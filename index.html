@@ -81,6 +81,37 @@ function truncateText(s, max=180){
   return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + '…';
 }
 </script>
+<script>
+// Build an <img> tag for a theatre image in ./images, trying common extensions.
+// If none load, the <img> removes itself.
+function theatreImageTag(theatreName) {
+  if (!theatreName) return "";
+  const base = String(theatreName).trim()
+    .replace(/\s+/g, "_")
+    .replace(/[^A-Za-z0-9._-]/g, "");
+  const exts = [".jpg",".jpeg",".png",".webp"];
+  const first = "images/" + base + exts[0];
+  // onerror cycles through extensions then removes the element
+  const onerr = `
+    (function(el){
+      try {
+        var src = el.getAttribute('src')||'';
+        var stem = src.replace(/\.(jpg|jpeg|png|webp)$/i, '');
+        var tried = el.getAttribute('data-tried')||'0';
+        var i = parseInt(tried,10)||0; i++;
+        if (i >= 4) { el.remove(); return; }
+        var nextExt = ['.jpg','.jpeg','.png','.webp'][i];
+        el.setAttribute('data-tried', String(i));
+        el.src = stem + nextExt;
+      } catch(e){ el.remove(); }
+    })(this);
+  `;
+  return `<div style="margin:8px 0;"><img src="${first}" alt="${base} photo"
+            style="max-width:300px;width:100%;height:auto;display:block;border-radius:8px;border:1px solid #eee;object-fit:cover"
+            data-tried="0" onerror="${onerr}"></div>`;
+}
+</script>
+
 </head>
 <body>
 <aside id="sidebar"><div style="margin-bottom:12px;"><button id="homeBtn">Home View</button></div><div class="section-title">GOING TO THE MOVIES IN CLEVELAND, 1945</div><div style="font-size:14px; line-height:1.4; margin-bottom:12px; color:#333;">It’s August 1945. The war is ending, the lights are back on downtown, and Cleveland’s theaters are buzzing with crowds. 
@@ -2853,7 +2884,9 @@ function truncateText(s, max=180){
       const films = parseFilms(anno.film || p.Movie || '');
       const address = anno.address || p.CT_Address || p.Address || '';
       const notesHtml = anno.notes ? `<div class="small" style="margin-top:6px">${notesToHtml(anno.notes)}</div>` : '';
-      let imgs='';
+      
+      const imgAuto = theatreImageTag(title);
+let imgs='';
       if (anno.images && Array.isArray(anno.images)) { imgs = anno.images.filter(Boolean).slice(0,4).map(u=>`<img src="${esc(u)}" style="width:100%;max-height:220px;object-fit:cover;border-radius:8px;margin-top:6px">`).join(''); }
       const rows = detailKeysFrom(feat).map(k=>`<tr><th>${esc(k)}</th><td>${esc(p[k])}</td></tr>`).join('');
       const details = rows ? `<table class="details-table">${rows}</table>` : '';
@@ -2872,6 +2905,7 @@ function truncateText(s, max=180){
 })()}
           ${notesHtml}
           ${imgs}
+          ${imgAuto}
           ${details}
         </div>`;
     }
