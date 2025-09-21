@@ -203,6 +203,72 @@ body.sidebar-hidden #sidebar { display: none !important; }
 }
 .sidebar-btn:hover { background: #f8fafc; }
 
+
+/* Center-right zoom control */
+.leaflet-right .leaflet-control-zoom {
+  position: absolute !important;
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%);
+  z-index: 1200;
+}
+/* Make sure layers control is in the top-left with some spacing */
+.leaflet-top.leaflet-left .leaflet-control {
+  margin-top: 12px;
+  margin-left: 12px;
+}
+
+
+/* Sidebar floating toggle button (inset, transparent circle) */
+.sidebar-btn {
+  position: absolute;
+  top: 50px;
+  right: 50px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.6);
+  background: rgba(0,0,0,.25);
+  color: #fff;
+  font-size: 20px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 1200;
+  user-select: none;
+  backdrop-filter: blur(2px);
+  transition: background .2s, border-color .2s;
+}
+.sidebar-btn:hover {
+  background: rgba(0,0,0,.4);
+  border-color: rgba(255,255,255,.85);
+}
+
+/* Image popup close button, matching style */
+.image-popup .close-btn {
+  position: absolute;
+  top: 50px;
+  right: 50px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.6);
+  background: rgba(0,0,0,.25);
+  color: #fff;
+  font-size: 20px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 2000;
+  user-select: none;
+  backdrop-filter: blur(2px);
+  transition: background .2s, border-color .2s;
+}
+.image-popup .close-btn:hover {
+  background: rgba(0,0,0,.4);
+  border-color: rgba(255,255,255,.85);
+}
+
 </style>
 </head>
 <body>
@@ -3122,7 +3188,7 @@ hybrid.addTo(map);
 L.control.layers(
   { 'Hybrid (Sat + Labels)': hybrid, 'Street': street, 'Satellite': sat },
   { 'Labels overlay': labels },
-  { collapsed: true, position: 'bottomright' , position: 'bottomright'}).addTo(map);
+  { collapsed: true, position: 'topleft' , position: 'topleft', position: 'topleft'}).addTo(map);
 window._map = map;
 
 window._map = map;// Layer control
@@ -3203,6 +3269,16 @@ const list=document.getElementById('list'); const statusEl=document.getElementBy
     var t; searchEl.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(applySearch, 120); });
   }
   document.addEventListener('DOMContentLoaded', main);
+
+// Move zoom control to the right container so CSS can center it
+try {
+  const zr = document.querySelector('.leaflet-control-zoom');
+  const rightPane = document.querySelector('.leaflet-right');
+  if (zr && rightPane && zr.parentElement !== rightPane) {
+    rightPane.appendChild(zr);
+  }
+} catch(e) {}
+
 
 // Single icon toggle: "X" when open, "[ ]" when closed
 (function initSingleSidebarToggle(){
