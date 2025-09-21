@@ -2928,43 +2928,36 @@ function imageHTML(props){
   }
 
   
-  function popupHTML(props){
-    const title = props.Theatre || props.Theater || props.Name || '(Unknown theatre)';
-    const addr  = props.CT_Address || props.Address || '';
-    const desc  = props.Description || '';
+  
 
-    // Flexible field lookups
-    const architects = props.Architects || props.Architect || props.Architecture || '';
-    const operator   = props.Operator || props.Operators || '';
-    const seats      = props.Seats || props.Seating || props.Capacity || '';
-    const capacity   = props.Capacity || props.Seating || props.Seats || '';
-    const opened     = props.Opened || props.YearOpened || props.Open || '';
-    const closed     = props.Closed || props.YearClosed || props.Close || '';
-    const status     = props.Status || '';
+function popupHTML(props){
+  const title = props.Theatre || props.Theater || props.Name || '(Unknown theatre)';
+  const addr  = props.CT_Address || props.Address || '';
+  const desc  = props.Description || '';
+  const filmsRaw = props.Movie || props.Movies || '';
+  const films = filmsRaw ? String(filmsRaw).split(';').map(s => s.trim()).filter(Boolean) : [];
 
-    const img   = imageHTML(props);
-    const hasDetails = architects || operator || seats || capacity || opened || closed || status;
+  const img   = imageHTML(props);
 
-    return '<div class="popup-flex">'
-      + img +
-      '<div class="popup-text">'
-        + '<h3 style="margin:0 0 6px 0;">' + title + '</h3>'
-        + (addr ? '<div class="small">' + addr + '</div>' : '')
-        + (desc ? '<div style="margin-top:6px;">' + desc + '</div>' : '')
-        + (hasDetails ? (
-            '<div class="details">'
-              + (status ? '<div class="label">Status</div><div class="value">' + status + '</div>' : '')
-              + (architects ? '<div class="label">Architect(s)</div><div class="value">' + architects + '</div>' : '')
-              + (operator ? '<div class="label">Operator</div><div class="value">' + operator + '</div>' : '')
-              + (seats ? '<div class="label">Seats</div><div class="value">' + seats + '</div>' : '')
-              + (!seats && capacity ? '<div class="label">Capacity</div><div class="value">' + capacity + '</div>' : '')
-              + (opened ? '<div class="label">Opened</div><div class="value">' + opened + '</div>' : '')
-              + (closed ? '<div class="label">Closed</div><div class="value">' + closed + '</div>' : '')
-            + '</div>'
-          ) : '')
-      + '</div>'
-    + '</div>';
+  let filmsLine = '';
+  if (films.length === 1) {
+    filmsLine = '<div style="margin-top:8px;"><strong>Film Billing:</strong> ' + films[0] + '</div>';
+  } else if (films.length > 1) {
+    filmsLine = '<div style="margin-top:8px;"><strong>Film Billings:</strong> ' + films.join(', ') + '</div>';
   }
+
+  return '<div class="popup-flex">'
+    + img
+    + '<div class="popup-text">'
+      + '<h3 style="margin:0 0 6px 0;">' + title + '</h3>'
+      + (addr ? '<div class="small">' + addr + '</div>' : '')
+      + (desc ? '<div style="margin-top:6px;">' + desc + '</div>' : '')
+      + filmsLine
+    + '</div>'
+  + '</div>';
+}
+
+
 
   // Modal
   (function initModal(){ const modal=document.getElementById('imgModal'); const img=modal.querySelector('img'); const closeX=modal.querySelector('.closeX');
