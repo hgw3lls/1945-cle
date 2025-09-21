@@ -91,6 +91,28 @@ body {
 }
 .map-home:hover { background: #f8fafc; }
 
+
+/* Sidebar toggle */
+body { display: grid; grid-template-columns: 420px 1fr; }
+body.sidebar-hidden { grid-template-columns: 1fr; }
+#sidebar { border-right: 1px solid #e3e3e3; padding: 12px; overflow: auto; }
+body.sidebar-hidden #sidebar { display: none !important; }
+
+.map-toggle {
+  position: absolute;
+  z-index: 1200;
+  top: 12px;
+  right: 12px;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 999px;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.map-toggle:hover { background: #f8fafc; }
+
 </style>
 </head>
 <body>
@@ -109,6 +131,7 @@ body {
   </aside>
   <div id="map"></div>
 <button id="mapHomeBtn" class="map-home" aria-label="Home View">🎞️</button>
+<button id="toggleSidebar" class="map-toggle" aria-pressed="false" aria-controls="sidebar">Hide Sidebar</button>
 
   <!-- Fullscreen image modal -->
   <div id="imgModal"><div class="closeX" aria-label="Close">✕</div><img alt="image preview"/></div>
@@ -199,7 +222,7 @@ body {
         "Architects": "Edward Richardson , Arthur G. Yost",
         "Firms": null,
         "Previous_Names": "Mall Theatre, New Mall Theatre",
-        "Description": "Opened in 1914 for films, with organs in each of its two auditoriums. Entrances on both Euclid Avenue and Superior Avenue E, with one auditorium directly above the other. Due to hill you would enter directly from Superior Avenue E into Lower Mall (600 seats, no balcony) and from Euclid Avenue into the Upper Mall (900 seats, one balcony). Possibly first duplex movie theatre. The Mall Theatres were closed on August 31, 1960, and the building was demolished in late-1960."
+        "Description": "Opened in 1914 for films, with organs in each of its two auditoriums. Entrances on both Euclid Avenue and Superior Avenue E, with one auditorium directly above the other. Due to hill you would enter directly from Superior Avenue E into Lower Mall (600 seats, no balcony) and from Euclid Avenue into the Upper Mall (900 seats, one balcony) Possibly first duplex movie theatre. The Mall Theatres were closed on August 31, 1960, and the building was demolished in late-1960."
       }
     },
     {
@@ -591,7 +614,7 @@ body {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "New Hippodrome Theatre",
-        "Description": "The Metropolitan Theatre, on Euclid Avenue near East 55th Street, had shown movies until at least the late-1950\u2019s. The theatre later became the WHK Auditorium (WHK AM 1420 had its studios in the building where the Metropolitan Theatre was, 5000 Euclid Avenue, which is also known as the WHK Building). The WHK Auditorium was used for various purposes (meetings, etc.) through the 1960\u2019s and 1970\u2019s. In the early-1980\u2019s, the Metropolitan Theatre briefly reopened for movies, this time as the New Hippodrome Theatre, but that lasted less than a year. The Agora Night Club, a major rock music venue in Cleveland, now occupies the former Metropolitan Theatre/WHK Auditorium/New Hippodrome."
+        "Description": "The Metropolitan Theatre, on Euclid Avenue near East 55th Street, had shown movies until at least the late-1950\u2019s. The theatre later became the WHK Auditorium (WHK AM 1420 had its studios in the building where the Metropolitan Theatre was, 5000 Euclid Avenue, which is also known as the WHK Building) The WHK Auditorium was used for various purposes (meetings, etc.) through the 1960\u2019s and 1970\u2019s. In the early-1980\u2019s, the Metropolitan Theatre briefly reopened for movies, this time as the New Hippodrome Theatre, but that lasted less than a year. The Agora Night Club, a major rock music venue in Cleveland, now occupies the former Metropolitan Theatre/WHK Auditorium/New Hippodrome."
       }
     },
     {
@@ -955,7 +978,7 @@ body {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Located in the south-west Cleveland district of Tremont. This Lorain Theatre is not to be confused with the nearby Lorain-Fulton Theatre (which has its own page on Cinema Treasures). This Lorain Theatre was located next to the Laub Baking Company. It was a popular theatre which played many of the Universal studio\u2019s horror movies from the 1930\u2019s to 1950\u2019s. It has recently been in retail use, and the building was \u2018For Rent\u2019 in August 2022."
+        "Description": "Located in the south-west Cleveland district of Tremont. This Lorain Theatre is not to be confused with the nearby Lorain-Fulton Theatre (which has its own page on Cinema Treasures) This Lorain Theatre was located next to the Laub Baking Company. It was a popular theatre which played many of the Universal studio\u2019s horror movies from the 1930\u2019s to 1950\u2019s. It has recently been in retail use, and the building was \u2018For Rent\u2019 in August 2022."
       }
     },
     {
@@ -1627,7 +1650,7 @@ body {
         "Architects": "Rudolph Grosel , Paul Matzinger",
         "Firms": "Matzinger & Grosel",
         "Previous_Names": null,
-        "Description": "Opened by 1911, the Ezella Theatre was owned by Modern Theatres, Inc., Owners: The Essex Brothers \u2013 Jack & Ray \u2013 and a rotund little man named Howard Reif. It was remodeled in 1941-1942 to the plans of architectural firm Matzinger & Grosel. The theatre was almost an exact duplicate of the Vine Theatre in Willoughby, Ohio. My memory is fading, but as best I can recall, it had 1,400 seats on one level. Last time I worked there as a stagehand was in 1958. The place was in good shape \u2013 surprisingly so, since it was located in what was even then considered to be a \u201cseedy\u201d part of town. There was nothing very unusual about the Ezella. It had a large projection booth, with two Super-Simplex projectors fitted with Peerless MagnaArc lamp-houses; an RCA sound system, and \u201cEl Cheapo\u201d anamorphic Cinemascope lenses that were vastly inferior to the Bosch & Lomb lenses that were in wide use at the better theatres around town. One interesting sidelight: Directly across an alley at the rear of the theatre, was a fairly large, two-story wooden storage building that looked like it had survived from the last century. I was told that an undertaker used it to store coffins. About three or-so years after I last worked at the Ezella, I learned that the old building had caught fire, and posed a real danger to the theatre building. Newspaper reports credited a young assistant theatre manager with doing a great job of making an announcement from the stage to the people in the audience, instructing them on the proper manner for safely exiting the theatre. I understand that damage to the Ezella building was minimal. USELESS TRIVIA: The phone number of the Ezella Theatre, back in 1957 was HE-1-2071. (The \u2018HE\u2019 stood for HENDERSON). The building is today home to a church."
+        "Description": "Opened by 1911, the Ezella Theatre was owned by Modern Theatres, Inc., Owners: The Essex Brothers \u2013 Jack & Ray \u2013 and a rotund little man named Howard Reif. It was remodeled in 1941-1942 to the plans of architectural firm Matzinger & Grosel. The theatre was almost an exact duplicate of the Vine Theatre in Willoughby, Ohio. My memory is fading, but as best I can recall, it had 1,400 seats on one level. Last time I worked there as a stagehand was in 1958. The place was in good shape \u2013 surprisingly so, since it was located in what was even then considered to be a \u201cseedy\u201d part of town. There was nothing very unusual about the Ezella. It had a large projection booth, with two Super-Simplex projectors fitted with Peerless MagnaArc lamp-houses; an RCA sound system, and \u201cEl Cheapo\u201d anamorphic Cinemascope lenses that were vastly inferior to the Bosch & Lomb lenses that were in wide use at the better theatres around town. One interesting sidelight: Directly across an alley at the rear of the theatre, was a fairly large, two-story wooden storage building that looked like it had survived from the last century. I was told that an undertaker used it to store coffins. About three or-so years after I last worked at the Ezella, I learned that the old building had caught fire, and posed a real danger to the theatre building. Newspaper reports credited a young assistant theatre manager with doing a great job of making an announcement from the stage to the people in the audience, instructing them on the proper manner for safely exiting the theatre. I understand that damage to the Ezella building was minimal. USELESS TRIVIA: The phone number of the Ezella Theatre, back in 1957 was HE-1-2071. (The \u2018HE\u2019 stood for HENDERSON) The building is today home to a church."
       }
     },
     {
@@ -1655,7 +1678,7 @@ body {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Garden Theatre opened by the Ohio Amusement Co. on August 30, 1924 with Jack Holt in \u201cWanderer of the Wasteland\u201d. My mother remembered attending in her girlhood, seeing Bela Lugosi in \u201cDracula\u201d during one of its many reissues. Never a first run theatre, it generally opened only on weekends, playing second or third run films on double features. During the 1960\u2019s, it was my favorite theatre, simply because it was the one most conveniently located, right down the street from me on W. 25th Street, a few steps down from Clark Avenue. Like most second run neighborhood theatres, they had children\u2019s matinees on Saturday and Sunday, often showing something other than the evening attractions, or perhaps adding a third feature to the program. Elvis Presley double features (\u201cLove Me Tender\u201d and \u201cJailhouse Rock\u201d, with the addition of \u201cKid Galahad\u201d for the Saturday-Sunday matinee) were pretty popular, as were horror shows from Hammer and American International (\u201cDracula, Prince of Darkness\u201d, \u201cThe Pit and the Pendulum\u201d, etc). I also saw quite a few sword and sandal epics there with Steve Reeves (\u201cThe Slave-The Son of Spartacus\u201d, \u201cHercules\u201d, \u201cDuel of the Titans\u201d). But the major films played there as well, everything from \u201cWest Side Story\u201d and \u201cLawrence of Arabia\u201d to the James Bond series) once they completed their runs at the downtown theatres and the suburban second run movie houses. The Garden Theatre holds a special place in my memories because it was the theatre in which I was introduced to movies. So besotted was I by the movie posters outside the theatre and in the lobby, I always insisted my mother take me by the theatre when we were in the area, even when it was closed so I could look at the posters and peer in the doorway at the ones for the coming attractions. Otherwise, it was a fairly seedy place for much of its last years. For a long time, there was a hole in the screen that no one bothered to repair. In 1969, the theatre closed with the marquee announcing it would soon reopen as the Pussycat Theatre, which would have given competition to the Paris adult theatre across the street (formerly the Southern Theatre). That never happened, and the Garden Theatre was demolished soon thereafter."
+        "Description": "The Garden Theatre opened by the Ohio Amusement Co. on August 30, 1924 with Jack Holt in \u201cWanderer of the Wasteland\u201d. My mother remembered attending in her girlhood, seeing Bela Lugosi in \u201cDracula\u201d during one of its many reissues. Never a first run theatre, it generally opened only on weekends, playing second or third run films on double features. During the 1960\u2019s, it was my favorite theatre, simply because it was the one most conveniently located, right down the street from me on W. 25th Street, a few steps down from Clark Avenue. Like most second run neighborhood theatres, they had children\u2019s matinees on Saturday and Sunday, often showing something other than the evening attractions, or perhaps adding a third feature to the program. Elvis Presley double features (\u201cLove Me Tender\u201d and \u201cJailhouse Rock\u201d, with the addition of \u201cKid Galahad\u201d for the Saturday-Sunday matinee) were pretty popular, as were horror shows from Hammer and American International (\u201cDracula, Prince of Darkness\u201d, \u201cThe Pit and the Pendulum\u201d, etc) I also saw quite a few sword and sandal epics there with Steve Reeves (\u201cThe Slave-The Son of Spartacus\u201d, \u201cHercules\u201d, \u201cDuel of the Titans\u201d) But the major films played there as well, everything from \u201cWest Side Story\u201d and \u201cLawrence of Arabia\u201d to the James Bond series) once they completed their runs at the downtown theatres and the suburban second run movie houses. The Garden Theatre holds a special place in my memories because it was the theatre in which I was introduced to movies. So besotted was I by the movie posters outside the theatre and in the lobby, I always insisted my mother take me by the theatre when we were in the area, even when it was closed so I could look at the posters and peer in the doorway at the ones for the coming attractions. Otherwise, it was a fairly seedy place for much of its last years. For a long time, there was a hole in the screen that no one bothered to repair. In 1969, the theatre closed with the marquee announcing it would soon reopen as the Pussycat Theatre, which would have given competition to the Paris adult theatre across the street (formerly the Southern Theatre) That never happened, and the Garden Theatre was demolished soon thereafter."
       }
     },
     {
@@ -1711,7 +1734,7 @@ body {
         "Architects": "Kurt Havermaet",
         "Firms": "Braverman & Havermaet",
         "Previous_Names": "Westwood Art Theatre",
-        "Description": "The former Hilliard Square Theatre (and later) Westwood Art Theatre is located in Lakewood, a district to the west of Cleveland, OH. It was the sister theatre to the Heights Art Theatre (aka Madstone Centrum) in Cleveland Heights and the Continental Art Theatre in East Cleveland (demolished in the 1970\u2019s.) In the 1960\u2019s/1970\u2019s the Westwood Theatre had shown XXX-rated adult films. The theatre opened as the Hilliard Square Theatre on April 14, 1927 and was built for vaudeville and motion pictures by the Universal Pictures chain. The seating capacity is given as 1,500 in editions of Film Daily Yearbook through the 1940\u2019s and 1950\u2019s, although in reality it could be 1,200 (800 in the orchestra, 400 in the balcony). It changed its name to the Westwood Theatre in around 1962. By the 1980\u2019s, the theatre started showing sub-run Hollywood fare, toward the end charging only 50 cents admission! The theatre closed in 1988, and has been vacant since. Lack of off-street parking, as well as the high cost of operating a single screen theatre, killed the Westwood Theatre. The building stood standing, and nothing was done to the theatre since it closed. It was demolished in February 2017."
+        "Description": "The former Hilliard Square Theatre (and later) Westwood Art Theatre is located in Lakewood, a district to the west of Cleveland, OH. It was the sister theatre to the Heights Art Theatre (aka Madstone Centrum) in Cleveland Heights and the Continental Art Theatre in East Cleveland (demolished in the 1970\u2019s.) In the 1960\u2019s/1970\u2019s the Westwood Theatre had shown XXX-rated adult films. The theatre opened as the Hilliard Square Theatre on April 14, 1927 and was built for vaudeville and motion pictures by the Universal Pictures chain. The seating capacity is given as 1,500 in editions of Film Daily Yearbook through the 1940\u2019s and 1950\u2019s, although in reality it could be 1,200 (800 in the orchestra, 400 in the balcony) It changed its name to the Westwood Theatre in around 1962. By the 1980\u2019s, the theatre started showing sub-run Hollywood fare, toward the end charging only 50 cents admission! The theatre closed in 1988, and has been vacant since. Lack of off-street parking, as well as the high cost of operating a single screen theatre, killed the Westwood Theatre. The building stood standing, and nothing was done to the theatre since it closed. It was demolished in February 2017."
       }
     },
     {
@@ -2103,7 +2126,7 @@ body {
         "Architects": "Rudolph Grosel , Paul Matzinger",
         "Firms": "Matzinger & Grosel",
         "Previous_Names": null,
-        "Description": "Replacing an earlier Madison Theatre located at 9613 Madison Avenue (it has its own page on Cinema Treasures). This \u2018new\u2019 Madison Theatre was a neighborhood theatre that opened around 1944 and closed in the mid-1980\u2019s. It was owned by part of a syndicate who also operated the Mayland Theatre, the Lorain Fulton Theatre and the Parma Theatre among others. A lumber yard business occupies the former theatre now. The lobby was demolished, but the auditorium is being used as a storage area for lumber."
+        "Description": "Replacing an earlier Madison Theatre located at 9613 Madison Avenue (it has its own page on Cinema Treasures) This \u2018new\u2019 Madison Theatre was a neighborhood theatre that opened around 1944 and closed in the mid-1980\u2019s. It was owned by part of a syndicate who also operated the Mayland Theatre, the Lorain Fulton Theatre and the Parma Theatre among others. A lumber yard business occupies the former theatre now. The lobby was demolished, but the auditorium is being used as a storage area for lumber."
       }
     },
     {
@@ -2607,7 +2630,7 @@ body {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "King Theatre",
-        "Description": "The Sunbeam Theatre was open prior to 1925. It seated 700 and was operating into the late-1940\u2019s (no longer listed in 1948). By 1950 it had been renamed King Theatre, which operated into the 1960\u2019s. The site is now a Baptist Church."
+        "Description": "The Sunbeam Theatre was open prior to 1925. It seated 700 and was operating into the late-1940\u2019s (no longer listed in 1948) By 1950 it had been renamed King Theatre, which operated into the 1960\u2019s. The site is now a Baptist Church."
       }
     },
     {
@@ -2982,9 +3005,47 @@ function popupHTML(props){
   }
 
   async function main(){
-    const map=L.map('map', { zoomControl: true }).setView([41.499, -81.694], 12); window._map=map;
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
-    wirePopupBehaviors(map);
+    const map=L.map('map', { zoomControl: true })
+
+
+
+window._map = map;
+
+// --- Base layers: Street, Satellite, Labels, and Hybrid group ---
+const street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 20,
+  attribution: '&copy; OpenStreetMap'
+});
+const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 20,
+  attribution: 'Imagery &copy; Esri'
+});
+const labels = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png', {
+  maxZoom: 20,
+  attribution: '&copy; CARTO'
+});
+const hybrid = L.layerGroup([sat, labels]);
+
+// Default to Hybrid
+hybrid.addTo(map);
+
+// Layer control UI
+L.control.layers(
+  { 'Hybrid (Sat + Labels)': hybrid, 'Street': street, 'Satellite': sat },
+  { 'Labels overlay': labels },
+  { collapsed: true }
+).addTo(map);
+
+window._map = map;// Layer control
+L.control.layers(
+  { 'Hybrid (Sat + Labels)': hybrid, 'Street': street, 'Satellite': sat },
+  { 'Labels overlay': labels },
+  { collapsed: true }
+).addTo(map);
+
+map.setView([41.499, -81.694], 12);
+window._map = map;
+wirePopupBehaviors(map);
 
     const fc = JSON.parse(document.getElementById('data').textContent);
       applyKnownImagesToData(fc);
@@ -3059,6 +3120,33 @@ const list=document.getElementById('list'); const statusEl=document.getElementBy
     var t; searchEl.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(applySearch, 120); });
   }
   document.addEventListener('DOMContentLoaded', main);
+
+// Sidebar toggle with persistence (no layout gap)
+(function initSidebarToggle(){
+  const btn = document.getElementById('toggleSidebar');
+  const BODY = document.body;
+  const KEY = 'sidebarHidden';
+  function apply(hidden, fromLoad=false){
+    if (hidden) {
+      BODY.classList.add('sidebar-hidden');
+      if (btn) { btn.textContent = 'Show Sidebar'; btn.setAttribute('aria-pressed','true'); }
+    } else {
+      BODY.classList.remove('sidebar-hidden');
+      if (btn) { btn.textContent = 'Hide Sidebar'; btn.setAttribute('aria-pressed','false'); }
+    }
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ try { window._map && window._map.invalidateSize(false); } catch(e){} }));
+  }
+  const saved = localStorage.getItem(KEY) === '1';
+  apply(saved, true);
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const next = !document.body.classList.contains('sidebar-hidden');
+      localStorage.setItem(KEY, next ? '1' : '0');
+      apply(next, false);
+    });
+  }
+})();
+
 
 // Global handler: any click on a popup image opens the modal (works for map & sidebar popups)
 document.addEventListener('click', function(e){
