@@ -113,6 +113,96 @@ body.sidebar-hidden #sidebar { display: none !important; }
 }
 .map-toggle:hover { background: #f8fafc; }
 
+
+/* --- Film leader frame around map --- */
+#map-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  padding: 24px;              /* thickness of film border */
+  box-sizing: border-box;
+  border: 12px solid #111;    /* outer edge darker rim */
+}
+
+#map-frame #map {
+  width: 100%;
+  height: 100%;
+  background: #222;           /* dark gray behind tiles */
+  position: relative;
+}
+
+/* Hide attribution under the frame */
+.leaflet-control-attribution,
+.leaflet-control-container .leaflet-control {
+  bottom: -40px !important;
+}
+
+/* Film sprocket effect */
+#map-frame::before,
+#map-frame::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: repeating-linear-gradient(
+    to right,
+    #000 0,
+    #000 12px,
+    #666 12px,
+    #666 24px
+  );
+}
+#map-frame::before { top: 0; }
+#map-frame::after  { bottom: 0; }
+
+
+/* Icon buttons (top-right stack) */
+.map-home, .map-toggle {
+  position: absolute;
+  z-index: 1200;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+}
+.map-home:hover, .map-toggle:hover { background: #f8fafc; }
+
+/* Stack placement: Home on top, Toggle below */
+.map-home { top: 12px; }
+.map-toggle { top: 60px; } /* 12 + 40 + 8 spacing */
+
+
+/* Single floating sidebar toggle button */
+.sidebar-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  font-size: 20px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 1200;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+  user-select: none;
+}
+.sidebar-btn:hover { background: #f8fafc; }
+
 </style>
 </head>
 <body>
@@ -129,9 +219,7 @@ body.sidebar-hidden #sidebar { display: none !important; }
     </header>
     <div class="list" id="list"></div>
   </aside>
-  <div id="map"></div>
-<button id="mapHomeBtn" class="map-home" aria-label="Home View">🎞️</button>
-<button id="toggleSidebar" class="map-toggle" aria-pressed="false" aria-controls="sidebar">Hide Sidebar</button>
+  <div id="map-frame"><div id="map"></div><button id="sidebarToggle" class="sidebar-btn" aria-pressed="false" aria-label="Toggle sidebar">X</button></div>
 
   <!-- Fullscreen image modal -->
   <div id="imgModal"><div class="closeX" aria-label="Close">✕</div><img alt="image preview"/></div>
@@ -3009,6 +3097,7 @@ function popupHTML(props){
 
 
 
+
 window._map = map;
 
 // --- Base layers: Street, Satellite, Labels, and Hybrid group ---
@@ -3029,20 +3118,14 @@ const hybrid = L.layerGroup([sat, labels]);
 // Default to Hybrid
 hybrid.addTo(map);
 
-// Layer control UI
+// Single layer control UI
 L.control.layers(
   { 'Hybrid (Sat + Labels)': hybrid, 'Street': street, 'Satellite': sat },
   { 'Labels overlay': labels },
-  { collapsed: true }
-).addTo(map);
+  { collapsed: true, position: 'bottomright' , position: 'bottomright'}).addTo(map);
+window._map = map;
 
 window._map = map;// Layer control
-L.control.layers(
-  { 'Hybrid (Sat + Labels)': hybrid, 'Street': street, 'Satellite': sat },
-  { 'Labels overlay': labels },
-  { collapsed: true }
-).addTo(map);
-
 map.setView([41.499, -81.694], 12);
 window._map = map;
 wirePopupBehaviors(map);
@@ -3121,28 +3204,31 @@ const list=document.getElementById('list'); const statusEl=document.getElementBy
   }
   document.addEventListener('DOMContentLoaded', main);
 
-// Sidebar toggle with persistence (no layout gap)
-(function initSidebarToggle(){
-  const btn = document.getElementById('toggleSidebar');
+// Single icon toggle: "X" when open, "[ ]" when closed
+(function initSingleSidebarToggle(){
+  const btn = document.getElementById('sidebarToggle');
   const BODY = document.body;
   const KEY = 'sidebarHidden';
-  function apply(hidden, fromLoad=false){
+
+  function apply(hidden){
     if (hidden) {
       BODY.classList.add('sidebar-hidden');
-      if (btn) { btn.textContent = 'Show Sidebar'; btn.setAttribute('aria-pressed','true'); }
+      if (btn) { btn.textContent = "[ ]"; btn.setAttribute('aria-pressed','true'); btn.title = 'Show sidebar'; }
     } else {
       BODY.classList.remove('sidebar-hidden');
-      if (btn) { btn.textContent = 'Hide Sidebar'; btn.setAttribute('aria-pressed','false'); }
+      if (btn) { btn.textContent = "X"; btn.setAttribute('aria-pressed','false'); btn.title = 'Hide sidebar'; }
     }
     requestAnimationFrame(()=>requestAnimationFrame(()=>{ try { window._map && window._map.invalidateSize(false); } catch(e){} }));
   }
+
   const saved = localStorage.getItem(KEY) === '1';
-  apply(saved, true);
+  apply(saved);
+
   if (btn) {
     btn.addEventListener('click', () => {
-      const next = !document.body.classList.contains('sidebar-hidden');
+      const next = !BODY.classList.contains('sidebar-hidden');
       localStorage.setItem(KEY, next ? '1' : '0');
-      apply(next, false);
+      apply(next);
     });
   }
 })();
