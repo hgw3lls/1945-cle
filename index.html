@@ -1,151 +1,121 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>Info Map — embedded (no cluster, films parsed, colored SVG markers, FIXED)</title>
-<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Going to the Movies in Cleveland, 1945 — Reset</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 html, body { height: 100%; margin: 0; }
-body { display: grid; grid-template-columns: 420px 1fr; grid-template-rows: 1fr; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
-#sidebar { border-right: 1px solid #e3e3e3; padding: 12px; overflow:auto; }
+body {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+#sidebar { border-right: 1px solid #e3e3e3; padding: 12px; overflow: auto; }
 #map { width: 100%; height: 100%; }
-.section-title { font-size: 12px; font-weight: 700; color:#333; margin: 8px 0 4px; text-transform: uppercase; letter-spacing: .04em; }
-.search { width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 8px; border:1px solid #ccc; margin-bottom: 8px; }
-.btns { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
-button, .btn { padding: 8px 10px; border-radius: 8px; border:1px solid #ccc; background:#fafafa; cursor:pointer; }
-button:hover, .btn:hover { background:#f1f1f1; }
+
+.sidebar-head { position: sticky; top: 0; background: #fff; z-index: 5; padding-bottom: 8px; border-bottom: 1px solid #ececec; }
+.branding { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.app-title { font-weight: 800; font-size: 14px; color: #222; }
+.btn { border: 1px solid #d0d5dd; background:#f8fafc; border-radius:999px; padding:6px 12px; font-size:12px; cursor:pointer; }
+.btn:hover { background:#eef2ff; border-color:#c7d2fe; }
+.search-wrap { margin-bottom: 6px; }
+.search { width:100%; padding:8px 10px; border-radius:10px; border:1px solid #d0d5dd; background:#fff; outline:none; }
+.search:focus { border-color:#93c5fd; box-shadow: 0 0 0 3px rgba(147,197,253,.25); }
+
 .status { font-size: 12px; margin: 8px 0; color: #333; }
 .list { margin-top: 8px; }
-.item { padding: 8px; border-radius: 8px; margin-bottom: 6px; cursor: pointer; border: 1px solid #eee; }
+.item { padding: 8px; border-radius: 8px; margin-bottom: 6px; cursor: pointer; border: 1px solid #eee; position: relative; transition: background-color .18s, border-color .18s; }
 .item:hover { background:#f7f7f7; }
-.title { font-weight: 700; }
-.small { color:#555; font-size: 12px; }
+.item.active { background:#fff7d6; border-color:#f59e0b; box-shadow: inset 0 0 0 1px rgba(245,158,11,.25); }
+.item.active::before {
+  content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:6px; border-radius:8px 0 0 8px;
+  background: linear-gradient(180deg, #f59e0b, #fbbf24);
+}
+.title { font-weight:700; color:#111; }
+.small { color:#555; font-size:12px; }
 .badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:4px; }
-.badge { display:inline-block; padding:2px 6px; border-radius:999px; background:#eef2ff; border:1px solid #c7d2fe; font-size:11px; color:#3730a3; }
-.details-table { width:100%; border-collapse: collapse; margin-top:6px; }
-.details-table th, .details-table td { border-top: 1px solid #eee; padding: 4px 0; font-size:12px; vertical-align: top; }
-.details-table th { color:#333; text-align:left; padding-right: 8px; white-space: nowrap; }
-.editor { border:1px solid #eee; padding:10px; border-radius:10px; background:#fcfcfc; }
-.editor input[type="text"], .editor textarea { width:100%; box-sizing:border-box; padding:8px 10px; border-radius:8px; border:1px solid #ccc; }
-.editor textarea { min-height: 90px; resize: vertical; }
-.editor .actions { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
-.hint { font-size:11px; color:#666; }
+.badge { display:inline-block; padding:2px 6px; border-radius:999px; background:#fff7ed; border:1px solid #fed7aa; font-size:11px; color:#9a3412; }
+
 .legend { position:absolute; z-index:1000; right:12px; bottom:12px; background:#fff; border:1px solid #eee; border-radius:10px; padding:8px 10px; box-shadow:0 2px 8px rgba(0,0,0,.05); }
 .legend .row{ display:flex; align-items:center; gap:8px; font-size:12px; margin:4px 0; }
-.legend img{ width:18px; height:18px; display:block; }
-  </style>
-<script>
-function statusColor(status) {
-  const s = String(status || '').toLowerCase().trim();
-  if (s === 'open') return '#16a34a';
-  if (s === 'closed') return '#dc2626';
-  if (s.includes('demo')) return '#7c3aed';
-  if (s.includes('restor')) return '#2563eb';
-  if (s.includes('church')) return '#f59e0b';
-  return '#64748b';
-}
-function statusDot(status) {
-  return '<span class="status-dot" style="display:inline-block;width:10px;height:10px;border-radius:999px;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,.15);background:'+statusColor(status)+';"></span>';
-}
-</script>
-<style>
-.leaflet-popup-content .row-url,
-.leaflet-popup-content .row-ech_source,
-.leaflet-popup-content .row-lon,
-.leaflet-popup-content .row-lat,
-.leaflet-popup-content .row-rl,
-.leaflet-popup-content .row-status,
-.leaflet-popup-content .row-ct_status { display:none !important; }
-.title .status-dot{ vertical-align:middle; }
+.legend .swatch{ width:14px; height:14px; border-radius:999px; border:1px solid rgba(0,0,0,.15); display:block; }
 
-
-/* --- HIDE THE EDITOR SECTION (title + panel) --- */
-#editor,
-.section-title:has(+ #editor) {
-  display: none !important;
+/* Popup two-column layout + modal */
+.leaflet-popup-content-wrapper { max-width: none; }
+.leaflet-popup-content { width: auto; max-width: min(680px, calc(100vw - 40px)); margin: 12px 16px; }
+.popup-flex { display:flex; flex-direction:row; gap:12px; align-items:stretch; max-width:780px; }
+.popup-imgwrap { flex:0 0 auto; max-width:50%; display:flex; align-items:stretch; }
+.popup-imgwrap img { display:block; height:auto; max-width:100%; object-fit:cover; border-radius:6px; cursor:zoom-in; }
+.popup-text { flex:1 1 auto; overflow-wrap: break-word; }
+@media (max-width:700px) {
+  .popup-flex { flex-direction:column; }
+  .popup-imgwrap { max-width:100%; }
+  .popup-imgwrap img { width:100%; height:auto!important; object-fit:contain; }
 }
 
-/* Sidebar Home View button */
-#homeBtn{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #1d4ed8;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}
-#homeBtn:hover{background:#1d4ed8}
+/* Fullscreen image modal */
+#imgModal { position:fixed; inset:0; background:rgba(0,0,0,.85); display:none; align-items:center; justify-content:center; z-index:10000; padding:24px; }
+#imgModal.open { display:flex; }
+#imgModal img { max-width:calc(100vw - 64px); max-height:calc(100vh - 64px); height:auto; width:auto; box-shadow:0 20px 60px rgba(0,0,0,.5); border-radius:8px; }
+#imgModal .closeX { position:fixed; top:16px; right:16px; width:40px; height:40px; display:grid; place-items:center; background:rgba(255,255,255,.15); color:#fff; font-size:22px; border-radius:999px; cursor:pointer; user-select:none; backdrop-filter: blur(2px); }
+#imgModal .closeX:hover { background: rgba(255,255,255,.25); }
+
+/* Popup details grid */
+.details {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 6px 10px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #374151;
+}
+.details .label { color: #6b7280; }
+.details .value { color: #111827; }
+
+
+
+.map-home {
+  position: absolute;
+  z-index: 1200;
+  top: 12px;
+  right: 12px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 999px;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.map-home:hover { background: #f8fafc; }
+
 </style>
-<script>
-// helper: truncate without splitting words
-function truncateText(s, max=180){
-  s = (s==null ? '' : String(s));
-  if (s.length <= max) return s;
-  const cut = s.slice(0, max);
-  const lastSpace = cut.lastIndexOf(' ');
-  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + '…';
-}
-</script>
-<script>
-// Build an <img> tag for a theatre image in ./images, trying common extensions.
-// If none load, the <img> removes itself.
-function theatreImageTag(theatreName) {
-  if (!theatreName) return "";
-  const base = String(theatreName).trim()
-    .replace(/\s+/g, "_")
-    .replace(/[^A-Za-z0-9._-]/g, "");
-  const exts = [".jpg",".jpeg",".png",".webp"];
-  const first = "images/" + base + exts[0];
-  // onerror cycles through extensions then removes the element
-  const onerr = `
-    (function(el){
-      try {
-        var src = el.getAttribute('src')||'';
-        var stem = src.replace(/\.(jpg|jpeg|png|webp)$/i, '');
-        var tried = el.getAttribute('data-tried')||'0';
-        var i = parseInt(tried,10)||0; i++;
-        if (i >= 4) { el.remove(); return; }
-        var nextExt = ['.jpg','.jpeg','.png','.webp'][i];
-        el.setAttribute('data-tried', String(i));
-        el.src = stem + nextExt;
-      } catch(e){ el.remove(); }
-    })(this);
-  `;
-  return `<div style="margin:8px 0;"><img src="${first}" alt="${base} photo"
-            style="max-width:300px;width:100%;height:auto;display:block;border-radius:8px;border:1px solid #eee;object-fit:cover"
-            data-tried="0" onerror="${onerr}"></div>`;
-}
-</script>
-
 </head>
 <body>
-<aside id="sidebar"><div style="margin-bottom:12px;"><button id="homeBtn">Home View</button></div><div class="section-title">GOING TO THE MOVIES IN CLEVELAND, 1945</div><div style="font-size:14px; line-height:1.4; margin-bottom:12px; color:#333;">It’s August 1945. The war is ending, the lights are back on downtown, and Cleveland’s theaters are buzzing with crowds. 
-    This interactive map lets you relive that moment.<br/><br/>
-    Just tap a theater dot to see what was on the marquee: the films playing that week, the house itself, and—when available—a photo, address, and a bit of its history.<br/><br/>
-    Close the window to return to the map and stroll to the next showplace. When your tour is done, step back to the map’s beginning and imagine the city as it was—alive with moviegoing.</div>
-<div class="section-title">Search</div>
-<input class="search" id="filter" placeholder="Filter by theatre…"/>
-<div class="btns">
-</div>
-<div class="section-title">Editor</div>
-<div class="editor" id="editor">
-<div class="hint">Select a marker or list item, or click “Edit” in a popup.</div>
-<div style="margin-top:8px">
-<input id="edTitle" placeholder="Custom title (optional)" type="text"/>
-<input id="edFilm" placeholder="Custom films (use ; to separate)" type="text"/>
-<input id="edAddress" placeholder="Display address (optional; doesn’t move marker)" type="text"/>
-<textarea id="edNotes" placeholder="Notes (plain text; line breaks allowed)"></textarea>
-<textarea id="edImages" placeholder="Image URLs (one per line)"></textarea>
-</div>
-<div class="actions">
-<button id="saveEdit">Save</button>
-<button id="openPopup">Open popup</button>
-<button id="clearEdit">Clear this entry</button>
-</div>
-<div class="hint">Enter multiple films separated by semicolons, e.g., “Movie A; Movie B; Movie C”.</div>
-</div>
-<div class="status" id="status">Loading…</div>
-<div class="list" id="list"></div>
-</aside>
-<div id="map"></div>
-<div class="legend" id="legend"></div>
-<!-- Safely embed JSON -->
-<script id="data" type="application/json">{
+  <aside id="sidebar">
+    <header class="sidebar-head">
+      <div class="branding">
+        <div class="app-title">Going to the Movies in Cleveland, 1945</div>
+        <button id="homeBtn" class="btn">Home View</button>
+      </div>
+      <div class="search-wrap">
+        <input id="search" class="search" type="search" placeholder="Search theatres, addresses, films…">
+      </div>
+      <div class="status" id="status">Loading…</div>
+    </header>
+    <div class="list" id="list"></div>
+  </aside>
+  <div id="map"></div>
+<button id="mapHomeBtn" class="map-home" aria-label="Home View">🎞️</button>
+
+  <!-- Fullscreen image modal -->
+  <div id="imgModal"><div class="closeX" aria-label="Close">✕</div><img alt="image preview"/></div>
+
+  <!-- Inline data -->
+  <script id="data" type="application/json">
+{
   "type": "FeatureCollection",
   "features": [
     {
@@ -201,7 +171,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Kurt Havermaet",
         "Firms": "Braverman & Havermaet",
         "Previous_Names": "Continental Art Theatre",
-        "Description": "Opened in the 1920’s as the Windermere Theatre, a neighborhood theatre, and was renamed the Continental Art Theatre in the late-1950’s. The Continental was a sister theatre to the Heights Art Theatre in Cleveland Heights and the Westwood Art Theatre in Lakewood. Like the Heights and Westwood, the Continental Arts Theatre had shown art/foreign films; then porn. In its final years, the Continental Arts Theatre had shown black-oriented action films before closing for good around 1974. The theatre was torn down afterwards – a Wendy’s is on the site now."
+        "Description": "Opened in the 1920\u2019s as the Windermere Theatre, a neighborhood theatre, and was renamed the Continental Art Theatre in the late-1950\u2019s. The Continental was a sister theatre to the Heights Art Theatre in Cleveland Heights and the Westwood Art Theatre in Lakewood. Like the Heights and Westwood, the Continental Arts Theatre had shown art/foreign films; then porn. In its final years, the Continental Arts Theatre had shown black-oriented action films before closing for good around 1974. The theatre was torn down afterwards \u2013 a Wendy\u2019s is on the site now."
       }
     },
     {
@@ -285,7 +255,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Thomas White Lamb",
         "Firms": null,
         "Previous_Names": "Loew's Ohio Theatre, Ohio Theatre",
-        "Description": "One of two theatres occupying the large Loew’s Building (the other being the State Theatre), the Ohio Theatre opened on February 14, 1921 with 2,153 seats. It was designed by Thomas W. Lamb and, as the name of the building implies, operated, like the State Theatre, by the Loew’s circuit. The Ohio Theatre, unlike its larger sister, the State Theatre, was originally designed as a legitimate house, though by the Depression, was used more and more infrequently. In 1935, the Ohio Theatre was converted into the Mayfair Casino, which featured a nightclub with jazz acts onstage. However, the Mayfair Casino didn’t catch on, and closed within a year. Afterwards, the Ohio Theatre was reopened as a movie house, which it remained until February 9, 1969 when it closed with Julie Andrews in “Star”. Both it and the State Theatre were closed on the same day due to declining attendance. Not long after closing in 1969, vandals set off the sprinklers inside the Ohio Theatre, ruining most of the ornate plasterwork décor throughout the theatre’s interior. In the early-1970’s, in both the Ohio Theatre and the State Theatre, the auditorium seats were removed and auctioned off, and the ceilings of both theatres were eventually opened in many places to the elements, allowing rain and snow inside. In its later years, the Ohio Theatre had more than its share of challenges. An extensive fire largely gutted the long, ornate inner lobby (which was rebuilt in a drab modern style), and the entire auditorium was painted fire engine red. It was in a sorry state by the time the Playhouse Square Association (formed in 1970) began its ambitious plan to restore all four movie palaces in the Playhouse Square area (the State Theatre, Allen Theatre, Palace Theatre and Hanna Theatre) and slowly funds were raised for the restoration of the Ohio Theatre. In 1977, Cuyahoga County purchased the Loew’s Building, and both of its theatres were added to the National Register of Historic Places the following year. The Ohio Theatre was the first to be restored, reopening in 1982. The auditorium was beautifully restored although with a different (cream and olive green) color scheme, and the modern lobby was freshened up, while the outer lobby was converted into a restaurant. Guests now entered the inner foyer from the State Theatre’s grand lobby. In 1990, the rear part of the Ohio Theatre grand lobby was remodeled into a beautiful semi-Atmospheric style courtesy of a generous donation from the Reinberger Foundation. This was followed by a repainting of the auditorium in 1992 in its original colors and finally in 2016, the grand lobby was restored to its original appearance. Today, restored to its former elegance, the renamed Mimi Ohio Theatre is used for smaller stage performances, concerts and live theatre."
+        "Description": "One of two theatres occupying the large Loew\u2019s Building (the other being the State Theatre), the Ohio Theatre opened on February 14, 1921 with 2,153 seats. It was designed by Thomas W. Lamb and, as the name of the building implies, operated, like the State Theatre, by the Loew\u2019s circuit. The Ohio Theatre, unlike its larger sister, the State Theatre, was originally designed as a legitimate house, though by the Depression, was used more and more infrequently. In 1935, the Ohio Theatre was converted into the Mayfair Casino, which featured a nightclub with jazz acts onstage. However, the Mayfair Casino didn\u2019t catch on, and closed within a year. Afterwards, the Ohio Theatre was reopened as a movie house, which it remained until February 9, 1969 when it closed with Julie Andrews in \u201cStar\u201d. Both it and the State Theatre were closed on the same day due to declining attendance. Not long after closing in 1969, vandals set off the sprinklers inside the Ohio Theatre, ruining most of the ornate plasterwork d\u00e9cor throughout the theatre\u2019s interior. In the early-1970\u2019s, in both the Ohio Theatre and the State Theatre, the auditorium seats were removed and auctioned off, and the ceilings of both theatres were eventually opened in many places to the elements, allowing rain and snow inside. In its later years, the Ohio Theatre had more than its share of challenges. An extensive fire largely gutted the long, ornate inner lobby (which was rebuilt in a drab modern style), and the entire auditorium was painted fire engine red. It was in a sorry state by the time the Playhouse Square Association (formed in 1970) began its ambitious plan to restore all four movie palaces in the Playhouse Square area (the State Theatre, Allen Theatre, Palace Theatre and Hanna Theatre) and slowly funds were raised for the restoration of the Ohio Theatre. In 1977, Cuyahoga County purchased the Loew\u2019s Building, and both of its theatres were added to the National Register of Historic Places the following year. The Ohio Theatre was the first to be restored, reopening in 1982. The auditorium was beautifully restored although with a different (cream and olive green) color scheme, and the modern lobby was freshened up, while the outer lobby was converted into a restaurant. Guests now entered the inner foyer from the State Theatre\u2019s grand lobby. In 1990, the rear part of the Ohio Theatre grand lobby was remodeled into a beautiful semi-Atmospheric style courtesy of a generous donation from the Reinberger Foundation. This was followed by a repainting of the auditorium in 1992 in its original colors and finally in 2016, the grand lobby was restored to its original appearance. Today, restored to its former elegance, the renamed Mimi Ohio Theatre is used for smaller stage performances, concerts and live theatre."
       }
     },
     {
@@ -313,7 +283,7 @@ function theatreImageTag(theatreName) {
         "Architects": "John Elliott , Wilm Knox , Thomas White Lamb",
         "Firms": "Knox & Elliott",
         "Previous_Names": "Keith's Hippodrome Theatre, Hipp Theatre",
-        "Description": "The Hippodrome Building, including the huge Hippodrome Theatre opened on December 30, 1907. The building itself was a unique structure with an eleven-story section facing Euclid Avenue and a seven-story section facing Prospect Avenue. The Hippodrome Theatre stretched between the two avenues. The opening production in the Hippodrome Theatre was the musical “Coaching Days”, and the feature of the evening was the exciting spectacle of horses diving into a large water tank built into the front of the stage. Presentations at the Hippodrome Theatre included grand opera, popular musical shows, vaudeville and movies. John Phillip Sousa and Marie Dressler are two of the many name performers who played at the Hippodrome Theatre. [above text from the book “Playhouse Square Cleveland Ohio” written by Kathleen Kennedy, Playhouse Square Association] From 1912 to 1922 it was operated by the B.F. Keith chain and presented movies & vaudeville. This place was HUGE. The main entrance on Euclid Avenue had a marquee and box office and came into a lobby that went through the block to another entrance on Prospect Avenue where there was another marquee and box office. The auditorium was off the lobby to the left, perpendicular to the lobby. It was remodeled by architect Thomas Lamb in 1930 and was taken over by RKO. On November 19, 1933 it was taken over by Warner Bros, reopening with the World premiere of “The World Changes” starring Paul Muni. The times I was there was as a kid in the late-1960’s it was a grind house, film running continuously. I never saw the interior with the lights on, so I can’t really say what the architectural style was. It was high and dark. I could barely make out that there were three balconies above the orchestra, but they were always closed in those last years. The Hippodrome Theatre was closed on May 1, 1980 with Ivan Rassimov in “Sacrifice” & Warren Oates in “Drum”. It was demolished to make way for, what else, a parking garage."
+        "Description": "The Hippodrome Building, including the huge Hippodrome Theatre opened on December 30, 1907. The building itself was a unique structure with an eleven-story section facing Euclid Avenue and a seven-story section facing Prospect Avenue. The Hippodrome Theatre stretched between the two avenues. The opening production in the Hippodrome Theatre was the musical \u201cCoaching Days\u201d, and the feature of the evening was the exciting spectacle of horses diving into a large water tank built into the front of the stage. Presentations at the Hippodrome Theatre included grand opera, popular musical shows, vaudeville and movies. John Phillip Sousa and Marie Dressler are two of the many name performers who played at the Hippodrome Theatre. [above text from the book \u201cPlayhouse Square Cleveland Ohio\u201d written by Kathleen Kennedy, Playhouse Square Association] From 1912 to 1922 it was operated by the B.F. Keith chain and presented movies & vaudeville. This place was HUGE. The main entrance on Euclid Avenue had a marquee and box office and came into a lobby that went through the block to another entrance on Prospect Avenue where there was another marquee and box office. The auditorium was off the lobby to the left, perpendicular to the lobby. It was remodeled by architect Thomas Lamb in 1930 and was taken over by RKO. On November 19, 1933 it was taken over by Warner Bros, reopening with the World premiere of \u201cThe World Changes\u201d starring Paul Muni. The times I was there was as a kid in the late-1960\u2019s it was a grind house, film running continuously. I never saw the interior with the lights on, so I can\u2019t really say what the architectural style was. It was high and dark. I could barely make out that there were three balconies above the orchestra, but they were always closed in those last years. The Hippodrome Theatre was closed on May 1, 1980 with Ivan Rassimov in \u201cSacrifice\u201d & Warren Oates in \u201cDrum\u201d. It was demolished to make way for, what else, a parking garage."
       }
     },
     {
@@ -341,7 +311,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Lewis W. Thomas",
         "Firms": null,
         "Previous_Names": "Miles Theater, Columbia Theater, Great Lakes Theater, Federal Theater",
-        "Description": "Even though it was located almost exactly at E. 9th Street and Euclid Avenue, very near the the Hippodrome Theater and Embassy Theater, and also just a few blocks from the grand theaters at Playhouse Square, and operating during the golden days of all those theaters, the Carter Theater is almost forgotten. According to the online Encyclopedia of Cleveland History, \"It opened on October 26, 1913 as the Miles Theater under the direction of president and general manager Chas. H. Miles. The 2,000-seat theater cost nearly $500,000. Billed as \"America’s most beautiful vaudeville palace,\" it was decorated in the Louis XIV style in a color scheme of old rose, ivory, cream, and gold, with DuBarry damask on the walls and mahogany seats upholstered in rich green velour, which matched the carpeting. The stuccoed walls contained two French murals on the spaces over the proscenium boxes. The auditorium contained twelve proscenium boxes, twenty-six mezzanine boxes, and two aero boxes. The backs of the seats were equipped with slot machines that would dispense candy for $.05. In 1920, the Miles Theater became a burlesque house and changed its name to the Columbia Theater. Movies were introduced in 1931, when it became the Great Lakes Theater. Between 1935-37 the theater suffered an identity crisis. For a while in 1935 it was called the Miles Theater again and featured vaudeville and first-run movies, then it was a movie theater called the Carter Theater. In 1936, it became the Federal Theater–part of the Federal Theater Project of the WPA. Operating as the Miles Theater again, it was called a \"flophouse with a soundtrack\" according to a 1937 article in the Plain Dealer. Sometime in 1937 it became the Carter Theater again, owned by the Community Theater Circuit. In 1954, the plaster ceiling fell, injuring 10 patrons. The theater was torn down in 1959."
+        "Description": "Even though it was located almost exactly at E. 9th Street and Euclid Avenue, very near the the Hippodrome Theater and Embassy Theater, and also just a few blocks from the grand theaters at Playhouse Square, and operating during the golden days of all those theaters, the Carter Theater is almost forgotten. According to the online Encyclopedia of Cleveland History, \"It opened on October 26, 1913 as the Miles Theater under the direction of president and general manager Chas. H. Miles. The 2,000-seat theater cost nearly $500,000. Billed as \"America\u2019s most beautiful vaudeville palace,\" it was decorated in the Louis XIV style in a color scheme of old rose, ivory, cream, and gold, with DuBarry damask on the walls and mahogany seats upholstered in rich green velour, which matched the carpeting. The stuccoed walls contained two French murals on the spaces over the proscenium boxes. The auditorium contained twelve proscenium boxes, twenty-six mezzanine boxes, and two aero boxes. The backs of the seats were equipped with slot machines that would dispense candy for $.05. In 1920, the Miles Theater became a burlesque house and changed its name to the Columbia Theater. Movies were introduced in 1931, when it became the Great Lakes Theater. Between 1935-37 the theater suffered an identity crisis. For a while in 1935 it was called the Miles Theater again and featured vaudeville and first-run movies, then it was a movie theater called the Carter Theater. In 1936, it became the Federal Theater\u2013part of the Federal Theater Project of the WPA. Operating as the Miles Theater again, it was called a \"flophouse with a soundtrack\" according to a 1937 article in the Plain Dealer. Sometime in 1937 it became the Carter Theater again, owned by the Community Theater Circuit. In 1954, the plaster ceiling fell, injuring 10 patrons. The theater was torn down in 1959."
       }
     },
     {
@@ -369,7 +339,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Myron B. Vorce",
         "Firms": null,
         "Previous_Names": "Lido Theatre, Lido Art Cinema",
-        "Description": "This downtown Cleveland theatre, which was sort of out of the way on Prospect Avenue, was opened June 12, 1914 as the Standard Theatre. In later years it was mainly a venue for adult pornographic films, although it had shown mainstream films early in its life. The Standard Theatre closed in 1989. The theatre had shown black-oriented action films briefly in the early-1980’s. It was demolished in 1995."
+        "Description": "This downtown Cleveland theatre, which was sort of out of the way on Prospect Avenue, was opened June 12, 1914 as the Standard Theatre. In later years it was mainly a venue for adult pornographic films, although it had shown mainstream films early in its life. The Standard Theatre closed in 1989. The theatre had shown black-oriented action films briefly in the early-1980\u2019s. It was demolished in 1995."
       }
     },
     {
@@ -397,7 +367,7 @@ function theatreImageTag(theatreName) {
         "Architects": "George A. Ebeling",
         "Firms": null,
         "Previous_Names": "Streamline Moderne",
-        "Description": "The Lake Theatre opened on the day Adolph Hitler invaded Poland, September 1, 1939. In fact, in the daily newspaper, the Lake Theatre’s opening was above the invasion headline. Nothing like this was ever seen in Painesville. A 1,550 seat theatre with no balcony. It was a Streamline Moderne style masterpiece. It was closed in 1975 and was demolished in 1986. A Rite Aid drug store was built on the site."
+        "Description": "The Lake Theatre opened on the day Adolph Hitler invaded Poland, September 1, 1939. In fact, in the daily newspaper, the Lake Theatre\u2019s opening was above the invasion headline. Nothing like this was ever seen in Painesville. A 1,550 seat theatre with no balcony. It was a Streamline Moderne style masterpiece. It was closed in 1975 and was demolished in 1986. A Rite Aid drug store was built on the site."
       }
     },
     {
@@ -425,7 +395,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Built on the site of the Columbia Theatre, later Star Theatre & later Cameo Theatre and retaining the outer walls. The Embassy Theatre was opened October 16, 1938 with Robert Young & Lana Turner in “Rich Man, Poor Girl”. The Embassy Theatre in downtown Cleveland also continued to show movies long after the Allen Theatre, State Theatre, Ohio Theatre, and Palace Theatre had closed. Like the Hippodrome Theatre, the Embassy Theatre courted a largely minority audience in the 1970’s with black-oriented action films. The Embassy Theatre closed on December 1, 1977, and was demolished to make way for the National City Bank headquarters."
+        "Description": "Built on the site of the Columbia Theatre, later Star Theatre & later Cameo Theatre and retaining the outer walls. The Embassy Theatre was opened October 16, 1938 with Robert Young & Lana Turner in \u201cRich Man, Poor Girl\u201d. The Embassy Theatre in downtown Cleveland also continued to show movies long after the Allen Theatre, State Theatre, Ohio Theatre, and Palace Theatre had closed. Like the Hippodrome Theatre, the Embassy Theatre courted a largely minority audience in the 1970\u2019s with black-oriented action films. The Embassy Theatre closed on December 1, 1977, and was demolished to make way for the National City Bank headquarters."
       }
     },
     {
@@ -509,7 +479,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Thomas White Lamb",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Located on the north side of Euclid Avenue between East 104th and East 105th Streets, the Loew’s Park Theatre was slightly newer than their State Theatre and Ohio Theatre in downtown Cleveland."
+        "Description": "Located on the north side of Euclid Avenue between East 104th and East 105th Streets, the Loew\u2019s Park Theatre was slightly newer than their State Theatre and Ohio Theatre in downtown Cleveland."
       }
     },
     {
@@ -537,7 +507,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Cornelius Ward Rapp , George W. Leslie Rapp , Arthur G. Yost",
         "Firms": "Rapp & Rapp",
         "Previous_Names": "B.F. Keith's 105th Street Theatre, Keith's East 105th Street Theatre, RKO 105th Street Theatre",
-        "Description": "The B.F. Keith’s East 105th Street Theatre was opened on November 24, 1921. It was equipped with an Austin 3 manul 34 ranks organ. It was another uptown theatre that had done well up until the mid-1960’s, when it closed in May 1966. The theatre remained vacant for many years afterward until it was torn down in 1982 to make way for the William O. Walker Center."
+        "Description": "The B.F. Keith\u2019s East 105th Street Theatre was opened on November 24, 1921. It was equipped with an Austin 3 manul 34 ranks organ. It was another uptown theatre that had done well up until the mid-1960\u2019s, when it closed in May 1966. The theatre remained vacant for many years afterward until it was torn down in 1982 to make way for the William O. Walker Center."
       }
     },
     {
@@ -565,7 +535,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Jack Alan Bialosky , Preston G. Bradshaw",
         "Firms": null,
         "Previous_Names": "Loew's Granada Theatre",
-        "Description": "The Granada Theatre opened in 1927 as a neighborhood theatre, and was once connected with Loew’s Inc. The Granada Theatre closed in 1969, and was demolished later that year, first to make way for a Shell service station, then after the Shell station closed (and was demolished) in the 1980’s, is now the site of a Pizza Hut."
+        "Description": "The Granada Theatre opened in 1927 as a neighborhood theatre, and was once connected with Loew\u2019s Inc. The Granada Theatre closed in 1969, and was demolished later that year, first to make way for a Shell service station, then after the Shell station closed (and was demolished) in the 1980\u2019s, is now the site of a Pizza Hut."
       }
     },
     {
@@ -593,7 +563,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "Hoffman Theatre",
-        "Description": "The Hoffman Theatre was built as a vaudeville theatre in 1920. It was located on Euclid Avenue, west of East 105th Street. It was one of five theatres in the Euclid and East 105 Street area, the others being Loew’s Park Theatre, Keith’s 105th Street Theatre, the University Theatre and the Alhambra Theatre. By 1927 it was re-named Circle Theatre after Loew’s took over. The Circle Theatre had a balcony, and seating totalled 1,975. There was a full stage, with dressing rooms. In the late-1950s, the Circle Theatre received some notoriety for being the first Cleveland venue to host a live stage show featuring Elvis Presley. In its final years, the theatre ran mostly movies, but also staged a live country/western show on Saturday nights."
+        "Description": "The Hoffman Theatre was built as a vaudeville theatre in 1920. It was located on Euclid Avenue, west of East 105th Street. It was one of five theatres in the Euclid and East 105 Street area, the others being Loew\u2019s Park Theatre, Keith\u2019s 105th Street Theatre, the University Theatre and the Alhambra Theatre. By 1927 it was re-named Circle Theatre after Loew\u2019s took over. The Circle Theatre had a balcony, and seating totalled 1,975. There was a full stage, with dressing rooms. In the late-1950s, the Circle Theatre received some notoriety for being the first Cleveland venue to host a live stage show featuring Elvis Presley. In its final years, the theatre ran mostly movies, but also staged a live country/western show on Saturday nights."
       }
     },
     {
@@ -621,7 +591,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "New Hippodrome Theatre",
-        "Description": "The Metropolitan Theatre, on Euclid Avenue near East 55th Street, had shown movies until at least the late-1950’s. The theatre later became the WHK Auditorium (WHK AM 1420 had its studios in the building where the Metropolitan Theatre was, 5000 Euclid Avenue, which is also known as the WHK Building). The WHK Auditorium was used for various purposes (meetings, etc.) through the 1960’s and 1970’s. In the early-1980’s, the Metropolitan Theatre briefly reopened for movies, this time as the New Hippodrome Theatre, but that lasted less than a year. The Agora Night Club, a major rock music venue in Cleveland, now occupies the former Metropolitan Theatre/WHK Auditorium/New Hippodrome."
+        "Description": "The Metropolitan Theatre, on Euclid Avenue near East 55th Street, had shown movies until at least the late-1950\u2019s. The theatre later became the WHK Auditorium (WHK AM 1420 had its studios in the building where the Metropolitan Theatre was, 5000 Euclid Avenue, which is also known as the WHK Building). The WHK Auditorium was used for various purposes (meetings, etc.) through the 1960\u2019s and 1970\u2019s. In the early-1980\u2019s, the Metropolitan Theatre briefly reopened for movies, this time as the New Hippodrome Theatre, but that lasted less than a year. The Agora Night Club, a major rock music venue in Cleveland, now occupies the former Metropolitan Theatre/WHK Auditorium/New Hippodrome."
       }
     },
     {
@@ -649,7 +619,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "Performing Arts Theatre, Circus Maximus, Pussycat CineX, Scrumpy Dump Cinema",
-        "Description": "This theatre originally opened as the University Theatre in the 1920’s, then it became the PAT (Performing Arts Theatre) briefly in the 1960’s. By the mid-1960’s it was operating as an adult cinema named Circus Maximus and by 1970 was the Pussycat CineX. The Scrumpy Dump name was used from 1973 until 1982 when the theatre closed. The Scrumpy Dump mainly played African-American-oriented films, although I think porn played there as well. The Scrumpy Dump was demolished to make way for the William O. Walker Center, which originally was planned as a workmen’s compensation hospital but is now offices for Cleveland Clinic."
+        "Description": "This theatre originally opened as the University Theatre in the 1920\u2019s, then it became the PAT (Performing Arts Theatre) briefly in the 1960\u2019s. By the mid-1960\u2019s it was operating as an adult cinema named Circus Maximus and by 1970 was the Pussycat CineX. The Scrumpy Dump name was used from 1973 until 1982 when the theatre closed. The Scrumpy Dump mainly played African-American-oriented films, although I think porn played there as well. The Scrumpy Dump was demolished to make way for the William O. Walker Center, which originally was planned as a workmen\u2019s compensation hospital but is now offices for Cleveland Clinic."
       }
     },
     {
@@ -705,7 +675,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Nicola Petti",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Uptown Theatre was located on St. Clair Avenue, just east of East 105th Street and opened November 22, 1928 with vaudeville and talking pictures. It had dressing rooms for the vaudeville artistes. It originally had 3,580 seats on orchestra and balcony levels. It was equipped with a Wurlitzer pipe organ, and there was a magnificent crystal chandelier in the center of the auditorium ceiling. By the early-1940’s the Uptown Theatre was operated by the Warner Bros. Circuit Management Corp. who also operated the Colony Theatre, Doan Theatre, Hippodrome Theatre, Lake Theatre and Variety Theatre, all in Cleveland. The Uptown Theatre was last operated by Stanley-Warner Theatres and closed by August 1956."
+        "Description": "The Uptown Theatre was located on St. Clair Avenue, just east of East 105th Street and opened November 22, 1928 with vaudeville and talking pictures. It had dressing rooms for the vaudeville artistes. It originally had 3,580 seats on orchestra and balcony levels. It was equipped with a Wurlitzer pipe organ, and there was a magnificent crystal chandelier in the center of the auditorium ceiling. By the early-1940\u2019s the Uptown Theatre was operated by the Warner Bros. Circuit Management Corp. who also operated the Colony Theatre, Doan Theatre, Hippodrome Theatre, Lake Theatre and Variety Theatre, all in Cleveland. The Uptown Theatre was last operated by Stanley-Warner Theatres and closed by August 1956."
       }
     },
     {
@@ -733,7 +703,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Nicola Petti",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Variety Amusement Company opened the Variety Theatre on November 24, 1927 with Clara Bow in “Hula” and vaudeville on the stage. Guest organist Edward Benedict opened the Kimball organ. Seating was provided for 1,550 in the orchestra level and 350 in the balcony. There were 3 dressing rooms. In 1929 it was taken over by Warner Bros. Circuit Management Corp. and they operated it until 1954 when it was taken over by an independent operator. The huge vertical name sign on the façade was damaged by a tornado in 1953 and had to be removed. The theatre had shown sub-run films during the 1970’s, and brought in cult midnight movies in the early-1980’s. At the same time it became a rock music venue. The theatre was also used as a “haunted theatre” for a couple of years in the 1980’s, in which there was a haunted tour of the theatre, while horror films were playing on the screen. Lack of off-street parking and the high cost of utilities and other expenses for a single screen theatre forced the Variety Theatre to close in 1986. Later on, a private school in the Cleveland area, Freedom Academy, used the theatre as a performing arts school. A boxing academy last occupied the Variety Theatre until 1990. Since 2006, the Variety Theatre has been in the process of restoration and renovation by new owners, the Friends of the Historic Variety Theatre, which hopes to reopen the theatre as a venue for both on-screen and live performances. In September 2016 a replica of the original vertical name sign was installed and re-lit. The building was ‘For Sale’ in summer of 2021. Restoration began in September 2022. The Variety Theatre is a Designated Cleveland Landmark."
+        "Description": "The Variety Amusement Company opened the Variety Theatre on November 24, 1927 with Clara Bow in \u201cHula\u201d and vaudeville on the stage. Guest organist Edward Benedict opened the Kimball organ. Seating was provided for 1,550 in the orchestra level and 350 in the balcony. There were 3 dressing rooms. In 1929 it was taken over by Warner Bros. Circuit Management Corp. and they operated it until 1954 when it was taken over by an independent operator. The huge vertical name sign on the fa\u00e7ade was damaged by a tornado in 1953 and had to be removed. The theatre had shown sub-run films during the 1970\u2019s, and brought in cult midnight movies in the early-1980\u2019s. At the same time it became a rock music venue. The theatre was also used as a \u201chaunted theatre\u201d for a couple of years in the 1980\u2019s, in which there was a haunted tour of the theatre, while horror films were playing on the screen. Lack of off-street parking and the high cost of utilities and other expenses for a single screen theatre forced the Variety Theatre to close in 1986. Later on, a private school in the Cleveland area, Freedom Academy, used the theatre as a performing arts school. A boxing academy last occupied the Variety Theatre until 1990. Since 2006, the Variety Theatre has been in the process of restoration and renovation by new owners, the Friends of the Historic Variety Theatre, which hopes to reopen the theatre as a venue for both on-screen and live performances. In September 2016 a replica of the original vertical name sign was installed and re-lit. The building was \u2018For Sale\u2019 in summer of 2021. Restoration began in September 2022. The Variety Theatre is a Designated Cleveland Landmark."
       }
     },
     {
@@ -761,7 +731,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Jack Alan Bialosky , George Howard Burrows",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Shaker Theatre opened in 1936, and closed in the mid-1980’s. The theatre was demolished to make way for Blaushild Chevrolet, which went out of business less than a year after their new showroom opened. A health care center occupies the former auto showroom now."
+        "Description": "The Shaker Theatre opened in 1936, and closed in the mid-1980\u2019s. The theatre was demolished to make way for Blaushild Chevrolet, which went out of business less than a year after their new showroom opened. A health care center occupies the former auto showroom now."
       }
     },
     {
@@ -789,7 +759,7 @@ function theatreImageTag(theatreName) {
         "Architects": "George Howard Burrows",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Riverside Theatre was a neighborhood theatre which opened on April 17, 1938 with Sonja Henie in “Happy Landing” & Jack Cooper in “Boys of the Streets”. Loews took over the theatre in the early-1970’s, and was twinned on October 28, 1978. Loews closed the theatre on January 20, 1994 with Michael Keaton in “My Life” & Al Pacino in “Carlito’s Way”. The Riverside Theatre was demolished in 1994 to make way for a Walgreens drug store."
+        "Description": "The Riverside Theatre was a neighborhood theatre which opened on April 17, 1938 with Sonja Henie in \u201cHappy Landing\u201d & Jack Cooper in \u201cBoys of the Streets\u201d. Loews took over the theatre in the early-1970\u2019s, and was twinned on October 28, 1978. Loews closed the theatre on January 20, 1994 with Michael Keaton in \u201cMy Life\u201d & Al Pacino in \u201cCarlito\u2019s Way\u201d. The Riverside Theatre was demolished in 1994 to make way for a Walgreens drug store."
       }
     },
     {
@@ -873,7 +843,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Astor Theatre was opened on November 24, 1927 with Norma Talmadge in “Camille”. It was still open in 1966. It was a very unremarkable neighborhood movie house located in what was to become one of Cleveland’s worst areas of urban blight - the infamous Hough neighborhood, scene of horrendous rioting in the late-1960s and early-1970’s."
+        "Description": "The Astor Theatre was opened on November 24, 1927 with Norma Talmadge in \u201cCamille\u201d. It was still open in 1966. It was a very unremarkable neighborhood movie house located in what was to become one of Cleveland\u2019s worst areas of urban blight - the infamous Hough neighborhood, scene of horrendous rioting in the late-1960s and early-1970\u2019s."
       }
     },
     {
@@ -901,7 +871,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Globe Theater is shown on the 1912-1913 Sanborn Street Map. Seating was provided in orchestra and balcony levels. In the 1920’s it was an African American theatre, part of the TOBA Circuit presenting movies and vaudeville. In 1922, the Globe Theater adopted a poly of catering for patrons of both races. In 1923 Bessie Smith appeared on stage, and returned again in 1929 in the show “Steamboat Days”. In the 1930’s the Ahmediyyih Muslim Community rented space above the lobby to be used as the Cleveland mosque. The Globe Theater was listed in the Film Daily Yearbook 1955 edition as a Negro theatre. It closed in the 1950’s, and its auditorium was never used again. The lobby was remodelled and became the Ebony Boy Barbecue take-out eatery. The Globe Theater and surrounding building were later demolished. The site is an empty plot of land in 2014."
+        "Description": "The Globe Theater is shown on the 1912-1913 Sanborn Street Map. Seating was provided in orchestra and balcony levels. In the 1920\u2019s it was an African American theatre, part of the TOBA Circuit presenting movies and vaudeville. In 1922, the Globe Theater adopted a poly of catering for patrons of both races. In 1923 Bessie Smith appeared on stage, and returned again in 1929 in the show \u201cSteamboat Days\u201d. In the 1930\u2019s the Ahmediyyih Muslim Community rented space above the lobby to be used as the Cleveland mosque. The Globe Theater was listed in the Film Daily Yearbook 1955 edition as a Negro theatre. It closed in the 1950\u2019s, and its auditorium was never used again. The lobby was remodelled and became the Ebony Boy Barbecue take-out eatery. The Globe Theater and surrounding building were later demolished. The site is an empty plot of land in 2014."
       }
     },
     {
@@ -929,7 +899,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Paul Matzinger",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Shore Theatre was opened on April 8, 1939 with Don Ameche in “The Three Musketeers”. It was closed around 1980. It was demolished and a bank now stands on the site."
+        "Description": "The Shore Theatre was opened on April 8, 1939 with Don Ameche in \u201cThe Three Musketeers\u201d. It was closed around 1980. It was demolished and a bank now stands on the site."
       }
     },
     {
@@ -957,7 +927,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "Loew's Doan Theatre",
-        "Description": "The Doan Theatre opened in around 1919 and closed in the early-1950’s. It had difficulty competing with the larger and more opulent Uptown Theatre, which was also operated by Warner Bros. located across the street and down a block from the Doan Theatre at 10515 St. Clair Avenue. The Doan Theatre did have a balcony and a full stage that was once used for vaudeville shows."
+        "Description": "The Doan Theatre opened in around 1919 and closed in the early-1950\u2019s. It had difficulty competing with the larger and more opulent Uptown Theatre, which was also operated by Warner Bros. located across the street and down a block from the Doan Theatre at 10515 St. Clair Avenue. The Doan Theatre did have a balcony and a full stage that was once used for vaudeville shows."
       }
     },
     {
@@ -985,7 +955,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Located in the south-west Cleveland district of Tremont. This Lorain Theatre is not to be confused with the nearby Lorain-Fulton Theatre (which has its own page on Cinema Treasures). This Lorain Theatre was located next to the Laub Baking Company. It was a popular theatre which played many of the Universal studio’s horror movies from the 1930’s to 1950’s. It has recently been in retail use, and the building was ‘For Rent’ in August 2022."
+        "Description": "Located in the south-west Cleveland district of Tremont. This Lorain Theatre is not to be confused with the nearby Lorain-Fulton Theatre (which has its own page on Cinema Treasures). This Lorain Theatre was located next to the Laub Baking Company. It was a popular theatre which played many of the Universal studio\u2019s horror movies from the 1930\u2019s to 1950\u2019s. It has recently been in retail use, and the building was \u2018For Rent\u2019 in August 2022."
       }
     },
     {
@@ -1013,7 +983,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Crown Theatre was open prior to 1917. It seated 604 and was still listed as open in the 1950’s. The building is now a church."
+        "Description": "The Crown Theatre was open prior to 1917. It seated 604 and was still listed as open in the 1950\u2019s. The building is now a church."
       }
     },
     {
@@ -1041,7 +1011,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Operated from 1919 to 1953, according to \"Bob\" in his listing of Cleveland, Ohio Theatres. A Page theatre organ with 2 manuals and 7 ranks of pipes was installed in the late-1920’s. The organ survives in storage in Toledo, Ohio. The Cleveland Public Library Digital Gallery has a photograph of the marquee, which may be viewed on their website."
+        "Description": "Operated from 1919 to 1953, according to \"Bob\" in his listing of Cleveland, Ohio Theatres. A Page theatre organ with 2 manuals and 7 ranks of pipes was installed in the late-1920\u2019s. The organ survives in storage in Toledo, Ohio. The Cleveland Public Library Digital Gallery has a photograph of the marquee, which may be viewed on their website."
       }
     },
     {
@@ -1069,7 +1039,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Hough-79th Theatre opened at the corner of Hough Avenue and E. 79th Street in 1924 with the inaugural film and “Husbands and Lovers”. Cleveland’s Hough neighborhood was named for settlers Oliver and Eliza Hough who moved there in 1799. M.B. Horowitz opened the Hough-79th Theatre as part of the Washington Circuit. Historic population shifts moved the neighborhood from upper middle class and upper class mainly Caucasian to immigrants to 90% African American Seat. Seat count varied between 750 and 917 but likely ended at the 750 count when CinemaScope screen technology was added in 1955. The theatre also hosted a weekly jamboree, grand ole spry-styled show simulcast on radio hosted by air personalties Tex and Glen Clark The theatre likely closed as a sub-run double-feature discount house for African American audiences in 1964. The former theatre was next to the epicenter of the famous Hough race riots in 1966 that saw a neighboring business, Seventy Niners' Café, spark a race riot that led to arson, injuries and death. Following the 1966 riots, the Negro Business and Industrial Association took on the Hough-79th Theatre venue planning to transform it into a roller skating rink and community center. The theatre appears to have been demolished in 1984 and the Lexington Village residential units have since been built where the business district once stood."
+        "Description": "The Hough-79th Theatre opened at the corner of Hough Avenue and E. 79th Street in 1924 with the inaugural film and \u201cHusbands and Lovers\u201d. Cleveland\u2019s Hough neighborhood was named for settlers Oliver and Eliza Hough who moved there in 1799. M.B. Horowitz opened the Hough-79th Theatre as part of the Washington Circuit. Historic population shifts moved the neighborhood from upper middle class and upper class mainly Caucasian to immigrants to 90% African American Seat. Seat count varied between 750 and 917 but likely ended at the 750 count when CinemaScope screen technology was added in 1955. The theatre also hosted a weekly jamboree, grand ole spry-styled show simulcast on radio hosted by air personalties Tex and Glen Clark The theatre likely closed as a sub-run double-feature discount house for African American audiences in 1964. The former theatre was next to the epicenter of the famous Hough race riots in 1966 that saw a neighboring business, Seventy Niners' Caf\u00e9, spark a race riot that led to arson, injuries and death. Following the 1966 riots, the Negro Business and Industrial Association took on the Hough-79th Theatre venue planning to transform it into a roller skating rink and community center. The theatre appears to have been demolished in 1984 and the Lexington Village residential units have since been built where the business district once stood."
       }
     },
     {
@@ -1097,7 +1067,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Back in the 1930’s and 1940’s, this old house showed Tom Mix and Roy Rogers films. For a nickel, we would spend a Saturday watching cowboy and Indian films."
+        "Description": "Back in the 1930\u2019s and 1940\u2019s, this old house showed Tom Mix and Roy Rogers films. For a nickel, we would spend a Saturday watching cowboy and Indian films."
       }
     },
     {
@@ -1125,7 +1095,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Frank Ray Walker",
         "Firms": "Walker & Weeks",
         "Previous_Names": null,
-        "Description": "Located at E. 55th Street and Woodland Avenue. The Haltnorth Theatre was opened in 1914. In the 1920’s it was equipped with a Link organ. It was still open in 1963."
+        "Description": "Located at E. 55th Street and Woodland Avenue. The Haltnorth Theatre was opened in 1914. In the 1920\u2019s it was equipped with a Link organ. It was still open in 1963."
       }
     },
     {
@@ -1153,7 +1123,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Paul Matzinger",
         "Firms": null,
         "Previous_Names": "Loews Stillwell Theatre",
-        "Description": "The Stillwell Theatre opened on March 5, 1942 with Jimmy Durante in “You’re in the Army Now”. It was a neighborhood theatre. It had a seating capacity for 1,000. Loews took over the theatre in 1969 and closed it in 1977. The theatre was used briefly by Bob Kay AMC as a storage area, then was demolished in 1980 to make way for a Ford dealership (first Bob Kay Ford, then Liberty Ford, now Frank Nero Lincoln Mercury.)"
+        "Description": "The Stillwell Theatre opened on March 5, 1942 with Jimmy Durante in \u201cYou\u2019re in the Army Now\u201d. It was a neighborhood theatre. It had a seating capacity for 1,000. Loews took over the theatre in 1969 and closed it in 1977. The theatre was used briefly by Bob Kay AMC as a storage area, then was demolished in 1980 to make way for a Ford dealership (first Bob Kay Ford, then Liberty Ford, now Frank Nero Lincoln Mercury.)"
       }
     },
     {
@@ -1209,7 +1179,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "This Cleveland west side theater was opened by 1926. It was closed in the late-1940’s or maybe 1950. After that the lobby was used as a auto repair shop, but the theater marquee and vertical were still in place."
+        "Description": "This Cleveland west side theater was opened by 1926. It was closed in the late-1940\u2019s or maybe 1950. After that the lobby was used as a auto repair shop, but the theater marquee and vertical were still in place."
       }
     },
     {
@@ -1237,7 +1207,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Located in the west of the city. The Ridge Theatre was opened by 1914. It was renovated in an Art Deco style in 1936. It was still open in 1952, but had closed by 1955. Today, with a new plain brick façade the building is in use as a workshop."
+        "Description": "Located in the west of the city. The Ridge Theatre was opened by 1914. It was renovated in an Art Deco style in 1936. It was still open in 1952, but had closed by 1955. Today, with a new plain brick fa\u00e7ade the building is in use as a workshop."
       }
     },
     {
@@ -1265,7 +1235,7 @@ function theatreImageTag(theatreName) {
         "Architects": "John F. Steffens",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Built in 1925, the Ambassador Theatre was a small, nondescript neighborhood movie theatre located at 12416 Superior Avenue, Cleveland, Ohio. It closed in the early-1950’s."
+        "Description": "Built in 1925, the Ambassador Theatre was a small, nondescript neighborhood movie theatre located at 12416 Superior Avenue, Cleveland, Ohio. It closed in the early-1950\u2019s."
       }
     },
     {
@@ -1321,7 +1291,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Paul Matzinger",
         "Firms": "F & Y Building Service",
         "Previous_Names": null,
-        "Description": "The Avalon Theatre was opened May 28, 1938 with Clark Gable in “Call of the Wild” & Phil Regan in “Outside of Paradise”. It cost $27,000 to build. I saw my first movie in this theatre. I was 9 years old at the time and my dad took my older brother and me to to see Charlton Heston in “The Ten Commandments”. The Avalon Theatre was closed in 1970 and like many other neighborhood theatres in the inner city, it was turned into a church. The building is still standing. The Avalon Theatre was located about two blocks north of Miles Avenue on E. 131st Street."
+        "Description": "The Avalon Theatre was opened May 28, 1938 with Clark Gable in \u201cCall of the Wild\u201d & Phil Regan in \u201cOutside of Paradise\u201d. It cost $27,000 to build. I saw my first movie in this theatre. I was 9 years old at the time and my dad took my older brother and me to to see Charlton Heston in \u201cThe Ten Commandments\u201d. The Avalon Theatre was closed in 1970 and like many other neighborhood theatres in the inner city, it was turned into a church. The building is still standing. The Avalon Theatre was located about two blocks north of Miles Avenue on E. 131st Street."
       }
     },
     {
@@ -1349,7 +1319,7 @@ function theatreImageTag(theatreName) {
         "Architects": "William Stanley Ferguson",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Beach Cliff Theatre opened in August 28, 1937 and closed in the mid-1970’s. The theatre space was remodeled into the Beachcliff Market Square Mall, with shops in the old auditorium space. The marquee is still used to advertise the mall."
+        "Description": "The Beach Cliff Theatre opened in August 28, 1937 and closed in the mid-1970\u2019s. The theatre space was remodeled into the Beachcliff Market Square Mall, with shops in the old auditorium space. The marquee is still used to advertise the mall."
       }
     },
     {
@@ -1377,7 +1347,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "This theatre opened January 16, 1927 with Marceline Day in “College Days” aka “The Younger Generation”. It was a neighborhood movie theatre with 2,100 seats and was equipped with an organ that was opened by organist Walter Trimmer. It started showing porn movies in the 1970’s. The theatre, after several vice squad raids, closed in the early-1980’s, then briefly reopened by a community group that brought in sub-run films for $2 admission. The theatre closed again on March 28, 1987, and had since been demolished to make way for a retail store (first Medic Drug, now a Family Dollar)."
+        "Description": "This theatre opened January 16, 1927 with Marceline Day in \u201cCollege Days\u201d aka \u201cThe Younger Generation\u201d. It was a neighborhood movie theatre with 2,100 seats and was equipped with an organ that was opened by organist Walter Trimmer. It started showing porn movies in the 1970\u2019s. The theatre, after several vice squad raids, closed in the early-1980\u2019s, then briefly reopened by a community group that brought in sub-run films for $2 admission. The theatre closed again on March 28, 1987, and had since been demolished to make way for a retail store (first Medic Drug, now a Family Dollar)."
       }
     },
     {
@@ -1405,7 +1375,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "Allen's Capitol Theatre",
-        "Description": "This theatre, which is located in the Gordon Square Building, opened as a neighborhood theatre on April 8, 1921 as Allen’s Capitol Theatre. The opening movie was Vera Gordon in “The Greatest Love”. By December 1924 it went to new operators and became the Capitol Theatre. It was later operated by the Ohio Amusement Co. It was closed in the late-1960’s. Since the Gordon Square Building was restored and renovated in 2003, there was talk of restoring and reopening the theatre as an art house, but nothing came of it for a while. The theatre, however was well maintained since it closed, but after 35 years of closure, some renovation was needed. It re-opened with three screens on October 2, 2009, and is an all digital cinema."
+        "Description": "This theatre, which is located in the Gordon Square Building, opened as a neighborhood theatre on April 8, 1921 as Allen\u2019s Capitol Theatre. The opening movie was Vera Gordon in \u201cThe Greatest Love\u201d. By December 1924 it went to new operators and became the Capitol Theatre. It was later operated by the Ohio Amusement Co. It was closed in the late-1960\u2019s. Since the Gordon Square Building was restored and renovated in 2003, there was talk of restoring and reopening the theatre as an art house, but nothing came of it for a while. The theatre, however was well maintained since it closed, but after 35 years of closure, some renovation was needed. It re-opened with three screens on October 2, 2009, and is an all digital cinema."
       }
     },
     {
@@ -1489,7 +1459,7 @@ function theatreImageTag(theatreName) {
         "Architects": "J.L. Cameron",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Corlett Theatre opened in the 1920’s. It was remodelled in 1933 to the plans of architect J.L. Cameron. The Corlett Theatre closed in the 1950’s. After it closed as a theatre, a VFW hall operated out of the building for several years. The Corlett Theatre building is currently a church."
+        "Description": "The Corlett Theatre opened in the 1920\u2019s. It was remodelled in 1933 to the plans of architect J.L. Cameron. The Corlett Theatre closed in the 1950\u2019s. After it closed as a theatre, a VFW hall operated out of the building for several years. The Corlett Theatre building is currently a church."
       }
     },
     {
@@ -1517,7 +1487,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "A neighborhood theatre, at the corner of East 152nd Street and Lakeshore Boulevard, that opened August 28, 1927. It closed as a movie theatre in 1972. St. Jerome’s Church was using the theatre as a bingo hall for quite some time. The Commodore Theatre was demolished in 2008."
+        "Description": "A neighborhood theatre, at the corner of East 152nd Street and Lakeshore Boulevard, that opened August 28, 1927. It closed as a movie theatre in 1972. St. Jerome\u2019s Church was using the theatre as a bingo hall for quite some time. The Commodore Theatre was demolished in 2008."
       }
     },
     {
@@ -1545,7 +1515,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Eclair Theatre opened in 1918 and closed as a cinema in 1954. It found a new life into the early-1960’s as the home of the live “Ohio Barn Dance” country-and-western stage shows, that were also broadcast on a radio network which eventually grew to ten stations. In 1950, Co-operative Theatres of Ohio owned the Eclair Theatre."
+        "Description": "The Eclair Theatre opened in 1918 and closed as a cinema in 1954. It found a new life into the early-1960\u2019s as the home of the live \u201cOhio Barn Dance\u201d country-and-western stage shows, that were also broadcast on a radio network which eventually grew to ten stations. In 1950, Co-operative Theatres of Ohio owned the Eclair Theatre."
       }
     },
     {
@@ -1601,7 +1571,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Denison Square Theatre opened in December 1915 with Mary Pickford in “The Dawn of Tomorrow” and operated into the late-1950’s."
+        "Description": "The Denison Square Theatre opened in December 1915 with Mary Pickford in \u201cThe Dawn of Tomorrow\u201d and operated into the late-1950\u2019s."
       }
     },
     {
@@ -1657,7 +1627,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Rudolph Grosel , Paul Matzinger",
         "Firms": "Matzinger & Grosel",
         "Previous_Names": null,
-        "Description": "Opened by 1911, the Ezella Theatre was owned by Modern Theatres, Inc., Owners: The Essex Brothers – Jack & Ray – and a rotund little man named Howard Reif. It was remodeled in 1941-1942 to the plans of architectural firm Matzinger & Grosel. The theatre was almost an exact duplicate of the Vine Theatre in Willoughby, Ohio. My memory is fading, but as best I can recall, it had 1,400 seats on one level. Last time I worked there as a stagehand was in 1958. The place was in good shape – surprisingly so, since it was located in what was even then considered to be a “seedy” part of town. There was nothing very unusual about the Ezella. It had a large projection booth, with two Super-Simplex projectors fitted with Peerless MagnaArc lamp-houses; an RCA sound system, and “El Cheapo” anamorphic Cinemascope lenses that were vastly inferior to the Bosch & Lomb lenses that were in wide use at the better theatres around town. One interesting sidelight: Directly across an alley at the rear of the theatre, was a fairly large, two-story wooden storage building that looked like it had survived from the last century. I was told that an undertaker used it to store coffins. About three or-so years after I last worked at the Ezella, I learned that the old building had caught fire, and posed a real danger to the theatre building. Newspaper reports credited a young assistant theatre manager with doing a great job of making an announcement from the stage to the people in the audience, instructing them on the proper manner for safely exiting the theatre. I understand that damage to the Ezella building was minimal. USELESS TRIVIA: The phone number of the Ezella Theatre, back in 1957 was HE-1-2071. (The ‘HE’ stood for HENDERSON). The building is today home to a church."
+        "Description": "Opened by 1911, the Ezella Theatre was owned by Modern Theatres, Inc., Owners: The Essex Brothers \u2013 Jack & Ray \u2013 and a rotund little man named Howard Reif. It was remodeled in 1941-1942 to the plans of architectural firm Matzinger & Grosel. The theatre was almost an exact duplicate of the Vine Theatre in Willoughby, Ohio. My memory is fading, but as best I can recall, it had 1,400 seats on one level. Last time I worked there as a stagehand was in 1958. The place was in good shape \u2013 surprisingly so, since it was located in what was even then considered to be a \u201cseedy\u201d part of town. There was nothing very unusual about the Ezella. It had a large projection booth, with two Super-Simplex projectors fitted with Peerless MagnaArc lamp-houses; an RCA sound system, and \u201cEl Cheapo\u201d anamorphic Cinemascope lenses that were vastly inferior to the Bosch & Lomb lenses that were in wide use at the better theatres around town. One interesting sidelight: Directly across an alley at the rear of the theatre, was a fairly large, two-story wooden storage building that looked like it had survived from the last century. I was told that an undertaker used it to store coffins. About three or-so years after I last worked at the Ezella, I learned that the old building had caught fire, and posed a real danger to the theatre building. Newspaper reports credited a young assistant theatre manager with doing a great job of making an announcement from the stage to the people in the audience, instructing them on the proper manner for safely exiting the theatre. I understand that damage to the Ezella building was minimal. USELESS TRIVIA: The phone number of the Ezella Theatre, back in 1957 was HE-1-2071. (The \u2018HE\u2019 stood for HENDERSON). The building is today home to a church."
       }
     },
     {
@@ -1685,7 +1655,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Garden Theatre opened by the Ohio Amusement Co. on August 30, 1924 with Jack Holt in “Wanderer of the Wasteland”. My mother remembered attending in her girlhood, seeing Bela Lugosi in “Dracula” during one of its many reissues. Never a first run theatre, it generally opened only on weekends, playing second or third run films on double features. During the 1960’s, it was my favorite theatre, simply because it was the one most conveniently located, right down the street from me on W. 25th Street, a few steps down from Clark Avenue. Like most second run neighborhood theatres, they had children’s matinees on Saturday and Sunday, often showing something other than the evening attractions, or perhaps adding a third feature to the program. Elvis Presley double features (“Love Me Tender” and “Jailhouse Rock”, with the addition of “Kid Galahad” for the Saturday-Sunday matinee) were pretty popular, as were horror shows from Hammer and American International (“Dracula, Prince of Darkness”, “The Pit and the Pendulum”, etc). I also saw quite a few sword and sandal epics there with Steve Reeves (“The Slave-The Son of Spartacus”, “Hercules”, “Duel of the Titans”). But the major films played there as well, everything from “West Side Story” and “Lawrence of Arabia” to the James Bond series) once they completed their runs at the downtown theatres and the suburban second run movie houses. The Garden Theatre holds a special place in my memories because it was the theatre in which I was introduced to movies. So besotted was I by the movie posters outside the theatre and in the lobby, I always insisted my mother take me by the theatre when we were in the area, even when it was closed so I could look at the posters and peer in the doorway at the ones for the coming attractions. Otherwise, it was a fairly seedy place for much of its last years. For a long time, there was a hole in the screen that no one bothered to repair. In 1969, the theatre closed with the marquee announcing it would soon reopen as the Pussycat Theatre, which would have given competition to the Paris adult theatre across the street (formerly the Southern Theatre). That never happened, and the Garden Theatre was demolished soon thereafter."
+        "Description": "The Garden Theatre opened by the Ohio Amusement Co. on August 30, 1924 with Jack Holt in \u201cWanderer of the Wasteland\u201d. My mother remembered attending in her girlhood, seeing Bela Lugosi in \u201cDracula\u201d during one of its many reissues. Never a first run theatre, it generally opened only on weekends, playing second or third run films on double features. During the 1960\u2019s, it was my favorite theatre, simply because it was the one most conveniently located, right down the street from me on W. 25th Street, a few steps down from Clark Avenue. Like most second run neighborhood theatres, they had children\u2019s matinees on Saturday and Sunday, often showing something other than the evening attractions, or perhaps adding a third feature to the program. Elvis Presley double features (\u201cLove Me Tender\u201d and \u201cJailhouse Rock\u201d, with the addition of \u201cKid Galahad\u201d for the Saturday-Sunday matinee) were pretty popular, as were horror shows from Hammer and American International (\u201cDracula, Prince of Darkness\u201d, \u201cThe Pit and the Pendulum\u201d, etc). I also saw quite a few sword and sandal epics there with Steve Reeves (\u201cThe Slave-The Son of Spartacus\u201d, \u201cHercules\u201d, \u201cDuel of the Titans\u201d). But the major films played there as well, everything from \u201cWest Side Story\u201d and \u201cLawrence of Arabia\u201d to the James Bond series) once they completed their runs at the downtown theatres and the suburban second run movie houses. The Garden Theatre holds a special place in my memories because it was the theatre in which I was introduced to movies. So besotted was I by the movie posters outside the theatre and in the lobby, I always insisted my mother take me by the theatre when we were in the area, even when it was closed so I could look at the posters and peer in the doorway at the ones for the coming attractions. Otherwise, it was a fairly seedy place for much of its last years. For a long time, there was a hole in the screen that no one bothered to repair. In 1969, the theatre closed with the marquee announcing it would soon reopen as the Pussycat Theatre, which would have given competition to the Paris adult theatre across the street (formerly the Southern Theatre). That never happened, and the Garden Theatre was demolished soon thereafter."
       }
     },
     {
@@ -1713,7 +1683,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "This neighborhood theatre opened in late-1927. It was redecorated and reopened on August 28, 1938 with Joe Penner in “New Faces of 1938”. It was closed in the mid-1960’s. A carpeting business occupied the building for 15 years. It was demolished around 2009. I remember as a child, seeing the marquee of the Garfield Theatre advertising ‘Polish Pictures’. I remember asking my mother, what are Polish Pictures, pronouncing ‘Polish’ like how it’s pronounced for shoe polish or furniture polish, instead of someone from Poland. My mother laughed."
+        "Description": "This neighborhood theatre opened in late-1927. It was redecorated and reopened on August 28, 1938 with Joe Penner in \u201cNew Faces of 1938\u201d. It was closed in the mid-1960\u2019s. A carpeting business occupied the building for 15 years. It was demolished around 2009. I remember as a child, seeing the marquee of the Garfield Theatre advertising \u2018Polish Pictures\u2019. I remember asking my mother, what are Polish Pictures, pronouncing \u2018Polish\u2019 like how it\u2019s pronounced for shoe polish or furniture polish, instead of someone from Poland. My mother laughed."
       }
     },
     {
@@ -1741,7 +1711,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Kurt Havermaet",
         "Firms": "Braverman & Havermaet",
         "Previous_Names": "Westwood Art Theatre",
-        "Description": "The former Hilliard Square Theatre (and later) Westwood Art Theatre is located in Lakewood, a district to the west of Cleveland, OH. It was the sister theatre to the Heights Art Theatre (aka Madstone Centrum) in Cleveland Heights and the Continental Art Theatre in East Cleveland (demolished in the 1970’s.) In the 1960’s/1970’s the Westwood Theatre had shown XXX-rated adult films. The theatre opened as the Hilliard Square Theatre on April 14, 1927 and was built for vaudeville and motion pictures by the Universal Pictures chain. The seating capacity is given as 1,500 in editions of Film Daily Yearbook through the 1940’s and 1950’s, although in reality it could be 1,200 (800 in the orchestra, 400 in the balcony). It changed its name to the Westwood Theatre in around 1962. By the 1980’s, the theatre started showing sub-run Hollywood fare, toward the end charging only 50 cents admission! The theatre closed in 1988, and has been vacant since. Lack of off-street parking, as well as the high cost of operating a single screen theatre, killed the Westwood Theatre. The building stood standing, and nothing was done to the theatre since it closed. It was demolished in February 2017."
+        "Description": "The former Hilliard Square Theatre (and later) Westwood Art Theatre is located in Lakewood, a district to the west of Cleveland, OH. It was the sister theatre to the Heights Art Theatre (aka Madstone Centrum) in Cleveland Heights and the Continental Art Theatre in East Cleveland (demolished in the 1970\u2019s.) In the 1960\u2019s/1970\u2019s the Westwood Theatre had shown XXX-rated adult films. The theatre opened as the Hilliard Square Theatre on April 14, 1927 and was built for vaudeville and motion pictures by the Universal Pictures chain. The seating capacity is given as 1,500 in editions of Film Daily Yearbook through the 1940\u2019s and 1950\u2019s, although in reality it could be 1,200 (800 in the orchestra, 400 in the balcony). It changed its name to the Westwood Theatre in around 1962. By the 1980\u2019s, the theatre started showing sub-run Hollywood fare, toward the end charging only 50 cents admission! The theatre closed in 1988, and has been vacant since. Lack of off-street parking, as well as the high cost of operating a single screen theatre, killed the Westwood Theatre. The building stood standing, and nothing was done to the theatre since it closed. It was demolished in February 2017."
       }
     },
     {
@@ -1881,7 +1851,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Jennings Theater was opened on October 28, 1916 with Edith Storey in “The Tarantula”. It was closed by 1950. The site is now a parking lot."
+        "Description": "The Jennings Theater was opened on October 28, 1916 with Edith Storey in \u201cThe Tarantula\u201d. It was closed by 1950. The site is now a parking lot."
       }
     },
     {
@@ -1909,7 +1879,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Nicola Petti",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "This neighborhood theatre, on E. 185th Street in Cleveland, opened on March 1, 1928 with Billie Dove in “The Love Mart”. It was closed for refurbishment in 1949, reopening on September 29, 1949 with Richard Widmark in “Slattery’s Hurricane”. It closed in 1991. It was used for neighborhood gatherings and other uses since, but the theatre is vacant more than it is used. At least the building’s owners are keeping it maintained and by 2021 it was in use as a banquet hall."
+        "Description": "This neighborhood theatre, on E. 185th Street in Cleveland, opened on March 1, 1928 with Billie Dove in \u201cThe Love Mart\u201d. It was closed for refurbishment in 1949, reopening on September 29, 1949 with Richard Widmark in \u201cSlattery\u2019s Hurricane\u201d. It closed in 1991. It was used for neighborhood gatherings and other uses since, but the theatre is vacant more than it is used. At least the building\u2019s owners are keeping it maintained and by 2021 it was in use as a banquet hall."
       }
     },
     {
@@ -1924,7 +1894,7 @@ function theatreImageTag(theatreName) {
       "properties": {
         "ObjectID": 64,
         "Theatre": "JEWEL",
-        "Movie": "Keys of the Kingdom; Candy’s Dream Girl",
+        "Movie": "Keys of the Kingdom; Candy\u2019s Dream Girl",
         "_annotation": null,
         "lon": -81.5984235,
         "lat": 41.540767,
@@ -1937,7 +1907,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Jewel Theatre was a neighborhood theatre on St. Clair Avenue between Eddy Road and Shaw Avenue. It was opened by 1924 when it was operated by the Ohio Amusement Co. It was closed in the mid-1950’s, one of many theatres that lost the battle to survive in the face of the competition presented by television. I recall my mother attending “dish nights” there."
+        "Description": "The Jewel Theatre was a neighborhood theatre on St. Clair Avenue between Eddy Road and Shaw Avenue. It was opened by 1924 when it was operated by the Ohio Amusement Co. It was closed in the mid-1950\u2019s, one of many theatres that lost the battle to survive in the face of the competition presented by television. I recall my mother attending \u201cdish nights\u201d there."
       }
     },
     {
@@ -1965,7 +1935,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Knickerbocker Theatre was a fairly large neighborhood theatre. It was located in an area that was apparently not very convenient to a lot of Cleveland moviegoers – being almost midway between the downtown theatre district at Playhouse Square and the East 105th Street/Euclid Avenue theatre district to the east. In it’s earlier years, the Knickerbocker Theatre staged vaudeville shows and by 1924 it had become a movie house operated by the Ohio Amusement Co. It closed in the early 1950’s"
+        "Description": "The Knickerbocker Theatre was a fairly large neighborhood theatre. It was located in an area that was apparently not very convenient to a lot of Cleveland moviegoers \u2013 being almost midway between the downtown theatre district at Playhouse Square and the East 105th Street/Euclid Avenue theatre district to the east. In it\u2019s earlier years, the Knickerbocker Theatre staged vaudeville shows and by 1924 it had become a movie house operated by the Ohio Amusement Co. It closed in the early 1950\u2019s"
       }
     },
     {
@@ -2049,7 +2019,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Henry Hradilek",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Opened December 25, 1921 with 1,400 seats, and located on the corner of Lorain Avenue and Fulton Road on Cleveland’s west side. This was a second run neighborhood theatre. By 1957 it was operated by Modern Theaters chain."
+        "Description": "Opened December 25, 1921 with 1,400 seats, and located on the corner of Lorain Avenue and Fulton Road on Cleveland\u2019s west side. This was a second run neighborhood theatre. By 1957 it was operated by Modern Theaters chain."
       }
     },
     {
@@ -2077,7 +2047,7 @@ function theatreImageTag(theatreName) {
         "Architects": "William Koehl",
         "Firms": null,
         "Previous_Names": "Lyceum Theatre",
-        "Description": "This neighborhood theatre opened on May 25, 1920 with Clara Kimball Young in “The Forbidden Woman”. Seating was on a stadium plan, with a raised section at the rear rather than the usual overhanging balcony. It was equipped with a Hope-Jones theatre pipe organ. It was closed in the late-1960’s. By 1971 it had reopened screening Spanish Language movies. During the 1970’s the theatre was renamed Lyceum Cinema and showed porn movies. It closed in the early-1980’s. The Lyceum Theatre was later demolished and is now the site of the Fulton Branch of the Cleveland Public Library."
+        "Description": "This neighborhood theatre opened on May 25, 1920 with Clara Kimball Young in \u201cThe Forbidden Woman\u201d. Seating was on a stadium plan, with a raised section at the rear rather than the usual overhanging balcony. It was equipped with a Hope-Jones theatre pipe organ. It was closed in the late-1960\u2019s. By 1971 it had reopened screening Spanish Language movies. During the 1970\u2019s the theatre was renamed Lyceum Cinema and showed porn movies. It closed in the early-1980\u2019s. The Lyceum Theatre was later demolished and is now the site of the Fulton Branch of the Cleveland Public Library."
       }
     },
     {
@@ -2105,7 +2075,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "Liberty Theater",
-        "Description": "The Loew’s Liberty Theater was opened September 6, 1915 with Enid Bennett in “Stepping Out” plus 6 acts of vaudeville on the stage. In 1929 a Wurlitzer organ was installed. The Liberty Theater is still listed in the 1957 Film Daily Yearbook."
+        "Description": "The Loew\u2019s Liberty Theater was opened September 6, 1915 with Enid Bennett in \u201cStepping Out\u201d plus 6 acts of vaudeville on the stage. In 1929 a Wurlitzer organ was installed. The Liberty Theater is still listed in the 1957 Film Daily Yearbook."
       }
     },
     {
@@ -2133,7 +2103,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Rudolph Grosel , Paul Matzinger",
         "Firms": "Matzinger & Grosel",
         "Previous_Names": null,
-        "Description": "Replacing an earlier Madison Theatre located at 9613 Madison Avenue (it has its own page on Cinema Treasures). This ‘new’ Madison Theatre was a neighborhood theatre that opened around 1944 and closed in the mid-1980’s. It was owned by part of a syndicate who also operated the Mayland Theatre, the Lorain Fulton Theatre and the Parma Theatre among others. A lumber yard business occupies the former theatre now. The lobby was demolished, but the auditorium is being used as a storage area for lumber."
+        "Description": "Replacing an earlier Madison Theatre located at 9613 Madison Avenue (it has its own page on Cinema Treasures). This \u2018new\u2019 Madison Theatre was a neighborhood theatre that opened around 1944 and closed in the mid-1980\u2019s. It was owned by part of a syndicate who also operated the Mayland Theatre, the Lorain Fulton Theatre and the Parma Theatre among others. A lumber yard business occupies the former theatre now. The lobby was demolished, but the auditorium is being used as a storage area for lumber."
       }
     },
     {
@@ -2148,7 +2118,7 @@ function theatreImageTag(theatreName) {
       "properties": {
         "ObjectID": 72,
         "Theatre": "LYRIC",
-        "Movie": "Bahama Passage; The Sky’s the Limit",
+        "Movie": "Bahama Passage; The Sky\u2019s the Limit",
         "_annotation": null,
         "lon": -81.768235,
         "lat": 41.4618032,
@@ -2161,7 +2131,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Lyric Theater was opened February 25, 1926. It was a second or third run house located on Cleveland’s west side. It had all seats on one level. It was most noted for it’s very large marquee. The auditorium was a basic, no frills square box. The Lyric Theater was closed July 21, 1962. It was converted into a Masonic Temple."
+        "Description": "The Lyric Theater was opened February 25, 1926. It was a second or third run house located on Cleveland\u2019s west side. It had all seats on one level. It was most noted for it\u2019s very large marquee. The auditorium was a basic, no frills square box. The Lyric Theater was closed July 21, 1962. It was converted into a Masonic Temple."
       }
     },
     {
@@ -2217,7 +2187,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Sigmund Braverman , Kurt Havermaet",
         "Firms": "Braverman & Havermaet",
         "Previous_Names": null,
-        "Description": "The Moreland Theater building was opened January 12, 1928, and used initially for Vaudeville performances and a movie theater. It included a small orchestra pit, a shallow stage with a fly loft and dressing rooms in the rear. The building also housed tenant space on its second floor and along the front facade. The theater is located in Cleveland’s Buckeye neighborhood at East 119th Street and Buckeye Road, which, for a time in the first half of the 20th century, was boasted the largest population of Hungarian immigrants in the United States."
+        "Description": "The Moreland Theater building was opened January 12, 1928, and used initially for Vaudeville performances and a movie theater. It included a small orchestra pit, a shallow stage with a fly loft and dressing rooms in the rear. The building also housed tenant space on its second floor and along the front facade. The theater is located in Cleveland\u2019s Buckeye neighborhood at East 119th Street and Buckeye Road, which, for a time in the first half of the 20th century, was boasted the largest population of Hungarian immigrants in the United States."
       }
     },
     {
@@ -2245,7 +2215,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Milo Theatre opened in the 1920’s and closed in the 1950’s. A carpet cleaning business, Arsalanian Brothers, has operated out of the Milo Theatre building since the late-1950’s and was still in business until it was destroyed by a fire in May 2007. I think a barber shop was in the building at one time as well. The marquee was still intact, advertising the carpet cleaning business."
+        "Description": "The Milo Theatre opened in the 1920\u2019s and closed in the 1950\u2019s. A carpet cleaning business, Arsalanian Brothers, has operated out of the Milo Theatre building since the late-1950\u2019s and was still in business until it was destroyed by a fire in May 2007. I think a barber shop was in the building at one time as well. The marquee was still intact, advertising the carpet cleaning business."
       }
     },
     {
@@ -2329,7 +2299,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The New Broadway Theatre is listed in editions of Film Daily Yearbook from at least 1941 through to 1950 and beyond…"
+        "Description": "The New Broadway Theatre is listed in editions of Film Daily Yearbook from at least 1941 through to 1950 and beyond\u2026"
       }
     },
     {
@@ -2357,7 +2327,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The New Victory Theatre was open prior to 1925. It seated 780 and was open into the 1950’s. The abandoned building was demolished in 2020."
+        "Description": "The New Victory Theatre was open prior to 1925. It seated 780 and was open into the 1950\u2019s. The abandoned building was demolished in 2020."
       }
     },
     {
@@ -2413,7 +2383,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "This was one of two theaters in the then-Hungarian Buckeye-Shaker neighborhood on Cleveland’s east side, the other being the Moreland Theater two blocks away. It was opened before 1930 and was listed in the 1950 Film Daily Yearbook as having 1,500 seats. It closed sometime later and was demolished. Today a bank stands on the site."
+        "Description": "This was one of two theaters in the then-Hungarian Buckeye-Shaker neighborhood on Cleveland\u2019s east side, the other being the Moreland Theater two blocks away. It was opened before 1930 and was listed in the 1950 Film Daily Yearbook as having 1,500 seats. It closed sometime later and was demolished. Today a bank stands on the site."
       }
     },
     {
@@ -2441,7 +2411,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Paul Matzinger",
         "Firms": "Matzinger & Grosel",
         "Previous_Names": null,
-        "Description": "Opened on October 17, 1936 with Joan Crawford in “The Gorgeous Hussy”. This local theatre in the Cleveland suburb of Parma, Ohio was showing second run movies in 2002. By 2009, it was screening first run movies. The Parma Theatre was closed in September 2012, and the front of the building was damaged by fire in an arson attack on November 16, 2012. The entire building was demolished in December 2014."
+        "Description": "Opened on October 17, 1936 with Joan Crawford in \u201cThe Gorgeous Hussy\u201d. This local theatre in the Cleveland suburb of Parma, Ohio was showing second run movies in 2002. By 2009, it was screening first run movies. The Parma Theatre was closed in September 2012, and the front of the building was damaged by fire in an arson attack on November 16, 2012. The entire building was demolished in December 2014."
       }
     },
     {
@@ -2497,7 +2467,7 @@ function theatreImageTag(theatreName) {
         "Architects": "Sam H. Weis",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Rialto Theatre opened October 19, 1919 with Dorothy Gish in “The Girl from Outside”. It is listed as operating in editions of Film Daily Yearbook through to 1957. It was later used as a nightclub. By 2017 it was an ice-cream parlor."
+        "Description": "The Rialto Theatre opened October 19, 1919 with Dorothy Gish in \u201cThe Girl from Outside\u201d. It is listed as operating in editions of Film Daily Yearbook through to 1957. It was later used as a nightclub. By 2017 it was an ice-cream parlor."
       }
     },
     {
@@ -2525,7 +2495,7 @@ function theatreImageTag(theatreName) {
         "Architects": "William Stanley Ferguson",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Shaw-Hayden Theatre was opened on October 25, 1919 with 1,200 seats. It was a popular neighborhood theatre that survived into the late-1960’s. It’s interior was rather non-descript, having been remodeled a number of times, including one in the late-1950’s that modernized the lobby with a white wood, sort of knotty pine decor. The installation of a screen for CinemaScope removed almost all decoration around the proscenium."
+        "Description": "The Shaw-Hayden Theatre was opened on October 25, 1919 with 1,200 seats. It was a popular neighborhood theatre that survived into the late-1960\u2019s. It\u2019s interior was rather non-descript, having been remodeled a number of times, including one in the late-1950\u2019s that modernized the lobby with a white wood, sort of knotty pine decor. The installation of a screen for CinemaScope removed almost all decoration around the proscenium."
       }
     },
     {
@@ -2609,7 +2579,7 @@ function theatreImageTag(theatreName) {
         "Architects": "George Allen Grieble",
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Olympia Theatre was a neighborhood theatre, located at E. 55th Street and Broadway Avenue in Cleveland. The theatre opened around 1913 as a vaudeville house, and had operated continuously as a movie theatre until 1980, when the theatre closed. The theatre fell into disrepair, and when the Olympia Building was renovated in the 1980’s as apartments and doctors' offices, the auditorium was demolished to make way for off-street parking for the apartments, but the lobby is still there. No renovation was done to the lobby since the theatre closed. In 2001 the Olympia Theatre was known as the ‘Luce Theatre’ when the film “Welcome To Collinwood” was shot in the East 55th/Broadway neighborhood."
+        "Description": "The Olympia Theatre was a neighborhood theatre, located at E. 55th Street and Broadway Avenue in Cleveland. The theatre opened around 1913 as a vaudeville house, and had operated continuously as a movie theatre until 1980, when the theatre closed. The theatre fell into disrepair, and when the Olympia Building was renovated in the 1980\u2019s as apartments and doctors' offices, the auditorium was demolished to make way for off-street parking for the apartments, but the lobby is still there. No renovation was done to the lobby since the theatre closed. In 2001 the Olympia Theatre was known as the \u2018Luce Theatre\u2019 when the film \u201cWelcome To Collinwood\u201d was shot in the East 55th/Broadway neighborhood."
       }
     },
     {
@@ -2637,7 +2607,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "King Theatre",
-        "Description": "The Sunbeam Theatre was open prior to 1925. It seated 700 and was operating into the late-1940’s (no longer listed in 1948). By 1950 it had been renamed King Theatre, which operated into the 1960’s. The site is now a Baptist Church."
+        "Description": "The Sunbeam Theatre was open prior to 1925. It seated 700 and was operating into the late-1940\u2019s (no longer listed in 1948). By 1950 it had been renamed King Theatre, which operated into the 1960\u2019s. The site is now a Baptist Church."
       }
     },
     {
@@ -2665,7 +2635,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Superior Theatre was open prior to 1925. It seated 525 and was open into the 1950’s. The building is now a church."
+        "Description": "The Superior Theatre was open prior to 1925. It seated 525 and was open into the 1950\u2019s. The building is now a church."
       }
     },
     {
@@ -2693,7 +2663,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "This theater was located in Cleveland’s Mt. Pleasant area, and appears to have been active in the period from about 1930 until 1950."
+        "Description": "This theater was located in Cleveland\u2019s Mt. Pleasant area, and appears to have been active in the period from about 1930 until 1950."
       }
     },
     {
@@ -2749,7 +2719,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "Located at Union Avenue and E. 116th Street. The Union Square Theater was opened in 1927. It was equipped with a Wurlitzer 2 manual 9 ranks organ. The organ was removed in 1934 and transfered to the De Luxe Theatre, Gloucester, England, UK. It was destroyed in 1939 when the De Luxe Theatre lost to a fire. My family attended this theater in the early-1950’s and it was still open in 1957. Not to be confused with a smaller theater named Union Theatre at E. 105th Street and Union Avenue."
+        "Description": "Located at Union Avenue and E. 116th Street. The Union Square Theater was opened in 1927. It was equipped with a Wurlitzer 2 manual 9 ranks organ. The organ was removed in 1934 and transfered to the De Luxe Theatre, Gloucester, England, UK. It was destroyed in 1939 when the De Luxe Theatre lost to a fire. My family attended this theater in the early-1950\u2019s and it was still open in 1957. Not to be confused with a smaller theater named Union Theatre at E. 105th Street and Union Avenue."
       }
     },
     {
@@ -2777,7 +2747,7 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": null,
-        "Description": "The Yale Theatre was open prior to 1924 when it was operated by the Ohio Amusement Co. It seated 800 and was open into the 1950’s. The site is now a vacant lot."
+        "Description": "The Yale Theatre was open prior to 1924 when it was operated by the Ohio Amusement Co. It seated 800 and was open into the 1950\u2019s. The site is now a vacant lot."
       }
     },
     {
@@ -2805,438 +2775,308 @@ function theatreImageTag(theatreName) {
         "Architects": null,
         "Firms": null,
         "Previous_Names": "Paris Arts Theatre Picture Show",
-        "Description": "Originally called the Southern Theatre, it opened in 1918, showing westerns and comedies. It was operated by the Ohio Amusement Co. by 1929. It was renamed the Paris Arts Theatre Picture Show about 1967, when it began showing X-rated movies. The name was shortened later to the Paris Art Theatre. It closed in the late-1990’s."
+        "Description": "Originally called the Southern Theatre, it opened in 1918, showing westerns and comedies. It was operated by the Ohio Amusement Co. by 1929. It was renamed the Paris Arts Theatre Picture Show about 1967, when it began showing X-rated movies. The name was shortened later to the Paris Art Theatre. It closed in the late-1990\u2019s."
       }
     }
   ]
-}</script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-    const FC = JSON.parse(document.getElementById('data').textContent);
-
-    const ANNO_KEY = 'theatreAnnotations_nocluster_films_colored_v2';
-    let annotations = {}
-    try { annotations = JSON.parse(localStorage.getItem(ANNO_KEY) || '{}'); } catch { annotations = {}; }
-    function saveAnno() { localStorage.setItem(ANNO_KEY, JSON.stringify(annotations)); }
-
-    
-    // ==== Dual-color icon: white foreground over colored circular background ====
-
-    const ICON_SIZE = 40;
-    const RAW_SVG = "<?xml version=\"1.0\" standalone=\"no\"?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 20010904//EN\"\n \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">\n<svg version=\"1.0\" xmlns=\"http://www.w3.org/2000/svg\"\n width=\"300.000000pt\" height=\"300.000000pt\" viewBox=\"0 0 300.000000 300.000000\"\n preserveAspectRatio=\"xMidYMid meet\">\n<metadata>\nCreated by potrace 1.10, written by Peter Selinger 2001-2011\n</metadata>\n<g transform=\"translate(0.000000,300.000000) scale(0.050000,-0.050000)\"\nfill=\"#000000\" stroke=\"none\">\n<path d=\"M526 5957 c-192 -65 -339 -195 -436 -385 l-80 -157 0 -2413 0 -2412\n64 -134 c103 -218 263 -352 505 -424 149 -44 4666 -49 4831 -5 235 63 413 210\n516 429 l64 134 0 2410 0 2410 -63 132 c-87 185 -184 284 -363 373 l-152 75\n-2381 4 c-2368 5 -2382 4 -2505 -37z m2934 -683 c0 -15 -31 -161 -68 -325 -38\n-165 -93 -420 -122 -569 -29 -148 -57 -286 -63 -306 -9 -31 -33 -35 -222 -30\nl-212 6 -94 460 c-83 402 -135 632 -171 755 -10 33 22 35 471 35 383 0 481 -5\n481 -26z m444 -380 c32 -4 31 -12 -8 -94 -23 -49 -103 -238 -177 -420 l-136\n-330 -142 -6 c-77 -3 -141 1 -141 9 0 49 186 839 200 847 15 9 319 5 404 -6z\nm-1325 -399 c48 -223 88 -414 89 -425 1 -12 -56 -20 -137 -20 l-138 0 -40 100\nc-22 55 -97 235 -168 400 -71 165 -133 311 -139 325 -8 19 43 25 218 25 l229\n0 86 -405z m-513 100 c6 -14 60 -139 120 -279 124 -287 124 -276 -19 -276\n-101 0 -109 4 -154 75 -79 126 -293 488 -293 497 0 22 336 6 346 -17z m2153\n-50 c-25 -41 -101 -169 -169 -285 l-123 -210 -96 -6 c-173 -11 -175 -33 47\n481 l41 95 172 0 173 0 -45 -75z m211 -1105 l0 -510 -1445 -5 -1445 -5 0 520\n0 520 1445 -5 1445 -5 0 -510z m-2970 10 l0 -70 -610 0 -610 0 0 70 0 70 610\n0 610 0 0 -70z m4280 0 l0 -70 -609 0 c-563 0 -609 3 -616 35 -23 108 -40 105\n617 105 l608 0 0 -70z m-4276 -404 l6 -213 370 -275 370 -275 773 -2 773 -1\n382 282 382 282 0 208 0 208 540 0 540 0 0 -1140 0 -1140 -910 0 -910 0 0 450\n0 450 -230 0 -230 0 0 -450 0 -450 -50 0 -50 0 0 450 0 450 -230 0 -230 0 0\n-450 0 -450 -50 0 -49 0 -6 445 -5 445 -230 0 -230 0 -5 -445 -6 -445 -899 0\n-900 0 0 1140 0 1140 539 0 540 0 5 -214z m4276 -2256 l0 -70 -2750 0 -2750 0\n0 70 0 70 2750 0 2750 0 0 -70z\"/>\n</g>\n</svg>\n";
-    function extractViewBox(svg){
-      const m = svg.match(/viewBox\s*=\s*["']\s*([-.\d]+)\s+([-.\d]+)\s+([-.\d]+)\s+([-.\d]+)\s*["']/i);
-      if (!m) return null;
-      return {minx: parseFloat(m[1]), miny: parseFloat(m[2]), w: parseFloat(m[3]), h: parseFloat(m[4])};
-    }
-    function stripOuterSvg(svg){
-      svg = svg.replace(/<\?xml[\s\S]*?\?>/g, '').replace(/<!DOCTYPE[\s\S]*?>/gi, '');
-      const m = svg.match(/<svg[^>]*>([\s\S]*?)<\/svg>/i);
-      return m ? m[1] : svg;
-    }
-    function composeIcon(bgColor){
-      const vb = extractViewBox(RAW_SVG) || {minx:0, miny:0, w:24, h:24};
-      const inner = stripOuterSvg(RAW_SVG);
-      const ICON_SIZE = 40, PAD = 4, INNER = ICON_SIZE - PAD*2;
-      const scale = Math.min(INNER / vb.w, INNER / vb.h);
-      const tx = (ICON_SIZE - vb.w*scale)/2 - vb.minx*scale;
-      const ty = (ICON_SIZE - vb.h*scale)/2 - vb.miny*scale;
-      const svg =
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${ICON_SIZE}" height="${ICON_SIZE}" viewBox="0 0 ${ICON_SIZE} ${ICON_SIZE}">` +
-          `<circle cx="${ICON_SIZE/2}" cy="${ICON_SIZE/2}" r="${(ICON_SIZE/2)-2}" fill="${bgColor}"/>` +
-          `<g transform="translate(${tx.toFixed(3)} ${ty.toFixed(3)}) scale(${scale.toFixed(5)})" fill="#ffffff" stroke="#ffffff">` +
-            inner +
-          `</g>` +
-        `</svg>`;
-      const encoded = encodeURIComponent(svg).replace(/'/g, '%27').replace(/"/g, '%22');
-      return `data:image/svg+xml;charset=utf-8,${encoded}`;
-    }
-    function makeIcon(color){
-      return L.icon({
-        iconUrl: composeIcon(color),
-        iconSize: [ICON_SIZE, ICON_SIZE],
-        iconAnchor: [ICON_SIZE/2, ICON_SIZE - 6],
-        popupAnchor: [0, -(ICON_SIZE/2 - 6)],
-        className: 'theatre-icon'
-      });
-    }
-    const ICON_OPEN   = makeIcon('#16a34a');
-    const ICON_CLOSED = makeIcon('#dc2626');
-    const ICON_UNKNOWN= makeIcon('#64748b');
-// slate-500
-
-    function keyFor(feat, idx) { const p=feat.properties||{}; return (p.ObjectID ?? p.id ?? idx); }
-    function esc(s) { if (s==null) return ''; return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-    function notesToHtml(s) { return esc(s).replace(/\n/g,'<br>'); }
-    function detailKeysFrom(feat) {
-      const p = feat.properties || {};
-      const exclude = new Set(['Theatre','Theater','Name','Movie','CT_Address','Address','CT_Source','CT_Status','CT_Screens','CT_Seats','ObjectID','id','_annotation','URL','ECH_Source','lon','lat','RL','Status','CT_Status','Description','Description_Long','Description Long','desc']);
-      return Object.keys(p).filter(k => !exclude.has(k)).sort();
-    }
-    function parseFilms(str) { if (!str) return []; return String(str).split(';').map(s => s.trim()).filter(Boolean); }
-    function filmsHtml(list) { if (!list.length) return ''; const chips = list.map(f => `<span class="badge">${esc(f)}</span>`).join(''); return `<div class="badges" aria-label="Films">${chips}</div>`; }
-
-    function popupHtml(feat, idx) {
-      const p=feat.properties||{};
-      const key = String(keyFor(feat, idx));
-      const anno = annotations[key] || {};
-      const title = anno.title || p.Theatre || p.Theater || p.Name || '(Unknown theatre)';
-      const films = parseFilms(anno.film || p.Movie || '');
-      const address = anno.address || p.CT_Address || p.Address || '';
-      const notesHtml = anno.notes ? `<div class="small" style="margin-top:6px">${notesToHtml(anno.notes)}</div>` : '';
-      
-      const imgAuto = theatreImageTag(title);
-let imgs='';
-      if (anno.images && Array.isArray(anno.images)) { imgs = anno.images.filter(Boolean).slice(0,4).map(u=>`<img src="${esc(u)}" style="width:100%;max-height:220px;object-fit:cover;border-radius:8px;margin-top:6px">`).join(''); }
-      const rows = detailKeysFrom(feat).map(k=>`<tr><th>${esc(k)}</th><td>${esc(p[k])}</td></tr>`).join('');
-      const details = rows ? `<table class="details-table">${rows}</table>` : '';
-      return `
-        <div style="min-width:280px">
-          <div style="display:flex;align-items:center;gap:8px">
-  <div style="font-weight:700;font-size:14px">${esc(title)}</div>
-  <div class="status-text" style="margin-left:auto;font-weight:600;color:${statusColor((feat && feat.properties && (feat.properties.CT_Status||feat.properties.Status)) || (p && (p.CT_Status||p.Status)) || "Unknown")}">${(feat && feat.properties && (feat.properties.CT_Status||feat.properties.Status)) || (p && (p.CT_Status||p.Status)) || "Unknown"}</div>
-</div>
-          ${films.length ? `<div class="small">Films:</div>${filmsHtml(films)}` : ''}
-          ${(() => {
-  const desc = (p && (p.Description_Long || p.Description || p["Description Long"])) 
-            || (feat && feat.properties && (feat.properties.Description_Long || feat.properties.Description || feat.properties["Description Long"])) 
-            || "";
-  return desc ? `<div class="small" style="margin-top:6px">${esc(desc)}</div>` : '';
-})()}
-          ${notesHtml}
-          ${imgs}
-          ${imgAuto}
-          ${details}
-        </div>`;
-    }
-    function tmplItem(feat, idx) {
-      const key=String(keyFor(feat, idx));
-      const p=feat.properties||{}; const anno=annotations[key]||{};
-      const title=anno.title||p.Theatre||p.Theater||p.Name||'(Unknown theatre)';
-      const addr=anno.address||p.CT_Address||p.Address||'';
-      return `<div class="item" data-key="${key}"><div><span class="title">${statusDot((p && (p.CT_Status||p.Status)) || (feat && feat.properties && (feat.properties.CT_Status||feat.properties.Status)))}${esc(title)}</span></div><div class="small">${esc(truncateText(
-  (p && (p.Description || p["Description"] || p.Description_Long || p["Description Long"])) ||
-  (feat && feat.properties && (feat.properties.Description || feat.properties["Description"] || feat.properties.Description_Long || feat.properties["Description Long"])) ||
-  ""
-))}</div></div>`;
-    }
-    function attachListHandlers(wrapper) {
-      wrapper.querySelectorAll('[data-key]').forEach(el=>{
-        el.addEventListener('click',e=>{ if(e.target.closest('[data-edit]')) return; selectByKey(el.getAttribute('data-key'), true); });
-      });
-      wrapper.querySelectorAll('[data-edit]').forEach(el=>{
-        el.addEventListener('click',e=>{ e.preventDefault(); openEditorFor(el.getAttribute('data-edit')); });
-      });
-    }
-
-    const map = L.map('map');
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
-    const indexByKey=new Map();
-
-    const listEl=document.getElementById('list');
-    const filterEl=document.getElementById('filter');
-    const statusEl=document.getElementById('status');
-    const edTitle=document.getElementById('edTitle');
-    const edFilm=document.getElementById('edFilm');
-    const edAddress=document.getElementById('edAddress');
-    const edNotes=document.getElementById('edNotes');
-    const edImages=document.getElementById('edImages');
-    const saveEdit=document.getElementById('saveEdit');
-    const openPopupBtn=document.getElementById('openPopup');
-    const clearEdit=document.getElementById('clearEdit');
-    let selectedKey=null;
-
-    function selectByKey(key,openPopup=false){
-      selectedKey=String(key);
-      const entry=indexByKey.get(selectedKey); if(!entry) return;
-      map.flyTo(entry.marker.getLatLng(),Math.max(map.getZoom(),15),{duration:0.7});
-      if(openPopup) entry.marker.openPopup();
-      loadEditor(selectedKey);
-    }
-    function loadEditor(key){
-      const anno=annotations[String(key)]||{};
-      edTitle.value=anno.title||''; edFilm.value=Array.isArray(anno.films) ? anno.films.join('; ') : (anno.film||''); edAddress.value=anno.address||'';
-      edNotes.value=anno.notes||''; edImages.value=(anno.images||[]).join('\n');
-    }
-    function openEditorFor(key){ selectedKey=String(key); loadEditor(selectedKey); }
-    function updatePopup(key){ const e=indexByKey.get(String(key)); if(e) e.marker.setPopupContent(popupHtml(e.feat,e.idx)); }
-
-    (function(){const _el=document.getElementById('exportAnno'); if(_el) _el.addEventListener('click', ()=>{
-const blob=new Blob([JSON.stringify(annotations,null,2)],{type:'application/json'});})();
-      const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='theatre_annotations.json'; document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
-    });
-    (function(){const _el=document.getElementById('importAnno'); if(_el) _el.addEventListener('change', e=>{
-const f=e.target.files[0]; if(!f) return; const reader=new FileReader();})();
-      reader.onload=()=>{ try{ const obj=JSON.parse(reader.result); if(obj&&typeof obj==='object'){ annotations=obj; saveAnno(); indexByKey.forEach((v,k)=>updatePopup(k)); } } catch{ alert('Invalid JSON'); } };
-      reader.readAsText(f); e.target.value='';
-    });
-    (function(){const _el=document.getElementById('exportGeo'); if(_el) _el.addEventListener('click', ()=>{
-const out={type:'FeatureCollection',features:[]};
-indexByKey.forEach((value,key)=>{ const cp=JSON.parse(JSON.stringify(value.feat));})(); const anno=annotations[String(key)]||undefined; if(anno) cp.properties=Object.assign({},cp.properties||{},{_annotation:anno}); out.features.push(cp); });
-      const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='info_with_annotations.geojson'; document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
-    });
-
-    filterEl.addEventListener('input',()=>{
-      const q=filterEl.value.trim().toLowerCase();
-      for(const child of listEl.children) child.style.display='';
-      if(!q) return;
-      for(const child of listEl.children){ if(!child.textContent.toLowerCase().includes(q)) child.style.display='none'; }
-    });
-
-    // Legend
-    (function legend(){
-      const el=document.getElementById('legend');
-      const img=(c)=>{ const u=composeIcon(c); return `<img src=\"${u}\" alt=\"\">`; };
-      el.innerHTML = `
-        <div class="row">${img('#16a34a')} <span>Open</span></div>
-        <div class="row">${img('#dc2626')} <span>Closed</span></div>
-        <div class="row">${img('#64748b')} <span>Unknown</span></div>
-      `;
-    })();
-
-    (function init(){
-      listEl.innerHTML=''; indexByKey.clear();
-      const b=L.latLngBounds([]); let placed=0;
-      (FC.features||[]).forEach((feat,idx)=>{
-        const g=feat.geometry; if(!g||g.type!=='Point'||!Array.isArray(g.coordinates)) return;
-        feat.__idx=idx;
-        const latlng=[g.coordinates[1],g.coordinates[0]];
-        const p=feat.properties||{};
-        const st=(p.CT_Status||p.status||p.Status||'').toString().toLowerCase().trim();
-        let icon = ICON_UNKNOWN;
-        if (st === 'open') icon = ICON_OPEN;
-        else if (st === 'closed') icon = ICON_CLOSED;
-
-        const m=L.marker(latlng, { icon });
-        m.bindPopup(popupHtml(feat,idx));
-        m.on('popupopen',e=>{ const a=e.popup.getElement().querySelector('[data-edit]'); if(a) a.addEventListener('click',evt=>{evt.preventDefault(); openEditorFor(String(keyFor(feat,idx)));}); });
-        m.addTo(map);
-        const key=String(keyFor(feat,idx)); indexByKey.set(key,{marker:m,feat,idx});
-        const div=document.createElement('div'); div.innerHTML=tmplItem(feat,idx); const el=div.firstElementChild; el.setAttribute('data-key',key); listEl.appendChild(el); attachListHandlers(listEl);
-        b.extend(latlng); placed++;
-      });
-      if(b.isValid()) map.fitBounds(b.pad(0.15)); else map.setView([41.4993,-81.6944],12);
-      statusEl.textContent=`Loaded ${placed} markers.`;
-    })();
+}
   </script>
-<script>
-(function(){
-  const HIDE = new Set(['url','ech_source','ech source','lon','long','longitude','lat','latitude','rl','status','ct_status','ct status','description','description_long','description long','desc']);
-  function sanitize(root){
-    if(!root) return;
-    root.querySelectorAll('table tr').forEach(tr=>{
-      const th = tr.querySelector('th, .label, .key'); if(!th) return;
-      const k = th.textContent.trim().toLowerCase().replace(/:$/,'');
-      if(HIDE.has(k)) tr.remove();
-    });
-    root.querySelectorAll('[data-field]').forEach(el=>{
-      const k = (el.getAttribute('data-field')||'').trim().toLowerCase();
-      if(HIDE.has(k)) el.remove();
-    });
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+  // --- Utilities ---
+  function statusColor(status){ const s=String(status||'').toLowerCase().trim(); if(s==='open') return '#16a34a'; if(s==='closed') return '#dc2626'; return '#64748b'; }
+  function statusDot(status){ return '<span class="status-dot" style="display:inline-block;width:10px;height:10px;border-radius:999px;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,.15);background:'+statusColor(status)+';"></span>'; }
+  const slugify = s => String(s||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+
+  const knownImages = {
+  "LOEW'S STATE": "images/LOEWS_STATE.jpg",
+  "WIND-A-MERE": "images/WIND-A-MERE.jpg",
+  "MALL": "images/MALL.jpg",
+  "MAPLETOWN": "images/MAPLETOWN.jpg",
+  "LOEW'S OHIO": "images/LOEWS_OHIO.jpg",
+  "HIPPODROME": "images/HIPPODROME.jpg",
+  "CARTER": "images/CARTER.jpg",
+  "STANDARD": "images/STANDARD.jpg",
+  "LAKE": "images/LAKE.jpg",
+  "EMBASSY": "images/EMBASSY.jpg",
+  "TELENEWS": "images/TELENEWS.jpg",
+  "ALHAMBRA": "images/ALHAMBRA.jpg",
+  "LOEW'S PARK": "images/LOEWS_PARK.jpg",
+  "RKO KEITH'S 105TH": "images/RKO_KEITHS_105TH.jpg",
+  "LOEW'S GRANADA": "images/LOEWS_GRANADA.jpg",
+  "CIRCLE": "images/CIRCLE.jpg",
+  "METROPOLITAN": "images/METROPOLITAN.jpg",
+  "UNIVERSITY": "images/UNIVERSITY.jpg",
+  "COLONY": "images/COLONY.jpg",
+  "UPTOWN": "images/UPTOWN.jpg",
+  "SHAKER": "images/SHAKER.jpg",
+  "RIVERSIDE": "images/RIVERSIDE.png",
+  "FAIRMOUNT": "images/FAIRMOUNT.jpg",
+  "ABBY": "images/ABBY.jpg",
+  "ASTOR": "images/ASTOR.jpg",
+  "GLOBE": "images/GLOBE.jpg",
+  "SHORE": "images/SHORE.jpg",
+  "DOAN": "images/DOAN.jpg",
+  "LORAIN": "images/LORAIN.png",
+  "CROWN": "images/CROWN.jpg",
+  "MARVEL": "images/MARVEL.jpg",
+  "HOUGH": "images/HOUGH.png",
+  "REX": "images/REX.jpg",
+  "HALTNORTH": "images/HALTNORTH.jpg",
+  "STILLWELL": "images/STILLWELL.jpg",
+  "ROYAL": "images/ROYAL.jpg",
+  "STORK": "images/STORK.jpg",
+  "RIDGE": "images/RIDGE.jpg",
+  "AMBASSADOR": "images/AMBASSADOR.jpg",
+  "ALMIRA": "images/ALMIRA.jpg",
+  "AVALON": "images/AVALON.jpg",
+  "BEACH CLIFF": "images/BEACH_CLIFF.jpg",
+  "BROADVUE": "images/BROADVUE.jpg",
+  "CAPITOL": "images/CAPITOL.jpg",
+  "CEDAR-LEE": "images/CEDAR-LEE.jpg",
+  "CENTER-MAYFIELD": "images/CENTER-MAYFIELD.jpg",
+  "CORLETT": "images/CORLETT.jpg",
+  "COMMODORE": "images/COMMODORE.jpg",
+  "ECLAIR": "images/ECLAIR.jpg",
+  "DETROIT": "images/DETROIT.jpg",
+  "EUCLID": "images/EUCLID.jpg",
+  "EZELLA": "images/EZELLA.jpg",
+  "HILLARD SQUARE": "images/HILLARD_SQUARE.jpg",
+  "GRAND": "images/GRAND.jpg",
+  "IMPERIAL": "images/IMPERIAL.jpg",
+  "HEIGHTS": "images/HEIGHTS.jpg",
+  "HOMESTEAD": "images/HOMESTEAD.png",
+  "JENNINGS": "images/JENNINGS.jpg",
+  "LA SALLE": "images/LA_SALLE.jpg",
+  "JEWEL": "images/JEWEL.jpg",
+  "KNICKERBOCKER": "images/KNICKERBOCKER.jpg",
+  "LEXINGTON": "images/LEXINGTON.jpg",
+  "LINCOLN": "images/LINCOLN.jpg",
+  "LORAIN-FULTON": "images/LORAIN-FULTON.jpg",
+  "LYCEUM": "images/LYCEUM.jpg",
+  "LIBERTY": "images/LIBERTY.jpg",
+  "MADISON": "images/MADISON.jpg",
+  "LYRIC": "images/LYRIC.jpg",
+  "MORELAND": "images/MORELAND.jpg",
+  "MILO": "images/MILO.jpg",
+  "MT. PLEASANT": "images/MT_PLEASANT.jpg",
+  "NORVAL": "images/NORVAL.jpg",
+  "NEW-BROADWAY": "images/NEW-BROADWAY.jpg",
+  "NEW VICTORY": "images/NEW_VICTORY.jpg",
+  "NORWOOD": "images/NORWOOD.jpg",
+  "REGENT": "images/REGENT.jpeg",
+  "PARMA": "images/PARMA.jpg",
+  "PLAZA": "images/PLAZA.jpg",
+  "RIALTO": "images/RIALTO.png",
+  "SHAW-HAYDEN": "images/SHAW-HAYDEN.jpg",
+  "SUN": "images/SUN.jpg",
+  "OLYMPIA": "images/OLYMPIA.jpg",
+  "SUNBEAM": "images/SUNBEAM.jpg",
+  "SUPERIOR": "images/SUPERIOR.png",
+  "WALDORF": "images/WALDORF.jpg",
+  "UNION": "images/UNION.jpg",
+  "UNION SQUARE": "images/UNION_SQUARE.jpg",
+  "YALE": "images/YALE.jpg",
+  "SOUTHERN": "images/SOUTHERN.jpg"
+};
+
+// Normalize titles for tolerant lookups (fold curly quotes, strip punctuation/case)
+function normalizeTitle(s){
+  try {
+    return String(s || '')
+      .normalize('NFKD')
+      .replace(/[’‘`´]/g, "'")
+      .replace(/&amp;/g, "&")
+      .replace(/[^a-z0-9]+/gi, " ")
+      .trim()
+      .toLowerCase();
+  } catch (e) {
+    return String(s || '').toLowerCase();
   }
-  if (typeof map !== 'undefined' && map && typeof map.on === 'function') {
-    map.on('popupopen', function(e){
-      try{
-        const el = e.popup && e.popup.getElement();
-        const content = el && el.querySelector('.leaflet-popup-content');
-        sanitize(content || el);
-      }catch(_){}
-    });
+}
+// Precompute a normalized lookup map from knownImages
+const knownImagesNorm = (() => {
+  const obj = {};
+  for (const [k, v] of Object.entries(knownImages)) {
+    obj[normalizeTitle(k)] = v;
   }
+  return obj;
 })();
-</script>
-<script>
-// Enhanced: remove any details rows with empty values (Architects/Firms/Operated_By etc.)
-(function(){
-  const HIDE_KEYS = new Set(['url','ech_source','ech source','lon','long','longitude','lat','latitude','rl','status','ct_status','ct status']);
-  const BLANK_RE = /^(?:\s*|n\/a|none|null|undefined|—|-|–|tbd|unknown)$/i;
 
-  function stripEmptyDetails(root){
-    if(!root) return;
-    // 1) Table rows: remove if value cell empty/placeholder
-    root.querySelectorAll('table tr').forEach(tr => {
-      const th = tr.querySelector('th, .label, .key');
-      const td = tr.querySelector('td, .value, .val');
-      const key = th ? (th.textContent||'').trim().toLowerCase().replace(/:$/,'') : '';
-      const val = td ? (td.textContent||'').replace(/\u00A0/g,' ').trim() : '';
-      if (HIDE_KEYS.has(key)) { tr.remove(); return; }
-      if (!val || BLANK_RE.test(val)) { tr.remove(); }
-    });
 
-    // 2) data-field rows (generic key/value blocks)
-    root.querySelectorAll('[data-field]').forEach(el => {
-      const key = (el.getAttribute('data-field')||'').trim().toLowerCase();
-      const txt = (el.textContent||'').trim();
-      if (HIDE_KEYS.has(key) || !txt || BLANK_RE.test(txt)) el.remove();
-    });
-
-    // 3) Definition lists (dt/dd)
-    root.querySelectorAll('dl').forEach(dl => {
-      dl.querySelectorAll('dt').forEach(dt => {
-        const dd = dt.nextElementSibling;
-        const val = dd ? (dd.textContent||'').trim() : '';
-        if (!val || BLANK_RE.test(val)) {
-          if (dd) dd.remove();
-          dt.remove();
-        }
-      });
-      // remove empty dl
-      if (!dl.querySelector('dt')) dl.remove();
-    });
-
-    // 4) Generic empty blocks cleanup (div/p/span with only whitespace)
-    root.querySelectorAll('div, p, span, li').forEach(el => {
-      const txt = (el.textContent||'').trim();
-      // If element is a label-only row (e.g., has strong/b tag but no value), remove it.
-      const hasValueChild = el.querySelector('td, .value, .val, dd');
-      if ((!txt || BLANK_RE.test(txt)) && !hasValueChild) {
-        el.remove();
-      }
-    });
-  }
-
-  if (typeof map !== 'undefined' && map && typeof map.on === 'function') {
-    map.on('popupopen', function(e){
-      try{
-        const el = e.popup && e.popup.getElement();
-        const content = el && el.querySelector('.leaflet-popup-content');
-        stripEmptyDetails(content || el);
-      }catch(_){}
-    });
-  }
-})();
-</script>
-<script>
-// Dedupe popup description: keep the LONG version, remove shorter/truncated duplicates
-(function(){
-  function norm(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
-  function dedupeDescription(e){
-    try{
-      const src = e && e.popup && e.popup._source;
-      const feat = src && (src.feature || (src.layer && src.layer.feature));
-      const p = feat && feat.properties || {};
-      const long = norm(p.Description_Long || p.Description || '');
-      if(!long || long.length < 40) return; // nothing usable
-
-      const popupEl = e.popup && e.popup.getElement();
-      const container = (popupEl && popupEl.querySelector('.leaflet-popup-content')) || popupEl;
-      if(!container) return;
-
-      // Find all text blocks in popup that look like description fragments
-      const blocks = Array.from(container.querySelectorAll('p, div, span, li'))
-        .filter(el => {
-          const t = norm(el.textContent);
-          // skip films list, titles, labels
-          if (!t || t.length < 30) return false;
-          if (/^films\s*:/i.test(t)) return false;
-          if (/^(architects|firms|operated[_\s-]?by)\s*:?/i.test(t)) return false;
-          if (/^(open|closed|demolished|restoration|church)$/i.test(t)) return false;
-          return long.startsWith(t) || t.startsWith(long) || long.includes(t.slice(0, 40));
-        })
-        .map(el => ({el, text: norm(el.textContent)}));
-
-      if(blocks.length < 2) return;
-
-      // Keep the block with the longest overlap with `long`, remove shorter prefix-like ones
-      blocks.sort((a,b)=> b.text.length - a.text.length);
-      const keep = blocks[0];
-      for(let i=1;i<blocks.length;i++){
-        const t = blocks[i].text;
-        // if it's a prefix of the long text or much shorter duplicate, remove it
-        if (long.startsWith(t) || keep.text.startsWith(t) || t.length < keep.text.length*0.85){
-          blocks[i].el.remove();
-        }
-      }
-    }catch(_){}
-  }
-  if (typeof map !== 'undefined' && map && typeof map.on === 'function') {
-    map.on('popupopen', dedupeDescription);
-  }
-})();
-</script>
-<script>
-// Ensure popup shows FULL Description_Long (no truncation/clamp)
-(function(){
-  function getPropsFromEvent(e){
-    try{
-      const src = e && e.popup && e.popup._source;
-      const f = src && (src.feature || (src.layer && src.layer.feature));
-      return f && f.properties || {};
-    }catch(_){}
-    return null;
-  }
-  function unclamp(el){
-    if(!el) return;
-    el.style.whiteSpace = 'normal';
-    el.style.overflow = 'visible';
-    el.style.textOverflow = 'unset';
-    el.style.maxHeight = 'none';
-    el.style.display = 'block';
-  }
-  function applyFullDescription(e){
-    const p = getPropsFromEvent(e);
-    if(!p) return;
-    const long = (p.Description_Long || p.Description || '').toString().trim();
-    if(!long) return;
-
-    const popupEl = e.popup && e.popup.getElement();
-    const container = (popupEl && popupEl.querySelector('.leaflet-popup-content')) || popupEl;
-    if(!container) return;
-
-    // Candidates: any blocks in popup that already hold description text
-    const blocks = Array.from(container.querySelectorAll('p,div,span'))
-      .filter(node => {
-        const t = (node.textContent||'').trim();
-        if (!t) return false;
-        // must have some overlap with the long description
-        return long.startsWith(t) || t.startsWith(long) || long.includes(t.slice(0, 60));
-      });
-
-    if (blocks.length) {
-      // Use the **first** match as the real description container, replace with full text
-      const main = blocks[0];
-      main.textContent = long;
-      unclamp(main);
-      // Remove any other duplicates
-      for (let i=1;i<blocks.length;i++) {
-        if (blocks[i] !== main) blocks[i].remove();
-      }
-    } else {
-      // If no block found, insert one just below the films/title area
-      const titleRow = container.querySelector('div[style*="display:flex"][style*="gap:8px"]');
-      const host = titleRow ? titleRow.parentElement : container;
-      const d = document.createElement('div');
-      d.textContent = long;
-      d.style.margin = '6px 0';
-      d.style.fontSize = '13px';
-      host.insertBefore(d, titleRow ? titleRow.nextSibling : host.firstChild);
+  // Force-resolve images onto the data so popups never fall back to slugs
+  function applyKnownImagesToData(fc) {
+    if (!fc || !Array.isArray(fc.features)) return;
+    for (const feat of fc.features) {
+      const props = (feat && feat.properties) || {};
+      const name = props.Theatre || props.Theater || props.Name || '';
+      const norm = normalizeTitle(name);
+      const src = (name && (knownImages[name] || knownImagesNorm[norm])) || null;
+      if (src) props.Image = src;
     }
   }
-  if (typeof map !== 'undefined' && map && typeof map.on === 'function') {
-    map.on('popupopen', function(e){ try{ applyFullDescription(e); }catch(_){ } });
-  }
-})();
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  var btn = document.getElementById('homeBtn');
-  if(!btn) return;
-  btn.addEventListener('click', function(){
-    try{
-      if (window.map && typeof map.setView === 'function'){
-        // Downtown Cleveland center; tweak zoom if you prefer
-        map.setView([41.4993, -81.6944], 12);
-        if (typeof map.closePopup === 'function') map.closePopup();
-      } else if (window._map && typeof _map.setView === 'function'){
-        _map.setView([41.4993, -81.6944], 12);
-        if (typeof _map.closePopup === 'function') _map.closePopup();
-      } else {
-        console.warn('Map object not found (expected "map" or "_map").');
-      }
-    }catch(e){
-      console.error('Home View error:', e);
+
+function imageHTML(props){
+    if (props && props.Image) {
+      return '<div class="popup-imgwrap"><img class="popup-img" src="'+props.Image+'" alt="'+(props.Theatre||'image')+'"></div>';
     }
-  });
+    const name = props && (props.Theatre || props.Theater || props.Name) || '';
+    if (!name) return '';
+    const slug = slugify(name);
+    return '<div class="popup-imgwrap">      <img class="popup-img" alt="'+name+'"           src="images/'+slug+'.webp"           onerror="if(this.dataset.try!==\'1\'){this.dataset.try=\'1\'; this.src=\'images/'+slug+'.jpg\';}                    else if(this.dataset.try!==\'2\'){this.dataset.try=\'2\'; this.src=\'images/'+slug+'.png\';}                    else { this.style.display=\'none\'; }">    </div>';
+  }
+
+  
+  function popupHTML(props){
+    const title = props.Theatre || props.Theater || props.Name || '(Unknown theatre)';
+    const addr  = props.CT_Address || props.Address || '';
+    const desc  = props.Description || '';
+
+    // Flexible field lookups
+    const architects = props.Architects || props.Architect || props.Architecture || '';
+    const operator   = props.Operator || props.Operators || '';
+    const seats      = props.Seats || props.Seating || props.Capacity || '';
+    const capacity   = props.Capacity || props.Seating || props.Seats || '';
+    const opened     = props.Opened || props.YearOpened || props.Open || '';
+    const closed     = props.Closed || props.YearClosed || props.Close || '';
+    const status     = props.Status || '';
+
+    const img   = imageHTML(props);
+    const hasDetails = architects || operator || seats || capacity || opened || closed || status;
+
+    return '<div class="popup-flex">'
+      + img +
+      '<div class="popup-text">'
+        + '<h3 style="margin:0 0 6px 0;">' + title + '</h3>'
+        + (addr ? '<div class="small">' + addr + '</div>' : '')
+        + (desc ? '<div style="margin-top:6px;">' + desc + '</div>' : '')
+        + (hasDetails ? (
+            '<div class="details">'
+              + (status ? '<div class="label">Status</div><div class="value">' + status + '</div>' : '')
+              + (architects ? '<div class="label">Architect(s)</div><div class="value">' + architects + '</div>' : '')
+              + (operator ? '<div class="label">Operator</div><div class="value">' + operator + '</div>' : '')
+              + (seats ? '<div class="label">Seats</div><div class="value">' + seats + '</div>' : '')
+              + (!seats && capacity ? '<div class="label">Capacity</div><div class="value">' + capacity + '</div>' : '')
+              + (opened ? '<div class="label">Opened</div><div class="value">' + opened + '</div>' : '')
+              + (closed ? '<div class="label">Closed</div><div class="value">' + closed + '</div>' : '')
+            + '</div>'
+          ) : '')
+      + '</div>'
+    + '</div>';
+  }
+
+  // Modal
+  (function initModal(){ const modal=document.getElementById('imgModal'); const img=modal.querySelector('img'); const closeX=modal.querySelector('.closeX');
+    window.openModal=function(src,alt){ img.src=src; img.alt=alt||''; modal.classList.add('open'); };
+    const close=function(){ modal.classList.remove('open'); img.src=''; };
+    modal.addEventListener('click',function(e){ if(e.target===modal||e.target===closeX) close(); });
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  })();
+
+  function wirePopupBehaviors(map){
+    map.on('popupopen', function(e){
+      try { const sz=map.getSize(); const dy=Math.round(sz.y*0.20); map.panBy([0,-dy], {animate:true, duration:0.35}); } catch(_){}
+      const root=e.popup.getElement && e.popup.getElement();
+      if (root) { const txt=root.querySelector('.popup-text'); const im=root.querySelector('.popup-imgwrap img');
+        if (txt && im) { im.style.height='auto'; setTimeout(function(){ const h=txt.getBoundingClientRect().height; if(h>0){ im.style.height=Math.round(h)+'px'; im.style.objectFit='cover'; } },0);
+          im.addEventListener('click', function(){ window.openModal(im.src, im.alt); }); }
+      }
+      const srcLayer=e.popup._source; const props=srcLayer && srcLayer.feature && srcLayer.feature.properties;
+      if (props && props.ObjectID!=null) { document.querySelectorAll('#list .item.active').forEach(function(el){ el.classList.remove('active'); });
+        const item=document.querySelector('#list .item[data-oid="'+props.ObjectID+'"]'); if(item){ item.classList.add('active'); try{ item.scrollIntoView({block:'nearest'}); }catch(_){}} }
+    });
+  }
+
+  async function main(){
+    const map=L.map('map', { zoomControl: true }).setView([41.499, -81.694], 12); window._map=map;
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+    wirePopupBehaviors(map);
+
+    const fc = JSON.parse(document.getElementById('data').textContent);
+      applyKnownImagesToData(fc);
+const list=document.getElementById('list'); const statusEl=document.getElementById('status');
+    statusEl.textContent = 'Loaded ' + fc.features.length + ' theatres';
+
+    const byId={}; window._byId=byId;
+    const latlngs=[];
+
+    fc.features.forEach(function(feat){
+      const p=feat.properties||{}; const ll=[feat.geometry.coordinates[1], feat.geometry.coordinates[0]]; latlngs.push(ll);
+      const marker=L.marker(ll); marker.feature=feat; byId[p.ObjectID]=marker;
+      marker.bindPopup(popupHTML(p), {maxWidth: 620, keepInView: true, autoPan: true, autoPanPaddingTopLeft: [24, 140], autoPanPaddingBottomRight: [24, 24]});
+      marker.on('click', function(){
+        // Match sidebar behavior
+        var z = Math.max(map.getZoom(), 15);
+        map.flyTo(ll, z, {duration: 0.6});
+        try { marker.openPopup(); } catch(e){}
+        // Highlight in sidebar
+        try {
+          Array.from(document.querySelectorAll('#list .item.active')).forEach(function(el){ el.classList.remove('active'); });
+          var item = document.querySelector('#list .item[data-oid="' + p.ObjectID + '"]');
+          if (item) { item.classList.add('active'); try { item.scrollIntoView({block:'nearest'}); } catch(e){} }
+        } catch(e){}
+      });
+      marker.addTo(map);
+
+      const div=document.createElement('div'); div.className='item'; div.setAttribute('data-oid', p.ObjectID);
+      var badges = p.Movie ? '<div class="badges">'+String(p.Movie).split(';').map(function(s){return '<span class="badge">'+s.trim()+'</span>';}).join('')+'</div>' : '';
+      div.innerHTML = (function(){
+        var badges = p.Movie ? '<div class="badges">' + String(p.Movie).split(';').map(function(s){return '<span class="badge">'+s.trim()+'</span>';}).join('') + '</div>' : '';
+        var op = p.Operator || p.Operators || '';
+        var seats = p.Seats || p.Seating || p.Capacity || '';
+        var metaLine = (op || seats) ? ('<div class="small">' + [op, seats ? ('Seats: ' + seats) : ''].filter(Boolean).join(' · ') + '</div>') : '';
+        return '<div class="title">'+statusDot(p.Status)+(p.Theatre||'')+'</div>'
+               + (p.Address?'<div class="small">'+p.Address+'</div>':'')
+               + metaLine
+               + badges;
+      })();
+      div.addEventListener('click', function(){
+        const already=div.classList.contains('active');
+        Array.from(document.querySelectorAll('#list .item.active')).forEach(function(el){ el.classList.remove('active'); });
+        if (!already) div.classList.add('active');
+        if (already) { try { marker.closePopup(); } catch(_){ } return; }
+        const z=Math.max(map.getZoom(), 15); map.flyTo(ll, z, {duration: 0.6}); marker.openPopup();
+      });
+      list.appendChild(div);
+    });
+
+    document.getElementById('homeBtn').addEventListener('click', function(){
+      if(latlngs.length){ map.fitBounds(L.latLngBounds(latlngs).pad(0.08)); }
+    });
+    const mapHomeBtn = document.getElementById('mapHomeBtn');
+    if (mapHomeBtn) {
+      mapHomeBtn.addEventListener('click', function(){
+        if(latlngs.length){ map.fitBounds(L.latLngBounds(latlngs).pad(0.08)); }
+      });
+    }
+
+    const searchEl=document.getElementById('search'); const norm=function(s){ return String(s||'').toLowerCase(); };
+    function matches(props, q){ if(!q) return true; q=norm(q); return [props.Theatre, props.Address, props.Movie, props.Description].filter(Boolean).some(function(v){ return norm(v).includes(q); }); }
+    function applySearch(){
+      const q=searchEl.value;
+      document.querySelectorAll('#list .item').forEach(function(el){
+        const oid=+el.getAttribute('data-oid'); const m=byId[oid];
+        const props=m && m.feature && m.feature.properties || {};
+        const show=matches(props,q);
+        el.style.display= show ? '' : 'none';
+        try { if(show) map.addLayer(m); else map.removeLayer(m); } catch(_){ }
+      });
+    }
+    var t; searchEl.addEventListener('input', function(){ clearTimeout(t); t=setTimeout(applySearch, 120); });
+  }
+  document.addEventListener('DOMContentLoaded', main);
+
+// Global handler: any click on a popup image opens the modal (works for map & sidebar popups)
+document.addEventListener('click', function(e){
+  const t = e.target;
+  if (t && t.classList && t.classList.contains('popup-img')) {
+    try { e.preventDefault(); e.stopPropagation(); } catch(_) {}
+    try { window.openModal(t.src, t.alt || ''); } catch(_) {}
+  }
 });
-</script></body>
+
+
+  </script>
+</body>
 </html>
