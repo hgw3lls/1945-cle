@@ -1,17 +1,17 @@
-const VERSION = 'v1';
+// sw.patched.js
+const VERSION = 'v2';
 const ASSET_CACHE = `assets-${VERSION}`;
 const TILE_CACHE  = `tiles-${VERSION}`;
 
 const CORE_ASSETS = [
-  '/assets/1945-clevelandfilm.html',
-  '/assets/sw.js'
+  './1945_clevelandfilm.html',
+  './sw.patched.js'
 ];
 
 const ALLOWED_TILE_HOSTS = [
-  'tile.openstreetmap.org',
-  'a.tile.openstreetmap.org',
-  'b.tile.openstreetmap.org',
-  'c.tile.openstreetmap.org'
+  'tile.openstreetmap.org','a.tile.openstreetmap.org','b.tile.openstreetmap.org','c.tile.openstreetmap.org',
+  'server.arcgisonline.com',
+  'basemaps.cartocdn.com'
 ];
 
 self.addEventListener('install', (event) => {
@@ -25,47 +25,42 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(
-      keys.map(k => (k.startsWith('assets-') || k.startsWith('tiles-')) && k !== ASSET_CACHE && k !== TILE_CACHE
-        ? caches.delete(k)
-        : Promise.resolve()
-      )
-    );
+    await Promise.all(keys.map(k =>
+      (k.startsWith('assets-') || k.startsWith('tiles-')) && k !== ASSET_CACHE && k !== TILE_CACHE
+        ? caches.delete(k) : Promise.resolve()
+    ));
     self.clients.claim();
   })());
 });
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  const url = new URL(req.url);
   if (req.method !== 'GET') return;
 
-  if (url.origin === self.location.origin && url.pathname.startsWith('/assets/')) {
+  const url = new URL(req.url);
+
+  if (url.origin === self.location.origin) {
+    if (req.mode === 'navigate') {
+      event.respondWith(cacheFirst('./1945_clevelandfilm.html', ASSET_CACHE));
+      return;
+    }
     event.respondWith(cacheFirst(req, ASSET_CACHE));
     return;
   }
 
-  if (ALLOWED_TILE_HOSTS.includes(url.host)) {
+  if (ALLOWED_TILE_HOSTS.some(h => url.host.endsWith(h))) {
     event.respondWith(staleWhileRevalidateWithLimit(req, TILE_CACHE, 1500));
-    return;
   }
 });
 
-async function cacheFirst(request, cacheName) {
+async function cacheFirst(requestOrUrl, cacheName) {
+  const request = typeof requestOrUrl === 'string' ? new Request(requestOrUrl) : requestOrUrl;
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
   if (cached) return cached;
-  try {
-    const fresh = await fetch(request);
-    cache.put(request, fresh.clone());
-    return fresh;
-  } catch (e) {
-    if (request.destination === 'document') {
-      const shell = await cache.match('/assets/1945-clevelandfilm.html');
-      if (shell) return shell;
-    }
-    throw e;
-  }
+  const fresh = await fetch(request);
+  cache.put(request, fresh.clone());
+  return fresh;
 }
 
 async function staleWhileRevalidateWithLimit(request, cacheName, maxEntries) {
@@ -87,7 +82,5 @@ async function trimCache(cache, maxEntries) {
   const keys = await cache.keys();
   if (keys.length <= maxEntries) return;
   const toDelete = keys.length - maxEntries;
-  for (let i = 0; i < toDelete; i++) {
-    await cache.delete(keys[i]);
-  }
+  for (let i = 0; i < toDelete; i++) await cache.delete(keys[i]);
 }

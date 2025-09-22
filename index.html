@@ -2950,17 +2950,17 @@ body.sidebar-hidden #sidebar { display: none !important; }
   "COLONY": "images/COLONY.jpg",
   "UPTOWN": "images/UPTOWN.jpg",
   "SHAKER": "images/SHAKER.jpg",
-  "RIVERSIDE": "images/RIVERSIDE.png",
+  "RIVERSIDE": "images/RIVERSIDE.jpg",
   "FAIRMOUNT": "images/FAIRMOUNT.jpg",
   "ABBY": "images/ABBY.jpg",
   "ASTOR": "images/ASTOR.jpg",
   "GLOBE": "images/GLOBE.jpg",
   "SHORE": "images/SHORE.jpg",
   "DOAN": "images/DOAN.jpg",
-  "LORAIN": "images/LORAIN.png",
+  "LORAIN": "images/LORAIN.jpg",
   "CROWN": "images/CROWN.jpg",
   "MARVEL": "images/MARVEL.jpg",
-  "HOUGH": "images/HOUGH.png",
+  "HOUGH": "images/HOUGH.jpg",
   "REX": "images/REX.jpg",
   "HALTNORTH": "images/HALTNORTH.jpg",
   "STILLWELL": "images/STILLWELL.jpg",
@@ -2985,7 +2985,7 @@ body.sidebar-hidden #sidebar { display: none !important; }
   "GRAND": "images/GRAND.jpg",
   "IMPERIAL": "images/IMPERIAL.jpg",
   "HEIGHTS": "images/HEIGHTS.jpg",
-  "HOMESTEAD": "images/HOMESTEAD.png",
+  "HOMESTEAD": "images/HOMESTEAD.jpg",
   "JENNINGS": "images/JENNINGS.jpg",
   "LA SALLE": "images/LA_SALLE.jpg",
   "JEWEL": "images/JEWEL.jpg",
@@ -3007,12 +3007,12 @@ body.sidebar-hidden #sidebar { display: none !important; }
   "REGENT": "images/REGENT.jpeg",
   "PARMA": "images/PARMA.jpg",
   "PLAZA": "images/PLAZA.jpg",
-  "RIALTO": "images/RIALTO.png",
+  "RIALTO": "images/RIALTO.jpg",
   "SHAW-HAYDEN": "images/SHAW-HAYDEN.jpg",
   "SUN": "images/SUN.jpg",
   "OLYMPIA": "images/OLYMPIA.jpg",
   "SUNBEAM": "images/SUNBEAM.jpg",
-  "SUPERIOR": "images/SUPERIOR.png",
+  "SUPERIOR": "images/SUPERIOR.jpg",
   "WALDORF": "images/WALDORF.jpg",
   "UNION": "images/UNION.jpg",
   "UNION SQUARE": "images/UNION_SQUARE.jpg",
@@ -3058,12 +3058,12 @@ const knownImagesNorm = (() => {
 
 function imageHTML(props){
     if (props && props.Image) {
-      return '<div class="popup-imgwrap"><img class="popup-img" src="'+props.Image+'" alt="'+(props.Theatre||'image')+'"></div>';
+      return '<div class="popup-imgwrap"><img class="popup-img" loading="lazy" loading="lazy" src="'+props.Image+'" alt="'+(props.Theatre||'image')+'"></div>';
     }
     const name = props && (props.Theatre || props.Theater || props.Name) || '';
     if (!name) return '';
     const slug = slugify(name);
-    return '<div class="popup-imgwrap">      <img class="popup-img" alt="'+name+'"           src="images/'+slug+'.webp"           onerror="if(this.dataset.try!==\'1\'){this.dataset.try=\'1\'; this.src=\'images/'+slug+'.jpg\';}                    else if(this.dataset.try!==\'2\'){this.dataset.try=\'2\'; this.src=\'images/'+slug+'.png\';}                    else { this.style.display=\'none\'; }">    </div>';
+    return '<div class="popup-imgwrap">      <img class="popup-img" loading="lazy" loading="lazy" alt="'+name+'"           src="images/'+slug+'.webp"           onerror="if(this.dataset.try!==\'1\'){this.dataset.try=\'1\'; this.src=\'images/'+slug+'.jpg\';}                    else if(this.dataset.try!==\'2\'){this.dataset.try=\'2\'; this.src=\'images/'+slug+'.png\';}                    else { this.style.display=\'none\'; }">    </div>';
   }
 
   
@@ -3288,6 +3288,14 @@ try {
   const btn = document.getElementById('sidebarToggle');
   const BODY = document.body;
   const KEY = 'sidebarHidden';
+  // Ensure the sidebar starts open by default at least once.
+  try {
+    if (!localStorage.getItem('sidebarDefaulted')) {
+      localStorage.setItem(KEY, '0');           // 0 => visible/open
+      localStorage.setItem('sidebarDefaulted', '1');
+    }
+  } catch(e) {}
+
 
   function apply(hidden){
     if (hidden) {
@@ -3356,5 +3364,193 @@ function popupHTML(props){
 }
 
 </script>
+
+<script>
+// Service Worker registration
+(function(){
+  if (('serviceWorker' in navigator) && (location.protocol === 'http:' || location.protocol === 'https:')) {
+  navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(console.error);
+} else {
+  console.log('Service Worker disabled on protocol:', location.protocol);
+}
+})();
+</script>
+
+<script>
+// Deep-linking (id & q) only (sidebar left to original code)
+(function(){
+  function readHash(){
+    const p = new URLSearchParams(location.hash.slice(1));
+    return { id: p.get('id'), q: p.get('q') || '' };
+  }
+  function writeHash(updates){
+    const p = new URLSearchParams(location.hash.slice(1));
+    Object.entries(updates).forEach(([k,v]) => v==null ? p.delete(k) : p.set(k, v));
+    history.replaceState(null, '', '#' + p.toString());
+  }
+  function onReady(fn){ if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+
+  onReady(function(){
+    const list = document.getElementById('list');
+    const searchEl = document.getElementById('search');
+    const init = readHash();
+    if (init.q && searchEl) {
+      searchEl.value = init.q;
+      if (typeof window.applySearch === 'function') window.applySearch();
+    }
+    if (init.id && list) {
+      const target = list.querySelector('[data-oid="'+init.id+'"]');
+      if (target) target.click();
+    }
+    if (list) {
+      list.addEventListener('click', (e)=>{
+        const item = e.target.closest('[data-oid]');
+        if (!item) return;
+        const oid = item.getAttribute('data-oid');
+        const q = searchEl && searchEl.value ? searchEl.value : null;
+        writeHash({ id: oid, q });
+      });
+    }
+    window.addEventListener('popstate', ()=>{
+      const state = readHash();
+      if (searchEl) {
+        searchEl.value = state.q || '';
+        if (typeof window.applySearch === 'function') window.applySearch();
+      }
+      if (state.id && list) {
+        const el = list.querySelector('[data-oid="'+state.id+'"]');
+        if (el) el.click();
+      }
+    });
+  });
+})();
+</script>
+
+
+<script>
+// --- Helpers injected ---
+
+// Resolve multiple filename variants in /images for a given name (slug variations)
+function resolveImageVariants(nameOrPath) {
+  const direct = typeof nameOrPath === 'string' && /\.(png|jpg|jpeg|webp|gif)$/i.test(nameOrPath) ? nameOrPath : null;
+  const baseName = (typeof nameOrPath === 'string' ? nameOrPath : '') || '';
+  function slugify(s){return (s||'').toString().trim()
+    .replace(/[’']/g,'')
+    .replace(/[^A-Za-z0-9]+/g,'_')
+    .replace(/^_+|_+$/g,'')
+    .toUpperCase();}
+  const slug = slugify(baseName);
+  const candidates = [];
+  if (direct) candidates.push(direct);
+  candidates.push('images/' + slug + '.jpg');
+  candidates.push('images/' + slug + '.jpg');
+  candidates.push('images/' + slug + '.jpeg');
+  candidates.push('images/' + slug + '_films.png');
+  candidates.push('images/' + slug + '_films.jpg');
+  const loose = slug.replace(/_/g,'-');
+  candidates.push('images/' + loose + '.png');
+  candidates.push('images/' + loose + '.jpg');
+  candidates.push('images/' + loose + '_films.png');
+  candidates.push('images/' + loose + '_films.jpg');
+
+  const seen = new Set();
+  const list = candidates.filter(c=>{ if(seen.has(c)) return false; seen.add(c); return true; });
+
+  return new Promise((resolve) => {
+    let i = 0;
+    function tryNext() {
+      if (i >= list.length) { resolve(null); return; }
+      const url = list[i++];
+      const img = new Image();
+      img.onload = () => resolve(url);
+      img.onerror = tryNext;
+      img.src = url;
+    }
+    tryNext();
+  });
+}
+
+// When a popup opens, set a one-time error handler that tries variants based on alt text
+(function attachPopupImageFallback(){
+  function bind(map){
+    map.on('popupopen', function(e){
+      try {
+        const node = e.popup && e.popup._contentNode;
+        if (!node) return;
+        const img = node.querySelector('img.popup-img');
+        if (!img) return;
+        img.setAttribute('loading','lazy');
+        const name = img.getAttribute('alt') || '';
+        img.addEventListener('error', function handler(){
+          img.removeEventListener('error', handler);
+          resolveImageVariants(name).then(url => { if (url) img.src = url; });
+        }, { once: true });
+      } catch (err) { console.warn('popup fallback bind err', err); }
+    });
+  }
+  // Try immediately and also retry later if map isn't ready yet
+  if (window._map) bind(window._map);
+  else if (window.map) { window._map = window.map; bind(window._map); }
+  else {
+    document.addEventListener('DOMContentLoaded', function(){
+      if (window._map) bind(window._map);
+      else if (window.map) { window._map = window.map; bind(window._map); }
+    });
+  }
+})();
+</script>
+
+
+
+<script>
+// Prefer .jpg for theatre images; posters (_films) remain .png in images/billings.
+function resolveTheatreJpgVariants(nameOrSlug){
+  const base = String(nameOrSlug||'');
+  function slugify(s){return (s||'').toString().trim()
+    .replace(/[’']/g,'')
+    .replace(/[^A-Za-z0-9]+/g,'_')
+    .replace(/^_+|_+$/g,'')
+    .toUpperCase();}
+  const s1 = slugify(base);
+  const s2 = s1.replace(/_/g,'-');
+  const candidates = [
+    'images/' + s1 + '.jpg',
+    'images/' + s2 + '.jpg'
+  ];
+  return new Promise((resolve) => {
+    let i = 0;
+    function next(){
+      if (i >= candidates.length) { resolve(null); return; }
+      const url = candidates[i++];
+      const img = new Image();
+      img.onload = () => resolve(url);
+      img.onerror = next;
+      img.src = url;
+    }
+    next();
+  });
+}
+
+// Bind only theatre image fallback (img.popup-img)
+(function attachTheatreFallback(){
+  function bind(map){
+    map.on('popupopen', function(e){
+      const node = e.popup && e.popup._contentNode;
+      if (!node) return;
+      const img = node.querySelector('img.popup-img');
+      if (!img) return;
+      const name = img.getAttribute('alt') || '';
+      img.addEventListener('error', function once(){
+        img.removeEventListener('error', once);
+        resolveTheatreJpgVariants(name).then(url => { if (url) img.src = url; });
+      }, { once: true });
+    });
+  }
+  if (window._map) bind(window._map);
+  else if (window.map) { window._map = window.map; bind(window._map); }
+  else document.addEventListener('DOMContentLoaded', function(){ if (window.map) { window._map = window.map; bind(window._map); } });
+})();
+</script>
+
 </body>
 </html>
