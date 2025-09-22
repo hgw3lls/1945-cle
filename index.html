@@ -96,8 +96,7 @@ body {
 body { display: grid; grid-template-columns: 420px 1fr; }
 body.sidebar-hidden { grid-template-columns: 1fr; }
 #sidebar { border-right: 1px solid #e3e3e3; padding: 12px; overflow: auto; }
-body.sidebar-hidden #sidebar { display: none !important; }
-
+body.sidebar-hidden
 .map-toggle {
   position: absolute;
   z-index: 1200;
@@ -232,6 +231,132 @@ body.sidebar-hidden #sidebar { display: none !important; }
 }
 
 </style>
+
+<style>body.sidebar-hidden #sidebar { display: none !important; }</style>
+
+<style>
+
+/* Details (full description) modal */
+.modal.desc-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+.modal.desc-modal[aria-hidden="false"] { display: flex; }
+.modal.desc-modal .modal-inner {
+  background: #111;
+  color: #f5f5f5;
+  padding: 12px;
+  border-radius: 10px;
+  max-width: 92vw;
+  max-height: 92vh;
+  width: 900px;
+  box-sizing: border-box;
+}
+.desc-modal-content { 
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.desc-modal-media img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+}
+.desc-modal-text h3 { margin: 0 0 8px; }
+.desc-modal-text .scrollable { 
+  max-height: 70vh; 
+  overflow: auto; 
+  line-height: 1.4;
+}
+/* "Read more" button in popup */
+.popup-readmore-btn {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #222;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.popup-readmore-btn:hover { background: #2b2b2b; }
+
+</style>
+
+
+<style>
+/* Billings modal styles */
+.modal.billings-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+.modal.billings-modal[aria-hidden="false"] { display: flex; }
+.modal.billings-modal .modal-inner {
+  background: #111;
+  padding: 8px;
+  border-radius: 8px;
+  max-width: 92vw;
+  max-height: 92vh;
+}
+#billingsImg {
+  max-width: 90vw;
+  max-height: 85vh;
+  height: auto;
+  width: auto;
+  display: block;
+}
+.billings-btn {
+  display: inline-block;
+  padding: 4px 8px;
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.2;
+  background: #222;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.billings-btn:hover { background:#2b2b2b; }
+</style>
+
+
+
+<style>
+/* Make "Billings: films" look like a link */
+.billings-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: #2aa3ff;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* Hide any poster/billings images inside the Leaflet popup */
+.leaflet-popup-content img[src*="images/billings/"] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+</style>
+
 </head>
 <body>
   <aside id="sidebar">
@@ -3082,7 +3207,8 @@ function toUpperUnderscore(name){
     .toUpperCase();
 }
 const knownPosters = {};
-function postersHTML(props){
+function postersHTML(props){ return ''; /* disabled: billings shown via modal only */
+//
   const name = (props.Theatre || props.Theater || props.Name || '').trim();
   if (!name) return '';
   const inferred = `images/billings/${toUpperUnderscore(name)}_films.png`;
@@ -3427,128 +3553,850 @@ function popupHTML(props){
 </script>
 
 
+
+
+
+
+
+
+
 <script>
-// --- Helpers injected ---
+// --- Safe Leaflet binder: waits for a real L.Map instance before attaching ---
+(function(){
+  function isLeafletMap(m){
+    return !!(m && typeof m.on === 'function' && typeof m.addLayer === 'function' && m._panes);
+  }
+  function onLeafletMap(cb){
+    // 1) if map exists globally, use it
+    if (isLeafletMap(window._map)) return cb(window._map);
+    if (isLeafletMap(window.map)) { window._map = window.map; return cb(window._map); }
 
-// Resolve multiple filename variants in /images for a given name (slug variations)
-function resolveImageVariants(nameOrPath) {
-  const direct = typeof nameOrPath === 'string' && /\.(png|jpg|jpeg|webp|gif)$/i.test(nameOrPath) ? nameOrPath : null;
-  const baseName = (typeof nameOrPath === 'string' ? nameOrPath : '') || '';
-  function slugify(s){return (s||'').toString().trim()
-    .replace(/[’']/g,'')
-    .replace(/[^A-Za-z0-9]+/g,'_')
-    .replace(/^_+|_+$/g,'')
-    .toUpperCase();}
-  const slug = slugify(baseName);
-  const candidates = [];
-  if (direct) candidates.push(direct);
-  candidates.push('images/' + slug + '.jpg');
-  candidates.push('images/' + slug + '.jpg');
-  candidates.push('images/' + slug + '.jpeg');
-  candidates.push('images/' + slug + '_films.png');
-  candidates.push('images/' + slug + '_films.jpg');
-  const loose = slug.replace(/_/g,'-');
-  candidates.push('images/' + loose + '.png');
-  candidates.push('images/' + loose + '.jpg');
-  candidates.push('images/' + loose + '_films.png');
-  candidates.push('images/' + loose + '_films.jpg');
-
-  const seen = new Set();
-  const list = candidates.filter(c=>{ if(seen.has(c)) return false; seen.add(c); return true; });
-
-  return new Promise((resolve) => {
-    let i = 0;
-    function tryNext() {
-      if (i >= list.length) { resolve(null); return; }
-      const url = list[i++];
-      const img = new Image();
-      img.onload = () => resolve(url);
-      img.onerror = tryNext;
-      img.src = url;
+    // 2) patch L.map to capture creation
+    if (window.L && L.map && !L._bindPatched){
+      const orig = L.map;
+      L.map = function(){
+        const m = orig.apply(this, arguments);
+        window._map = m;
+        try { setTimeout(()=>cb(m), 0); } catch(e) {}
+        return m;
+      };
+      L._bindPatched = true;
     }
-    tryNext();
-  });
-}
 
-// When a popup opens, set a one-time error handler that tries variants based on alt text
-(function attachPopupImageFallback(){
-  function bind(map){
-    map.on('popupopen', function(e){
-      try {
-        const node = e.popup && e.popup._contentNode;
+    // 3) polling fallback (covers late loads)
+    const iv = setInterval(()=>{
+      if (isLeafletMap(window._map)) { clearInterval(iv); try { cb(window._map); } catch(e) {} }
+      else if (isLeafletMap(window.map)) { clearInterval(iv); window._map = window.map; try { cb(window._map);} catch(e) {} }
+    }, 120);
+    setTimeout(()=>clearInterval(iv), 10000); // give up after 10s to avoid leaks
+  }
+
+  // Replace fragile attach functions with safe versions:
+  window.attachPopupImageFallback = function attachPopupImageFallback(){
+    onLeafletMap(function(map){
+      map.on('popupopen', function(e){
+        const node = e && e.popup && e.popup._contentNode;
         if (!node) return;
         const img = node.querySelector('img.popup-img');
         if (!img) return;
         img.setAttribute('loading','lazy');
         const name = img.getAttribute('alt') || '';
-        img.addEventListener('error', function handler(){
-          img.removeEventListener('error', handler);
-          resolveImageVariants(name).then(url => { if (url) img.src = url; });
-        }, { once: true });
-      } catch (err) { console.warn('popup fallback bind err', err); }
+        img.addEventListener('error', function once(){
+          img.removeEventListener('error', once);
+          // Try theatre JPG variants if main load fails
+          (function resolveTheatreJpgVariants(name){
+            function toUpperUnderscore(s){ return String(s||'').normalize('NFKD').replace(/[’‘`´]/g,"'").replace(/&amp;/g,"&").replace(/[^A-Za-z0-9 ]+/g,' ').trim().replace(/\s+/g,'_').toUpperCase(); }
+            const s1 = toUpperUnderscore(name);
+            const s2 = s1.replace(/_/g,'-');
+            const candidates = ['images/'+s1+'.jpg','images/'+s2+'.jpg'];
+            let i=0;
+            function tryNext(){ if(i>=candidates.length) return; const url=candidates[i++]; const probe=new Image(); probe.onload=()=>img.src=url; probe.onerror=tryNext; probe.src=url; }
+            tryNext();
+          })(name);
+        }, { once:true });
+      });
     });
+  };
+
+  window.attachTheatreFallback = function attachTheatreFallback(){
+    onLeafletMap(function(map){
+      map.on('popupopen', function(e){
+        const node = e && e.popup && e.popup._contentNode;
+        if (!node) return;
+        // Cap image to text height for better balance
+        const imgEl  = node.querySelector('img.popup-img');
+        const textEl = node.querySelector('.popup-text, .details, .copy, .text') || node;
+        if (imgEl && textEl) {
+          const h = Math.max(140, textEl.clientHeight);
+          imgEl.style.maxHeight = h + 'px';
+        }
+      });
+    });
+  };
+
+  // Auto-run both
+  try { window.attachPopupImageFallback(); } catch(e){}
+  try { window.attachTheatreFallback(); } catch(e){}
+})();
+</script>
+
+
+<script>
+// Force sidebar open on every load (ignore saved state)
+(function(){
+  function applyOpen(){
+    document.body.classList.remove('sidebar-hidden');
+    try { localStorage.setItem('sidebarHidden','0'); } catch(e){}
+    var btn = document.getElementById('sidebarToggle');
+    if (btn){
+      btn.textContent = "X";
+      btn.setAttribute('aria-pressed','false');
+      btn.setAttribute('aria-label','Hide sidebar');
+    }
+    // Resize Leaflet map if present
+    if (window._map) { try { window._map.invalidateSize(false); } catch(e){} }
   }
-  // Try immediately and also retry later if map isn't ready yet
-  if (window._map) bind(window._map);
-  else if (window.map) { window._map = window.map; bind(window._map); }
-  else {
-    document.addEventListener('DOMContentLoaded', function(){
-      if (window._map) bind(window._map);
-      else if (window.map) { window._map = window.map; bind(window._map); }
-    });
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', applyOpen);
+  } else {
+    applyOpen();
   }
 })();
 </script>
 
 
 
+<!-- Full Theatre Details modal -->
+<div id="descModal" class="modal desc-modal" aria-hidden="true" role="dialog" aria-label="Theatre details">
+  <div class="modal-inner">
+    <button class="closeX" id="descClose" aria-label="Close details">&times;</button>
+    <div class="desc-modal-content">
+      <div class="desc-modal-media">
+        <img id="descImg" alt="Theatre image" />
+      </div>
+      <div class="desc-modal-text">
+        <h3 id="descTitle"></h3>
+        <div id="descBody" class="scrollable"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 <script>
-// Prefer .jpg for theatre images; posters (_films) remain .png in images/billings.
-function resolveTheatreJpgVariants(nameOrSlug){
-  const base = String(nameOrSlug||'');
-  function slugify(s){return (s||'').toString().trim()
-    .replace(/[’']/g,'')
-    .replace(/[^A-Za-z0-9]+/g,'_')
-    .replace(/^_+|_+$/g,'')
-    .toUpperCase();}
-  const s1 = slugify(base);
-  const s2 = s1.replace(/_/g,'-');
-  const candidates = [
-    'images/' + s1 + '.jpg',
-    'images/' + s2 + '.jpg'
-  ];
-  return new Promise((resolve) => {
-    let i = 0;
-    function next(){
-      if (i >= candidates.length) { resolve(null); return; }
-      const url = candidates[i++];
-      const img = new Image();
-      img.onload = () => resolve(url);
-      img.onerror = next;
-      img.src = url;
+(function(){
+  // Utility to get first N words
+  function firstWords(text, n){
+    const words = String(text || '').trim().split(/\s+/);
+    if (words.length <= n) return { short: text, trimmed: false };
+    return { short: words.slice(0, n).join(' ') + '…', trimmed: true };
+  }
+
+  // Open/close the description modal
+  const dModal = document.getElementById('descModal');
+  const dClose = document.getElementById('descClose');
+  const dImg   = document.getElementById('descImg');
+  const dTitle = document.getElementById('descTitle');
+  const dBody  = document.getElementById('descBody');
+
+  function openDescModal(title, fullText, imgSrc){
+    if (!dModal) return;
+    dTitle.textContent = title || '';
+    dBody.innerHTML = ''; // reset
+    const p = document.createElement('div');
+    p.textContent = fullText || '';
+    dBody.appendChild(p);
+    if (imgSrc) dImg.src = imgSrc; else dImg.removeAttribute('src');
+    dModal.setAttribute('aria-hidden','false');
+  }
+  function closeDescModal(){
+    if (!dModal) return;
+    dModal.setAttribute('aria-hidden','true');
+    dImg.removeAttribute('src');
+  }
+  if (dClose) dClose.addEventListener('click', closeDescModal);
+  if (dModal) dModal.addEventListener('click', (e)=>{ if (e.target === dModal) closeDescModal(); });
+  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeDescModal(); });
+
+  // Bind on Leaflet popup open: truncate description to 50 words and add "Read more"
+  function onLeafletMap(cb){
+    function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    if (window.L && L.map && !L._descBindPatched){
+      const orig = L.map;
+      L.map = function(){
+        const m = orig.apply(this, arguments);
+        window._map = m;
+        try { setTimeout(()=>cb(m),0); } catch(e){}
+        return m;
+      };
+      L._descBindPatched = true;
     }
-    next();
+    const iv = setInterval(()=>{
+      if (isMap(window._map)) { clearInterval(iv); try{ cb(window._map);}catch(e){} }
+      else if (isMap(window.map)) { clearInterval(iv); window._map=window.map; try{ cb(window._map);}catch(e){} }
+    }, 120);
+    setTimeout(()=>clearInterval(iv), 10000);
+  }
+
+  onLeafletMap(function(map){
+    map.on('popupopen', function(e){
+      const node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+
+      // Find a description element; prefer explicit classes, then fallback to first <p>
+      let desc = node.querySelector('.popup-desc, .description, .details .desc, .copy .desc, .text .desc');
+      if (!desc) desc = node.querySelector('.details p, .copy p, .text p, p');
+
+      if (desc && !desc.dataset.truncated){
+        const full = (desc.textContent || '').trim();
+        const res  = firstWords(full, 50);
+        if (res.trimmed){
+          desc.dataset.full = full;
+          desc.textContent = res.short;
+          // Add Read more button (once)
+          if (!node.querySelector('.popup-readmore-btn')){
+            const btn = document.createElement('button');
+            btn.className = 'popup-readmore-btn';
+            btn.textContent = 'Read more';
+            btn.addEventListener('click', function(ev){
+              ev.preventDefault();
+              // Get title and image from popup
+              const titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+              const title   = (titleEl && (titleEl.textContent||'').trim()) || '';
+              const imgEl   = node.querySelector('img.popup-img');
+              const imgSrc  = imgEl ? imgEl.getAttribute('src') : null;
+              openDescModal(title, full, imgSrc);
+            });
+            // Place button after the desc element
+            desc.insertAdjacentElement('afterend', btn);
+          }
+          desc.dataset.truncated = "1";
+        }
+      }
+    });
   });
+})();
+</script>
+
+
+<script>
+(function(){
+  // robust truncation + modal open
+  function onLeafletMap(cb){
+    function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    if (window.L && L.map && !L._robustTruncPatch){
+      const orig = L.map;
+      L.map = function(){
+        const m = orig.apply(this, arguments);
+        window._map = m;
+        try { setTimeout(()=>cb(m),0); } catch(e){}
+        return m;
+      };
+      L._robustTruncPatch = true;
+    }
+    const iv = setInterval(()=>{
+      if (isMap(window._map)) { clearInterval(iv); try{ cb(window._map);}catch(e){} }
+      else if (isMap(window.map)) { clearInterval(iv); window._map=window.map; try{ cb(window._map);}catch(e){} }
+    }, 120);
+    setTimeout(()=>clearInterval(iv), 10000);
+  }
+
+  function openDescModal(title, fullText, imgSrc){
+    const dModal = document.getElementById('descModal');
+    const dImg   = document.getElementById('descImg');
+    const dTitle = document.getElementById('descTitle');
+    const dBody  = document.getElementById('descBody');
+    if (!dModal) return;
+    if (dTitle) dTitle.textContent = title || '';
+    if (dBody) {
+      dBody.innerHTML = '';
+      const p = document.createElement('div');
+      p.textContent = fullText || '';
+      dBody.appendChild(p);
+    }
+    if (dImg) { if (imgSrc) dImg.src = imgSrc; else dImg.removeAttribute('src'); }
+    dModal.setAttribute('aria-hidden','false');
+  }
+
+  onLeafletMap(function(map){
+    map.on('popupopen', function(e){
+      const node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+
+      // Find description element robustly
+      let desc = node.querySelector('.popup-desc');
+      if (!desc) {
+        const paragraphs = Array.from(node.querySelectorAll('p'));
+        desc = paragraphs.find(p => !p.closest('.popup-imgwrap'));
+        if (!desc && paragraphs.length) desc = paragraphs[0];
+      }
+      if (!desc) return;
+      if (desc.dataset.truncated) return;
+
+      const full = (desc.textContent || '').trim().replace(/\s+/g,' ');
+      if (!full) return;
+
+      const words = full.split(' ');
+      if (words.length > 50){
+        const short = words.slice(0,50).join(' ') + '…';
+        desc.dataset.full = full;
+        desc.textContent = short;
+
+        // "Read more" button
+        const btn = document.createElement('button');
+        btn.className = 'popup-readmore-btn';
+        btn.textContent = 'Read more';
+        btn.addEventListener('click', function(ev){
+          ev.preventDefault();
+          const titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+          const title   = (titleEl && (titleEl.textContent||'').trim()) || '';
+          const imgEl   = node.querySelector('img.popup-img');
+          const imgSrc  = imgEl ? imgEl.getAttribute('src') : null;
+          openDescModal(title, full, imgSrc);
+        });
+        desc.insertAdjacentElement('afterend', btn);
+        desc.dataset.truncated = "1";
+      }
+    });
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  function onLeafletMap(cb){
+    function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    if (window.L && L.map && !L._imgMapFix){
+      const orig = L.map;
+      L.map = function(){
+        const m = orig.apply(this, arguments);
+        window._map = m;
+        try { setTimeout(()=>cb(m),0); } catch(e){}
+        return m;
+      };
+      L._imgMapFix = true;
+    }
+    const iv = setInterval(()=>{
+      if (isMap(window._map)) { clearInterval(iv); try{ cb(window._map);}catch(e){} }
+      else if (isMap(window.map)) { clearInterval(iv); window._map=window.map; try{ cb(window._map);}catch(e){} }
+    }, 120);
+    setTimeout(()=>clearInterval(iv), 10000);
+  }
+  onLeafletMap(function(map){
+    map.on('popupopen', function(e){
+      const node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+      const imgEl   = node.querySelector('img.popup-img');
+      const titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+      const altName = imgEl ? (imgEl.getAttribute('alt')||'') : '';
+      const theatreName = (titleEl && (titleEl.textContent||'').trim()) || altName;
+      if (imgEl && theatreName){
+        const current = imgEl.getAttribute('src') || '';
+        const resolved = theatreImagePathFor(theatreName, current);
+        if (resolved && resolved !== current) {
+          imgEl.src = resolved;
+        }
+      }
+    });
+  });
+})();
+</script>
+
+
+
+<script>
+// --- Hardcoded image maps (override when present) ---
+// Keys should be uppercase; we'll normalize theatre names to these.
+const THEATRE_IMAGE_MAP = {
+  "CAPITOL": "images/CAPITOL.jpg",
+  "LOEWS_STATE": "images/LOEWS_STATE.jpg",
+  "LOEWS_OHIO": "images/LOEWS_OHIO.jpg",
+  "WIND-A-MERE": "images/WIND-A-MERE.jpg",
+  "LOEWS_GRANADA": "images/LOEWS_GRANADA.jpg"
+  // Add more as needed: "PALACE": "images/PALACE.jpg"
+};
+
+const BILLINGS_IMAGE_MAP = {
+  "CAPITOL": "images/billings/CAPITOL_films.png",
+  "LOEWS_STATE": "images/billings/LOEWS_STATE_films.png",
+  "LOEWS_OHIO": "images/billings/LOEWS_OHIO_films.png",
+  "WIND-A-MERE": "images/billings/WIND-A-MERE_films.png",
+  "LOEWS_GRANADA": "images/billings/LOEWS_GRANADA_films.png"
+  // Add more as needed: "PALACE": "images/billings/PALACE_films.png"
+};
+
+function _normBase(name){
+  return String(name||'')
+    .replace(/[’‘`´]/g,"'")
+    .replace(/&amp;/g,"&")
+    .trim();
+}
+function _toUpperUnderscore(name){
+  return _normBase(name)
+    .replace(/[^A-Za-z0-9 ]+/g,' ')
+    .replace(/\s+/g,'_')
+    .toUpperCase();
+}
+function _toUpperDash(name){
+  return _normBase(name)
+    .replace(/[^A-Za-z0-9 ]+/g,' ')
+    .replace(/\s+/g,'-')
+    .toUpperCase();
+}
+// Normalize with special cases (LOEW_S* -> LOEWS*, WIND A MERE -> WIND-A-MERE)
+function normalizeTheatreKey(name){
+  let us = _toUpperUnderscore(name).replace(/^LOEW_S/,'LOEWS').replace(/\bWIND_A_MERE\b/,'WIND-A-MERE');
+  let ud = _toUpperDash(name).replace(/^LOEW-S/,'LOEWS-').replace(/\bWIND-A-MERE\b/,'WIND-A-MERE');
+  return { us, ud };
 }
 
-// Bind only theatre image fallback (img.popup-img)
-(function attachTheatreFallback(){
-  function bind(map){
-    map.on('popupopen', function(e){
-      const node = e.popup && e.popup._contentNode;
-      if (!node) return;
-      const img = node.querySelector('img.popup-img');
-      if (!img) return;
-      const name = img.getAttribute('alt') || '';
-      img.addEventListener('error', function once(){
-        img.removeEventListener('error', once);
-        resolveTheatreJpgVariants(name).then(url => { if (url) img.src = url; });
-      }, { once: true });
-    });
+// Resolve theatre .jpg path from map or by construction
+function theatreImagePathFor(name, existingSrc){
+  // If an existing src has a slash, assume it's already a path (leave it)
+  if (existingSrc && /\//.test(existingSrc)) return existingSrc;
+
+  const { us, ud } = normalizeTheatreKey(name);
+  if (THEATRE_IMAGE_MAP[us]) return THEATRE_IMAGE_MAP[us];
+  if (THEATRE_IMAGE_MAP[ud]) return THEATRE_IMAGE_MAP[ud];
+
+  // Default build: prefer underscore form
+  return 'images/' + us + '.jpg';
+}
+
+// Resolve billings <THEATRE>_films.png using map first
+function billingsPathFor(name){
+  const { us } = normalizeTheatreKey(name);
+  return 'images/billings/' + us + '_films.png';
+}
+</script>
+
+
+
+<!-- Billings modal -->
+<div id="billingsModal" class="modal billings-modal" aria-hidden="true" role="dialog" aria-label="Film billings image">
+  <div class="modal-inner">
+    <button class="closeX" id="billingsClose" aria-label="Close billings">&times;</button>
+    <img id="billingsImg" alt="Film billings" />
+  </div>
+</div>
+
+
+
+<script>
+(function(){
+  // Use existing billingsPathFor and mapping; add modal open/close with error fallback
+  const bModal = document.getElementById('billingsModal');
+  const bImg   = document.getElementById('billingsImg');
+  const bClose = document.getElementById('billingsClose');
+
+  function altBillingsCandidates(name){
+    // Try underscore and dashed variants in case of filename mismatches
+    const { us, ud } = normalizeTheatreKey(name);
+    return [
+      billingsPathFor(name), // mapped or images/billings/<US>_films.png
+      'images/billings/' + ud + '_films.png'
+    ];
   }
-  if (window._map) bind(window._map);
-  else if (window.map) { window._map = window.map; bind(window._map); }
-  else document.addEventListener('DOMContentLoaded', function(){ if (window.map) { window._map = window.map; bind(window._map); } });
+
+  function openBillings(name){
+  const bModal = document.getElementById('billingsModal');
+  const bImg   = document.getElementById('billingsImg');
+  if (!bModal || !bImg) return;
+  const primary = billingsPathFor(name);
+  const { ud } = normalizeTheatreKey(name);
+  const candidates = ud ? [primary, 'images/billings/' + ud + '_films.png'] : [primary];
+  let i = 0;
+  function tryNext(){
+    if (i >= candidates.length) return;
+    const url = candidates[i++];
+    const probe = new Image();
+    probe.onload = function(){ bImg.src = url; };
+    probe.onerror = tryNext;
+    probe.src = url;
+  }
+  tryNext();
+  bModal.setAttribute('aria-hidden','false');
+}
+
+  function closeBillings(){
+    if (!bModal) return;
+    bModal.setAttribute('aria-hidden','true');
+    if (bImg) bImg.removeAttribute('src');
+  }
+
+  if (bClose) bClose.addEventListener('click', closeBillings);
+  if (bModal) bModal.addEventListener('click', (e)=>{ if (e.target === bModal) closeBillings(); });
+  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeBillings(); });
+
+  // Wire a "View billings" button on popup open
+  function onLeafletMap(cb){
+    function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    if (window.L && L.map && !L._billBtnPatch){
+      const orig = L.map;
+      L.map = function(){
+        const m = orig.apply(this, arguments);
+        window._map = m;
+        try { setTimeout(()=>cb(m),0); } catch(e){}
+        return m;
+      };
+      L._billBtnPatch = true;
+    }
+    const iv = setInterval(()=>{
+      if (isMap(window._map)) { clearInterval(iv); try{ cb(window._map);}catch(e){} }
+      else if (isMap(window.map)) { clearInterval(iv); window._map=window.map; try{ cb(window._map);}catch(e){} }
+    }, 120);
+    setTimeout(()=>clearInterval(iv), 10000);
+  }
+
+  onLeafletMap(function(map){
+    map.on('popupopen', function(e){
+      const node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+      // Find theatre name from title or image alt
+      const titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+      const imgEl   = node.querySelector('img.popup-img');
+      const name    = (titleEl && (titleEl.textContent||'').trim()) || (imgEl && imgEl.alt) || '';
+      if (!name) return;
+      // Inject button once
+      if (!node.querySelector('.billings-btn')){
+        const btn = document.createElement('button');
+        btn.className = 'billings-btn';
+        btn.textContent = 'View billings';
+        btn.addEventListener('click', function(ev){
+          ev.preventDefault();
+          openBillings(name);
+        });
+        // place near title if possible
+        (titleEl && titleEl.parentElement ? titleEl.parentElement : node).appendChild(btn);
+      }
+    });
+  });
+})();
+</script>
+
+
+
+<script>
+(function(){
+  function onLeafletMap(cb){
+    function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    if (window.L && L.map && !L._billingsInject){
+      const orig = L.map;
+      L.map = function(){
+        const m = orig.apply(this, arguments);
+        window._map = m;
+        try { setTimeout(()=>cb(m),0); } catch(e){}
+        return m;
+      };
+      L._billingsInject = true;
+    }
+    const iv = setInterval(()=>{
+      if (isMap(window._map)) { clearInterval(iv); try{ cb(window._map);}catch(e){} }
+      else if (isMap(window.map)) { clearInterval(iv); window._map=window.map; try{ cb(window._map);}catch(e){} }
+    }, 120);
+    setTimeout(()=>clearInterval(iv), 10000);
+  }
+  onLeafletMap(function(map){
+    map.on('popupopen', function(e){
+      const node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+      const titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+      const imgEl   = node.querySelector('img.popup-img');
+      const name    = (titleEl && (titleEl.textContent||'').trim()) || (imgEl && imgEl.alt) || '';
+      if (!name) return;
+      if (!node.querySelector('.billings-btn')){
+        const btn = document.createElement('button');
+        btn.className = 'billings-btn';
+        btn.textContent = 'View billings';
+        btn.addEventListener('click', function(ev){
+          ev.preventDefault();
+          openBillings(name);
+        });
+        (titleEl && titleEl.parentElement ? titleEl.parentElement : node).appendChild(btn);
+      }
+    });
+  });
+})();
+</script>
+
+
+
+<script>
+(function(){
+  const MAX_WORDS = 60; // change this value if you want a different cap
+
+  function onLeafletMap(cb){
+    function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    if (window.L && L.map && !L._descPatch){
+      const orig = L.map;
+      L.map = function(){
+        const m = orig.apply(this, arguments);
+        window._map = m;
+        try { setTimeout(()=>cb(m),0); } catch(e){}
+        return m;
+      };
+      L._descPatch = true;
+    }
+    const iv = setInterval(()=>{
+      if (isMap(window._map)) { clearInterval(iv); try{ cb(window._map);}catch(e){} }
+      else if (isMap(window.map)) { clearInterval(iv); window._map=window.map; try{ cb(window._map);}catch(e){} }
+    }, 120);
+    setTimeout(()=>clearInterval(iv), 10000);
+  }
+
+  function openDescModal(title, fullText, imgSrc){
+    const dModal = document.getElementById('descModal');
+    const dImg   = document.getElementById('descImg');
+    const dTitle = document.getElementById('descTitle');
+    const dBody  = document.getElementById('descBody');
+    if (!dModal) return;
+    if (dTitle) dTitle.textContent = title || '';
+    if (dBody) {
+      dBody.innerHTML = '';
+      const p = document.createElement('div');
+      p.textContent = fullText || '';
+      dBody.appendChild(p);
+    }
+    if (dImg) { if (imgSrc) dImg.src = imgSrc; else dImg.removeAttribute('src'); }
+    dModal.setAttribute('aria-hidden','false');
+  }
+
+  onLeafletMap(function(map){
+    map.on('popupopen', function(e){
+      const node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+
+      // Try to find an explicit description node first
+      let desc = node.querySelector('.popup-desc, .description, .details .desc, .copy .desc, .text .desc');
+      // Fallback: first <p> that is not inside the image wrapper
+      if (!desc) {
+        const paragraphs = Array.from(node.querySelectorAll('p'));
+        desc = paragraphs.find(p => !p.closest('.popup-imgwrap'));
+        if (!desc && paragraphs.length) desc = paragraphs[0];
+      }
+      if (!desc) return;
+
+      // Avoid double-processing
+      if (desc.dataset.truncated) return;
+
+      const full = (desc.textContent || '').trim().replace(/\s+/g,' ');
+      if (!full) return;
+      const words = full.split(' ');
+      if (words.length > MAX_WORDS){
+        const short = words.slice(0, MAX_WORDS).join(' ') + '…';
+        desc.dataset.full = full;
+        desc.textContent = short;
+
+        // Add "Read more" button (once)
+        if (!node.querySelector('.popup-readmore-btn')){
+          const btn = document.createElement('button');
+          btn.className = 'popup-readmore-btn';
+          btn.textContent = 'Read more';
+          btn.addEventListener('click', function(ev){
+            ev.preventDefault();
+            const titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+            const title   = (titleEl && (titleEl.textContent||'').trim()) || '';
+            const imgEl   = node.querySelector('img.popup-img');
+            const imgSrc  = imgEl ? imgEl.getAttribute('src') : null;
+            openDescModal(title, full, imgSrc);
+          });
+          desc.insertAdjacentElement('afterend', btn);
+        }
+        desc.dataset.truncated = "1";
+      }
+    });
+  });
+})();
+</script>
+
+
+
+<script>
+(function(){
+  function onLeafletMap(cb){
+    function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    if (window.L && L.map && !L._billingsTextPatch){
+      const orig = L.map;
+      L.map = function(){
+        const m = orig.apply(this, arguments);
+        window._map = m;
+        try { setTimeout(()=>cb(m),0); } catch(e){}
+        return m;
+      };
+      L._billingsTextPatch = true;
+    }
+    const iv = setInterval(()=>{
+      if (isMap(window._map)) { clearInterval(iv); try{ cb(window._map);}catch(e){} }
+      else if (isMap(window.map)) { clearInterval(iv); window._map=window.map; try{ cb(window._map);}catch(e){} }
+    }, 120);
+    setTimeout(()=>clearInterval(iv), 10000);
+  }
+
+  onLeafletMap(function(map){
+    map.on('popupopen', function(e){
+      const node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+
+      // 1) Remove any billings poster images already injected into the popup
+      node.querySelectorAll('img[src*="images/billings/"]').forEach(img => {
+        img.remove();
+      });
+
+      // 2) Find theatre name (title text or image alt)
+      const titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+      const imgEl   = node.querySelector('img.popup-img');
+      const theatreName = (titleEl && (titleEl.textContent||'').trim()) || (imgEl && imgEl.alt) || '';
+
+      // 3) Convert any "Billings: films" text into a clickable button
+      //    Strategy: find elements whose text includes "Billings" and "films" (case-insensitive)
+      const candidates = Array.from(node.querySelectorAll('*')).filter(el => {
+        if (!el.childNodes || el.childNodes.length !== 1) return false; // simple text nodes only
+        const t = (el.textContent || '').trim().toLowerCase();
+        return t.includes('billings') && t.includes('films');
+      });
+
+      candidates.forEach(el => {
+        if (el.querySelector('.billings-link')) return; // already converted
+        const btn = document.createElement('button');
+        btn.className = 'billings-link';
+        btn.type = 'button';
+        btn.textContent = 'Billings: films';
+        btn.addEventListener('click', function(ev){
+          ev.preventDefault();
+          if (typeof openBillings === 'function') {
+            openBillings(theatreName);
+          }
+        });
+        el.innerHTML = '';
+        el.appendChild(btn);
+      });
+    });
+  });
+})();
+</script>
+
+
+
+
+
+
+
+<script>
+(function(){
+  function onLeafletMap(cb){
+    function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    if (window.L && L.map && !L._billingsTextExactPatch2){
+      const orig = L.map;
+      L.map = function(){
+        const m = orig.apply(this, arguments);
+        window._map = m;
+        try { setTimeout(()=>cb(m),0); } catch(e){}
+        return m;
+      };
+      L._billingsTextExactPatch2 = true;
+    }
+    const iv = setInterval(()=>{
+      if (isMap(window._map)) { clearInterval(iv); try{ cb(window._map);}catch(e){} }
+      else if (isMap(window.map)) { clearInterval(iv); window._map=window.map; try{ cb(window._map);}catch(e){} }
+    }, 120);
+    setTimeout(()=>clearInterval(iv), 10000);
+  }
+
+  const TARGET_RE = /\bBillings\s*:\s*films\b/i;
+
+  function makeBillingsLink(theatreName){
+    const btn = document.createElement('button');
+    btn.className = 'billings-link';
+    btn.type = 'button';
+    btn.textContent = 'Billings: films';
+    btn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      if (typeof openBillings === 'function') openBillings(theatreName);
+    });
+    return btn;
+  }
+
+  function replaceTextWithLink(container, theatreName){
+    if (!container) return false;
+    let changed = false;
+    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode(node){
+        const t = node.nodeValue || '';
+        const p = node.parentNode;
+        if (!t || !p) return NodeFilter.FILTER_SKIP;
+        if (p.closest && p.closest('.billings-link')) return NodeFilter.FILTER_SKIP;
+        if (/^(SCRIPT|STYLE)$/.test(p.nodeName)) return NodeFilter.FILTER_SKIP;
+        return TARGET_RE.test(t) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      }
+    });
+    const matches = [];
+    while (walker.nextNode()) matches.push(walker.currentNode);
+    matches.forEach(node => {
+      const text = node.nodeValue;
+      const m = text.match(TARGET_RE);
+      if (!m) return;
+      const start = m.index;
+      const end = start + m[0].length;
+      const before = text.slice(0, start);
+      const after  = text.slice(end);
+      const link = makeBillingsLink(theatreName);
+      const parent = node.parentNode;
+      if (before) parent.insertBefore(document.createTextNode(before), node);
+      parent.insertBefore(link, node);
+      if (after) parent.insertBefore(document.createTextNode(after), node);
+      parent.removeChild(node);
+      changed = true;
+    });
+    return changed;
+  }
+
+  function watchAndReplace(node, theatreName){
+    // Try immediately
+    if (replaceTextWithLink(node, theatreName)) return;
+
+    // Observe for up to 2 seconds to catch async content fills
+    const mo = new MutationObserver(() => {
+      if (replaceTextWithLink(node, theatreName)) {
+        try { mo.disconnect(); } catch(e){}
+      }
+    });
+    try {
+      mo.observe(node, { childList: true, subtree: true, characterData: true });
+      setTimeout(()=>{ try { mo.disconnect(); } catch(e){} }, 2000);
+    } catch(e){}
+  }
+
+  onLeafletMap(function(map){
+    function handle(e){
+      const node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+      const titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+      const imgEl   = node.querySelector('img.popup-img');
+      const theatreName = (titleEl && (titleEl.textContent||'').trim()) || (imgEl && imgEl.alt) || '';
+      watchAndReplace(node, theatreName);
+    }
+    map.on('popupopen', handle);
+    // Some builds emit 'popupupdate' after content render; catch that too
+    if (typeof map.on === 'function') map.on('popupupdate', handle);
+  });
 })();
 </script>
 
