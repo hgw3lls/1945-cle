@@ -3578,7 +3578,16 @@ function popupHTML(props){
 
 </script>
 
-
+<script>
+// Service Worker registration
+(function(){
+  if (('serviceWorker' in navigator) && (location.protocol === 'http:' || location.protocol === 'https:')) {
+  navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(console.error);
+} else {
+  console.log('Service Worker disabled on protocol:', location.protocol);
+}
+})();
+</script>
 
 <script>
 // Deep-linking (id & q) only (sidebar left to original code)
