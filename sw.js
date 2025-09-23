@@ -1,86 +1,13 @@
-// sw.patched.js
-const VERSION = 'v2';
-const ASSET_CACHE = `assets-${VERSION}`;
-const TILE_CACHE  = `tiles-${VERSION}`;
-
-const CORE_ASSETS = [
-  './1945_clevelandfilm.html',
-  './sw.patched.js'
-];
-
-const ALLOWED_TILE_HOSTS = [
-  'tile.openstreetmap.org','a.tile.openstreetmap.org','b.tile.openstreetmap.org','c.tile.openstreetmap.org',
-  'server.arcgisonline.com',
-  'basemaps.cartocdn.com'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil((async () => {
-    const cache = await caches.open(ASSET_CACHE);
-    try { await cache.addAll(CORE_ASSETS); } catch (e) {}
-    self.skipWaiting();
-  })());
+/* Offline-first SW for kiosk (Leaflet tiles) */
+const VERSION='v1.3';const APP=`app-${VERSION}`,TILES=`tiles-${VERSION}`,RUNTIME=`rt-${VERSION}`;
+const PRECACHE=['/','/offline.html'];
+const isHTML=r=>r.destination==='document'||r.headers?.get('accept')?.includes('text/html');
+const isTile=u=>/tile\.openstreetmap\.org\/\d+\/\d+\/\d+\.png/.test(u);
+async function trim(n,m=300){const c=await caches.open(n),k=await c.keys();if(k.length<=m)return;for(let i=0;i<k.length-m;i++)await c.delete(k[i]);}
+self.addEventListener('install',e=>{e.waitUntil(caches.open(APP).then(c=>c.addAll(PRECACHE)).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ns=>Promise.all(ns.map(n=>{if(![APP,TILES,RUNTIME].includes(n))return caches.delete(n);}))).then(()=>self.clients.claim()))});
+self.addEventListener('fetch',e=>{const r=e.request,u=new URL(r.url),same=u.origin===self.location.origin,tile=isTile(u.href);
+ if(isHTML(r)){e.respondWith((async()=>{try{const f=await fetch(r);(await caches.open(APP)).put(r,f.clone());return f}catch(e){const c=await caches.open(APP);return await c.match(r)||await c.match('/offline.html')||new Response('Offline',{status:503});}})());return;}
+ if(tile){e.respondWith((async()=>{const c=await caches.open(TILES),hit=await c.match(r),net=fetch(r).then(res=>{if(res&&res.status===200)c.put(r,res.clone()),trim(TILES,800).catch(()=>{});return res;}).catch(()=>null);return hit||net||new Response(null,{status:504});})());return;}
+ if(same){e.respondWith((async()=>{const c=await caches.open(RUNTIME),hit=await c.match(r);if(hit)return hit;try{const f=await fetch(r);if(f&&f.status===200)c.put(r,f.clone()),trim(RUNTIME,200).catch(()=>{});return f}catch(e){return hit||new Response(null,{status:504});}})());}
 });
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(k =>
-      (k.startsWith('assets-') || k.startsWith('tiles-')) && k !== ASSET_CACHE && k !== TILE_CACHE
-        ? caches.delete(k) : Promise.resolve()
-    ));
-    self.clients.claim();
-  })());
-});
-
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
-  if (req.method !== 'GET') return;
-
-  const url = new URL(req.url);
-
-  if (url.origin === self.location.origin) {
-    if (req.mode === 'navigate') {
-      event.respondWith(cacheFirst('./1945_clevelandfilm.html', ASSET_CACHE));
-      return;
-    }
-    event.respondWith(cacheFirst(req, ASSET_CACHE));
-    return;
-  }
-
-  if (ALLOWED_TILE_HOSTS.some(h => url.host.endsWith(h))) {
-    event.respondWith(staleWhileRevalidateWithLimit(req, TILE_CACHE, 1500));
-  }
-});
-
-async function cacheFirst(requestOrUrl, cacheName) {
-  const request = typeof requestOrUrl === 'string' ? new Request(requestOrUrl) : requestOrUrl;
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
-  if (cached) return cached;
-  const fresh = await fetch(request);
-  cache.put(request, fresh.clone());
-  return fresh;
-}
-
-async function staleWhileRevalidateWithLimit(request, cacheName, maxEntries) {
-  const cache = await caches.open(cacheName);
-  const cached = await cache.match(request);
-
-  const networkFetch = fetch(request).then((resp) => {
-    if (resp && resp.status === 200 && (resp.type === 'basic' || resp.type === 'cors')) {
-      cache.put(request, resp.clone());
-      trimCache(cache, maxEntries).catch(() => {});
-    }
-    return resp;
-  }).catch(() => cached);
-
-  return cached || networkFetch;
-}
-
-async function trimCache(cache, maxEntries) {
-  const keys = await cache.keys();
-  if (keys.length <= maxEntries) return;
-  const toDelete = keys.length - maxEntries;
-  for (let i = 0; i < toDelete; i++) await cache.delete(keys[i]);
-}
