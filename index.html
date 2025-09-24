@@ -605,6 +605,32 @@ body.sidebar-hidden
   display: inline-block !important;
   object-fit: contain;
 }
+
+/* Place both buttons in the exact same spot; only one is visible at a time */
+.modal.info-modal .tools {
+  position: absolute;
+  top: 10px; 
+  right: 56px; /* leave room for the close X */
+  width: 140px; 
+  height: 60px; 
+}
+.modal.info-modal .tools img {
+  position: absolute;
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 56px !important;
+  width: auto !important;
+  display: none;      /* default hidden; JS will show the right one */
+  cursor: pointer;
+}
+
+/* --- View-state driven button visibility --- */
+.modal.info-modal .tools img { display: none; } /* default hidden */
+.modal.info-modal[data-view="about"]  .tools #rs-howto-btn { display: block; }
+.modal.info-modal[data-view="about"]  .tools #rs-about-btn { display: none; }
+.modal.info-modal[data-view="howto"]  .tools #rs-about-btn { display: block; }
+.modal.info-modal[data-view="howto"]  .tools #rs-howto-btn { display: none; }
 </style>
 <style id="rs-modal-lock">
 /* Lock background when modal is open */
@@ -636,7 +662,7 @@ body.modal-open #sidebar {
 <div class="list" id="list"></div>
 </aside>
 <div id="map-frame"><div id="map"></div><button aria-controls="rs-info-modal" aria-label="Info" class="map-info" id="rs-info-btn" title="About this map">i</button>
-</div><div aria-hidden="false" aria-modal="true" class="modal info-modal" id="rs-info-modal" role="dialog"><div class="modal-inner"><div class="closeX" data-close="">✕</div><div class="tools"><img alt="About" id="rs-about-btn" src="images/ABOUT.png" style="height:56px; cursor:pointer; display:none;"/><img alt="How-To" id="rs-howto-btn" src="images/HOWTO.png" style="height:56px; cursor:pointer; display:inline-block;"/></div><div id="rs-about-wrap"><img alt="Reel Screens Info" src="images/reel_screens_info.png" style="max-width:320px; display:block; margin:0 auto 12px;"/><div class="scrollable" id="rs-info-content"><p>August 1945. The war is ending. Ration books sit in kitchen drawers; gasoline and rubber are scarce. Streetcars ring along Euclid and St. Clair, and most Clevelanders walk to the neighborhood movie house. Those small‑but‑proud theatres within a few blocks of home glow again—sanctuaries where the city gathers to share light, sound, and news from the wider world.</p><p>Reel Screens: Cleveland 1945 is your map back to that moment. Tap a dot to see what was on the marquee, open photos and notes, and trace how theatres clustered along transit lines and commercial corridors. Compare downtown palaces with corner houses; follow double‑features, cartoons, and wartime newsreels as they moved across the city’s screens.</p><p>Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call it Hollywood on the Cuyahoga. This was a distribution hub and test market, a showman’s town where ornate marquees lit Euclid Avenue and neighborhood houses kept the reels spinning after factory shifts. In 1945, with V‑J Day crowds spilling into the streets, the movies were more than entertainment: they were civic ritual—stitching together downtown glitz and working‑class blocks from Glenville to Tremont to Collinwood.</p><p>How to explore: pan and zoom the map, use the search bar for theatres/addresses/films, click a pin for details, and open images full‑screen. Toggle the sidebar if you want a wider view. The reels are turning—Cleveland is at the movies.</p></div></div><div class="scrollable rs-hidden" id="rs-howto-wrap"><h2>How to Explore</h2><ul><li>Pan and zoom the map to navigate Cleveland’s theatres.</li><li>Use the search bar for theatre names, addresses, or films.</li><li>Click a pin or list item to open details, images, and notes.</li><li>Tap an image to view it full-screen.</li><li>Use the Home (⌂) button to reset the view.</li><li>Toggle the sidebar for a wider map view.</li></ul></div></div></div>
+</div><div aria-hidden="false" aria-modal="true" class="modal info-modal" data-view="about" id="rs-info-modal" role="dialog"><div class="modal-inner"><div class="closeX" data-close="">✕</div><div class="tools"><img alt="About" id="rs-about-btn" src="images/ABOUT.png"/><img alt="How-To" id="rs-howto-btn" src="images/HOWTO.png"/></div><div id="rs-about-wrap"><img alt="Reel Screens Info" src="images/reel_screens_info.png" style="max-width:320px; display:block; margin:0 auto 12px;"/><div class="scrollable" id="rs-info-content"><p>August 1945. The war is ending. Ration books sit in kitchen drawers; gasoline and rubber are scarce. Streetcars ring along Euclid and St. Clair, and most Clevelanders walk to the neighborhood movie house. Those small‑but‑proud theatres within a few blocks of home glow again—sanctuaries where the city gathers to share light, sound, and news from the wider world.</p><p>Reel Screens: Cleveland 1945 is your map back to that moment. Tap a dot to see what was on the marquee, open photos and notes, and trace how theatres clustered along transit lines and commercial corridors. Compare downtown palaces with corner houses; follow double‑features, cartoons, and wartime newsreels as they moved across the city’s screens.</p><p>Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call it Hollywood on the Cuyahoga. This was a distribution hub and test market, a showman’s town where ornate marquees lit Euclid Avenue and neighborhood houses kept the reels spinning after factory shifts. In 1945, with V‑J Day crowds spilling into the streets, the movies were more than entertainment: they were civic ritual—stitching together downtown glitz and working‑class blocks from Glenville to Tremont to Collinwood.</p><p>How to explore: pan and zoom the map, use the search bar for theatres/addresses/films, click a pin for details, and open images full‑screen. Toggle the sidebar if you want a wider view. The reels are turning—Cleveland is at the movies.</p></div></div><div class="scrollable rs-hidden" id="rs-howto-wrap"><h2>How to Explore</h2><ul><li>Pan and zoom the map to navigate Cleveland’s theatres.</li><li>Use the search bar for theatre names, addresses, or films.</li><li>Click a pin or list item to open details, images, and notes.</li><li>Tap an image to view it full-screen.</li><li>Use the Home (⌂) button to reset the view.</li><li>Toggle the sidebar for a wider map view.</li></ul></div></div></div>
 <!-- Fullscreen image modal -->
 <div id="imgModal"><div aria-label="Close" class="closeX">✕</div><img alt="image preview"/></div>
 <!-- Inline data -->
@@ -5462,41 +5488,42 @@ function billingsPathFor(name){
 
 <script>
 (function(){
-  var modal   = document.getElementById('rs-info-modal');
-  var aboutBtn= document.getElementById('rs-about-btn');
-  var howtoBtn= document.getElementById('rs-howto-btn');
-  var about   = document.getElementById('rs-about-wrap');
-  var howto   = document.getElementById('rs-howto-wrap');
+  var modal    = document.getElementById('rs-info-modal');
+  var aboutBtn = document.getElementById('rs-about-btn');
+  var howtoBtn = document.getElementById('rs-howto-btn');
+  var about    = document.getElementById('rs-about-wrap');
+  var howto    = document.getElementById('rs-howto-wrap') || document.getElementById('rs-instructions-wrap');
 
-  function showHowTo(){
-    if (!about || !howto) return;
-    about.classList.add('rs-hidden');
-    howto.classList.remove('rs-hidden');
-    if (aboutBtn) aboutBtn.style.display = 'inline-block';
-    if (howtoBtn) howtoBtn.style.display = 'none';
+  function setView(view){
+    if (!modal || !about || !howto) return;
+    modal.setAttribute('data-view', view);
+    if (view === 'about'){
+      // show about content, hide howto
+      about.classList.remove('rs-hidden');
+      howto.classList.add('rs-hidden');
+    } else {
+      // show howto content, hide about
+      howto.classList.remove('rs-hidden');
+      about.classList.add('rs-hidden');
+    }
+    // keep scroll top
+    var s = modal.querySelector('.scrollable');
+    if (s) s.scrollTop = 0;
   }
-  function showAbout(){
-    if (!about || !howto) return;
-    howto.classList.add('rs-hidden');
-    about.classList.remove('rs-hidden');
-    if (aboutBtn) aboutBtn.style.display = 'none';
-    if (howtoBtn) howtoBtn.style.display = 'inline-block';
-  }
 
-  if (aboutBtn){ aboutBtn.addEventListener('click', showAbout); }
-  if (howtoBtn){ howtoBtn.addEventListener('click', showHowTo); }
+  if (aboutBtn) aboutBtn.addEventListener('click', function(){ setView('about'); });
+  if (howtoBtn) howtoBtn.addEventListener('click', function(){ setView('howto'); });
 
-  // Default state on load/open: ABOUT content visible, only HOWTO button shown
-  document.addEventListener('DOMContentLoaded', showAbout);
-  window.addEventListener('load', showAbout);
+  // Initial state: About
+  document.addEventListener('DOMContentLoaded', function(){ setView('about'); });
+  window.addEventListener('load', function(){ setView('about'); });
 
+  // When modal opens, enforce state
   if (modal){
     var obs = new MutationObserver(function(muts){
       for (var i=0;i<muts.length;i++){
         if (muts[i].attributeName === 'aria-hidden' && modal.getAttribute('aria-hidden') === 'false'){
-          showAbout();
-          var s = modal.querySelector('.scrollable');
-          if (s) s.scrollTop = 0;
+          setView('about');
         }
       }
     });
