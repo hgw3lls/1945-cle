@@ -1,10 +1,39 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
+<script>
+// ---- Safe globals guard to avoid ReferenceError in desktop testing ----
+(function(){
+  try {
+    if (typeof window.knownImages === 'undefined') window.knownImages = {};
+    if (typeof window.knownPosters === 'undefined') window.knownPosters = {};
+    // Normalize film billings maps across possible names
+    if (typeof window.BILLINGS_IMAGE_MAP === 'undefined' && typeof window.filmBillingsMap !== 'undefined') {
+      window.BILLINGS_IMAGE_MAP = window.filmBillingsMap;
+    }
+    if (typeof window.filmBillingsMap === 'undefined' && typeof window.BILLINGS_IMAGE_MAP !== 'undefined') {
+      window.filmBillingsMap = window.BILLINGS_IMAGE_MAP;
+    }
+    if (typeof window.filmBillingsMap === 'undefined') window.filmBillingsMap = {};
+    if (typeof window.BILLINGS_IMAGE_MAP === 'undefined') window.BILLINGS_IMAGE_MAP = {};
+
+    if (typeof window.getFilmsFor !== 'function') {
+      window.getFilmsFor = function(nameUS){
+        try {
+          var m = window.filmBillingsMap || {};
+          var a = m && m[nameUS];
+          return Array.isArray(a) ? a : [];
+        } catch (e) { return []; }
+      };
+    }
+  } catch (e) { /*noop*/ }
+})();
+</script>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>Reel Screens: Cleveland 1945</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
 <style>
 html, body { height: 100%; margin: 0; }
 body {
@@ -244,10 +273,53 @@ body.sidebar-hidden
   padding: 0;
 }
 
+
+/* Loading overlay */
+#loadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+  z-index: 99999;
+}
+#loadingOverlay .loader {
+  font: 600 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 6px 24px rgba(0,0,0,.08);
+}
+@keyframes pulseFade { 0%{opacity: .4} 50%{opacity: 1} 100%{opacity:.4} }
+#loadingOverlay .loader { animation: pulseFade 1.2s ease-in-out infinite; }
+
+
+
+/* Single-film poster stricter cap */
+.leaflet-popup-content img.popup-posters-img.single-film {
+  max-width: 160px;
+  max-height: 140px;
+  object-fit: contain;
+}
+
+
+/* Poster sizing tiers: 1 film vs 2–3 films vs default */
+.leaflet-popup-content img.popup-posters-img {
+  max-width: 220px;
+  max-height: 180px;
+  object-fit: contain;
+}
+.leaflet-popup-content img.popup-posters-img.single-film {
+  max-width: 160px;
+  max-height: 140px;
+}
+.leaflet-popup-content img.popup-posters-img.multi-small {
+  max-width: 220px;
+  max-height: 180px;
+}
+
 </style>
-
 <style>body.sidebar-hidden #sidebar { display: none !important; }</style>
-
 <style>
 
 /* Details (full description) modal */
@@ -304,8 +376,6 @@ body.sidebar-hidden
 .popup-readmore-btn:hover { background: #2b2b2b; }
 
 </style>
-
-
 <style>
 /* Billings modal styles */
 .modal.billings-modal {
@@ -346,9 +416,7 @@ body.sidebar-hidden
 }
 .billings-btn:hover { background:#2b2b2b; }
 </style>
-
-  <link rel="icon" type="image/png" href="images/reel_screens_logo.png"/>
-
+<link href="images/reel_screens_logo.png" id="kioskLogo" rel="icon" type="image/png"/>
 <style>
 .leaflet-control-zoom-in,
 .leaflet-control-zoom-out,
@@ -360,11 +428,6 @@ body.sidebar-hidden
   text-align: center !important;
 }
 </style>
-
-
-
-
-
 <style id="rs-control-size-tweak">
 /* Match control sizes for Zoom, Home, and Sidebar toggle */
 .leaflet-top.leaflet-left .leaflet-control-zoom-in,
@@ -378,11 +441,6 @@ body.sidebar-hidden
   text-align: center !important;
 }
 </style>
-
-
-
-
-
 <style id="rs-branding-bg">
 /* Sidebar branding: logo over a background image (only this area, not whole sidebar) */
 .sidebar-head .branding {
@@ -415,58 +473,129 @@ body.sidebar-hidden
   height: auto;
 }
 </style>
+<style id="rs-branding-clickable">
+/* Make the sidebar branding area act like a button */
+.sidebar-head .branding[role="button"] {
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+.sidebar-head .branding[role="button"]:focus {
+  box-shadow: 0 0 0 3px rgba(147,197,253,.35);
+  border-radius: 10px;
+}
+</style><style id="rs-info-css">
+/* === Reel Screens INFO controls & modal (scroll-enabled) === */
+.map-info {
+  position: absolute;
+  z-index: 1200;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+}
+.map-info:hover { background:#f8fafc; }
 
-</head>
+.modal.info-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+.modal.info-modal[aria-hidden="false"] { display: flex; }
+.modal.info-modal .modal-inner {
+  position: relative;
+  background: #111;
+  color: #f5f5f5;
+  padding: 24px 24px 18px;
+  border-radius: 10px;
+  max-width: 92vw;
+  max-height: 92vh;          /* restore height limit */
+  width: 820px;
+  box-sizing: border-box;
+  font-size: 18px;
+  line-height: 1.6;
+  overflow: hidden;           /* container clip */
+}
+.modal.info-modal h2 { margin: 0 0 8px; }
+.modal.info-modal .scrollable {
+  max-height: 70vh;          /* scroll area */
+  overflow: auto;            /* enable scrolling */
+  line-height: 1.6;
+  padding-right: 8px;        /* avoid scrollbar overlap */
+}
+.modal.info-modal .closeX {
+  position: absolute;
+  top: 10px; right: 12px;
+  width: 36px; height: 36px;
+  display: grid; place-items:center;
+  background: rgba(255,255,255,.12);
+  color:#fff; border-radius: 999px; cursor:pointer;
+}
+.modal.info-modal .closeX:hover{ background: rgba(255,255,255,.22); }
+
+/* New: top-right Instructions toggle button (sits left of the close X) */
+.modal.info-modal .tools {
+  position: absolute;
+  top: 10px; right: 56px; /* leave space for closeX */
+  display: flex; gap: 8px;
+}
+.modal.info-modal .tools .btn {
+  height: 36px; padding: 0 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.12);
+  color: #fff; border: 1px solid rgba(255,255,255,.18);
+  cursor: pointer;
+  font-size: 14px;
+}
+.modal.info-modal .tools .btn:hover { background: rgba(255,255,255,.22); }
+
+/* Utility for hiding sections */
+.rs-hidden { display: none !important; }
+
+.leaflet-top.leaflet-left #rs-info-btn {
+  width: 42px !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  font-size: 24px !important;
+  text-align: center !important;
+}
+</style></head>
 <body>
+<div id="loadingOverlay"><div class="loader">Loading…</div></div>
 <!-- Hidden placeholder for legacy bindings -->
 <button id="homeBtn" style="display:none"></button>
-
-  <aside id="sidebar">
-    <header class="sidebar-head">
-  <div class="branding" style="text-align:center;">
-    <img src="images/reel_screens_logo.png"
-         alt="Reel Screens: Cleveland 1945 Logo"
-         style="max-width:180px; margin-bottom:8px;"/>
-  </div>
-  
-  <div class="search-wrap">
-    <input id="search" class="search" type="search" placeholder="Search theatres, addresses, films…">
-  </div>
-  <div class="status" id="status">Loading Reel Screens…</div>
-</header>
-
-<section id="intro1945" class="intro1945" style="border:1px solid #eee;border-radius:10px;padding:10px;margin:10px 0;background:#fff;">
-  <div class="section-title" style="font-weight:800;letter-spacing:.5px;color:#111;">REEL SCREENS: CLEVELAND 1945</div>
-  <div style="font-size:14px;line-height:1.5;margin-top:6px;color:#333;">
-    <p><strong>August 1945.</strong> The war is ending. Ration books sit in kitchen drawers; gasoline and rubber are scarce.
-    Streetcars ring along Euclid and St. Clair, and most Clevelanders walk to the neighborhood movie house.
-    Those small‑but‑proud theatres within a few blocks of home glow again—sanctuaries where the city gathers to share light, sound,
-    and news from the wider world.</p>
-
-    <p><em>Reel Screens: Cleveland 1945</em> is your map back to that moment. <strong>Tap a dot</strong> to see what was on the marquee,
-    open photos and notes, and trace how theatres clustered along transit lines and commercial corridors.
-    Compare downtown palaces with corner houses; follow double‑features, cartoons, and wartime newsreels as they moved across the city’s screens.</p>
-
-    <p>Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call it <strong>Hollywood on the Cuyahoga</strong>.
-    This was a distribution hub and test market, a showman’s town where ornate marquees lit Euclid Avenue and neighborhood houses kept the reels
-    spinning after factory shifts. In 1945, with V‑J Day crowds spilling into the streets, the movies were more than entertainment:
-    they were civic ritual—stitching together downtown glitz and working‑class blocks from Glenville to Tremont to Collinwood.</p>
-
-    <p><strong>How to explore:</strong> pan and zoom the map, use the search bar for theatres/addresses/films, click a pin for details, and
-    open images full‑screen. Toggle the sidebar if you want a wider view. The reels are turning—Cleveland is at the movies.</p>
-  </div>
-</section>
-
-    <div class="list" id="list"></div>
-  </aside>
-  <div id="map-frame"><div id="map"></div>
+<aside id="sidebar">
+<header class="sidebar-head">
+<div class="branding" id="brandingInfoTrigger" role="button" style="text-align:center;" tabindex="0">
+<img alt="Reel Screens: Cleveland 1945 Logo" id="kioskLogo" src="images/reel_screens_logo.png" style="max-width:180px; margin-bottom:8px;"/>
 </div>
-
-  <!-- Fullscreen image modal -->
-  <div id="imgModal"><div class="closeX" aria-label="Close">✕</div><img alt="image preview"/></div>
-
-  <!-- Inline data -->
-  <script id="data" type="application/json">
+<div class="search-wrap">
+<input class="search" id="search" placeholder="Search theatres, addresses, films…" type="search"/>
+</div>
+<div class="status" id="status">Loading Reel Screens…</div>
+</header>
+<div class="list" id="list"></div>
+</aside>
+<div id="map-frame"><div id="map"></div><button aria-controls="rs-info-modal" aria-label="Info" class="map-info" id="rs-info-btn" title="About this map">i</button>
+</div><div aria-hidden="false" aria-modal="true" class="modal info-modal" id="rs-info-modal" role="dialog"><div class="modal-inner"><div class="closeX" data-close="">✕</div><div class="tools"><button class="btn" id="rs-instructions-btn" type="button">Instructions</button></div><div id="rs-about-wrap"><img alt="Reel Screens Info" src="images/reel_screens_info.png" style="max-width:320px; display:block; margin:0 auto 12px;"/><div class="scrollable" id="rs-info-content"><p>August 1945. The war is ending. Ration books sit in kitchen drawers; gasoline and rubber are scarce. Streetcars ring along Euclid and St. Clair, and most Clevelanders walk to the neighborhood movie house. Those small‑but‑proud theatres within a few blocks of home glow again—sanctuaries where the city gathers to share light, sound, and news from the wider world.</p><p>Reel Screens: Cleveland 1945 is your map back to that moment. Tap a dot to see what was on the marquee, open photos and notes, and trace how theatres clustered along transit lines and commercial corridors. Compare downtown palaces with corner houses; follow double‑features, cartoons, and wartime newsreels as they moved across the city’s screens.</p><p>Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call it Hollywood on the Cuyahoga. This was a distribution hub and test market, a showman’s town where ornate marquees lit Euclid Avenue and neighborhood houses kept the reels spinning after factory shifts. In 1945, with V‑J Day crowds spilling into the streets, the movies were more than entertainment: they were civic ritual—stitching together downtown glitz and working‑class blocks from Glenville to Tremont to Collinwood.</p><p>How to explore: pan and zoom the map, use the search bar for theatres/addresses/films, click a pin for details, and open images full‑screen. Toggle the sidebar if you want a wider view. The reels are turning—Cleveland is at the movies.</p></div></div><div class="scrollable rs-hidden" id="rs-instructions-wrap"><h2>How to Explore</h2><ul><li>Pan and zoom the map to navigate Cleveland’s theatres.</li><li>Use the search bar for theatre names, addresses, or films.</li><li>Click a pin or list item to open details, images, and notes.</li><li>Tap an image to view it full-screen.</li><li>Use the Home (⌂) button to reset the view.</li><li>Toggle the sidebar for a wider map view.</li></ul></div></div></div>
+<!-- Fullscreen image modal -->
+<div id="imgModal"><div aria-label="Close" class="closeX">✕</div><img alt="image preview"/></div>
+<!-- Inline data -->
+<script id="data" type="application/json">
 {
   "type": "FeatureCollection",
   "features": [
@@ -3133,9 +3262,8 @@ body.sidebar-hidden
   ]
 }
   </script>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
   // --- Utilities ---
   function statusColor(status){ const s=String(status||'').toLowerCase().trim(); if(s==='open') return '#16a34a'; if(s==='closed') return '#dc2626'; return '#64748b'; }
   function statusDot(status){ return '<span class="status-dot" style="display:inline-block;width:10px;height:10px;border-radius:999px;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,.15);background:'+statusColor(status)+';"></span>'; }
@@ -3232,6 +3360,34 @@ body.sidebar-hidden
   "YALE": "images/YALE.jpg",
   "SOUTHERN": "images/SOUTHERN.jpg"
 };
+// --- Background image preloader & SW warmup ---
+(function(){
+  // Collect unique image URLs
+  try {
+    var urls = Array.from(new Set([].concat(Object.values(knownImages||{}), Object.values(typeof BILLINGS_IMAGE_MAP==='object'?BILLINGS_IMAGE_MAP:{})))).filter(Boolean);
+    // Concurrency-limited preloader
+    function preloadAll(list, concurrency){
+      concurrency = Math.max(2, Math.min(8, concurrency||6));
+      var i = 0, active = 0, done = 0;
+      function next(){
+        if (done >= list.length) return;
+        while (active < concurrency && i < list.length){
+          var url = list[i++]; active++;
+          // Prefer fetch (so SW/runtime cache gets it), fallback to Image()
+          ((/^file:/i.test(url) ? Promise.reject('file-scheme') : fetch(url, {cache:'force-cache'}))
+          .catch(function(){ 
+            return new Promise(function(res){ var im=new Image(); im.onload=im.onerror=function(){res()}; im.src=url; });
+          })).finally(function(){ active--; done++; if (done === list.length){ /* finished */ } next(); });
+        }
+      }
+      next();
+    }
+    // Schedule after first render so it doesn't block UI
+    var ric = window.requestIdleCallback || function(fn){ return setTimeout(fn, 500); };
+    ric(function(){ preloadAll(urls, 6); });
+  } catch(e){ console.warn('[preload] skipped:', e); }
+})();
+
 
 // Normalize titles for tolerant lookups (fold curly quotes, strip punctuation/case)
 function normalizeTitle(s){
@@ -3296,23 +3452,31 @@ function toUpperUnderscore(name){
 }
 const knownPosters = {};
 function postersHTML(props){
-  const name = (props.Theatre || props.Theater || props.Name || '').trim();
-  if (!name) return '';
-  const inferred = `images/billings/${toUpperUnderscore(name)}_films.png`;
-  const src = (knownPosters && knownPosters[name]) ? knownPosters[name] : inferred;
-  return `
-    <div class="popup-posters">
-      <img class="popup-posters-img" alt="Film billings for ${name}"
-           src="${src}"
-           onerror="this.style.display='none'">
-    </div>`;
+  const nameRaw = (props.Theatre || props.Theater || props.Name || '').trim();
+  if (!nameRaw) return '';
+  const nameUS = (typeof toUpperUnderscore === 'function')
+                   ? toUpperUnderscore(nameRaw)
+                   : (nameRaw || '').toUpperCase().replace(/\W+/g,'_');
+  const inferred = "images/billings/" + nameUS + "_films.png";
+  const src = (typeof knownPosters !== 'undefined' && knownPosters && knownPosters[nameRaw]) ? knownPosters[nameRaw] : inferred;
+  const films = (typeof filmBillingsMap !== 'undefined' && filmBillingsMap && filmBillingsMap[nameUS]) ? filmBillingsMap[nameUS] : [];
+  const count = Array.isArray(films) ? films.length : 0;
+
+  var sizeClass = '';
+  if (count === 1) sizeClass = 'single-film';
+  else if (count === 2 || count === 3) sizeClass = 'multi-small';
+
+  return (
+    '<div class="popup-posters">' +
+      '<img class="popup-posters-img ' + sizeClass + '"' +
+      ' alt="Film billings for ' + nameRaw + '"' +
+      ' src="' + src + '"' +
+      ' onerror="this.style.display=\'none\'">' +
+    '</div>'
+  );
 }
 
-
-// Auto-generated from CSV: normalized theatre -> array of film titles
-const filmBillingsMap = {"LOEW_S_STATE": ["Salty O'Rourke"], "WIND_A_MERE": ["Keep Your Powder Dry"], "MALL": ["Hangover Square"], "MAPLETOWN": ["Sunday Dinner for a Soldier", "Fighting Lady"], "LOEW_S_OHIO": ["Guest in the House"], "HIPPODROME": ["God Is My Co-Pilot"], "CARTER": ["The Navy Way", "Buckskin Frontier"], "STANDARD": ["Strange Affair", "Sundown Valley"], "LAKE": ["A Tree Grows in Brooklyn"], "EMBASSY": ["Ministry of Fear", "Isle of Tabu"], "TELENEWS": ["German Atrocities--Lublin Death Factory"], "ALHAMBRA": ["Rough, Tough and Ready"], "LOEW_S_PARK": ["The Unseen"], "RKO_KEITH_S_105TH": ["A Song to Remember"], "LOEW_S_GRANADA": ["The Unseen"], "CIRCLE": ["Bluebeard"], "METROPOLITAN": ["The Ape Man", "The Ape"], "UNIVERSITY": ["Days of Glory", "Music for Millions"], "COLONY": ["Between Two Women"], "UPTOWN": ["Hotel Berlin"], "VARIETY": ["Hotel Berlin"], "SHAKER": ["Between Two Women"], "RIVERSIDE": ["Experiment Perilous", "Dark Waters"], "FAIRMOUNT": ["Hotel Berlin"], "ABBY": ["Abroad With Two Yanks", "Gypsy Wildcat"], "ASTOR": ["Since You Went Away"], "GLOBE": ["The Devil Bat", "The Strangler"], "SHORE": ["Between Two Women"], "DOAN": ["Music for Millions", "Thoroughbreds"], "LORAIN": ["Music for Millions", "The Big Showoff"], "CROWN": ["To Have and Have Not", "Tonight and Every Night"], "MARVEL": ["Escort Girl", "I'll Sell My Life"], "HOUGH": ["Woman in the Window", "Friaco Sal"], "REX": ["The Climax", "Partners of the Trail"], "HALTNORTH": ["Lucky Jordan", "Sunday Dinner for a Soldier"], "STILLWELL": ["Two Girls and a Sailor"], "ROYAL": ["Experiment Perilous", "She's a Soldier Too"], "STORK": ["Keys of the Kingdom"], "RIDGE": ["The Thin Man Goes Home", "Moonlight and Cactus"], "AMBASSADOR": ["Music for Millions", "3 Is a Family"], "ALMIRA": ["Music for Millions"], "AVALON": ["Between Two Women", "Isle of Tabu", "Beachhead to Berlin"], "BEACH_CLIFF": ["Hotel Berlin"], "BROADVUE": ["Between Two Women"], "CAPITOL": ["Between Two Women", "Woo Woo"], "CEDAR_LEE": ["Here Come the Co-Eds", "Dark Waters"], "CENTER_MAYFIELD": ["Between Two Women"], "CORLETT": ["Ice Capades Revue", "In Old California"], "COMMODORE": ["Between Two Women", "Wedded Bliss", "Isle of Tabu"], "ECLAIR": ["Lake Placid Serenade", "Thoroughbreds"], "DETROIT": ["Topper", "Youth on Trial"], "DENISON_SQUARE": ["Experiment Perilous", "Alaska"], "EUCLID": ["Music for Millions", "Lake Placid Serenade"], "EZELLA": ["Practically Yours", "Heather and Yon"], "GARDEN": ["Between Two Women", "Bombalera"], "GARFIELD": ["Objective Burma"], "HILLARD_SQUARE": ["Between Two Women", "Beachhead to Berlin"], "GRAND": ["Fast Company", "When the Lights Go on Again"], "IMPERIAL": ["Music for Millions", "Falcon in Hollywood"], "HEIGHTS": ["Hotel Berlin"], "HOMESTEAD": ["Hotel Berlin"], "JENNINGS": ["Jail-Talking Polish Picture"], "LA_SALLE": ["Sandy Dinner for a Soldier"], "JEWEL": ["Keys of the Kingdom", "Gandy’s Dream Girl"], "KNICKERBOCKER": ["A Night to Remember", "Swing Hostess"], "LEXINGTON": ["Fighting Lady", "Lake Placid Serenade", "Thoroughbreds"], "LINCOLN": ["Tonight and Every Night", "Heavenly Days"], "LORAIN_FULTON": ["Between Two Women"], "LYCEUM": ["Frisco Sal", "Enter Arsene Lupin"], "LIBERTY": ["Between Two Women"], "MADISON": ["Our Hearts Were Young and Gay"], "LYRIC": ["Bahama Passage", "The Sky’s the Limit"], "MARKET_SQUARE": ["Storm Over Lisbon", "Mark of the Whistler"], "MORELAND": ["Shine On, Harvest Moon", "Tampico"], "MILO": ["Music for Millions", "Dark Waters"], "MT_PLEASANT": ["Fighting Lady", "Sunday Dinner for a Soldier"], "NORVAL": ["Heavenly Days", "Music for Millions"], "NEW_BROADWAY": ["Practically Yours"], "NEW_VICTORY": ["Keys of the Kingdom"], "NORWOOD": ["Sergeant Mike", "3 Is a Family"], "REGENT": ["Music for Millions", "Thoroughbred"], "PARMA": ["Between Two Women"], "PLAZA": ["Here Come the Waves"], "RIALTO": ["Lake Placid Serenade", "Sergeant Mike"], "SHAW_HAYDEN": ["Between Two Women"], "RITZ": ["Hotel Berlin", "Lilli Marlene"], "SUN": ["Meet Me in St. Louis", "Nevada"], "OLYMPIA": ["Between Two Women"], "SUNBEAM": ["Made for Each Other", "Music in Manhattan"], "SUPERIOR": ["Since You Went Away", "Attack"], "WALDORF": ["I'll Be Seeing You", "Something for the Boys"], "UNION": ["Turnabout", "Dark Mountain"], "UNION_SQUARE": ["Keys of the Kingdom"], "YALE": ["Here Come the Waves"], "SOUTHERN": ["The Woman in the Window", "Nevada"]};
-
-function getFilmsFor(props) {
+function popupDetailsHTML_legacy(props) {
   const nameRaw = (props.Theatre || props.Theater || props.Name || '').trim();
   function toUpperUnderscore(name){
     return String(name || '')
@@ -3328,7 +3492,7 @@ function getFilmsFor(props) {
   if (filmBillingsMap && filmBillingsMap[key]) return filmBillingsMap[key];
 
   // Fallback to properties Movie/Movies split by ';'
-  const films = getFilmsFor(props);
+  const films = []; // legacy stub: was getFilmsFor(props) causing recursion
 
   const img   = imageHTML(props);
 
@@ -3461,12 +3625,54 @@ const list=document.getElementById('list'); const statusEl=document.getElementBy
     });
 
     document.getElementById('homeBtn').addEventListener('click', function(){
-      if(latlngs.length){ map.fitBounds(L.latLngBounds(latlngs).pad(0.08)); }
+      
+        // --- Home View extras ---
+        try { 
+          // 1) Clear selection and close any popups
+          Array.from(document.querySelectorAll('#list .item.active')).forEach(function(el){ el.classList.remove('active'); });
+          if (typeof map !== 'undefined' && map) { map.closePopup(); }
+          // 2) Open sidebar if hidden + sync toggle state/localStorage
+          (function(){
+            var BODY = document.body;
+            var KEY = 'sidebarHidden';
+            var btn = document.getElementById('sidebarToggle');
+            if (BODY.classList.contains('sidebar-hidden')) {
+              BODY.classList.remove('sidebar-hidden');
+              try { localStorage.setItem(KEY, '0'); } catch(e){}
+              if (btn) { btn.textContent = "X"; btn.setAttribute('aria-pressed','false'); btn.title = 'Hide sidebar'; }
+            }
+          })();
+          // 3) Scroll sidebar to top
+          var sidebar = document.getElementById('sidebar');
+          if (sidebar) try { sidebar.scrollTo({top:0, behavior:'smooth'}); } catch(_){ sidebar.scrollTop = 0; }
+        } catch(e){}
+if(latlngs.length){ map.fitBounds(L.latLngBounds(latlngs).pad(0.08)); }
     });
     const mapHomeBtn = document.getElementById('mapHomeBtn');
     if (mapHomeBtn) {
       mapHomeBtn.addEventListener('click', function(){
-        if(latlngs.length){ map.fitBounds(L.latLngBounds(latlngs).pad(0.08)); }
+        
+        // --- Home View extras ---
+        try { 
+          // 1) Clear selection and close any popups
+          Array.from(document.querySelectorAll('#list .item.active')).forEach(function(el){ el.classList.remove('active'); });
+          if (typeof map !== 'undefined' && map) { map.closePopup(); }
+          // 2) Open sidebar if hidden + sync toggle state/localStorage
+          (function(){
+            var BODY = document.body;
+            var KEY = 'sidebarHidden';
+            var btn = document.getElementById('sidebarToggle');
+            if (BODY.classList.contains('sidebar-hidden')) {
+              BODY.classList.remove('sidebar-hidden');
+              try { localStorage.setItem(KEY, '0'); } catch(e){}
+              if (btn) { btn.textContent = "X"; btn.setAttribute('aria-pressed','false'); btn.title = 'Hide sidebar'; }
+            }
+          })();
+          // 3) Scroll sidebar to top
+          var sidebar = document.getElementById('sidebar');
+          if (sidebar) try { sidebar.scrollTo({top:0, behavior:'smooth'}); } catch(_){ sidebar.scrollTop = 0; }
+        } catch(e){}
+if(latlngs.length){ map.fitBounds(L.latLngBounds(latlngs).pad(0.08)); }
       });
     }
 
@@ -3577,9 +3783,6 @@ function popupHTML(props){
 }
 
 </script>
-
-
-
 <script>
 // Deep-linking (id & q) only (sidebar left to original code)
 (function(){
@@ -3629,15 +3832,6 @@ function popupHTML(props){
   });
 })();
 </script>
-
-
-
-
-
-
-
-
-
 <script>
 // --- Safe Leaflet binder: waits for a real L.Map instance before attaching ---
 (function(){
@@ -3717,8 +3911,6 @@ function popupHTML(props){
   try { window.attachTheatreFallback(); } catch(e){}
 })();
 </script>
-
-
 <script>
 // Force sidebar open on every load (ignore saved state)
 (function(){
@@ -3741,27 +3933,21 @@ function popupHTML(props){
   }
 })();
 </script>
-
-
-
 <!-- Full Theatre Details modal -->
-<div id="descModal" class="modal desc-modal" aria-hidden="true" role="dialog" aria-label="Theatre details">
-  <div class="modal-inner">
-    <button class="closeX" id="descClose" aria-label="Close details">&times;</button>
-    <div class="desc-modal-content">
-      <div class="desc-modal-media">
-        <img id="descImg" alt="Theatre image" />
-      </div>
-      <div class="desc-modal-text">
-        <h3 id="descTitle"></h3>
-        <div id="descBody" class="scrollable"></div>
-      </div>
-    </div>
-  </div>
+<div aria-hidden="true" aria-label="Theatre details" class="modal desc-modal" id="descModal" role="dialog">
+<div class="modal-inner">
+<button aria-label="Close details" class="closeX" id="descClose">×</button>
+<div class="desc-modal-content">
+<div class="desc-modal-media">
+<img alt="Theatre image" id="descImg"/>
 </div>
-
-
-
+<div class="desc-modal-text">
+<h3 id="descTitle"></h3>
+<div class="scrollable" id="descBody"></div>
+</div>
+</div>
+</div>
+</div>
 <script>
 (function(){
   // Utility to get first N words
@@ -3858,8 +4044,6 @@ function popupHTML(props){
   });
 })();
 </script>
-
-
 <script>
 (function(){
   // robust truncation + modal open
@@ -3944,8 +4128,6 @@ function popupHTML(props){
   });
 })();
 </script>
-
-
 <script>
 (function(){
   function onLeafletMap(cb){
@@ -3987,9 +4169,6 @@ function popupHTML(props){
   });
 })();
 </script>
-
-
-
 <script>
 // --- Hardcoded image maps (override when present) ---
 // Keys should be uppercase; we'll normalize theatre names to these.
@@ -4055,19 +4234,13 @@ function billingsPathFor(name){
   return 'images/billings/' + us + '_films.png';
 }
 </script>
-
-
-
 <!-- Billings modal -->
-<div id="billingsModal" class="modal billings-modal" aria-hidden="true" role="dialog" aria-label="Film billings image">
-  <div class="modal-inner">
-    <button class="closeX" id="billingsClose" aria-label="Close billings">&times;</button>
-    <img id="billingsImg" alt="Film billings" />
-  </div>
+<div aria-hidden="true" aria-label="Film billings image" class="modal billings-modal" id="billingsModal" role="dialog">
+<div class="modal-inner">
+<button aria-label="Close billings" class="closeX" id="billingsClose">×</button>
+<img alt="Film billings" id="billingsImg"/>
 </div>
-
-
-
+</div>
 <script>
 (function(){
   // Use existing billingsPathFor and mapping; add modal open/close with error fallback
@@ -4161,9 +4334,6 @@ function billingsPathFor(name){
   });
 })();
 </script>
-
-
-
 <script>
 (function(){
   function onLeafletMap(cb){
@@ -4208,14 +4378,6 @@ function billingsPathFor(name){
   });
 })();
 </script>
-
-
-
-
-
-
-
-
 <script>
 // Robust Home View logic with outlier trimming (median/MAD) and fallbacks
 (function() {
@@ -4273,8 +4435,6 @@ function billingsPathFor(name){
   }
   })();
 </script>
-
-
 <script>
 // ---- Reel Screens: robust Home View + Leaflet-styled Home control (dom-injected) ----
 (function(){
@@ -4363,8 +4523,6 @@ function billingsPathFor(name){
   })();
 })();
 </script>
-
-
 <script>
 (function(){
   function captureInitial() {
@@ -4381,8 +4539,6 @@ function billingsPathFor(name){
   }, 120);
 })();
 </script>
-
-
 <!-- Safety: ensure Home View works from both the injected control and any existing #homeBtn -->
 <script>
 (function(){
@@ -4404,14 +4560,6 @@ function billingsPathFor(name){
   }
 })();
 </script>
-
-
-
-
-
-
-
-
 <script>
 // Ensure Home control swallows dblclick so map doesn't zoom
 (function(){
@@ -4429,11 +4577,6 @@ function billingsPathFor(name){
   }, 120);
 })();
 </script>
-
-
-
-
-
 <script>
 // Robust capture of initial center/zoom after first stable view
 (function(){
@@ -4493,19 +4636,12 @@ function billingsPathFor(name){
   }
 })();
 </script>
-
-
 <script>
 (function(){
   if (!window._reelscreens) window._reelscreens = {};
   
 })();
 </script>
-
-
-
-
-
 <script>
 // Ensure a Leaflet-styled Home control exists, swallows dblclick, and calls fitHomeBounds
 (function(){
@@ -4556,8 +4692,6 @@ function billingsPathFor(name){
   }
 })();
 </script>
-
-
 <script>
 // --- Home View: Fixed fallback to initial config if runtime capture fails ---
 (function(){
@@ -4584,8 +4718,6 @@ function billingsPathFor(name){
   
 })();
 </script>
-
-
 <script>
 // Home View: robust map resolver + fallback to startup center/zoom
 (function(){
@@ -4639,8 +4771,6 @@ function billingsPathFor(name){
   };
 })();
 </script>
-
-
 <script>
 // Add a Leaflet-styled Sidebar Toggle control under the Home button
 (function(){
@@ -4710,8 +4840,6 @@ function billingsPathFor(name){
   }
 })();
 </script>
-
-
 <script>
 // Ensure a Leaflet-style Sidebar Toggle exists under the Home button
 (function(){
@@ -4763,8 +4891,6 @@ function billingsPathFor(name){
   }
 })();
 </script>
-
-
 <script>
 // Wire the left sidebar toggle to body.sidebar-hidden and fix map size
 (function(){
@@ -4799,7 +4925,515 @@ function billingsPathFor(name){
     }, 120);
   }
 })();
-</script>
 
+// Hide loading overlay (on ready or after a short timeout as fallback)
+(function(){
+  function hide(){ try{ var o=document.getElementById('loadingOverlay'); if(o) o.style.display='none'; }catch(_){} }
+  // Try after map/list render
+  try { document.addEventListener('DOMContentLoaded', function(){ setTimeout(hide, 1200); }); } catch(_) {}
+  // Safety timeout
+  setTimeout(hide, 3000);
+})();
+
+</script>
+<script>
+// Robust billings button injector to ensure it appears on first open
+(function(){
+  function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+  function tryInject(node){
+    if (!node) return false;
+    if (node.querySelector('.billings-btn')) return true;
+    var titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+    var imgEl   = node.querySelector('img.popup-img');
+    var name    = (titleEl && (titleEl.textContent||'').trim()) || (imgEl && imgEl.alt) || '';
+    if (!name) return false;
+    var btn = document.createElement('button');
+    btn.className = 'billings-btn';
+    btn.textContent = 'View billings';
+    btn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      try { window.openBillings(name); } catch(_) {}
+    });
+    (titleEl && titleEl.parentElement ? titleEl.parentElement : node).appendChild(btn);
+    return true;
+  }
+  function setup(map){
+    map.on('popupopen', function(e){
+      var node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+      if (tryInject(node)) return;
+      // next tick
+      setTimeout(function(){ if (tryInject(node)) return; }, 0);
+      // observe brief DOM changes (content arriving async)
+      var obs = new MutationObserver(function(){
+        if (tryInject(node)) { try { obs.disconnect(); } catch(_){} }
+      });
+      try { obs.observe(node, {childList:true, subtree:true}); } catch(_){}
+      setTimeout(function(){ try{ obs.disconnect(); }catch(_){ } }, 1200);
+    });
+  }
+  // Attach once map is ready
+  (function onLeafletMap(cb){
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    var iv = setInterval(function(){
+      if (isMap(window._map)) { clearInterval(iv); try{ cb(window._map);}catch(e){} }
+      else if (isMap(window.map)) { clearInterval(iv); window._map=window.map; try{ cb(window._map);}catch(e){} }
+    }, 120);
+    setTimeout(function(){ clearInterval(iv); }, 10000);
+  })(setup);
+})();
+</script>
+<script>
+// Ensure 'View billings' button shows on first popup open and not only on second
+(function(){
+  function isMap(m){ return !!(m && typeof m.on==='function' && m._panes); }
+  function tryInject(node){
+    if (!node) return false;
+    if (node.querySelector('.billings-btn')) return true;
+    var titleEl = node.querySelector('.title, .popup-title, h3, h4, [data-name]');
+    var imgEl   = node.querySelector('img.popup-img');
+    var name    = (titleEl && (titleEl.textContent||'').trim()) || (imgEl && imgEl.alt) || '';
+    if (!name) return false;
+    var btn = document.createElement('button');
+    btn.className = 'billings-btn';
+    btn.textContent = 'View billings';
+    btn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      try { window.openBillings && window.openBillings(name); } catch(_) {}
+    });
+    (titleEl && titleEl.parentElement ? titleEl.parentElement : node).appendChild(btn);
+    return true;
+  }
+  function setup(map){
+    map.on('popupopen', function(e){
+      var node = e && e.popup && e.popup._contentNode;
+      if (!node) return;
+      if (tryInject(node)) return;
+      setTimeout(function(){ if (tryInject(node)) return; }, 0);
+      var obs = new MutationObserver(function(){
+        if (tryInject(node)) { try { obs.disconnect(); } catch(_){} }
+      });
+      try { obs.observe(node, {childList:true, subtree:true}); } catch(_){}
+      setTimeout(function(){ try{ obs.disconnect(); }catch(_){ } }, 1500);
+    });
+  }
+  (function waitForMap(cb){
+    if (isMap(window._map)) return cb(window._map);
+    if (isMap(window.map)) { window._map = window.map; return cb(window._map); }
+    var iv = setInterval(function(){
+      if (isMap(window._map)) { clearInterval(iv); cb(window._map); }
+      else if (isMap(window.map)) { clearInterval(iv); window._map = window.map; cb(window._map); }
+    }, 120);
+    setTimeout(function(){ clearInterval(iv); }, 10000);
+  })(setup);
+})();
+</script>
+<script>
+// Background image preloader & hide loading overlay
+(function(){
+  function hideOverlay(){
+    try { var o = document.getElementById('loadingOverlay'); if (o) o.style.display = 'none'; } catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', function(){ setTimeout(hideOverlay, 1200); });
+  setTimeout(hideOverlay, 3500);
+
+  function unique(arr){ var s={}, out=[]; for (var i=0;i<arr.length;i++){ var v=arr[i]; if (v && !s[v]){ s[v]=1; out.push(v); } } return out; }
+  function collectUrls(){
+    var urls = [];
+    try { urls = urls.concat(Object.values(typeof knownImages!=='undefined' ? knownImages : {})); } catch(e){}
+    try { urls = urls.concat(Object.values(typeof BILLINGS_IMAGE_MAP!=='undefined' ? BILLINGS_IMAGE_MAP : {})); } catch(e){}
+    return unique(urls.filter(Boolean));
+  }
+  function preloadAll(list, concurrency){
+    concurrency = Math.max(2, Math.min(8, concurrency||6));
+    var i = 0, active = 0;
+    function kick(){
+      while (active < concurrency && i < list.length){
+        var url = list[i++]; active++;
+        ((/^file:/i.test(url) ? Promise.reject('file-scheme') : fetch(url, {cache:'force-cache'}))
+          .catch(function(){
+          return new Promise(function(res){
+            var im=new Image(); im.onload=im.onerror=function(){res()}; im.src=url;
+          });
+        })).finally(function(){ active--; kick(); });
+      }
+    }
+    kick();
+  }
+  var ric = window.requestIdleCallback || function(fn){ return setTimeout(fn, 500); };
+  ric(function(){ try{ preloadAll(collectUrls(), 6); } catch(e){} });
+})();
+</script>
+<script>
+// Home View: clear selection, open sidebar, scroll to top, and fit bounds with sidebar padding
+(function(){
+  function openSidebarIfHidden(){
+    var BODY = document.body;
+    var KEY = 'sidebarHidden';
+    if (BODY.classList.contains('sidebar-hidden')){
+      BODY.classList.remove('sidebar-hidden');
+      try { localStorage.setItem(KEY, '0'); } catch(e){}
+    }
+    var sidebar = document.getElementById('sidebar');
+    if (sidebar){ try { sidebar.scrollTo({top:0, behavior:'smooth'}); } catch(_){ sidebar.scrollTop = 0; } }
+  }
+  function clearSelection(){
+    try {
+      Array.from(document.querySelectorAll('#list .item.active')).forEach(function(el){ el.classList.remove('active'); });
+      if (window.map && typeof window.map.closePopup==='function') window.map.closePopup();
+    } catch(e){}
+  }
+  function fitHome(){
+    try {
+      var latlngs = [];
+      if (window._allMarkers && window._allMarkers.length){
+        for (var i=0;i<window._allMarkers.length;i++){ var m=window._allMarkers[i]; if (m.getLatLng) latlngs.push(m.getLatLng()); }
+      }
+      if (latlngs.length && window.L && window.map){
+        var open = !document.body.classList.contains('sidebar-hidden');
+        var leftPad = open ? 420 + 24 : 16;
+        window.map.fitBounds(window.L.latLngBounds(latlngs).pad(0.08), {
+          paddingTopLeft: [leftPad, 16],
+          paddingBottomRight: [16, 16]
+        });
+      }
+    } catch(e){}
+  }
+  function goHome(){
+    clearSelection();
+    openSidebarIfHidden();
+    fitHome();
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var hb = document.getElementById('homeBtn'); if (hb) hb.addEventListener('click', goHome);
+    var rsh = document.getElementById('rs-home-btn'); if (rsh) rsh.addEventListener('click', goHome);
+  });
+  window.goHome = goHome;
+})();
+</script>
+<!-- Admin exit modal (hidden) -->
+<div id="adminOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;">
+<div style="background:#fff;padding:20px;border-radius:8px;max-width:480px;width:90%;box-shadow:0 6px 24px rgba(0,0,0,0.3);text-align:left;">
+<h2 style="margin-top:0;">Admin Panel</h2>
+<p>Enter password to access admin actions.</p>
+<input id="adminPass" placeholder="Password" style="width:100%;padding:8px;margin-bottom:12px;" type="password"/>
+<div style="display:flex;gap:8px;justify-content:flex-end;">
+<button id="adminCancelBtn" style="padding:8px 12px;">Cancel</button>
+<button id="adminUnlockBtn" style="padding:8px 12px;background:#d32f2f;color:#fff;border:none;border-radius:4px;">Unlock</button>
+</div>
+<div id="adminActions" style="margin-top:12px;display:none;">
+<hr/>
+<button id="exitAppBtn" style="padding:10px 12px;width:100%;margin-top:8px;background:#333;color:#fff;border:none;border-radius:4px;">Exit App</button>
+<button id="reloadContentBtn" style="padding:10px 12px;width:100%;margin-top:8px;background:#1976d2;color:#fff;border:none;border-radius:4px;">Reload Content</button>
+<button id="toggleKioskBtn" style="padding:10px 12px;width:100%;margin-top:8px;background:#00796b;color:#fff;border:none;border-radius:4px;">Toggle Kiosk Mode</button>
+</div>
+<div id="adminMsg" style="margin-top:8px;color:#d32f2f;display:none;"></div>
+</div>
+</div>
+<script>
+(function(){
+  const tapsRequired = 7;
+  const tapWindowMs = 3000;
+  let tapCount = 0;
+  let firstTapAt = 0;
+
+  const logo = document.getElementById('kioskLogo');
+  function showAdminOverlay() {
+    const ol = document.getElementById('adminOverlay');
+    if (!ol) return;
+    ol.style.display = 'flex';
+    document.getElementById('adminPass').value = '';
+    document.getElementById('adminMsg').style.display = 'none';
+    document.getElementById('adminActions').style.display = 'none';
+    document.getElementById('adminPass').style.display = 'block';
+    document.getElementById('adminUnlockBtn').style.display = 'inline-block';
+    document.getElementById('adminPass').focus();
+  }
+  function hideAdminOverlay() {
+    const ol = document.getElementById('adminOverlay');
+    if (!ol) return;
+    ol.style.display = 'none';
+  }
+
+  if (logo) {
+    logo.style.cursor = 'pointer';
+    logo.addEventListener('click', function(){
+      const now = Date.now();
+      if (now - firstTapAt > tapWindowMs) {
+        tapCount = 0;
+        firstTapAt = now;
+      }
+      tapCount++;
+      if (tapCount === 1) firstTapAt = now;
+      if (tapCount >= tapsRequired && (now - firstTapAt) <= tapWindowMs) {
+        tapCount = 0; firstTapAt = 0;
+        showAdminOverlay();
+      }
+    });
+  } else {
+    console.warn('kioskLogo not found for admin taps');
+  }
+
+  // Admin modal buttons
+  document.addEventListener('click', function(ev){
+    if (ev.target && ev.target.id === 'adminCancelBtn') hideAdminOverlay();
+  });
+
+  document.getElementById('adminUnlockBtn').addEventListener('click', function(){
+    const pass = document.getElementById('adminPass').value || '';
+    const msg = document.getElementById('adminMsg');
+    if (pass.trim() === '1945') {
+      msg.style.display = 'none';
+      document.getElementById('adminActions').style.display = 'block';
+      // Optionally hide password input after success
+      document.getElementById('adminPass').style.display = 'none';
+      document.getElementById('adminUnlockBtn').style.display = 'none';
+    } else {
+      msg.style.display = 'block';
+      msg.textContent = 'Incorrect password';
+    }
+  });
+
+  // Admin actions
+  document.getElementById('exitAppBtn').addEventListener('click', function(){
+    // Try Android bridge if available
+    if (window.Android && typeof window.Android.exitApp === 'function') {
+      try { window.Android.exitApp(); } catch(e){ console.warn(e); }
+    } else if (navigator && navigator.app && typeof navigator.app.exitApp === 'function') {
+      try { navigator.app.exitApp(); } catch(e){ console.warn(e); }
+    } else {
+      // Fallback: navigate to a blank page
+      window.location.href = 'about:blank';
+    }
+  });
+
+  document.getElementById('reloadContentBtn').addEventListener('click', function(){
+    location.reload(true);
+  });
+
+  // Toggle kiosk: call Android.toggleKiosk() if exposed; otherwise show message
+  document.getElementById('toggleKioskBtn').addEventListener('click', function(){
+    if (window.Android && typeof window.Android.toggleKiosk === 'function') {
+      try { window.Android.toggleKiosk(); } catch(e){ console.warn(e); }
+    } else {
+      const msg = document.getElementById('adminMsg');
+      msg.style.display = 'block';
+      msg.style.color = '#000';
+      msg.textContent = 'Kiosk toggle not available natively.';
+    }
+  });
+
+  // Close overlay when clicking outside the modal content
+  document.getElementById('adminOverlay').addEventListener('click', function(ev){
+    if (ev.target && ev.target.id === 'adminOverlay') hideAdminOverlay();
+  });
+
+  // Allow Enter key to unlock
+  document.getElementById('adminPass').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') {
+      document.getElementById('adminUnlockBtn').click();
+    }
+  });
+})();
+</script>
+<!-- Android touch reliability patch -->
+<style>
+  button, .tap, .icon, #homeBtn {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+  }
+  /* If your sidebar already has its own styles, this won't interfere */
+  #sidebar.open { pointer-events: auto; }
+</style>
+<script>
+(function(){
+  // Idempotent: don't double-install
+  if (window.__androidTouchPatched) return;
+  window.__androidTouchPatched = true;
+
+  function onTap(el, handler){
+    if (!el) return;
+    if (window.PointerEvent){
+      el.addEventListener('pointerup', handler, {passive:true});
+    } else {
+      el.addEventListener('touchend', function(e){
+        try { e.preventDefault(); } catch(_) {}
+        handler(e);
+      }, {passive:false});
+      el.addEventListener('click', handler);
+    }
+  }
+
+  function openSidebar(){
+    var sb = document.getElementById('sidebar');
+    if (!sb) return;
+    // Prefer existing API if present
+    if (typeof window.showSidebar === 'function') { window.showSidebar(); }
+    else if (typeof sb.show === 'function') { sb.show(); }
+    else { sb.classList.add('open'); }
+    // scroll top
+    var scroller = sb.querySelector('.sidebar-content') || sb;
+    try { scroller.scrollTo({top:0, behavior:'instant'}); } catch(_) { scroller.scrollTop = 0; }
+  }
+
+  var homeBtn = document.getElementById('homeBtn');
+  if (homeBtn){
+    onTap(homeBtn, function(e){
+      try {
+        if (typeof goHome === 'function') goHome();
+        else if (typeof window.navigateHome === 'function') window.navigateHome();
+        // ensure sidebar is visible & reset
+        openSidebar();
+      } catch(err){
+        console && console.warn && console.warn('Home tap handler error:', err);
+      }
+    });
+  }
+})();
+</script>
+<script>
+(function(){
+  var infoBtn = document.getElementById('rs-info-btn');
+  var modal   = document.getElementById('rs-info-modal');
+
+  function openInfo(){ if(modal) modal.setAttribute('aria-hidden','false'); }
+  function closeInfo(){ if(modal) modal.setAttribute('aria-hidden','true'); }
+
+  if (infoBtn && modal){
+    infoBtn.addEventListener('click', openInfo);
+  }
+  if (modal){
+    modal.addEventListener('click', function(e){
+      if (e.target === modal || e.target.hasAttribute('data-close')) closeInfo();
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') closeInfo();
+    });
+  }
+
+  // Header branding opens the same modal
+  var branding = document.getElementById('brandingInfoTrigger') || document.querySelector('.sidebar-head .branding');
+  if (branding && modal){
+    branding.setAttribute('role','button');
+    branding.setAttribute('tabindex','0');
+    branding.addEventListener('click', openInfo);
+    branding.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openInfo();
+      }
+    });
+  }
+})();
+</script>
+<script>
+// Ensure Leaflet map refreshes when layout changes (e.g., sidebar hidden)
+(function(){
+  function nudgeMap() {
+    // Dispatch resize events a couple of times to ensure Leaflet recalculates
+    try {
+      window.dispatchEvent(new Event('resize'));
+      setTimeout(function(){ window.dispatchEvent(new Event('resize')); }, 150);
+      setTimeout(function(){ window.dispatchEvent(new Event('resize')); }, 400);
+    } catch(e){ /* noop */ }
+    // If we have a known map reference, try to invalidate directly as well
+    try {
+      if (window.rsMap && typeof window.rsMap.invalidateSize === 'function') {
+        window.rsMap.invalidateSize(true);
+        setTimeout(function(){ window.rsMap.invalidateSize(true); }, 200);
+      }
+    } catch(e){ /* noop */ }
+  }
+
+  // Try to capture a reference to the map when created (for direct invalidateSize)
+  if (window.L && typeof L.map === 'function' && !window.__rsPatchedLMap) {
+    window.__rsPatchedLMap = true;
+    var __origMap = L.map;
+    L.map = function(){
+      var m = __origMap.apply(this, arguments);
+      try { window.rsMap = m; } catch(e){}
+      // After first map creation, give a quick nudge
+      setTimeout(nudgeMap, 50);
+      return m;
+    };
+  }
+
+  // Nudge on load
+  window.addEventListener('load', nudgeMap);
+
+  // Nudge on any window resize just in case
+  window.addEventListener('resize', function(){
+    // debounce a bit
+    clearTimeout(window.__rsResizeDebounce);
+    window.__rsResizeDebounce = setTimeout(nudgeMap, 50);
+  });
+
+  // Observe body class changes (e.g., toggling 'sidebar-hidden')
+  try {
+    var target = document.body;
+    var mo = new MutationObserver(function(muts){
+      for (var i=0;i<muts.length;i++){
+        if (muts[i].attributeName === 'class') {
+          nudgeMap();
+          break;
+        }
+      }
+    });
+    mo.observe(target, { attributes: true });
+  } catch(e){ /* noop */ }
+
+  // Expose a manual hook (optional)
+  window.rsNudgeMap = nudgeMap;
+})();
+</script>
+<script>
+(function(){
+  var modal = document.getElementById('rs-info-modal');
+  var btn   = document.getElementById('rs-instructions-btn');
+  var about = document.getElementById('rs-about-wrap');
+  var inst  = document.getElementById('rs-instructions-wrap');
+
+  function showInstructions(){
+    if (!about || !inst) return;
+    about.classList.add('rs-hidden');
+    inst.classList.remove('rs-hidden');
+    btn.textContent = 'About';
+  }
+  function showAbout(){
+    if (!about || !inst) return;
+    inst.classList.add('rs-hidden');
+    about.classList.remove('rs-hidden');
+    btn.textContent = 'Instructions';
+  }
+  function toggle(){
+    if (!about || !inst) return;
+    if (inst.classList.contains('rs-hidden')){
+      showInstructions();
+    } else {
+      showAbout();
+    }
+  }
+  if (btn){
+    btn.addEventListener('click', toggle);
+  }
+  // Ensure scrollable areas nudge on open to reveal content properly
+  if (modal){
+    var obs = new MutationObserver(function(muts){
+      for (var i=0;i<muts.length;i++){
+        if (muts[i].attributeName === 'aria-hidden' && modal.getAttribute('aria-hidden') === 'false'){
+          // Reset to About view on open
+          showAbout();
+          // Scroll to top
+          var s = modal.querySelector('.scrollable');
+          if (s) s.scrollTop = 0;
+        }
+      }
+    });
+    obs.observe(modal, { attributes: true });
+  }
+})();
+</script>
 </body>
 </html>
