@@ -5809,15 +5809,7 @@ function billingsPathFor(name){
     document.addEventListener('DOMContentLoaded', startIdleCountdown);
   }
 
-  window.RS_IDLE = {
-    start: startAuto,
-    stop: function(){ stopAuto(false); },
-    stopAndHome: function(){ hideAttract(); stopAuto(true); },
-    reset: startIdleCountdown,
-    setIdleMs: function(ms){ IDLE_MS = +ms || IDLE_MS; startIdleCountdown(); },
-    setPaceMs: function(ms){ PACE_MS = +ms || PACE_MS; if (paceTimer){ clearInterval(paceTimer); paceTimer = setInterval(function(){}, PACE_MS); } },
-    setMaxMs: function(ms){ MAX_MS = +ms || MAX_MS; }
-  };
+  
 })();
 </script>
 
@@ -5836,37 +5828,12 @@ function billingsPathFor(name){
   #rs-attract-iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; display: block; background: #000; }
   #rs-attract-tap { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; margin: 0; padding: 0; cursor: pointer; background: transparent; }
 </style>
-<div id="rs-attract" aria-label="Attract Screen">
-  <iframe id="rs-attract-iframe" title="Attract"></iframe>
-  <button id="rs-attract-tap" aria-label="Tap to start"></button>
-</div>
+
 
 <!-- Raw marquee HTML payload (base64) -->
 <script id="rs-attract-raw" type="application/octet-stream" data-b64="PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgPG1ldGEgY2hhcnNldD0idXRmLTgiIC8+CiAgPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xIiAvPgogIDx0aXRsZT5WZXJ0aWNhbCBNYXJxdWVlIOKAlCBQb3N0ZXJzPC90aXRsZT4KICA8c3R5bGU+CiAgICBAZm9udC1mYWNlIHsKICAgICAgZm9udC1mYW1pbHk6ICdMZWFndWVHb3RoaWMnOwogICAgICBzcmM6IHVybCgnZm9udHMvTGVhZ3VlR290aGljLVJlZ3VsYXIud29mZjInKSBmb3JtYXQoJ3dvZmYyJyksCiAgICAgICAgICAgdXJsKCdmb250cy9MZWFndWVHb3RoaWMtUmVndWxhci53b2ZmJykgZm9ybWF0KCd3b2ZmJyksCiAgICAgICAgICAgdXJsKCdmb250cy9MZWFndWVHb3RoaWMtUmVndWxhci50dGYnKSBmb3JtYXQoJ3RydWV0eXBlJyk7CiAgICAgIGZvbnQtd2VpZ2h0OiBub3JtYWw7CiAgICAgIGZvbnQtc3R5bGU6IG5vcm1hbDsKICAgIH0KCiAgICA6cm9vdCB7CiAgICAgIC0tYmc6ICMwYjBiMGI7CiAgICAgIC0tZmc6ICNlNmU2ZTY7CiAgICAgIC0tZ2FwOiBjbGFtcCg0cHgsIDEuMnZ3LCAxMHB4KTsKICAgICAgLS1wb3N0ZXItdzogbWluKDI4dncsIDM2MHB4KTsKICAgICAgLS1yYWRpdXM6IDE2cHg7CiAgICAgIC0tc2hhZG93OiAwIDZweCAyNHB4IHJnYmEoMCwwLDAsLjM1KTsKICAgICAgLS1zcGVlZDogNDVzOwogICAgfQoKICAgICogeyBib3gtc2l6aW5nOiBib3JkZXItYm94OyB9CiAgICBodG1sLCBib2R5IHsgaGVpZ2h0OiAxMDAlOyB9CiAgICBib2R5IHsKICAgICAgbWFyZ2luOiAwOwogICAgICBiYWNrZ3JvdW5kOiByYWRpYWwtZ3JhZGllbnQoMTIwMHB4IDgwMHB4IGF0IDgwJSAtMTAlLCAjMTcxNzE3IDAlLCAjMGIwYjBiIDU1JSwgIzA2MDYwNiAxMDAlKTsKICAgICAgY29sb3I6IHZhcigtLWZnKTsKICAgICAgZm9udDogNDAwIDE1cHgvMS41IHN5c3RlbS11aSwgLWFwcGxlLXN5c3RlbSwgU2Vnb2UgVUksIFJvYm90bywgSGVsdmV0aWNhLCBBcmlhbCwgTm90byBTYW5zOwogICAgICBvdmVyZmxvdzogaGlkZGVuOwogICAgfQoKICAgIC5sb2dvIHsKICAgICAgcG9zaXRpb246IGZpeGVkOyB6LWluZGV4OiAxMDsKICAgICAgbGVmdDogNTAlOyB0b3A6IDE0cHg7IHRyYW5zZm9ybTogdHJhbnNsYXRlWCgtNTAlKTsKICAgICAgd2lkdGg6IG1pbig0MnZ3LCA1MjBweCk7CiAgICAgIGZpbHRlcjogZHJvcC1zaGFkb3coMCAxMHB4IDI0cHggcmdiYSgwLDAsMCwuNjUpKTsKICAgICAgcG9pbnRlci1ldmVudHM6IG5vbmU7CiAgICB9CgogICAgLnRhZ2xpbmUgewogICAgICBwb3NpdGlvbjogZml4ZWQ7CiAgICAgIHotaW5kZXg6IDk7CiAgICAgIHRvcDogY2FsYygxNHB4ICsgbWluKDQydncsIDUyMHB4KSArIDE2cHgpOwogICAgICBsZWZ0OiA1MCU7CiAgICAgIHRyYW5zZm9ybTogdHJhbnNsYXRlWCgtNTAlKTsKICAgICAgZm9udC1zaXplOiBjbGFtcCgyMHB4LCAzdncsIDQwcHgpOwogICAgICBjb2xvcjogI2ZmZmZmZjsKICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICBmb250LWZhbWlseTogJ0xlYWd1ZUdvdGhpYycsIEltcGFjdCwgc2Fucy1zZXJpZjsKICAgICAgbGV0dGVyLXNwYWNpbmc6IDFweDsKICAgICAgdGV4dC10cmFuc2Zvcm06IHVwcGVyY2FzZTsKICAgICAgdGV4dC1zaGFkb3c6IDAgMCA2cHggcmdiYSgwLDAsMCwwLjkpLCAwIDAgMThweCByZ2JhKDAsMCwwLDAuOCksIDAgMCAyOHB4IHJnYmEoMjU1LDI1NSwyNTUsMC40KTsKICAgICAgYW5pbWF0aW9uOiBwdWxzZSAyLjVzIGVhc2UtaW4tb3V0IGluZmluaXRlOwogICAgICBwb2ludGVyLWV2ZW50czogbm9uZTsKICAgICAgbGluZS1oZWlnaHQ6IDEuMzsKICAgIH0KCiAgICAudGFnbGluZSAuY3RhIHsKICAgICAgZGlzcGxheTogYmxvY2s7CiAgICAgIG1hcmdpbi10b3A6IDhweDsKICAgICAgY29sb3I6ICNmZmNjMzM7CiAgICAgIHRleHQtc2hhZG93OiAwIDAgMTBweCByZ2JhKDAsMCwwLDAuOSksIDAgMCAyMHB4IHJnYmEoMjU1LDIwNCw1MSwwLjgpLCAwIDAgMzJweCByZ2JhKDI1NSwyMDQsNTEsMC43KTsKICAgIH0KCiAgICBAa2V5ZnJhbWVzIHB1bHNlIHsKICAgICAgMCUsMTAwJSB7IG9wYWNpdHk6IDE7IH0KICAgICAgNTAlIHsgb3BhY2l0eTogMC43NTsgfQogICAgfQoKICAgIC53cmFwIHsgbWF4LXdpZHRoOiAxNDAwcHg7IG1hcmdpbjogMCBhdXRvOyBwYWRkaW5nOiAxMjBweCBtYXgoMTBweCwgM3Z3KSAyNHB4OyB9CgogICAgLndhbGwgewogICAgICBkaXNwbGF5OiBncmlkOwogICAgICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdChhdXRvLWZpdCwgbWlubWF4KDI0MHB4LCAxZnIpKTsKICAgICAgZ2FwOiB2YXIoLS1nYXApOwogICAgICBhbGlnbi1pdGVtczogc3RhcnQ7CiAgICB9CgogICAgLmNvbCB7IGRpc3BsYXk6IGdyaWQ7IGdhcDogdmFyKC0tZ2FwKTsgZ3JpZC1hdXRvLXJvd3M6IG1pbi1jb250ZW50OyBhbmltYXRpb246IHNjcm9sbFkgdmFyKC0tc3BlZWQpIGxpbmVhciBpbmZpbml0ZTsgfQogICAgLmNvbDpudGgtY2hpbGQoMikgeyBhbmltYXRpb24tZHVyYXRpb246IGNhbGModmFyKC0tc3BlZWQpICogMS4xNSk7IGFuaW1hdGlvbi1kaXJlY3Rpb246IHJldmVyc2U7IH0KICAgIC5jb2w6bnRoLWNoaWxkKDMpIHsgYW5pbWF0aW9uLWR1cmF0aW9uOiBjYWxjKHZhcigtLXNwZWVkKSAqIDAuOSk7IH0KCiAgICBAa2V5ZnJhbWVzIHNjcm9sbFkgeyAwJSB7IHRyYW5zZm9ybTogdHJhbnNsYXRlWSgwKTsgfSAxMDAlIHsgdHJhbnNmb3JtOiB0cmFuc2xhdGVZKC01MCUpOyB9IH0KCiAgICAucG9zdGVyIHsgd2lkdGg6IDEwMCU7IG1heC13aWR0aDogdmFyKC0tcG9zdGVyLXcpOyBib3JkZXItcmFkaXVzOiB2YXIoLS1yYWRpdXMpOyBvdmVyZmxvdzogaGlkZGVuOyBib3gtc2hhZG93OiB2YXIoLS1zaGFkb3cpOyBiYWNrZ3JvdW5kOiAjMTExOyBib3JkZXI6IDFweCBzb2xpZCByZ2JhKDI1NSwyNTUsMjU1LC4wOCk7IGFzcGVjdC1yYXRpbzogMi8zOyBwb3NpdGlvbjogcmVsYXRpdmU7IGlzb2xhdGlvbjogaXNvbGF0ZTsgfQogICAgLnBvc3RlciBpbWcgeyB3aWR0aDogMTAwJTsgaGVpZ2h0OiAxMDAlOyBvYmplY3QtZml0OiBjb3ZlcjsgZGlzcGxheTogYmxvY2s7IGZpbHRlcjogc2F0dXJhdGUoMS4wNSkgY29udHJhc3QoMS4wNSk7IH0KICAgIC5wb3N0ZXI6OmFmdGVyIHsgY29udGVudDogIiI7IHBvc2l0aW9uOiBhYnNvbHV0ZTsgaW5zZXQ6IDA7IGJhY2tncm91bmQ6IHJhZGlhbC1ncmFkaWVudCgxMjAlIDEwMCUgYXQgNTAlIDAlLCB0cmFuc3BhcmVudCA0MCUsIHJnYmEoMCwwLDAsLjI1KSA4NSUsIHJnYmEoMCwwLDAsLjYpIDEwMCUpOyBwb2ludGVyLWV2ZW50czogbm9uZTsgbWl4LWJsZW5kLW1vZGU6IG11bHRpcGx5OyB9CgogICAgLmVtcHR5IHsgb3BhY2l0eTogLjc7IHRleHQtYWxpZ246IGNlbnRlcjsgcGFkZGluZzogMjRweDsgfQogICAgZm9vdGVyIHsgb3BhY2l0eTogLjY7IHRleHQtYWxpZ246IGNlbnRlcjsgcGFkZGluZzogOHB4IDAgMjBweDsgZm9udC1zaXplOiAxM3B4OyB9CgogICAgQG1lZGlhIChtYXgtd2lkdGg6IDYwMHB4KSB7IDpyb290IHsgLS1zcGVlZDogNjBzOyB9IC53cmFwe3BhZGRpbmctdG9wOjk2cHh9IH0KICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PgogIDxpbWcgY2xhc3M9ImxvZ28iIHNyYz0iaW1hZ2VzL3JlZWxfc2NyZWVuc19sb2dvLnBuZyIgYWx0PSJSZWVsIFNjcmVlbnMg4oCUIENsZXZlbGFuZCAxOTQ1IiAvPgogIDxkaXYgY2xhc3M9InRhZ2xpbmUiPldoZXJlIERpZCBDbGV2ZWxhbmQgR28gdG8gdGhlIE1vdmllcyBpbiAxOTQ1PzxzcGFuIGNsYXNzPSJjdGEiPlRhcCB0byBGaW5kIE91dC48L3NwYW4+PC9kaXY+CgogIDxkaXYgY2xhc3M9IndyYXAiPgogICAgPGRpdiBpZD0id2FsbCIgY2xhc3M9IndhbGwiIGFyaWEtbGl2ZT0icG9saXRlIj4KICAgICAgPHAgY2xhc3M9ImVtcHR5Ij5Mb2FkaW5nIGVtYmVkZGVkIHBvc3RlciBsaXN04oCmPC9wPgogICAgPC9kaXY+CiAgICA8Zm9vdGVyPkVuZGxlc3MgcmFuZG9tIHN0cmVhbSDigJQga2VlcHMgcmVzaHVmZmxpbmcgYXMgaXQgc2Nyb2xscy48L2Zvb3Rlcj4KICA8L2Rpdj4KCiAgPHNjcmlwdD4KICAgIGNvbnN0IFBPU1RFUlNfRElSID0gJ2ltYWdlcy9iaWxsaW5ncy9wb3N0ZXJzLyc7CiAgICBjb25zdCBSQVdfTUFOSUZFU1QgPSBbCiAgICAgICIzaXNhZmFtaWx5LnBuZyIsImFicm9hZHdpdGh0d295YW5rcy5wbmciLCJhbGFza2EucG5nIiwiYW5pZ2h0dG9yZW1lbWJlci5wbmciLCJhcGVtYW4ucG5nIiwiYXNvbmd0b3JlbWVtYmVyLnBuZyIsImF0cmVlZ3Jvd3NpbmJyb29rbHluLnBuZyIsImF0dGFjay5wbmciLCJiYWhhbWFwYXNzYWdlLnBuZyIsImJlYWNoaGVhZHRvYmVybGluLnBuZyIsImJldHdlZW50d293b21lbi5wbmciLCJibHVlYmVhcmQucG5nIiwiYm9tYmFsZXJhLnBuZyIsImJyb3RoZXJzYW5kc2lzdGVyc29mdGhldG9kYWZhbWlseS5wbmciLCJidWNrc2tpbmZyb250aWVyLnBuZyIsImNvdW50ZXItYXR0YWNrLnBuZyIsImRhcmttb3VudGFpbi5wbmciLCJkYXJrd2F0ZXJzLnBuZyIsImRheXNvZmdsb3J5LnBuZyIsImRldmlsYmF0LnBuZyIsImVudGVyYXJzZW5lbHVwaW4ucG5nIiwiZXNjb3J0Z2lybC5wbmciLCJleHBlcmltZW50cGVyaWxvdXMucG5nIiwiZmFzdGNvbXBhbnkucG5nIiwiZnJpc2Nvc2FsLnBuZyIsImdhbmR5c2RyZWFtZ2lybC5wbmciLCJnb2Rpc215Y28tcGlsb3QucG5nIiwiZ3Vlc3RpbnRoZWhvdXNlLnBuZyIsImd5cHN5d2lsZGNhdC5wbmciLCJoYW5nb3ZlcnNxdWFyZS5wbmciLCJoZWF0aGVyYW5keW9uLnBuZyIsImhlYXZlbmx5ZGF5cy5wbmciLCJoZXJlY29tZXRoZWNvLWVkcy5wbmciLCJoZXJlY29tZXRoZXdhdmVzLnBuZyIsImhvdGVsYmVybGluLnBuZyIsImljZWNhcGFkZXNyZXZ1ZS5wbmciLCJpbGxiZXNlZWluZ3lvdS5wbmciLCJpbGxzZWxsbXlsaWZlLnBuZyIsImlub2xkY2FsaWZvcm5pYS5wbmciLCJpc2xlb2Z0YWJ1LnBuZyIsImtlZXB5b3VycG93ZGVyZHJ5LnBuZyIsImtleXNvZnRoZWtpZ2RvbS5wbmciLCJsYWtlcGxhY2lkc2VyZW5hZGUucG5nIiwibGlsbGltYXJsZW5lLnBuZyIsImx1YmxpbmRlYXRoZmFjdG9yeS5wbmciLCJsdWNreWpvcmRhbi5wbmciLCJtYWRlZm9yZWFjaG90aGVyLnBuZyIsIm1lZXRtZWluc3Rsb3Vpcy5wbmciLCJtaW5pc3RyeW9mZmVhci5wbmciLCJtb29ubGlnaHRhbmRjYWN0dXMucG5nIiwibXVzaWNmb3JtaWxsaW9ucy5wbmciLCJtdXNpY2lubWFuaGF0dGFuLnBuZyIsIm5ldmFkYS5wbmciLCJvYmplY3RpdmVidXJtYS5wbmciLCJvdXJoZWFydHN3ZXJleW91bmdhbmRnYXkucG5nIiwicGFydG5lcnNvZnRoZXRyYWlsLnBuZyIsInBvc3RlcnNfaW5kZXguanNvbiIsInByYWN0aWNhbGx5eW91cnMucG5nIiwicm91Z2h0b3VnaGFuZHJlYWR5LnBuZyIsInNhbHR5b3JvdXJrZS5wbmciLCJzZXJnZWFudG1pa2UucG5nIiwic2hlc2Fzb2xkaWVydG9vLnBuZyIsInNoaW5lb25oYXJ2ZXN0bW9vbi5wbmciLCJzaW5jZXlvdXdlbnRhd2F5LnBuZyIsInNvbWV0aGluZ2ZvcnRoZWJveXMucG5nIiwic3Rvcm1vdmVybGlzYm9uLnBuZyIsInN0cmFuZ2VhZmZhaXIucG5nIiwiU3VuZGF5RGlubmVyZm9yYVNvbGRpZXIucG5nIiwic3VuZG93bnZhbGxleS5wbmciLCJzd2luZ2hvc3Rlc3MucG5nIiwidGFtcGljby5wbmciLCJ0aGVhcGUucG5nIiwidGhlYmlnc2hvdy1vZmYucG5nIiwidGhlY2xpbWF4LnBuZyIsInRoZWZhbGNvbmluaG9sbHl3b29kLnBuZyIsInRoZWZpZ2h0aW5nbGFkeS5wbmciLCJ0aGVtYXJrb2Z0aGV3aGlzdGxlci5wbmciLCJ0aGVuYXZ5d2F5LnBuZyIsInRoZXNreXN0aGVsaW1pdC5wbmciLCJ0aGVzdHJhbmdsZXIucG5nIiwidGhldGhpbm1hbmdvZXNob21lLnBuZyIsInRoZXVuc2Vlbi5wbmciLCJ0aGV3b21hbmludGhld2luZG93LnBuZyIsInRob3JvdWdoYnJlZHMucG5nIiwidG9oYXZlYW5kaGF2ZW5vdC5wbmciLCJ0b25pZ2h0YW5kZXZlcnluaWdodC5wbmciLCJ0b3BwZXIucG5nIiwidHVybmFib3V0LnBuZyIsInR3b2dpcmxzYW5kYXNhaWxvci5wbmciLCJ3ZWRkZWRibGlzcy5wbmciLCJ3aGVudGhlbGlnaHRzZ29vbmFnYWluLnBuZyIsIndvb3dvby5wbmciLCJ5b3V0aG9udHJpYWwucG5nIgogICAgXTsKICAgIGNvbnN0IE1BTklGRVNUID0gUkFXX01BTklGRVNULmZpbHRlcihuID0+IC9cLig/OmpwZ3xwbmd8anBlZ3x3ZWJwKSQvaS50ZXN0KG4pKTsKCiAgICBjb25zdCB3YWxsID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3dhbGwnKTsKICAgIGNvbnN0IHJuZCA9IChuKSA9PiBNYXRoLmZsb29yKE1hdGgucmFuZG9tKCkqbik7CiAgICBjb25zdCBzaHVmZmxlQXJyID0gKGEpID0+IHsgZm9yIChsZXQgaT1hLmxlbmd0aC0xO2k+MDtpLS0peyBjb25zdCBqID0gTWF0aC5mbG9vcihNYXRoLnJhbmRvbSgpKihpKzEpKTsgW2FbaV0sYVtqXV09W2Fbal0sYVtpXV07IH0gcmV0dXJuIGE7IH07CgogICAgZnVuY3Rpb24gcGlja1JhbmRvbShsaXN0LCBjb3VudCl7CiAgICAgIGNvbnN0IGlkeHMgPSBBcnJheS5mcm9tKHtsZW5ndGg6bGlzdC5sZW5ndGh9LCAoXyxpKT0+aSk7CiAgICAgIHNodWZmbGVBcnIoaWR4cyk7CiAgICAgIHJldHVybiBpZHhzLnNsaWNlKDAsIE1hdGgubWluKGNvdW50LCBsaXN0Lmxlbmd0aCkpLm1hcChpPT5saXN0W2ldKTsKICAgIH0KCiAgICBmdW5jdGlvbiBtYWtlVGlsZShmaWxlKXsKICAgICAgY29uc3QgY2FyZCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2ZpZ3VyZScpOwogICAgICBjYXJkLmNsYXNzTmFtZSA9ICdwb3N0ZXInOwogICAgICBjb25zdCBpbWcgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdpbWcnKTsKICAgICAgaW1nLmxvYWRpbmcgPSAnbGF6eSc7IGltZy5kZWNvZGluZyA9ICdhc3luYyc7CiAgICAgIGltZy5hbHQgPSBmaWxlLnNwbGl0KCcvJykucG9wKCkucmVwbGFjZSgvWy1fXS9nLCcgJykucmVwbGFjZSgvXC5bXi5dKyQvLCAnJyk7CiAgICAgIGltZy5zcmMgPSBQT1NURVJTX0RJUiArIGZpbGU7CiAgICAgIGNhcmQuYXBwZW5kQ2hpbGQoaW1nKTsKICAgICAgcmV0dXJuIGNhcmQ7CiAgICB9CgogICAgZnVuY3Rpb24gZmlsbEhhbGYoY29sLCBjb3VudCl7CiAgICAgIGNvbnN0IG5hbWVzID0gcGlja1JhbmRvbShNQU5JRkVTVCwgY291bnQpOwogICAgICBjb25zdCBmcmFnID0gZG9jdW1lbnQuY3JlYXRlRG9jdW1lbnRGcmFnbWVudCgpOwogICAgICBmb3IgKGNvbnN0IGYgb2YgbmFtZXMpIGZyYWcuYXBwZW5kQ2hpbGQobWFrZVRpbGUoZikpOwogICAgICByZXR1cm4gZnJhZzsKICAgIH0KCiAgICBmdW5jdGlvbiBidWlsZE1hcnF1ZWUodG90YWw9MjcpewogICAgICB3YWxsLmlubmVySFRNTCA9ICcnOwogICAgICBjb25zdCBjb2xzID0gMzsKICAgICAgY29uc3QgcGVyQ29sID0gTWF0aC5jZWlsKHRvdGFsIC8gY29scyk7CgogICAgICBmb3IgKGxldCBjPTA7IGM8Y29sczsgYysrKXsKICAgICAgICBjb25zdCBjb2wgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdkaXYnKTsKICAgICAgICBjb2wuY2xhc3NOYW1lID0gJ2NvbCc7CiAgICAgICAgY29sLmRhdGFzZXQucGVyQ29sID0gcGVyQ29sOwogICAgICAgIGNvbnN0IGZpcnN0ID0gZmlsbEhhbGYoY29sLCBwZXJDb2wpOwogICAgICAgIGNvbnN0IHNlY29uZCA9IGZpbGxIYWxmKGNvbCwgcGVyQ29sKTsKICAgICAgICBjb2wuYXBwZW5kQ2hpbGQoZmlyc3QpOwogICAgICAgIGNvbC5hcHBlbmRDaGlsZChzZWNvbmQpOwogICAgICAgIGNvbC5hZGRFdmVudExpc3RlbmVyKCdhbmltYXRpb25pdGVyYXRpb24nLCAoKSA9PiB7CiAgICAgICAgICBjb25zdCBjb3VudCA9IE51bWJlcihjb2wuZGF0YXNldC5wZXJDb2wpfHxwZXJDb2w7CiAgICAgICAgICBmb3IobGV0IGk9MDtpPGNvdW50O2krKykgY29sLnJlbW92ZUNoaWxkKGNvbC5maXJzdEVsZW1lbnRDaGlsZCk7CiAgICAgICAgICBjb2wuYXBwZW5kQ2hpbGQoZmlsbEhhbGYoY29sLCBjb3VudCkpOwogICAgICAgIH0pOwogICAgICAgIHdhbGwuYXBwZW5kQ2hpbGQoY29sKTsKICAgICAgfQogICAgfQoKICAgIGJ1aWxkTWFycXVlZSgyNyk7CiAgPC9zY3JpcHQ+CjwvYm9keT4KPC9odG1sPgo="></script>
 
-<script id="rs-attract-embed">
-(function(){
-  function setIframe(){
-    try {
-      var ifr = document.getElementById('rs-attract-iframe');
-      if (!ifr) return;
-      var base = document.baseURI || location.href;
-      var holder = document.getElementById('rs-attract-raw');
-      var b64 = holder ? holder.getAttribute('data-b64') : '';
-      var raw = b64 ? atob(b64) : '';
-      // Inject <base> so relative paths (images/fonts) resolve
-      var content = raw;
-      if (/<head[^>]*>/i.test(content)) {
-        content = content.replace(/<head[^>]*>/i, function(m){ return m + '<base href="' + base + '">'; });
-      } else {
-        content = '<!doctype html><head><base href="' + base + '"></head>' + content;
-      }
-      ifr.srcdoc = content;
-    } catch(e){}
-  }
-  window.__RS_ATTRACT_EMBED__ = { set: setIframe };
-})();
-</script>
+
 
 
 <script id="rs-map-reinit">
@@ -6185,6 +6152,543 @@ function billingsPathFor(name){
   }
   if (document.readyState === 'complete' || document.readyState === 'interactive') stopIfClosing();
   else document.addEventListener('DOMContentLoaded', stopIfClosing);
+})();
+</script>
+
+
+<script id="rs-idle-simple">
+(function(){
+  // Config (can be overridden elsewhere before this runs)
+  var IDLE_MS = (window.RS_IDLE_MS|0) || 30000;     // time of user inactivity before starting autoplay
+  var PACE_MS = (window.RS_AUTOPACE_MS|0) || 8000;  // time between pans to next point
+
+  var idleTimer = null;
+  var paceTimer = null;
+  var inAuto = false;
+  var seq = [];          // ordered list of LatLngs
+  var idx = 0;           // current index
+  var startedAtHome = false;
+
+  function getMap(){
+    try { if (window._rs_map && typeof window._rs_map.panTo === 'function') return window._rs_map; } catch(e){}
+    try { if (window.map && typeof window.map.panTo === 'function') return window.map; } catch(e){}
+    return null;
+  }
+
+  function collectPoints(){
+    seq = [];
+    var m = getMap();
+    if (!m || !m._layers) return;
+    // Gather all marker-like layers with getLatLng()
+    for (var k in m._layers){
+      var l = m._layers[k];
+      if (!l || typeof l.getLatLng !== 'function') continue;
+      try {
+        var ll = l.getLatLng();
+        if (ll && typeof ll.lat === 'number' && typeof ll.lng === 'number'){
+          seq.push([ll.lat, ll.lng]);
+        }
+      } catch(e){}
+    }
+    // Fallback: try any stored list of features
+    if (!seq.length && Array.isArray(window.RS_POINTS)){
+      for (var i=0;i<window.RS_POINTS.length;i++){
+        var p = window.RS_POINTS[i];
+        if (p && typeof p.lat === 'number' && typeof p.lng === 'number') seq.push([p.lat, p.lng]);
+      }
+    }
+  }
+
+  function panToNext(){
+    var m = getMap();
+    if (!m) return;
+    if (!seq.length) collectPoints();
+    if (!seq.length) return;
+    if (idx >= seq.length) idx = 0;
+    var target = seq[idx++];
+    try {
+      m.panTo(target, {animate:true, duration: 1.0});
+    } catch(e){}
+  }
+
+  function startAuto(){
+    if (inAuto) return;
+    var m = getMap(); if (!m) return;
+    collectPoints();
+    if (!seq.length) return;
+    inAuto = true;
+    if (!startedAtHome) { startedAtHome = true; } // note the first time we start
+    panToNext(); // immediate
+    paceTimer = setInterval(panToNext, PACE_MS);
+  }
+
+  function stopAutoAndHome(){
+    // Stop timers
+    inAuto = false;
+    try { clearInterval(paceTimer); } catch(e){}
+    paceTimer = null;
+
+    // Go home / start position
+    try {
+      if (typeof window.showHomeView === 'function') {
+        window.showHomeView();
+      } else if (typeof window.homeView === 'function') {
+        window.homeView();
+      } else {
+        // Fallback: fit bounds to all collected points
+        var m = getMap();
+        if (m && window.L && seq.length){
+          var bounds = L.latLngBounds(seq.map(function(p){ return L.latLng(p[0], p[1]); }));
+          m.fitBounds(bounds, {padding:[30,30]});
+        }
+      }
+    } catch(e){}
+  }
+
+  function openAbout(){
+    try {
+      if (typeof window.showAbout === 'function') return window.showAbout();
+      if (typeof window.openAbout === 'function') return window.openAbout();
+      if (typeof window.openAboutModal === 'function') return window.openAboutModal();
+      if (typeof window.showInfo === 'function') return window.showInfo('ABOUT');
+      // Try clicking an About button if present
+      var el = document.querySelector('[data-modal="about"], #ABOUT, #about, .about-button, [aria-controls="about-modal"]');
+      if (el) el.click();
+    } catch(e){}
+  }
+
+  function resetIdleTimer(){
+    try { clearTimeout(idleTimer); } catch(e){}
+    idleTimer = setTimeout(startAuto, IDLE_MS);
+  }
+
+  // User interactions: stop autoplay, return home, and open About.
+  function onUserInteraction(){
+    if (inAuto) {
+      stopAutoAndHome();
+      // Do not restart autoplay immediately; user is active.
+      openAbout();
+    }
+    resetIdleTimer();
+  }
+
+  // Wire interaction events
+  ['pointerdown','keydown','wheel','touchstart','click'].forEach(function(ev){
+    document.addEventListener(ev, onUserInteraction, {passive:true});
+  });
+
+  // Boot: set idle timer
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', resetIdleTimer);
+  } else {
+    resetIdleTimer();
+  }
+
+  // Expose a simple control surface
+  window.RS_IDLE = {
+    start: startAuto,
+    stopAndHome: stopAutoAndHome,
+    reset: resetIdleTimer,
+    setIdleMs: function(ms){ IDLE_MS = +ms || IDLE_MS; resetIdleTimer(); },
+    setPaceMs: function(ms){ PACE_MS = +ms || PACE_MS; if (inAuto){ try{ clearInterval(paceTimer);}catch(e){} paceTimer = setInterval(panToNext, PACE_MS);} }
+  };
+})();
+</script>
+
+
+<script id="rs-theatre-img-patch">
+(function(){
+  function patchTheatreImages(root){
+    (root || document).querySelectorAll('img[src^="images/"]').forEach(function(img){
+      // Skip billings/posters entirely (posters are not patched)
+      var s = img.getAttribute('src') || '';
+      if (s.indexOf('images/billings/posters/') === 0) return;
+
+      // Only patch once
+      if (img.dataset.rsTheatrePatched) return;
+      img.dataset.rsTheatrePatched = "1";
+
+      // Assume .jpg first; on error try .png once, then stop & hide
+      img.dataset.try = "jpg";
+      img.addEventListener('error', function onErr(){
+        var tried = img.dataset.try || "jpg";
+        var base = (img.getAttribute("src")||"")
+          .replace(/^.*\//,"")
+          .replace(/\.(png|jpg)$/i,"");
+        if (tried === "jpg"){
+          img.dataset.try = "png";
+          img.src = "images/" + base + ".png";
+        } else {
+          img.style.display = "none";
+          try { img.removeAttribute("src"); } catch(e){}
+          img.removeEventListener("error", onErr);
+        }
+      });
+    });
+  }
+
+  // Patch existing theatre images
+  patchTheatreImages(document);
+
+  // Watch for dynamically-added popups
+  var obs = new MutationObserver(function(muts){
+    muts.forEach(function(r){
+      r.addedNodes && r.addedNodes.forEach(function(n){
+        if (n && n.nodeType === 1) patchTheatreImages(n);
+      });
+    });
+  });
+  obs.observe(document.body, {childList:true, subtree:true});
+})();
+</script>
+
+
+
+
+
+
+
+<style id="rs-billings-modal-css">
+#rs-billings-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.85);
+  z-index: 100000;
+}
+#rs-billings-modal.open { display: flex; }
+#rs-billings-modal .sheet {
+  position: relative;
+  max-width: min(92vw, 1200px);
+  max-height: 88vh;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 30px 120px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+#rs-billings-modal img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 88vh;
+  object-fit: contain;
+  background: #000;
+}
+#rs-billings-modal .close {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font: 600 13px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+}
+#rs-billings-modal .title {
+  position: absolute;
+  left: 12px; top: 10px;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,.6);
+  font: 700 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+}
+</style>
+
+<div id="rs-billings-modal" aria-hidden="true">
+  <div class="sheet">
+    <div class="title" id="rs-billings-title"></div>
+    <button class="close" id="rs-billings-close" type="button">Close</button>
+    <img id="rs-billings-img" alt="Now Showing">
+  </div>
+</div>
+
+<script id="rs-billings-modal-js">
+(function(){
+  var modal = null, imgEl = null, titleEl = null, closeBtn = null;
+
+  function ensureModal(){
+    if (modal) return;
+    modal = document.getElementById('rs-billings-modal');
+    imgEl = document.getElementById('rs-billings-img');
+    titleEl = document.getElementById('rs-billings-title');
+    closeBtn = document.getElementById('rs-billings-close');
+    if (!modal || !imgEl) return;
+    function close(){ try { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); imgEl.removeAttribute('src'); } catch(e){} }
+    closeBtn && closeBtn.addEventListener('click', close);
+    modal.addEventListener('click', function(e){ if (e.target === modal) close(); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') close(); });
+  }
+
+  function toCandidates(theatreName){
+    var base = String(theatreName||'').trim();
+    // sanitize
+    base = base.replace(/[^\w\- ]+/g,'').trim();
+    var variants = [];
+    var space = base.replace(/\s+/g,' ');
+    var underscore = space.replace(/\s+/g,'_');
+    var dash = space.replace(/\s+/g,'-');
+    var upper = space.toUpperCase();
+    var upper_us = underscore.toUpperCase();
+    var upper_dash = dash.toUpperCase();
+    // expected pattern: THEATRE_films
+    [space, underscore, dash, upper, upper_us, upper_dash].forEach(function(v){
+      if (v && variants.indexOf(v) === -1) variants.push(v);
+    });
+    // map to images/billings/<variant>_films.<ext>
+    var list = [];
+    variants.forEach(function(v){
+      list.push('images/billings/' + v + '_films.png');
+      list.push('images/billings/' + v + '_films.jpg');
+    });
+    return list;
+  }
+
+  function loadWithFallback(urls){
+    return new Promise(function(resolve, reject){
+      if (!urls || !urls.length) return reject(new Error('no candidates'));
+      var i = 0, tried = [];
+      function tryNext(){
+        if (i >= urls.length) return reject(new Error('all failed: ' + tried.join(', ')));
+        var u = urls[i++]; tried.push(u);
+        var img = new Image();
+        img.onload = function(){ resolve(u); };
+        img.onerror = function(){ tryNext(); };
+        img.src = u;
+      }
+      tryNext();
+    });
+  }
+
+  function openBillingsModal(name){
+    ensureModal();
+    if (!modal || !imgEl) return;
+    titleEl && (titleEl.textContent = (name ? (name + ' — Now Showing') : 'Now Showing'));
+    var candidates = toCandidates(name);
+    // Try to load; on success set src and open. If all fail, just close silently.
+    loadWithFallback(candidates).then(function(u){
+      imgEl.src = u;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden','false');
+    }).catch(function(e){
+      // optional: alert or ignore
+      // console.warn('No billings sheet found', e);
+    });
+  }
+
+  // Expose public API
+  window.openBillingsModal = openBillingsModal;
+  window.showBillingsFor = openBillingsModal;
+})();
+</script>
+
+
+<style id="rs-popup-billings-toggle-css">
+.rs-billings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font: 600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.3);
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+  transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
+}
+.rs-billings-btn:hover { box-shadow: 0 2px 10px rgba(0,0,0,.25); background:#151515; }
+.rs-billings-btn:active { transform: translateY(1px); }
+.rs-billings-btn svg { width: 16px; height: 16px; display:block; }
+</style>
+
+
+
+
+<script id="rs-popup-billings-toggle">
+(function(){
+  // Helpers duplicated here so we can preflight availability before showing button
+  function inferTheatreName(container){
+    try{
+      var t = container.querySelector('h1, h2, h3, .title, strong');
+      var s = (t ? t.textContent : container.textContent) || '';
+      s = s.trim().split(/\n|—|-/)[0].trim();
+      return s.replace(/\s+/g,' ').trim();
+    }catch(e){ return ''; }
+  }
+
+  function toCandidates(name){
+    var base = String(name||'').trim();
+    base = base.replace(/[^\w\- ]+/g,'').trim();
+    var variants = [];
+    var space = base.replace(/\s+/g,' ');
+    var underscore = space.replace(/\s+/g,'_');
+    var dash = space.replace(/\s+/g,'-');
+    var upper = space.toUpperCase();
+    var upper_us = underscore.toUpperCase();
+    var upper_dash = dash.toUpperCase();
+    [space, underscore, dash, upper, upper_us, upper_dash].forEach(function(v){
+      if (v && variants.indexOf(v) === -1) variants.push(v);
+    });
+    var list = [];
+    variants.forEach(function(v){
+      list.push('images/billings/' + v + '_films.png');
+      list.push('images/billings/' + v + '_films.jpg');
+    });
+    return list;
+  }
+
+  function probeFirstAvailable(urls){
+    return new Promise(function(resolve, reject){
+      if (!urls || !urls.length) return reject(new Error('no candidates'));
+      var i = 0;
+      function next(){
+        if (i >= urls.length) return reject(new Error('none found'));
+        var u = urls[i++];
+        var img = new Image();
+        img.onload = function(){ resolve(u); };
+        img.onerror = function(){ next(); };
+        img.src = u;
+      }
+      next();
+    });
+  }
+
+  function removeInlineBillingsImages(root){
+    // Strip any inline billings images taking space in the popup
+    root.querySelectorAll('img').forEach(function(img){
+      var src = img.getAttribute('src') || '';
+      if (/^images\/billings\//i.test(src)){
+        img.remove();
+      }
+    });
+  }
+
+  function removeViewBillingButtons(root){
+    // Remove any existing "View Billing" buttons/links (by text match)
+    var candidates = root.querySelectorAll('a, button, .btn, [role="button"]');
+    candidates.forEach(function(el){
+      var txt = (el.textContent || '').trim();
+      if (/view\s*billing/i.test(txt)){
+        el.remove();
+      }
+    });
+  }
+
+  function ensureButton(root, theatreName, url){
+    // Avoid duplicates
+    if (root.querySelector('.rs-billings-btn')) return;
+    var btn = document.createElement('button');
+    btn.className = 'rs-billings-btn';
+    btn.type = 'button';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"></path></svg> Now Showing';
+    btn.addEventListener('click', function(){
+      try {
+        if (typeof window.openBillingsModal === 'function'){
+          // If our modal supports direct URL, pass it via name (modal recomputes) or store URL for future extension
+          window.openBillingsModal(theatreName);
+        }
+      } catch(e){}
+    });
+    root.appendChild(document.createElement('hr'));
+    root.appendChild(btn);
+  }
+
+  function processPopup(popContent){
+    if (!popContent) return;
+
+    // 1) Remove any inline billings images and any "View Billing" buttons
+    removeInlineBillingsImages(popContent);
+    removeViewBillingButtons(popContent);
+
+    // 2) Decide whether to show "Now Showing" by probing existence
+    var theatreName = inferTheatreName(popContent);
+    var cands = toCandidates(theatreName);
+    probeFirstAvailable(cands).then(function(url){
+      // Only then insert the button
+      ensureButton(popContent, theatreName, url);
+    }).catch(function(){
+      // No image available: do not show any button
+    });
+  }
+
+  function processExisting(){
+    document.querySelectorAll('.leaflet-popup-content').forEach(processPopup);
+  }
+
+  // Initial
+  processExisting();
+
+  // Observe dynamic popups
+  var obs = new MutationObserver(function(muts){
+    muts.forEach(function(m){
+      m.addedNodes && m.addedNodes.forEach(function(n){
+        if (!n || n.nodeType !== 1) return;
+        if (n.classList && n.classList.contains('leaflet-popup')){
+          var c = n.querySelector('.leaflet-popup-content');
+          processPopup(c);
+        } else if (n.classList && n.classList.contains('leaflet-popup-content')){
+          processPopup(n);
+        } else {
+          n.querySelectorAll && n.querySelectorAll('.leaflet-popup-content').forEach(processPopup);
+        }
+      });
+    });
+  });
+  obs.observe(document.body, {childList:true, subtree:true});
+})();
+</script>
+
+
+<script id="rs-billings-autotimeout">
+(function(){
+  var modal = null;
+  var timer = null;
+
+  function ensureModal(){
+    modal = document.getElementById('rs-billings-modal');
+    if (!modal) return;
+    modal.addEventListener('mouseenter', resetTimer, false);
+    modal.addEventListener('mousemove', resetTimer, false);
+    modal.addEventListener('click', resetTimer, false);
+    modal.addEventListener('keydown', resetTimer, false);
+    modal.addEventListener('touchstart', resetTimer, false);
+    modal.addEventListener('focus', resetTimer, true);
+    new MutationObserver(checkOpen).observe(modal, {attributes:true, attributeFilter:['class']});
+  }
+
+  function resetTimer(){
+    if (timer){ clearTimeout(timer); timer = null; }
+    if (modal && modal.classList.contains('open')){
+      timer = setTimeout(function(){
+        try{
+          // Close modal
+          modal.classList.remove('open');
+          modal.setAttribute('aria-hidden','true');
+          var img = document.getElementById('rs-billings-img');
+          if (img) img.removeAttribute('src');
+          // Trigger autoplay return if function available
+          if (typeof window.returnToAutoplay === 'function'){
+            window.returnToAutoplay();
+          }
+        }catch(e){}
+      }, 20000); // 20 seconds
+    }
+  }
+
+  function checkOpen(){
+    if (modal && modal.classList.contains('open')){
+      resetTimer();
+    } else {
+      if (timer){ clearTimeout(timer); timer = null; }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', ensureModal);
 })();
 </script>
 
