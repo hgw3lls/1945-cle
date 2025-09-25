@@ -5666,6 +5666,8 @@ function billingsPathFor(name){
   }
 
   function showAttract(){
+    try{ window.__RS_ATTRACT_IDLE__ && window.__RS_ATTRACT_IDLE__.start(); }catch(e){}
+
     try{ window.__RS_AUTOPLAY_BTN__ && window.__RS_AUTOPLAY_BTN__.hide(); }catch(e){}
 
     try { if (window.__RS_ATTRACT_EMBED__ && typeof window.__RS_ATTRACT_EMBED__.set === 'function') { window.__RS_ATTRACT_EMBED__.set(); } } catch(e){}
@@ -5738,6 +5740,8 @@ function billingsPathFor(name){
   }
 
   function stopAuto(goHome){
+    try{ window.__RS_ATTRACT_IDLE__ && window.__RS_ATTRACT_IDLE__.stop(); }catch(e){}
+
     try{ window.__RS_AUTOPLAY_BTN__ && window.__RS_AUTOPLAY_BTN__.hide(); }catch(e){}
 
     if (!active) return;
@@ -5769,6 +5773,8 @@ function billingsPathFor(name){
   }
 
   function onUserInteract(){
+    try{ window.__RS_ATTRACT_IDLE__ && window.__RS_ATTRACT_IDLE__.stop(); }catch(e){}
+
     try{ window.__RS_AUTOPLAY_BTN__ && window.__RS_AUTOPLAY_BTN__.hide(); }catch(e){}
 
     // If user interacts while autoplay is active OR attract is open:
@@ -6079,6 +6085,106 @@ function billingsPathFor(name){
 
   // Expose tiny API so idle script can toggle
   window.__RS_AUTOPLAY_BTN__ = { show: showBtn, hide: hideBtn };
+})();
+</script>
+
+
+<script id="rs-attract-idle">
+(function(){
+  var TIMER = null, LAST = 0, MS = 30000; // 30s
+  var WIRED = false;
+
+  function now(){ return Date.now(); }
+
+  function hideAttract(){
+    try { var el = document.getElementById('rs-attract'); if (el) el.classList.remove('open'); } catch(e){}
+  }
+
+  function startAutoplay(){
+    try {
+      if (window.RS_IDLE && typeof window.RS_IDLE.startAuto === 'function'){
+        window.RS_IDLE.startAuto();
+      }
+    } catch(e){}
+  }
+
+  function onTimeout(){
+    stop();
+    hideAttract();
+    startAutoplay();
+  }
+
+  function reset(){
+    LAST = now();
+  }
+
+  function tick(){
+    if (now() - LAST >= MS){
+      onTimeout();
+    }
+  }
+
+  function wire(){
+    if (WIRED) return;
+    WIRED = true;
+    var root = document;
+    var evs = ['pointerdown','pointermove','keydown','wheel','touchstart','mousemove'];
+    evs.forEach(function(ev){ root.addEventListener(ev, reset, {passive:true}); });
+    var host = document.getElementById('rs-attract-shadowhost');
+    if (host){ evs.forEach(function(ev){ host.addEventListener(ev, reset, {passive:true}); }); }
+    var ifr = document.getElementById('rs-attract-iframe');
+    if (ifr){
+      try {
+        ifr.addEventListener('load', function(){
+          try {
+            var w = ifr.contentWindow;
+            if (!w) return;
+            evs.forEach(function(ev){
+              try { w.addEventListener(ev, reset, {passive:true}); } catch(e){}
+            });
+          } catch(e){}
+        });
+      } catch(e){}
+    }
+  }
+
+  function start(){
+    wire();
+    reset();
+    stop();
+    TIMER = setInterval(tick, 500);
+  }
+
+  function stop(){
+    if (TIMER){ clearInterval(TIMER); TIMER = null; }
+  }
+
+  window.__RS_ATTRACT_IDLE__ = { start:start, stop:stop, reset:reset };
+})();
+</script>
+
+
+<script id="rs-attract-idle-stop-on-close">
+(function(){
+  function stopIfClosing(){
+    try {
+      var el = document.getElementById('rs-attract');
+      if (!el) return;
+      var obs = new MutationObserver(function(muts){
+        muts.forEach(function(m){
+          if (m.attributeName === 'class'){
+            var isOpen = el.classList.contains('open');
+            if (!isOpen){
+              try{ window.__RS_ATTRACT_IDLE__ && window.__RS_ATTRACT_IDLE__.stop(); }catch(e){}
+            }
+          }
+        });
+      });
+      obs.observe(el, { attributes:true, attributeFilter:['class'] });
+    } catch(e){}
+  }
+  if (document.readyState === 'complete' || document.readyState === 'interactive') stopIfClosing();
+  else document.addEventListener('DOMContentLoaded', stopIfClosing);
 })();
 </script>
 
