@@ -2,6 +2,19 @@
 
 <html lang="en">
 <head>
+
+<!-- === Reel Screens Idle/Autoplay Configuration === -->
+<script id="rs-config">
+  // Time (ms) after last interaction before autoplay starts
+  window.RS_IDLE_MS = 30000;   // 30 seconds
+
+  // Time (ms) between random point jumps once autoplay starts
+  window.RS_AUTOPACE_MS = 8000;  // 8 seconds
+
+  // Time (ms) to stay in autoplay before switching to Attract screen
+  window.RS_AUTOPLAY_MAX_MS = 60000; // 60 seconds
+</script>
+
 <script>
 // ---- Safe globals guard to avoid ReferenceError in desktop testing ----
 (function(){
@@ -625,12 +638,14 @@ body.sidebar-hidden
   cursor: pointer;
 }
 
-/* --- View-state driven button visibility --- */
-.modal.info-modal .tools img { display: none; } /* default hidden */
-.modal.info-modal[data-view="about"]  .tools #rs-howto-btn { display: block; }
-.modal.info-modal[data-view="about"]  .tools #rs-about-btn { display: none; }
-.modal.info-modal[data-view="howto"]  .tools #rs-about-btn { display: block; }
-.modal.info-modal[data-view="howto"]  .tools #rs-howto-btn { display: none; }
+/* Smooth fade for swapping About/How-To content */
+.rs-fade {
+  transition: opacity 200ms ease;
+  opacity: 1;
+}
+.rs-fade.is-fading {
+  opacity: 0.01;
+}
 </style>
 <style id="rs-modal-lock">
 /* Lock background when modal is open */
@@ -644,6 +659,44 @@ body.modal-open #sidebar {
   pointer-events: none;
 }
 </style>
+
+
+
+
+
+
+
+
+<style id="rs-info-button-override">
+  /* Override: blue outline with strong grey fill, move button more left/down, keep icon shadow */
+  .map-info {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: rgba(128, 128, 128, 0.65) !important;  /* 65% grey fill */
+    border: 2px solid rgba(0, 153, 255, 0.85) !important;  /* strong blue outline */
+    box-shadow: 0 2px 8px rgba(0,0,0,.25) !important;
+    display: grid !important;
+    place-items: center !important;
+    padding: 0 !important;
+    transform: translate(-16px, 16px); /* moved further left and down */
+  }
+  .map-info:hover { background: rgba(128, 128, 128, 0.9) !important; }
+  .map-info img { 
+    width: 70% !important; 
+    height: auto !important; 
+    display: block !important; 
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.8)); /* shadow on icon */
+  }
+</style>
+
+
+
+
+
+
+
+
 </head>
 <body>
 <div id="loadingOverlay"><div class="loader">Loading…</div></div>
@@ -661,8 +714,8 @@ body.modal-open #sidebar {
 </header>
 <div class="list" id="list"></div>
 </aside>
-<div id="map-frame"><div id="map"></div><button aria-controls="rs-info-modal" aria-label="Info" class="map-info" id="rs-info-btn" title="About this map">i</button>
-</div><div aria-hidden="false" aria-modal="true" class="modal info-modal" data-view="about" id="rs-info-modal" role="dialog"><div class="modal-inner"><div class="closeX" data-close="">✕</div><div class="tools"><img alt="About" id="rs-about-btn" src="images/ABOUT.png"/><img alt="How-To" id="rs-howto-btn" src="images/HOWTO.png"/></div><div id="rs-about-wrap"><img alt="Reel Screens Info" src="images/reel_screens_info.png" style="max-width:320px; display:block; margin:0 auto 12px;"/><div class="scrollable" id="rs-info-content"><p>August 1945. The war is ending. Ration books sit in kitchen drawers; gasoline and rubber are scarce. Streetcars ring along Euclid and St. Clair, and most Clevelanders walk to the neighborhood movie house. Those small‑but‑proud theatres within a few blocks of home glow again—sanctuaries where the city gathers to share light, sound, and news from the wider world.</p><p>Reel Screens: Cleveland 1945 is your map back to that moment. Tap a dot to see what was on the marquee, open photos and notes, and trace how theatres clustered along transit lines and commercial corridors. Compare downtown palaces with corner houses; follow double‑features, cartoons, and wartime newsreels as they moved across the city’s screens.</p><p>Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call it Hollywood on the Cuyahoga. This was a distribution hub and test market, a showman’s town where ornate marquees lit Euclid Avenue and neighborhood houses kept the reels spinning after factory shifts. In 1945, with V‑J Day crowds spilling into the streets, the movies were more than entertainment: they were civic ritual—stitching together downtown glitz and working‑class blocks from Glenville to Tremont to Collinwood.</p><p>How to explore: pan and zoom the map, use the search bar for theatres/addresses/films, click a pin for details, and open images full‑screen. Toggle the sidebar if you want a wider view. The reels are turning—Cleveland is at the movies.</p></div></div><div class="scrollable rs-hidden" id="rs-howto-wrap"><h2>How to Explore</h2><ul><li>Pan and zoom the map to navigate Cleveland’s theatres.</li><li>Use the search bar for theatre names, addresses, or films.</li><li>Click a pin or list item to open details, images, and notes.</li><li>Tap an image to view it full-screen.</li><li>Use the Home (⌂) button to reset the view.</li><li>Toggle the sidebar for a wider map view.</li></ul></div></div></div>
+<div id="map-frame"><div id="map"></div><button aria-controls="rs-info-modal" aria-label="Info" class="map-info" id="rs-info-btn" title="About this map"><img src="images/info.png" alt="Info"/></button>
+</div><div aria-hidden="false" aria-modal="true" class="modal info-modal" data-view="about" id="rs-info-modal" role="dialog"><div class="modal-inner"><div class="closeX" data-close="">✕</div><div class="tools"><img alt="How-To" id="rs-toggle-btn" src="images/HOWTO.png" style="height:56px; cursor:pointer; display:block;"/></div><div class="rs-fade" id="rs-about-wrap"><img alt="Reel Screens Info" src="images/reel_screens_info.png" style="max-width:320px; display:block; margin:0 auto 12px;"/><div class="scrollable" id="rs-info-content"><p>August 1945. The war is ending. Ration books sit in kitchen drawers; gasoline and rubber are scarce. Streetcars ring along Euclid and St. Clair, and most Clevelanders walk to the neighborhood movie house. Those small‑but‑proud theatres within a few blocks of home glow again—sanctuaries where the city gathers to share light, sound, and news from the wider world.</p><p>Reel Screens: Cleveland 1945 is your map back to that moment. Tap a dot to see what was on the marquee, open photos and notes, and trace how theatres clustered along transit lines and commercial corridors. Compare downtown palaces with corner houses; follow double‑features, cartoons, and wartime newsreels as they moved across the city’s screens.</p><p>Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call it Hollywood on the Cuyahoga. This was a distribution hub and test market, a showman’s town where ornate marquees lit Euclid Avenue and neighborhood houses kept the reels spinning after factory shifts. In 1945, with V‑J Day crowds spilling into the streets, the movies were more than entertainment: they were civic ritual—stitching together downtown glitz and working‑class blocks from Glenville to Tremont to Collinwood.</p><p>How to explore: pan and zoom the map, use the search bar for theatres/addresses/films, click a pin for details, and open images full‑screen. Toggle the sidebar if you want a wider view. The reels are turning—Cleveland is at the movies.</p></div></div><div class="scrollable rs-hidden rs-fade" id="rs-howto-wrap"><h2>How to Explore</h2><ul><li>Pan and zoom the map to navigate Cleveland’s theatres.</li><li>Use the search bar for theatre names, addresses, or films.</li><li>Click a pin or list item to open details, images, and notes.</li><li>Tap an image to view it full-screen.</li><li>Use the Home (⌂) button to reset the view.</li><li>Toggle the sidebar for a wider map view.</li></ul></div></div></div>
 <!-- Fullscreen image modal -->
 <div id="imgModal"><div aria-label="Close" class="closeX">✕</div><img alt="image preview"/></div>
 <!-- Inline data -->
@@ -5488,37 +5541,72 @@ function billingsPathFor(name){
 
 <script>
 (function(){
-  var modal    = document.getElementById('rs-info-modal');
-  var aboutBtn = document.getElementById('rs-about-btn');
-  var howtoBtn = document.getElementById('rs-howto-btn');
-  var about    = document.getElementById('rs-about-wrap');
-  var howto    = document.getElementById('rs-howto-wrap') || document.getElementById('rs-instructions-wrap');
+  var modal   = document.getElementById('rs-info-modal');
+  var btnImg  = document.getElementById('rs-toggle-btn');
+  var about   = document.getElementById('rs-about-wrap');
+  var howto   = document.getElementById('rs-howto-wrap') || document.getElementById('rs-instructions-wrap');
 
-  function setView(view){
-    if (!modal || !about || !howto) return;
-    modal.setAttribute('data-view', view);
+  function updateButton(){
+    var view = modal.getAttribute('data-view') || 'about';
     if (view === 'about'){
-      // show about content, hide howto
-      about.classList.remove('rs-hidden');
-      howto.classList.add('rs-hidden');
+      btnImg.src = 'images/HOWTO.png';
+      btnImg.alt = 'How-To';
     } else {
-      // show howto content, hide about
-      howto.classList.remove('rs-hidden');
-      about.classList.add('rs-hidden');
+      btnImg.src = 'images/ABOUT.png';
+      btnImg.alt = 'About';
     }
-    // keep scroll top
-    var s = modal.querySelector('.scrollable');
-    if (s) s.scrollTop = 0;
   }
 
-  if (aboutBtn) aboutBtn.addEventListener('click', function(){ setView('about'); });
-  if (howtoBtn) howtoBtn.addEventListener('click', function(){ setView('howto'); });
+  function fadeSwap(nextView){
+    if (!about || !howto) return;
+    var currentView = modal.getAttribute('data-view') || 'about';
+    var currentNode = currentView === 'about' ? about : howto;
+    var nextNode    = nextView === 'about' ? about : howto;
 
-  // Initial state: About
+    if (currentView === nextView){
+      updateButton();
+      return;
+    }
+
+    currentNode.classList.add('is-fading');
+    setTimeout(function(){
+      currentNode.classList.remove('is-fading');
+      currentNode.classList.add('rs-hidden');
+      nextNode.classList.remove('rs-hidden');
+      void nextNode.offsetWidth; // reflow
+      nextNode.classList.add('is-fading');
+      var s = modal.querySelector('.scrollable');
+      if (s) s.scrollTop = 0;
+      modal.setAttribute('data-view', nextView);
+      updateButton();
+      setTimeout(function(){
+        nextNode.classList.remove('is-fading');
+      }, 20);
+    }, 200);
+  }
+
+  function setView(view){
+    if (!about || !howto) return;
+    modal.setAttribute('data-view', view);
+    if (view === 'about'){
+      about.classList.remove('rs-hidden'); howto.classList.add('rs-hidden');
+    } else {
+      howto.classList.remove('rs-hidden'); about.classList.add('rs-hidden');
+    }
+    updateButton();
+    var s = modal.querySelector('.scrollable'); if (s) s.scrollTop = 0;
+  }
+
+  function toggleView(){
+    var current = modal.getAttribute('data-view') || 'about';
+    fadeSwap(current === 'about' ? 'howto' : 'about');
+  }
+
+  if (btnImg){ btnImg.addEventListener('click', toggleView); }
+
   document.addEventListener('DOMContentLoaded', function(){ setView('about'); });
   window.addEventListener('load', function(){ setView('about'); });
 
-  // When modal opens, enforce state
   if (modal){
     var obs = new MutationObserver(function(muts){
       for (var i=0;i<muts.length;i++){
@@ -5531,5 +5619,468 @@ function billingsPathFor(name){
   }
 })();
 </script>
+
+
+
+<script id="rs-idle-autoplay">
+(function(){
+  var IDLE_MS = typeof window.RS_IDLE_MS === "number" ? window.RS_IDLE_MS : 30000; // 30s default
+  var PACE_MS = typeof window.RS_AUTOPACE_MS === "number" ? window.RS_AUTOPACE_MS : 8000; // 8s default
+  var MAX_MS  = typeof window.RS_AUTOPLAY_MAX_MS === "number" ? window.RS_AUTOPLAY_MAX_MS : 60000; // 60s default
+
+  var idleTimer = null;
+  var paceTimer = null;
+  var active = false;
+  var homeView = null;
+  var autoStartTs = 0;
+  var maxCheckTimer = null;
+
+  function findMap(){
+    try {
+      if (window.map && typeof window.map.getContainer === 'function') return window.map;
+      if (window.RS_MAP && typeof window.RS_MAP.getContainer === 'function') return window.RS_MAP;
+      if (window.RS_MAP && window.RS_MAP.map && typeof window.RS_MAP.map.getContainer === 'function') return window.RS_MAP.map;
+      for (var k in window){
+        var obj = window[k];
+        if (obj && typeof obj === 'object' && typeof obj.getContainer === 'function' && typeof obj.flyTo === 'function'){
+          var el = null;
+          try { el = obj.getContainer(); } catch(e) {}
+          if (el && el.id === 'map') return obj;
+        }
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function collectMarkers(map){
+    var arr = [];
+    try {
+      map.eachLayer(function(l){
+        if (!l) return;
+        if (typeof l.getLatLng === 'function' && (typeof l.openPopup === 'function' || typeof l.fire === 'function')){
+          arr.push(l);
+        }
+      });
+    } catch (e){}
+    return arr;
+  }
+
+  function showAttract(){
+    try{ window.__RS_AUTOPLAY_BTN__ && window.__RS_AUTOPLAY_BTN__.hide(); }catch(e){}
+
+    try { if (window.__RS_ATTRACT_EMBED__ && typeof window.__RS_ATTRACT_EMBED__.set === 'function') { window.__RS_ATTRACT_EMBED__.set(); } } catch(e){}
+
+    try {
+      var el = document.getElementById('rs-attract');
+      if (el) { el.classList.add('open'); }
+      if (window.__RS_ATTRACT_MARQUEE__) { window.__RS_ATTRACT_MARQUEE__.ensureBuilt(); }
+    } catch(e){}
+  }
+  function hideAttract(){
+    try {
+      var el = document.getElementById('rs-attract');
+      if (el) { el.classList.remove('open'); }
+    } catch(e){}
+  }
+
+  function startAuto(){
+    try{ window.__RS_AUTOPLAY_BTN__ && window.__RS_AUTOPLAY_BTN__.show(); }catch(e){}
+
+    if (active) return;
+    var map = findMap();
+    if (!map) return;
+    var markers = collectMarkers(map);
+    if (!markers.length) return;
+
+    if (!homeView){
+      try { homeView = { center: map.getCenter(), zoom: map.getZoom() }; } catch (e){}
+    }
+
+    active = true;
+    autoStartTs = Date.now();
+
+    // Start max-duration monitor
+    if (maxCheckTimer) { clearInterval(maxCheckTimer); }
+    maxCheckTimer = setInterval(function(){
+      if (!active) return;
+      if (Date.now() - autoStartTs >= MAX_MS){
+        // Hit max autoplay duration: stop autoplay, show attract overlay
+        stopAuto(false); // don't go home yet; wait for tap
+        showAttract();
+      }
+    }, 1000);
+
+    var last = -1;
+    function pickIdx(){
+      if (markers.length <= 1) return 0;
+      var i;
+      do { i = Math.floor(Math.random() * markers.length); } while (i === last);
+      last = i;
+      return i;
+    }
+    function step(){
+      if (!markers.length){
+        markers = collectMarkers(map);
+        if (!markers.length) return;
+      }
+      var idx = pickIdx();
+      var m = markers[idx];
+      try {
+        var ll = m.getLatLng();
+        var z = Math.max(map.getZoom(), 14);
+        map.flyTo(ll, z, {duration: 1.2});
+        if (typeof m.openPopup === 'function') m.openPopup();
+        if (typeof m.fire === 'function') m.fire('click');
+      } catch (e){}
+    }
+    step();
+    paceTimer = setInterval(step, PACE_MS);
+  }
+
+  function stopAuto(goHome){
+    try{ window.__RS_AUTOPLAY_BTN__ && window.__RS_AUTOPLAY_BTN__.hide(); }catch(e){}
+
+    if (!active) return;
+    active = false;
+    if (paceTimer) { clearInterval(paceTimer); paceTimer = null; }
+    if (maxCheckTimer) { clearInterval(maxCheckTimer); maxCheckTimer = null; }
+
+    if (goHome){
+      var map = findMap();
+      if (map && homeView){
+        try { map.flyTo(homeView.center, homeView.zoom, {duration: 1.2}); }
+        catch (e){ try { map.setView(homeView.center, homeView.zoom); } catch(e2){} }
+      }
+      // Also open the Info modal
+      try {
+        var modal = document.getElementById('rs-info-modal');
+        if (modal) {
+          modal.setAttribute('aria-hidden','false');
+          modal.classList.add('open');
+          document.body.classList.add('modal-open');
+        }
+      } catch(e){}
+    }
+  }
+
+  function startIdleCountdown(){
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = setTimeout(function(){ startAuto(); }, IDLE_MS);
+  }
+
+  function onUserInteract(){
+    try{ window.__RS_AUTOPLAY_BTN__ && window.__RS_AUTOPLAY_BTN__.hide(); }catch(e){}
+
+    // If user interacts while autoplay is active OR attract is open:
+    var attract = document.getElementById('rs-attract');
+    var isAttractOpen = attract && attract.classList.contains('open');
+    if (isAttractOpen){
+      hideAttract();
+      stopAuto(true);     // go home and open Info
+    } else if (active) {
+      stopAuto(true);     // go home and open Info
+    }
+    startIdleCountdown();
+  }
+
+  // Tap to dismiss attract
+  document.addEventListener('click', function(e){
+    var attract = document.getElementById('rs-attract');
+    if (attract && attract.classList.contains('open')){
+      hideAttract();
+      stopAuto(true);
+    }
+  }, {passive:true});
+
+  var events = ['pointerdown','mousedown','touchstart','keydown','wheel','scroll','focus'];
+  events.forEach(function(ev){
+    try { document.addEventListener(ev, onUserInteract, {passive:true}); } catch(e){}
+  });
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive'){
+    startIdleCountdown();
+  } else {
+    document.addEventListener('DOMContentLoaded', startIdleCountdown);
+  }
+
+  window.RS_IDLE = {
+    start: startAuto,
+    stop: function(){ stopAuto(false); },
+    stopAndHome: function(){ hideAttract(); stopAuto(true); },
+    reset: startIdleCountdown,
+    setIdleMs: function(ms){ IDLE_MS = +ms || IDLE_MS; startIdleCountdown(); },
+    setPaceMs: function(ms){ PACE_MS = +ms || PACE_MS; if (paceTimer){ clearInterval(paceTimer); paceTimer = setInterval(function(){}, PACE_MS); } },
+    setMaxMs: function(ms){ MAX_MS = +ms || MAX_MS; }
+  };
+})();
+</script>
+
+
+
+
+
+  </div>
+</div>
+
+
+<!-- === Attract Overlay (Exact marquee HTML via base64 iframe) === -->
+<style id="rs-attract-style">
+  #rs-attract { position: fixed; inset: 0; z-index: 100000; display: none; }
+  #rs-attract.open { display: block; }
+  #rs-attract-iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; display: block; background: #000; }
+  #rs-attract-tap { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; margin: 0; padding: 0; cursor: pointer; background: transparent; }
+</style>
+<div id="rs-attract" aria-label="Attract Screen">
+  <iframe id="rs-attract-iframe" title="Attract"></iframe>
+  <button id="rs-attract-tap" aria-label="Tap to start"></button>
+</div>
+
+<!-- Raw marquee HTML payload (base64) -->
+<script id="rs-attract-raw" type="application/octet-stream" data-b64="PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CiAgPG1ldGEgY2hhcnNldD0idXRmLTgiIC8+CiAgPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xIiAvPgogIDx0aXRsZT5WZXJ0aWNhbCBNYXJxdWVlIOKAlCBQb3N0ZXJzPC90aXRsZT4KICA8c3R5bGU+CiAgICBAZm9udC1mYWNlIHsKICAgICAgZm9udC1mYW1pbHk6ICdMZWFndWVHb3RoaWMnOwogICAgICBzcmM6IHVybCgnZm9udHMvTGVhZ3VlR290aGljLVJlZ3VsYXIud29mZjInKSBmb3JtYXQoJ3dvZmYyJyksCiAgICAgICAgICAgdXJsKCdmb250cy9MZWFndWVHb3RoaWMtUmVndWxhci53b2ZmJykgZm9ybWF0KCd3b2ZmJyksCiAgICAgICAgICAgdXJsKCdmb250cy9MZWFndWVHb3RoaWMtUmVndWxhci50dGYnKSBmb3JtYXQoJ3RydWV0eXBlJyk7CiAgICAgIGZvbnQtd2VpZ2h0OiBub3JtYWw7CiAgICAgIGZvbnQtc3R5bGU6IG5vcm1hbDsKICAgIH0KCiAgICA6cm9vdCB7CiAgICAgIC0tYmc6ICMwYjBiMGI7CiAgICAgIC0tZmc6ICNlNmU2ZTY7CiAgICAgIC0tZ2FwOiBjbGFtcCg0cHgsIDEuMnZ3LCAxMHB4KTsKICAgICAgLS1wb3N0ZXItdzogbWluKDI4dncsIDM2MHB4KTsKICAgICAgLS1yYWRpdXM6IDE2cHg7CiAgICAgIC0tc2hhZG93OiAwIDZweCAyNHB4IHJnYmEoMCwwLDAsLjM1KTsKICAgICAgLS1zcGVlZDogNDVzOwogICAgfQoKICAgICogeyBib3gtc2l6aW5nOiBib3JkZXItYm94OyB9CiAgICBodG1sLCBib2R5IHsgaGVpZ2h0OiAxMDAlOyB9CiAgICBib2R5IHsKICAgICAgbWFyZ2luOiAwOwogICAgICBiYWNrZ3JvdW5kOiByYWRpYWwtZ3JhZGllbnQoMTIwMHB4IDgwMHB4IGF0IDgwJSAtMTAlLCAjMTcxNzE3IDAlLCAjMGIwYjBiIDU1JSwgIzA2MDYwNiAxMDAlKTsKICAgICAgY29sb3I6IHZhcigtLWZnKTsKICAgICAgZm9udDogNDAwIDE1cHgvMS41IHN5c3RlbS11aSwgLWFwcGxlLXN5c3RlbSwgU2Vnb2UgVUksIFJvYm90bywgSGVsdmV0aWNhLCBBcmlhbCwgTm90byBTYW5zOwogICAgICBvdmVyZmxvdzogaGlkZGVuOwogICAgfQoKICAgIC5sb2dvIHsKICAgICAgcG9zaXRpb246IGZpeGVkOyB6LWluZGV4OiAxMDsKICAgICAgbGVmdDogNTAlOyB0b3A6IDE0cHg7IHRyYW5zZm9ybTogdHJhbnNsYXRlWCgtNTAlKTsKICAgICAgd2lkdGg6IG1pbig0MnZ3LCA1MjBweCk7CiAgICAgIGZpbHRlcjogZHJvcC1zaGFkb3coMCAxMHB4IDI0cHggcmdiYSgwLDAsMCwuNjUpKTsKICAgICAgcG9pbnRlci1ldmVudHM6IG5vbmU7CiAgICB9CgogICAgLnRhZ2xpbmUgewogICAgICBwb3NpdGlvbjogZml4ZWQ7CiAgICAgIHotaW5kZXg6IDk7CiAgICAgIHRvcDogY2FsYygxNHB4ICsgbWluKDQydncsIDUyMHB4KSArIDE2cHgpOwogICAgICBsZWZ0OiA1MCU7CiAgICAgIHRyYW5zZm9ybTogdHJhbnNsYXRlWCgtNTAlKTsKICAgICAgZm9udC1zaXplOiBjbGFtcCgyMHB4LCAzdncsIDQwcHgpOwogICAgICBjb2xvcjogI2ZmZmZmZjsKICAgICAgdGV4dC1hbGlnbjogY2VudGVyOwogICAgICBmb250LWZhbWlseTogJ0xlYWd1ZUdvdGhpYycsIEltcGFjdCwgc2Fucy1zZXJpZjsKICAgICAgbGV0dGVyLXNwYWNpbmc6IDFweDsKICAgICAgdGV4dC10cmFuc2Zvcm06IHVwcGVyY2FzZTsKICAgICAgdGV4dC1zaGFkb3c6IDAgMCA2cHggcmdiYSgwLDAsMCwwLjkpLCAwIDAgMThweCByZ2JhKDAsMCwwLDAuOCksIDAgMCAyOHB4IHJnYmEoMjU1LDI1NSwyNTUsMC40KTsKICAgICAgYW5pbWF0aW9uOiBwdWxzZSAyLjVzIGVhc2UtaW4tb3V0IGluZmluaXRlOwogICAgICBwb2ludGVyLWV2ZW50czogbm9uZTsKICAgICAgbGluZS1oZWlnaHQ6IDEuMzsKICAgIH0KCiAgICAudGFnbGluZSAuY3RhIHsKICAgICAgZGlzcGxheTogYmxvY2s7CiAgICAgIG1hcmdpbi10b3A6IDhweDsKICAgICAgY29sb3I6ICNmZmNjMzM7CiAgICAgIHRleHQtc2hhZG93OiAwIDAgMTBweCByZ2JhKDAsMCwwLDAuOSksIDAgMCAyMHB4IHJnYmEoMjU1LDIwNCw1MSwwLjgpLCAwIDAgMzJweCByZ2JhKDI1NSwyMDQsNTEsMC43KTsKICAgIH0KCiAgICBAa2V5ZnJhbWVzIHB1bHNlIHsKICAgICAgMCUsMTAwJSB7IG9wYWNpdHk6IDE7IH0KICAgICAgNTAlIHsgb3BhY2l0eTogMC43NTsgfQogICAgfQoKICAgIC53cmFwIHsgbWF4LXdpZHRoOiAxNDAwcHg7IG1hcmdpbjogMCBhdXRvOyBwYWRkaW5nOiAxMjBweCBtYXgoMTBweCwgM3Z3KSAyNHB4OyB9CgogICAgLndhbGwgewogICAgICBkaXNwbGF5OiBncmlkOwogICAgICBncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdChhdXRvLWZpdCwgbWlubWF4KDI0MHB4LCAxZnIpKTsKICAgICAgZ2FwOiB2YXIoLS1nYXApOwogICAgICBhbGlnbi1pdGVtczogc3RhcnQ7CiAgICB9CgogICAgLmNvbCB7IGRpc3BsYXk6IGdyaWQ7IGdhcDogdmFyKC0tZ2FwKTsgZ3JpZC1hdXRvLXJvd3M6IG1pbi1jb250ZW50OyBhbmltYXRpb246IHNjcm9sbFkgdmFyKC0tc3BlZWQpIGxpbmVhciBpbmZpbml0ZTsgfQogICAgLmNvbDpudGgtY2hpbGQoMikgeyBhbmltYXRpb24tZHVyYXRpb246IGNhbGModmFyKC0tc3BlZWQpICogMS4xNSk7IGFuaW1hdGlvbi1kaXJlY3Rpb246IHJldmVyc2U7IH0KICAgIC5jb2w6bnRoLWNoaWxkKDMpIHsgYW5pbWF0aW9uLWR1cmF0aW9uOiBjYWxjKHZhcigtLXNwZWVkKSAqIDAuOSk7IH0KCiAgICBAa2V5ZnJhbWVzIHNjcm9sbFkgeyAwJSB7IHRyYW5zZm9ybTogdHJhbnNsYXRlWSgwKTsgfSAxMDAlIHsgdHJhbnNmb3JtOiB0cmFuc2xhdGVZKC01MCUpOyB9IH0KCiAgICAucG9zdGVyIHsgd2lkdGg6IDEwMCU7IG1heC13aWR0aDogdmFyKC0tcG9zdGVyLXcpOyBib3JkZXItcmFkaXVzOiB2YXIoLS1yYWRpdXMpOyBvdmVyZmxvdzogaGlkZGVuOyBib3gtc2hhZG93OiB2YXIoLS1zaGFkb3cpOyBiYWNrZ3JvdW5kOiAjMTExOyBib3JkZXI6IDFweCBzb2xpZCByZ2JhKDI1NSwyNTUsMjU1LC4wOCk7IGFzcGVjdC1yYXRpbzogMi8zOyBwb3NpdGlvbjogcmVsYXRpdmU7IGlzb2xhdGlvbjogaXNvbGF0ZTsgfQogICAgLnBvc3RlciBpbWcgeyB3aWR0aDogMTAwJTsgaGVpZ2h0OiAxMDAlOyBvYmplY3QtZml0OiBjb3ZlcjsgZGlzcGxheTogYmxvY2s7IGZpbHRlcjogc2F0dXJhdGUoMS4wNSkgY29udHJhc3QoMS4wNSk7IH0KICAgIC5wb3N0ZXI6OmFmdGVyIHsgY29udGVudDogIiI7IHBvc2l0aW9uOiBhYnNvbHV0ZTsgaW5zZXQ6IDA7IGJhY2tncm91bmQ6IHJhZGlhbC1ncmFkaWVudCgxMjAlIDEwMCUgYXQgNTAlIDAlLCB0cmFuc3BhcmVudCA0MCUsIHJnYmEoMCwwLDAsLjI1KSA4NSUsIHJnYmEoMCwwLDAsLjYpIDEwMCUpOyBwb2ludGVyLWV2ZW50czogbm9uZTsgbWl4LWJsZW5kLW1vZGU6IG11bHRpcGx5OyB9CgogICAgLmVtcHR5IHsgb3BhY2l0eTogLjc7IHRleHQtYWxpZ246IGNlbnRlcjsgcGFkZGluZzogMjRweDsgfQogICAgZm9vdGVyIHsgb3BhY2l0eTogLjY7IHRleHQtYWxpZ246IGNlbnRlcjsgcGFkZGluZzogOHB4IDAgMjBweDsgZm9udC1zaXplOiAxM3B4OyB9CgogICAgQG1lZGlhIChtYXgtd2lkdGg6IDYwMHB4KSB7IDpyb290IHsgLS1zcGVlZDogNjBzOyB9IC53cmFwe3BhZGRpbmctdG9wOjk2cHh9IH0KICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PgogIDxpbWcgY2xhc3M9ImxvZ28iIHNyYz0iaW1hZ2VzL3JlZWxfc2NyZWVuc19sb2dvLnBuZyIgYWx0PSJSZWVsIFNjcmVlbnMg4oCUIENsZXZlbGFuZCAxOTQ1IiAvPgogIDxkaXYgY2xhc3M9InRhZ2xpbmUiPldoZXJlIERpZCBDbGV2ZWxhbmQgR28gdG8gdGhlIE1vdmllcyBpbiAxOTQ1PzxzcGFuIGNsYXNzPSJjdGEiPlRhcCB0byBGaW5kIE91dC48L3NwYW4+PC9kaXY+CgogIDxkaXYgY2xhc3M9IndyYXAiPgogICAgPGRpdiBpZD0id2FsbCIgY2xhc3M9IndhbGwiIGFyaWEtbGl2ZT0icG9saXRlIj4KICAgICAgPHAgY2xhc3M9ImVtcHR5Ij5Mb2FkaW5nIGVtYmVkZGVkIHBvc3RlciBsaXN04oCmPC9wPgogICAgPC9kaXY+CiAgICA8Zm9vdGVyPkVuZGxlc3MgcmFuZG9tIHN0cmVhbSDigJQga2VlcHMgcmVzaHVmZmxpbmcgYXMgaXQgc2Nyb2xscy48L2Zvb3Rlcj4KICA8L2Rpdj4KCiAgPHNjcmlwdD4KICAgIGNvbnN0IFBPU1RFUlNfRElSID0gJ2ltYWdlcy9iaWxsaW5ncy9wb3N0ZXJzLyc7CiAgICBjb25zdCBSQVdfTUFOSUZFU1QgPSBbCiAgICAgICIzaXNhZmFtaWx5LnBuZyIsImFicm9hZHdpdGh0d295YW5rcy5wbmciLCJhbGFza2EucG5nIiwiYW5pZ2h0dG9yZW1lbWJlci5wbmciLCJhcGVtYW4ucG5nIiwiYXNvbmd0b3JlbWVtYmVyLnBuZyIsImF0cmVlZ3Jvd3NpbmJyb29rbHluLnBuZyIsImF0dGFjay5wbmciLCJiYWhhbWFwYXNzYWdlLnBuZyIsImJlYWNoaGVhZHRvYmVybGluLnBuZyIsImJldHdlZW50d293b21lbi5wbmciLCJibHVlYmVhcmQucG5nIiwiYm9tYmFsZXJhLnBuZyIsImJyb3RoZXJzYW5kc2lzdGVyc29mdGhldG9kYWZhbWlseS5wbmciLCJidWNrc2tpbmZyb250aWVyLnBuZyIsImNvdW50ZXItYXR0YWNrLnBuZyIsImRhcmttb3VudGFpbi5wbmciLCJkYXJrd2F0ZXJzLnBuZyIsImRheXNvZmdsb3J5LnBuZyIsImRldmlsYmF0LnBuZyIsImVudGVyYXJzZW5lbHVwaW4ucG5nIiwiZXNjb3J0Z2lybC5wbmciLCJleHBlcmltZW50cGVyaWxvdXMucG5nIiwiZmFzdGNvbXBhbnkucG5nIiwiZnJpc2Nvc2FsLnBuZyIsImdhbmR5c2RyZWFtZ2lybC5wbmciLCJnb2Rpc215Y28tcGlsb3QucG5nIiwiZ3Vlc3RpbnRoZWhvdXNlLnBuZyIsImd5cHN5d2lsZGNhdC5wbmciLCJoYW5nb3ZlcnNxdWFyZS5wbmciLCJoZWF0aGVyYW5keW9uLnBuZyIsImhlYXZlbmx5ZGF5cy5wbmciLCJoZXJlY29tZXRoZWNvLWVkcy5wbmciLCJoZXJlY29tZXRoZXdhdmVzLnBuZyIsImhvdGVsYmVybGluLnBuZyIsImljZWNhcGFkZXNyZXZ1ZS5wbmciLCJpbGxiZXNlZWluZ3lvdS5wbmciLCJpbGxzZWxsbXlsaWZlLnBuZyIsImlub2xkY2FsaWZvcm5pYS5wbmciLCJpc2xlb2Z0YWJ1LnBuZyIsImtlZXB5b3VycG93ZGVyZHJ5LnBuZyIsImtleXNvZnRoZWtpZ2RvbS5wbmciLCJsYWtlcGxhY2lkc2VyZW5hZGUucG5nIiwibGlsbGltYXJsZW5lLnBuZyIsImx1YmxpbmRlYXRoZmFjdG9yeS5wbmciLCJsdWNreWpvcmRhbi5wbmciLCJtYWRlZm9yZWFjaG90aGVyLnBuZyIsIm1lZXRtZWluc3Rsb3Vpcy5wbmciLCJtaW5pc3RyeW9mZmVhci5wbmciLCJtb29ubGlnaHRhbmRjYWN0dXMucG5nIiwibXVzaWNmb3JtaWxsaW9ucy5wbmciLCJtdXNpY2lubWFuaGF0dGFuLnBuZyIsIm5ldmFkYS5wbmciLCJvYmplY3RpdmVidXJtYS5wbmciLCJvdXJoZWFydHN3ZXJleW91bmdhbmRnYXkucG5nIiwicGFydG5lcnNvZnRoZXRyYWlsLnBuZyIsInBvc3RlcnNfaW5kZXguanNvbiIsInByYWN0aWNhbGx5eW91cnMucG5nIiwicm91Z2h0b3VnaGFuZHJlYWR5LnBuZyIsInNhbHR5b3JvdXJrZS5wbmciLCJzZXJnZWFudG1pa2UucG5nIiwic2hlc2Fzb2xkaWVydG9vLnBuZyIsInNoaW5lb25oYXJ2ZXN0bW9vbi5wbmciLCJzaW5jZXlvdXdlbnRhd2F5LnBuZyIsInNvbWV0aGluZ2ZvcnRoZWJveXMucG5nIiwic3Rvcm1vdmVybGlzYm9uLnBuZyIsInN0cmFuZ2VhZmZhaXIucG5nIiwiU3VuZGF5RGlubmVyZm9yYVNvbGRpZXIucG5nIiwic3VuZG93bnZhbGxleS5wbmciLCJzd2luZ2hvc3Rlc3MucG5nIiwidGFtcGljby5wbmciLCJ0aGVhcGUucG5nIiwidGhlYmlnc2hvdy1vZmYucG5nIiwidGhlY2xpbWF4LnBuZyIsInRoZWZhbGNvbmluaG9sbHl3b29kLnBuZyIsInRoZWZpZ2h0aW5nbGFkeS5wbmciLCJ0aGVtYXJrb2Z0aGV3aGlzdGxlci5wbmciLCJ0aGVuYXZ5d2F5LnBuZyIsInRoZXNreXN0aGVsaW1pdC5wbmciLCJ0aGVzdHJhbmdsZXIucG5nIiwidGhldGhpbm1hbmdvZXNob21lLnBuZyIsInRoZXVuc2Vlbi5wbmciLCJ0aGV3b21hbmludGhld2luZG93LnBuZyIsInRob3JvdWdoYnJlZHMucG5nIiwidG9oYXZlYW5kaGF2ZW5vdC5wbmciLCJ0b25pZ2h0YW5kZXZlcnluaWdodC5wbmciLCJ0b3BwZXIucG5nIiwidHVybmFib3V0LnBuZyIsInR3b2dpcmxzYW5kYXNhaWxvci5wbmciLCJ3ZWRkZWRibGlzcy5wbmciLCJ3aGVudGhlbGlnaHRzZ29vbmFnYWluLnBuZyIsIndvb3dvby5wbmciLCJ5b3V0aG9udHJpYWwucG5nIgogICAgXTsKICAgIGNvbnN0IE1BTklGRVNUID0gUkFXX01BTklGRVNULmZpbHRlcihuID0+IC9cLig/OmpwZ3xwbmd8anBlZ3x3ZWJwKSQvaS50ZXN0KG4pKTsKCiAgICBjb25zdCB3YWxsID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3dhbGwnKTsKICAgIGNvbnN0IHJuZCA9IChuKSA9PiBNYXRoLmZsb29yKE1hdGgucmFuZG9tKCkqbik7CiAgICBjb25zdCBzaHVmZmxlQXJyID0gKGEpID0+IHsgZm9yIChsZXQgaT1hLmxlbmd0aC0xO2k+MDtpLS0peyBjb25zdCBqID0gTWF0aC5mbG9vcihNYXRoLnJhbmRvbSgpKihpKzEpKTsgW2FbaV0sYVtqXV09W2Fbal0sYVtpXV07IH0gcmV0dXJuIGE7IH07CgogICAgZnVuY3Rpb24gcGlja1JhbmRvbShsaXN0LCBjb3VudCl7CiAgICAgIGNvbnN0IGlkeHMgPSBBcnJheS5mcm9tKHtsZW5ndGg6bGlzdC5sZW5ndGh9LCAoXyxpKT0+aSk7CiAgICAgIHNodWZmbGVBcnIoaWR4cyk7CiAgICAgIHJldHVybiBpZHhzLnNsaWNlKDAsIE1hdGgubWluKGNvdW50LCBsaXN0Lmxlbmd0aCkpLm1hcChpPT5saXN0W2ldKTsKICAgIH0KCiAgICBmdW5jdGlvbiBtYWtlVGlsZShmaWxlKXsKICAgICAgY29uc3QgY2FyZCA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2ZpZ3VyZScpOwogICAgICBjYXJkLmNsYXNzTmFtZSA9ICdwb3N0ZXInOwogICAgICBjb25zdCBpbWcgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdpbWcnKTsKICAgICAgaW1nLmxvYWRpbmcgPSAnbGF6eSc7IGltZy5kZWNvZGluZyA9ICdhc3luYyc7CiAgICAgIGltZy5hbHQgPSBmaWxlLnNwbGl0KCcvJykucG9wKCkucmVwbGFjZSgvWy1fXS9nLCcgJykucmVwbGFjZSgvXC5bXi5dKyQvLCAnJyk7CiAgICAgIGltZy5zcmMgPSBQT1NURVJTX0RJUiArIGZpbGU7CiAgICAgIGNhcmQuYXBwZW5kQ2hpbGQoaW1nKTsKICAgICAgcmV0dXJuIGNhcmQ7CiAgICB9CgogICAgZnVuY3Rpb24gZmlsbEhhbGYoY29sLCBjb3VudCl7CiAgICAgIGNvbnN0IG5hbWVzID0gcGlja1JhbmRvbShNQU5JRkVTVCwgY291bnQpOwogICAgICBjb25zdCBmcmFnID0gZG9jdW1lbnQuY3JlYXRlRG9jdW1lbnRGcmFnbWVudCgpOwogICAgICBmb3IgKGNvbnN0IGYgb2YgbmFtZXMpIGZyYWcuYXBwZW5kQ2hpbGQobWFrZVRpbGUoZikpOwogICAgICByZXR1cm4gZnJhZzsKICAgIH0KCiAgICBmdW5jdGlvbiBidWlsZE1hcnF1ZWUodG90YWw9MjcpewogICAgICB3YWxsLmlubmVySFRNTCA9ICcnOwogICAgICBjb25zdCBjb2xzID0gMzsKICAgICAgY29uc3QgcGVyQ29sID0gTWF0aC5jZWlsKHRvdGFsIC8gY29scyk7CgogICAgICBmb3IgKGxldCBjPTA7IGM8Y29sczsgYysrKXsKICAgICAgICBjb25zdCBjb2wgPSBkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdkaXYnKTsKICAgICAgICBjb2wuY2xhc3NOYW1lID0gJ2NvbCc7CiAgICAgICAgY29sLmRhdGFzZXQucGVyQ29sID0gcGVyQ29sOwogICAgICAgIGNvbnN0IGZpcnN0ID0gZmlsbEhhbGYoY29sLCBwZXJDb2wpOwogICAgICAgIGNvbnN0IHNlY29uZCA9IGZpbGxIYWxmKGNvbCwgcGVyQ29sKTsKICAgICAgICBjb2wuYXBwZW5kQ2hpbGQoZmlyc3QpOwogICAgICAgIGNvbC5hcHBlbmRDaGlsZChzZWNvbmQpOwogICAgICAgIGNvbC5hZGRFdmVudExpc3RlbmVyKCdhbmltYXRpb25pdGVyYXRpb24nLCAoKSA9PiB7CiAgICAgICAgICBjb25zdCBjb3VudCA9IE51bWJlcihjb2wuZGF0YXNldC5wZXJDb2wpfHxwZXJDb2w7CiAgICAgICAgICBmb3IobGV0IGk9MDtpPGNvdW50O2krKykgY29sLnJlbW92ZUNoaWxkKGNvbC5maXJzdEVsZW1lbnRDaGlsZCk7CiAgICAgICAgICBjb2wuYXBwZW5kQ2hpbGQoZmlsbEhhbGYoY29sLCBjb3VudCkpOwogICAgICAgIH0pOwogICAgICAgIHdhbGwuYXBwZW5kQ2hpbGQoY29sKTsKICAgICAgfQogICAgfQoKICAgIGJ1aWxkTWFycXVlZSgyNyk7CiAgPC9zY3JpcHQ+CjwvYm9keT4KPC9odG1sPgo="></script>
+
+<script id="rs-attract-embed">
+(function(){
+  function setIframe(){
+    try {
+      var ifr = document.getElementById('rs-attract-iframe');
+      if (!ifr) return;
+      var base = document.baseURI || location.href;
+      var holder = document.getElementById('rs-attract-raw');
+      var b64 = holder ? holder.getAttribute('data-b64') : '';
+      var raw = b64 ? atob(b64) : '';
+      // Inject <base> so relative paths (images/fonts) resolve
+      var content = raw;
+      if (/<head[^>]*>/i.test(content)) {
+        content = content.replace(/<head[^>]*>/i, function(m){ return m + '<base href="' + base + '">'; });
+      } else {
+        content = '<!doctype html><head><base href="' + base + '"></head>' + content;
+      }
+      ifr.srcdoc = content;
+    } catch(e){}
+  }
+  window.__RS_ATTRACT_EMBED__ = { set: setIframe };
+})();
+</script>
+
+
+<script id="rs-map-reinit">
+(function(){
+  function findMap(){
+    try {
+      if (window.map && typeof window.map.getCenter === 'function') return window.map;
+      if (window.RS_MAP && typeof window.RS_MAP.getCenter === 'function') return window.RS_MAP;
+      if (window.RS_MAP && window.RS_MAP.map && typeof window.RS_MAP.map.getCenter === 'function') return window.RS_MAP.map;
+      for (var k in window){
+        var obj = window[k];
+        if (obj && typeof obj.getCenter === 'function' && typeof obj.flyTo === 'function'){
+          try { var el = obj.getContainer && obj.getContainer(); if (el && el.id === 'map') return obj; } catch(e){}
+        }
+      }
+    } catch(e){}
+    return null;
+  }
+
+  function captureDefaultHome(){
+    if (window.__RS_DEFAULT_HOME) return;
+    var m = findMap();
+    if (!m) return;
+    try {
+      window.__RS_DEFAULT_HOME = { center: m.getCenter(), zoom: m.getZoom() };
+    } catch(e){}
+  }
+
+  function openAbout(){
+    try {
+      var modal = document.getElementById('rs-info-modal');
+      if (modal){
+        modal.setAttribute('aria-hidden','false');
+        modal.classList.add('open');
+        document.body.classList.add('modal-open');
+      }
+    } catch(e){}
+  }
+
+  function clearSelections(){
+    try {
+      var m = findMap();
+      if (!m) return;
+      if (typeof m.closePopup === 'function') m.closePopup();
+      try { m.fire && m.fire('rs:deselect'); } catch(e){}
+    } catch(e){}
+  }
+
+  function reinit(opts){
+    opts = opts || {};
+    var keep = !!opts.keepSelected;
+    captureDefaultHome();
+    var m = findMap();
+    if (!m || !window.__RS_DEFAULT_HOME) { openAbout(); return; }
+
+    if (!keep) clearSelections();
+
+    try { m.flyTo(window.__RS_DEFAULT_HOME.center, window.__RS_DEFAULT_HOME.zoom, {duration: 1.0}); }
+    catch(e){ try { m.setView(window.__RS_DEFAULT_HOME.center, window.__RS_DEFAULT_HOME.zoom); } catch(e2){} }
+
+    openAbout();
+  }
+
+  window.RS_REINIT = {
+    setDefaultHome: function(center, zoom){
+      if (center && typeof center.lat === 'number' && typeof center.lng === 'number' && typeof zoom === 'number'){
+        window.__RS_DEFAULT_HOME = { center: center, zoom: zoom };
+      }
+    },
+    reinit: reinit,
+    reinitKeepSelected: function(){ return reinit({keepSelected: true}); }
+  };
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') captureDefaultHome();
+  else document.addEventListener('DOMContentLoaded', captureDefaultHome);
+})();
+</script>
+
+
+<script id="rs-attract-tap-logic">
+(function(){
+  function isAttractOpen(){
+    try { 
+      var el = document.getElementById('rs-attract'); 
+      return !!(el && el.classList && el.classList.contains('open'));
+    } catch(e){ return false; }
+  }
+  function hideAttract(){
+    try { var el = document.getElementById('rs-attract'); if (el) el.classList.remove('open'); } catch(e){}
+  }
+  function goHomeWithAboutKeepSelected(){
+    if (window.RS_REINIT && typeof window.RS_REINIT.reinitKeepSelected === 'function'){
+      window.RS_REINIT.reinitKeepSelected();
+    } else if (window.RS_REINIT && typeof window.RS_REINIT.reinit === 'function'){
+      // Fallback: standard reinit (will still open About)
+      window.RS_REINIT.reinit({ keepSelected: true });
+    } else if (window.RS_IDLE && typeof window.RS_IDLE.stopAndHome === 'function'){
+      // Last resort
+      window.RS_IDLE.stopAndHome();
+    }
+  }
+  function onTap(){
+    if (!isAttractOpen()) return;
+    hideAttract();
+    goHomeWithAboutKeepSelected();
+  }
+  // Global pointer handler so any tap/click while attract is open will work
+  document.addEventListener('pointerdown', onTap, {passive:true});
+})();
+</script>
+
+
+<!-- === Autoplay Attract Button (visible only during autoplay) === -->
+<style id="rs-autoplay-attractbtn-style">
+  @font-face {
+    font-family: 'LeagueGothic';
+    src: url('fonts/LeagueGothic-Regular.woff2') format('woff2'),
+         url('fonts/LeagueGothic-Regular.woff') format('woff'),
+         url('fonts/LeagueGothic-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+  #rs-autoplay-attractbtn {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 110000;
+    display: none;
+  }
+  #rs-autoplay-attractbtn.open { display: block; }
+  #rs-autoplay-attractbtn .btn {
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+    background: #f6f1e1; /* cream */
+    color: #111;
+    border: 3px solid #111;
+    border-radius: 12px;
+    padding: 12px 18px;
+    min-width: min(72vw, 520px);
+    max-width: min(90vw, 640px);
+    box-shadow: 0 8px 28px rgba(0,0,0,.35);
+    text-align: center;
+    line-height: 1.25;
+  }
+  #rs-autoplay-attractbtn h4 {
+    margin: 0 0 4px 0;
+    font-family: 'LeagueGothic', Impact, 'Franklin Gothic Condensed', system-ui, sans-serif;
+    font-size: clamp(18px, 4.2vw, 28px);
+    letter-spacing: .6px;
+    text-transform: uppercase;
+  }
+  #rs-autoplay-attractbtn p {
+    margin: 0;
+    font-size: clamp(13px, 2.6vw, 18px);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-style: italic;
+  }
+  #rs-autoplay-attractbtn .btn::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 14px;
+    box-shadow: 0 0 0 2px rgba(255,210,96,.6), 0 0 24px rgba(255,210,96,.45), 0 0 48px rgba(255,210,96,.35);
+    opacity: .0;
+    transition: opacity .6s ease;
+    pointer-events: none;
+  }
+  #rs-autoplay-attractbtn.open .btn::after { opacity: .7; animation: rs_marquee_glow_btn 2.6s ease-in-out infinite; }
+  @keyframes rs_marquee_glow_btn { 0%,100% { opacity: .5 } 50% { opacity: .85 } }
+
+  /* Responsive nudge above Leaflet zoom controls if present */
+  @media (max-width: 640px) {
+    #rs-autoplay-attractbtn { bottom: 76px; }
+  }
+</style>
+<div id="rs-autoplay-attractbtn" aria-live="polite">
+  <div class="btn" role="button" tabindex="0" aria-label="Tap to interact">
+    <h4>Cleveland, 1945</h4>
+    <p>Every marquee tells a story — tap to step in.</p>
+  </div>
+</div>
+
+<script id="rs-autoplay-attractbtn-logic">
+(function(){
+  var el = null;
+  function getEl(){ return el || (el = document.getElementById('rs-autoplay-attractbtn')); }
+
+  function showBtn(){ try{ var n=getEl(); if(n) n.classList.add('open'); }catch(e){} }
+  function hideBtn(){ try{ var n=getEl(); if(n) n.classList.remove('open'); }catch(e){} }
+
+  function onClick(){
+    hideBtn();
+    if (window.RS_REINIT && typeof window.RS_REINIT.reinitKeepSelected === 'function'){
+      window.RS_REINIT.reinitKeepSelected();
+    } else if (window.RS_REINIT && typeof window.RS_REINIT.reinit === 'function'){
+      window.RS_REINIT.reinit({ keepSelected: true });
+    } else if (window.RS_IDLE && typeof window.RS_IDLE.stopAndHome === 'function'){
+      window.RS_IDLE.stopAndHome();
+    }
+  }
+
+  function wire(){
+    var n = getEl();
+    if (!n) return;
+    var b = n.querySelector('.btn');
+    if (!b) return;
+    b.addEventListener('click', onClick);
+    b.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } });
+  }
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') wire();
+  else document.addEventListener('DOMContentLoaded', wire);
+
+  // Expose tiny API so idle script can toggle
+  window.__RS_AUTOPLAY_BTN__ = { show: showBtn, hide: hideBtn };
+})();
+</script>
+
 </body>
 </html>
