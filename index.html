@@ -8138,9 +8138,9 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     var lines = [];
     lines.push('<h3>Map Layers</h3>');
     if (isOnline) {
-      lines.push('<p>Online mode provides two base layers: <strong>Street</strong> and <strong>Satellite</strong>. Use the layer switcher in the top-right to toggle.</p>');
+      lines.push('<p>Two Base Layers <strong>Street</strong> and <strong>Satellite</strong>. Use the layer switcher in the top-right to toggle.</p>');
     } else {
-      lines.push('<p>Local mode includes multiple base layers and archives. Use <strong>Map Layers</strong> to toggle categories.</p>');
+      lines.push('<pMultiple base layers and archives. Use <strong>Map Layers</strong> to toggle categories.</p>');
       lines.push('<ul>');
       lines.push('<li><strong>Street</strong> — Street map for navigation.</li>');
       lines.push('<li><strong>Satellite</strong> — Aerial imagery for context.</li>');
@@ -8177,12 +8177,6 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     } else {
       lines.push('<li>“Switch from <em>Street</em> to <em>Satellite</em> using the control in the top-right.”</li>');
     }
-    lines.push('</ul>');
-
-    lines.push('<h3>Quick Keys</h3>');
-    lines.push('<ul>');
-    lines.push('<li>Press <span class=\"rs-kbd\">?</span> or <span class=\"rs-kbd\">H</span> to open Help.</li>');
-    lines.push('<li>Press <span class=\"rs-kbd\">Esc</span> to close Help.</li>');
     lines.push('</ul>');
 
     return lines.join('');
