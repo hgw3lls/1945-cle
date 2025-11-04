@@ -7,9 +7,7 @@
 <title>Reel Screens — Offline Interactive Map</title>
 <link href="vendor/leaflet/leaflet.css" rel="stylesheet"/>
 <!-- -->
-<style>
-.rs-historic-slider { display: none !important; }
- id="rs-consolidated">
+<style id="rs-consolidated">
 
 
 /* --- Consolidated CSS (last occurrence wins) --- */
@@ -2027,6 +2025,57 @@ html.booting #rs-float{transition:none !important;}
 #rs-gallery .rs-g-title{font:900 20px/1 'StandingRoomOnly NF', system-ui; text-transform:uppercase; color:#f3efe4;}
 #rs-gallery .rs-g-close{background:#f3efe4; color:#000; border:2px solid #000; padding:6px 10px; font-weight:900; text-transform:uppercase; cursor:pointer;}
 #rs-gallery.rs-single .rs-g-title{display:block !important;}
+
+
+/* === TV Scaling Fix for 65" Displays (adaptive) === */
+@media (min-width: 1600px) and (min-height: 900px) {
+  html.tv {
+    --tv-scale: 0.85; /* reduce global scale for large TVs */
+  }
+
+  html.tv body {
+    font-size: calc(14px * var(--tv-scale));
+  }
+
+  html.tv .rs-btn,
+  html.tv .rs-layer-btn,
+  html.tv .rs-footer-sq,
+  html.tv .rs-footer-all {
+    min-width: 42px;
+    min-height: 42px;
+    font-size: calc(13px * var(--tv-scale));
+    line-height: 1.1;
+    padding: 6px 10px;
+  }
+
+  html.tv #rs-list .rs-li h4 {
+    font-size: calc(22px * var(--tv-scale));
+  }
+
+  html.tv #rs-list .rs-addr,
+  html.tv #rs-list .rs-movie,
+  html.tv .rs-dt,
+  html.tv .rs-dd {
+    font-size: calc(13px * var(--tv-scale));
+  }
+
+  html.tv .rs-details-desc .rs-desc-body {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  /* Reduce popup/modal width so long lines are more readable */
+  html.tv .rs-details-panel,
+  html.tv #rs-infohelp-modal .panel {
+    max-width: 70vw;
+  }
+}
+
+/* Optional: reset to 1.0 on small displays */
+@media (max-width: 1400px) {
+  html.tv { --tv-scale: 1.0; }
+}
+
 </style>
 <style id="rs-fontrestore">
 /* --- THEATRE TITLE + MODAL TITLE FONT RESTORE --- */
@@ -2186,6 +2235,623 @@ html.booting #rs-float{transition:none !important;}
 }
 </style>
 
+<style>
+/* === Skinny & Tall Float Panel (see more theatres) === */
+#rs-float {
+  /* narrower overall, but responsive */
+  width: clamp(280px, 26vw, 340px) !important;
+  max-height: 90vh !important;
+}
+/* Make the internal list use the added height */
+#rs-list {
+  max-height: calc(90vh - 170px) !important; /* header+footer allowance */
+}
+
+/* Keep padding tight so content fits the skinny panel */
+#rs-float .rs-float__header { padding: 8px 10px !important; }
+#rs-float .rs-float__list { padding: 6px !important; }
+
+/* Sliders must fit inside the skinnier panel */
+#rs-float .rs-historic-slider,
+#rs-float .rs-layer-slider {
+  width: 100% !important;
+  max-width: 100% !important;
+  gap: 10px !important;
+  margin: 4px 0 !important;
+}
+#rs-float .rs-hist-label {
+  width: 110px !important;
+  font-size: 11px !important;
+}
+#rs-float .rs-hist-bar {
+  flex: 1 1 auto !important;
+  max-width: none !important;
+}
+
+/* Footer controls stay single-line and right-aligned */
+#rs-footer-bar .rs-footer-controls .rs-btn {
+  max-width: 110px !important;
+  padding: 8px 0 !important;
+}
+</style>
+<style>
+/* === Fix: Footer buttons stay inside skinny #rs-float === */
+#rs-footer-bar .rs-footer-controls {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)) !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+  justify-items: stretch !important;
+  width: 100% !important;
+  overflow: visible !important;
+  flex-wrap: initial !important;  /* neutralize earlier nowrap */
+}
+
+#rs-footer-bar .rs-footer-controls .rs-btn {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 10px 8px !important;
+  box-sizing: border-box !important;
+}
+
+/* Ensure any wide children in header/list can’t push a horizontal overflow */
+#rs-float, #rs-float * { max-width: 100%; box-sizing: border-box; }
+
+/* Guardrail: if the panel is extremely narrow, allow controls to stack */
+@media (max-width: 480px) {
+  #rs-footer-bar .rs-footer-controls {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+<style>
+/* === Additional Fix: right-edge clipping in footer === */
+#rs-footer-bar { 
+  padding: 0 10px 8px !important;   /* symmetric horizontal padding */
+}
+#rs-footer-bar .rs-footer-inner {
+  padding: 6px 10px 0 !important;   /* match left/right padding */
+}
+#rs-footer-bar .rs-footer-controls {
+  margin: 0 !important;             /* remove stray margins */
+  width: 100% !important;
+}
+#rs-footer-bar .rs-footer-controls .rs-btn {
+  margin: 0 !important;
+}
+/* Neutralize older rule that shoved Reset to the right with extra margin */
+#rs-reset {
+  margin-right: 0 !important;
+}
+</style>
+<style>
+/* === Right-edge fix for MAP LAYERS section === */
+#rs-float .rs-layer-group,
+#rs-float .rs-historic-slider,
+#rs-float .rs-layer-slider {
+  width: calc(100% - 16px) !important;  /* fit inside padding */
+  margin: 0 auto 6px auto !important;   /* center in panel */
+  padding-right: 0 !important;
+  overflow-x: hidden !important;
+}
+
+#rs-float .rs-hist-bar,
+#rs-float .rs-layer-bar {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+#rs-float .rs-hist-label,
+#rs-float .rs-layer-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95px !important; /* keep readable but constrained */
+}
+
+#rs-footer-bar {
+  padding-right: 10px !important;
+  padding-left: 10px !important;
+}
+
+#rs-footer-bar .rs-footer-controls {
+  justify-content: center !important;
+  width: calc(100% - 8px) !important;
+}
+</style>
+<style>
+/* === MAP LAYERS: tidy two‑column rows (label + bar) === */
+#rs-float .rs-historic-slider,
+#rs-float .rs-layer-slider {
+  display: grid !important;
+  grid-template-columns: 120px 1fr !important; /* fixed label rail + flexible bar */
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 6px 0 !important;
+  padding: 0 8px !important;
+}
+
+#rs-float .rs-hist-label,
+#rs-float .rs-layer-label {
+  max-width: 120px !important;
+  font-size: 16px !important;       /* slightly smaller for skinny panel */
+  line-height: 1.05 !important;
+  white-space: normal !important;    /* allow the 2-line Cleveland label */
+  text-overflow: clip !important;
+  overflow: hidden !important;
+}
+
+#rs-float .rs-hist-bar,
+#rs-float .rs-layer-bar,
+#rs-float .rs-hist-bar .rs-hist-bar-fill {
+  height: 24px !important;
+}
+
+/* Keep the segmented bar 100% inside */
+#rs-float .rs-hist-bar {
+  max-width: 100% !important;
+  border-radius: 3px !important;
+}
+
+/* === RESET MAP: compact, aligned right, inside panel === */
+#rs-footer-bar {
+  padding: 8px 10px 10px !important;
+}
+
+#rs-footer-bar .rs-footer-controls {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+#rs-reset {
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  margin: 0 !important;
+  max-width: 180px !important;
+  width: auto !important;
+  box-sizing: border-box !important;
+}
+</style>
+<style>
+/* === Robust collapse/expand for MAP LAYERS (prevents post-toggle overflow) === */
+/* Keep layout rules scoped to the expanded state so reflow recalculates widths */
+#rs-float .rs-layer-section:not(.collapsed) .rs-historic-slider,
+#rs-float .rs-layer-section:not(.collapsed) .rs-layer-slider {
+  display: grid !important;
+  grid-template-columns: 120px 1fr !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 6px 0 !important;
+  padding: 0 8px !important;
+  box-sizing: border-box !important;
+}
+
+#rs-float .rs-layer-section.collapsed .rs-historic-slider,
+#rs-float .rs-layer-section.collapsed .rs-layer-slider {
+  display: none !important; /* fully remove from flow; avoids half widths */
+}
+
+#rs-float .rs-layer-section {
+  width: 100% !important;
+  will-change: max-height !important;
+}
+
+#rs-float .rs-layer-section .rs-hist-label,
+#rs-float .rs-layer-section .rs-layer-label {
+  max-width: 120px !important;
+  white-space: normal !important;  /* allow Cleveland 2-line */
+  overflow: hidden !important;
+  text-overflow: clip !important;
+}
+
+#rs-float .rs-layer-section .rs-hist-bar,
+#rs-float .rs-layer-section .rs-layer-bar {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* Smooth but safe collapse animation */
+#rs-float .rs-layer-section.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+  overflow: hidden !important;
+  transition: max-height 220ms ease, opacity 160ms ease !important;
+}
+#rs-float .rs-layer-section:not(.collapsed) {
+  max-height: 500px !important;   /* plenty of headroom */
+  opacity: 1;
+  transition: max-height 260ms ease, opacity 180ms ease !important;
+}
+
+/* Force a reflow-safe container so rounding/padding don't push children */
+#rs-float, #rs-float * { box-sizing: border-box !important; }
+</style>
+<style>
+/* === Collapse only the MAP LAYERS content; keep footer visible === */
+#rs-float .rs-layer-content.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+  overflow: hidden !important;
+  transition: max-height 220ms ease, opacity 160ms ease !important;
+}
+#rs-float .rs-layer-content:not(.collapsed) {
+  max-height: 600px !important;   /* headroom */
+  opacity: 1;
+  transition: max-height 260ms ease, opacity 180ms ease !important;
+}
+
+/* Layout grid for rows (label + bar) stays the same in expanded state */
+#rs-float .rs-layer-content:not(.collapsed) .rs-historic-slider,
+#rs-float .rs-layer-content:not(.collapsed) .rs-layer-slider {
+  display: grid !important;
+  grid-template-columns: 120px 1fr !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 6px 0 !important;
+  padding: 0 8px !important;
+  box-sizing: border-box !important;
+}
+
+/* When collapsed, fully remove rows from flow */
+#rs-float .rs-layer-content.collapsed .rs-historic-slider,
+#rs-float .rs-layer-content.collapsed .rs-layer-slider {
+  display: none !important;
+}
+
+/* Sticky Reset footer stays visible inside the panel */
+#rs-footer-bar {
+  position: sticky !important;
+  bottom: 0 !important;
+  background: rgba(0,0,0,0.9);     /* match panel */
+  backdrop-filter: blur(0.5px);
+  padding: 8px 10px 10px !important;
+  z-index: 2;
+}
+</style>
+<style>
+/* === Footer safety: never hidden by collapse === */
+#rs-float .rs-layer-section,
+#rs-float .rs-layer-section.collapsed {
+  max-height: none !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+  display: block !important;
+}
+
+/* Collapse only the content wrapper */
+#rs-float .rs-layer-content.collapsed {
+  max-height: 0 !important;
+  opacity: 0;
+  overflow: hidden !important;
+}
+#rs-float .rs-layer-content:not(.collapsed) {
+  max-height: 600px !important;
+  opacity: 1;
+}
+
+/* Sticky footer stays visible */
+#rs-footer-bar {
+  position: sticky !important;
+  bottom: 0 !important;
+  background: rgba(0,0,0,0.9);
+  padding: 8px 10px 10px !important;
+  z-index: 5;
+}
+</style>
+<style>
+/* === Inline status chip + address === */
+.rs-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 6px;
+  margin-bottom: 4px;
+}
+.rs-meta-line .rs-statuschip {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 3px;
+  line-height: 1.3;
+  white-space: nowrap;
+  margin: 0;
+}
+.rs-meta-line .rs-addr-inline {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #f3e9d0;
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+@media (max-width: 400px) {
+  .rs-meta-line { flex-direction: column; align-items: flex-start; }
+}
+</style>
+<style>
+/* === Force inline status chip + address (no markup assumptions) === */
+#rs-list .rs-li .rs-meta-line {
+  display: flex !important;
+  align-items: baseline !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-top: 6px !important;
+  margin-bottom: 4px !important;
+}
+#rs-list .rs-li .rs-meta-line .rs-statuschip {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 3px 8px !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+#rs-list .rs-li .rs-meta-line .rs-addr,
+#rs-list .rs-li .rs-meta-line .rs-addr-inline {
+  display: inline !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: #f3e9d0 !important;
+  flex: 1 1 auto !important;
+  min-width: 120px !important;
+}
+
+/* In case legacy rules force blocks, neutralize them */
+#rs-list .rs-li .rs-statuschip { display: inline-flex !important; margin-right: 8px !important; }
+#rs-list .rs-li .rs-addr { display: inline !important; margin: 0 !important; }
+</style>
+<style>
+/* === Final inline meta row (chip + address) — bulletproof === */
+#rs-list .rs-li .rs-meta-line {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  margin: 6px 0 4px !important;
+}
+#rs-list .rs-li .rs-meta-line .rs-statuschip {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 4px 10px !important;
+  line-height: 1.1 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+#rs-list .rs-li .rs-meta-line .rs-addr,
+#rs-list .rs-li .rs-meta-line .rs-addr-inline {
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: #f3e9d0 !important;
+  flex: 1 1 auto !important;
+  min-width: 140px !important;
+}
+/* Kill default P margins anywhere inside cards */
+#rs-list .rs-li p.rs-addr { margin: 0 !important; padding: 0 !important; }
+</style>
+<style>
+/* === Inline meta row (chip + address) with hard overrides === */
+#rs-list .rs-li .rs-meta-line {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+  margin: 6px 0 6px !important;
+}
+#rs-list .rs-li .rs-meta-line .rs-statuschip {
+  order: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 4px 10px !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+#rs-list .rs-li .rs-meta-line .rs-addr-inline {
+  order: 2 !important;
+  display: inline-block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: #f3e9d0 !important;
+  flex: 1 1 140px !important;
+  min-width: 140px !important;
+}
+/* Neutralize legacy block margins */
+#rs-list .rs-li p.rs-addr { margin: 0 !important; padding: 0 !important; display: inline !important; }
+</style>
+<style>
+/* === Consolidated v2 rules (scoped) ======================================= */
+#rs-list.rs-inline-meta .rs-li .rs-meta-line {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;    /* keep chip + address on the SAME row */
+  gap: 10px !important;
+  margin: 6px 0 6px !important;
+}
+#rs-list.rs-inline-meta .rs-li .rs-meta-line .rs-statuschip {
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 4px 10px !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+}
+#rs-list.rs-inline-meta .rs-li .rs-meta-line .rs-addr-inline,
+#rs-list.rs-inline-meta .rs-li .rs-meta-line .rs-addr {
+  flex: 1 1 0 !important;          /* take remaining width */
+  min-width: 0 !important;         /* allow text to wrap instead of pushing chip down */
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: #f3e9d0 !important;
+  overflow-wrap: anywhere !important;
+}
+/* Neutralize legacy rules that force block layout or extra spacing */
+#rs-list.rs-inline-meta .rs-li .rs-statuschip { display: inline-flex !important; margin: 0 !important; }
+#rs-list.rs-inline-meta .rs-li p.rs-addr { display: block !important; margin: 0 !important; padding: 0 !important; }
+</style>
+<style>
+/* === Universal inline meta row (final) === */
+#rs-list .rs-li .rs-meta-line {
+  display: flex !important;
+  align-items: baseline !important;
+  flex-wrap: nowrap !important;     /* keep on one row */
+  gap: 10px !important;
+  margin: 6px 0 6px !important;
+}
+#rs-list .rs-li .rs-meta-line .rs-statuschip,
+#rs-list .rs-li .rs-meta-line [class*="rs-statuschip"] {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 4px 10px !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+}
+#rs-list .rs-li .rs-meta-line .rs-addr-inline,
+#rs-list .rs-li .rs-meta-line .rs-addr,
+#rs-list .rs-li .rs-meta-line [class*="rs-addr"] {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: #f3e9d0 !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;          /* allow wrapping within one row */
+  overflow-wrap: anywhere !important;
+}
+/* Nuke default P margins inside cards */
+#rs-list .rs-li p.rs-addr { margin: 0 !important; padding: 0 !important; }
+</style>
+<style>
+/* === Status chip in top-right of the card title band === */
+#rs-list .rs-li { position: relative; }
+#rs-list .rs-li .rs-titleband { position: relative; padding-right: 110px; }
+
+#rs-list .rs-li .rs-statuschip,
+#rs-list .rs-li [class*="rs-statuschip"] {
+  position: absolute !important;
+  top: 8px;
+  right: 10px;
+  z-index: 3;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px !important;
+  font-size: 12px !important;
+  font-weight: 700;
+  line-height: 1.2;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+
+/* Slight color normalization (optional—keeps your tones) */
+.rs-statuschip-open { background:#47a775; color:#fff; }
+.rs-statuschip-closed { background:#d65252; color:#fff; }
+.rs-statuschip-repurposed { background:#f0c247; color:#222; }
+.rs-statuschip-demolished { background:#7f8790; color:#fff; }
+
+/* Ensure the inline meta row (address) no longer reserves space for the chip */
+#rs-list .rs-li .rs-meta-line { gap: 10px; }
+</style>
+<style>
+/* === Guided Tips / Coach Marks ========================================== */
+.rs-coach-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.55);
+  display: none;
+}
+.rs-coach-overlay.active { display: block; }
+
+.rs-coach-highlight {
+  position: absolute; pointer-events: none;
+  border-radius: 10px;
+  box-shadow: 0 0 0 4px rgba(63,196,255,0.9), 0 0 0 9999px rgba(0,0,0,0.55);
+  transition: all .22s ease;
+}
+
+.rs-coach-tip {
+  position: absolute; max-width: 360px;
+  background: #111; color: #f2f2f2;
+  border: 1px solid #3fc4ff; border-radius: 10px;
+  padding: 12px 12px 10px; box-shadow: 0 6px 28px rgba(0,0,0,.5);
+  font-size: 14px; line-height: 1.35;
+}
+.rs-coach-tip h4 { margin: 0 0 6px; font-size: 16px; letter-spacing: .02em; }
+.rs-coach-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+.rs-coach-actions .btn {
+  background:#3fc4ff; color:#081018; border:none; border-radius:6px;
+  padding:8px 10px; font-weight:700; cursor:pointer;
+}
+.rs-coach-actions .btn.alt { background:#222; color:#ddd; border:1px solid #3fc4ff; }
+.rs-coach-actions .btn.skip { background:#444; color:#ddd; }
+
+/* Floating 'Tips' button in the panel header (added if HELP not wired) */
+#rs-float .rs-tips-btn {
+  position:absolute; top:10px; right:10px;
+  background:#3fc4ff; color:#081018; border-radius:8px; border:none;
+  padding:6px 10px; font-weight:800; cursor:pointer; z-index:4;
+}
+#rs-float .rs-tips-btn:active { transform: translateY(1px); }
+</style>
+<style>
+/* === Toolbar Tips button (next to INFO/HELP) ============================ */
+.rs-tips-btn-toolbar {
+  display:inline-flex; align-items:center; justify-content:center;
+  background:#fff; color:#111; border:2px solid #111; border-radius:6px;
+  padding:10px 14px; font-weight:800; letter-spacing:.02em; cursor:pointer;
+  box-shadow:0 1px 2px rgba(0,0,0,.25);
+  transition:transform .06s ease;
+}
+.rs-tips-btn-toolbar:active { transform: translateY(1px); }
+.rs-tips-btn-toolbar.dark {
+  background:#eae5d8; border-color:#000; color:#000;
+}
+
+/* Ensure coach overlay always on top of ALL UI */
+.rs-coach-overlay { z-index: 999999 !important; }
+.rs-coach-highlight { z-index: 999999 !important; }
+.rs-coach-tip { z-index: 1000000 !important; }
+</style>
+<style>
+/* === Global toolbar Tips button (outside #rs-float) ====================== */
+.rs-tips-btn-global {
+  display:inline-flex; align-items:center; justify-content:center;
+  background:#eae5d8; color:#111; border:2px solid #111; border-radius:6px;
+  padding:10px 14px; font-weight:800; letter-spacing:.02em; cursor:pointer;
+  box-shadow:0 1px 2px rgba(0,0,0,.25);
+  transition:transform .06s ease;
+}
+.rs-tips-btn-global:active { transform: translateY(1px); }
+
+/* Fallback: fixed-position if no toolbar found */
+.rs-tips-btn-fixed {
+  position:fixed; top:12px; right:12px; z-index: 1000001;
+}
+</style>
 </head>
 <body>
 
@@ -2381,13 +3047,13 @@ map.on('tileerror', function(e){
   L.control.zoom({ position: 'topright' }).addTo(map);
 
   // Offline tiles
-  var baseOSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:200}).addTo(map);
-  var sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {minZoom:12, maxZoom:19, tms:false, zIndex:210, opacity:1.0, updateWhenZooming:false});
+  var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:200}).addTo(map);
+  var sat = L.tileLayer('tiles/sat/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:210, opacity:1.0, updateWhenZooming:false});
   try { window.sat = sat; } catch(_) {}
 
-  var street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:220, opacity:1.0, updateWhenZooming:false});
+  var street = L.tileLayer('tiles/street/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:220, opacity:1.0, updateWhenZooming:false});
   try { window.street = street; } catch(_) {};
-  var historic = L.layerGroup();
+  var historic = L.tileLayer('tiles/historic/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:400, opacity:1.0, updateWhenZooming:false}).addTo(map);
   try { window.historic = historic; } catch(_) {}
   function refreshZ(){
     try{
@@ -6314,6 +6980,774 @@ document.addEventListener('DOMContentLoaded', function() {
 
   observer.observe(document.body, { childList: true, subtree: true });
 
+})();
+</script>
+<script>
+/*
+ * Secret code: _config_now
+ * PIN: 1945
+ * Behavior: on match -> prompt for PIN -> navigate to configurator
+ * Targets: #rs-search (your float's search field)
+ */
+(function () {
+  const SECRET = '_config_now';
+  const PIN = '1945';
+
+  function goToConfigurator() {
+    // mark mode for your app if you want to branch UI on load
+    try { localStorage.setItem('rs_mode', 'configurator'); } catch (e) {}
+
+    // Preferred Android WebView assets path; fallbacks help on desktop dev
+    const targets = [
+      'file:///android_asset/www/index.html', // Android WebView
+      'assets/www/index.html',                // relative
+      'index.html'                            // same folder
+    ];
+
+    // If we’re already on index.html, just reload
+    const href = (location.pathname || '') + (location.search || '');
+    if (/\/index\.html(\?|$)/.test(href)) {
+      location.reload();
+      return;
+    }
+    // Otherwise go to first target (Android), browser devs can use fallbacks if needed
+    location.assign(targets[0]);
+  }
+
+  function handleSecret(value) {
+    const v = String(value || '').trim().toLowerCase();
+    if (v !== SECRET) return false;
+
+    // Clear the field so the secret doesn't leak into search logic
+    const input = document.getElementById('rs-search');
+    if (input) input.value = '';
+
+    // Simple PIN prompt (keep it minimal for kiosk)
+    for (let tries = 0; tries < 2; tries++) {
+      const entered = window.prompt('Enter PIN to open Configurator', '');
+      if (entered === null) return true;          // user cancelled
+      if (entered.trim() === PIN) { goToConfigurator(); return true; }
+    }
+    alert('Incorrect PIN.');
+    return true;
+  }
+
+  function attachSecretListener() {
+    const input = document.getElementById('rs-search');
+    if (!input) return;
+
+    // Detect on-the-fly typing
+    input.addEventListener('input', (e) => {
+      if (handleSecret(e.target.value)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
+    // Also catch ENTER presses
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && handleSecret(e.currentTarget.value)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachSecretListener);
+  } else {
+    attachSecretListener();
+  }
+})();
+</script>
+
+<script>
+// === Ensure reflow after toggling MAP LAYERS ===
+(function(){
+  const sect = document.querySelector('#rs-float .rs-layer-section');
+  const header = document.querySelector('#rs-float .rs-maplayers-header');
+  if (!sect || !header) return;
+
+  function toggleSection(){
+    sect.classList.toggle('collapsed');
+    // After transition, trigger a layout reflow so bars recalc widths
+    const onEnd = () => {
+      // read -> write pattern to flush layout
+      void sect.offsetWidth;
+      sect.style.transform = 'translateZ(0)';
+      // remove the transform next frame
+      requestAnimationFrame(()=>{ sect.style.transform = ''; });
+      sect.removeEventListener('transitionend', onEnd);
+    };
+    sect.addEventListener('transitionend', onEnd);
+  }
+
+  // If header already has a listener elsewhere, we won't duplicate (idempotent)
+  if (!header.dataset.rsToggleBound) {
+    header.addEventListener('click', toggleSection);
+    header.dataset.rsToggleBound = '1';
+  }
+})();
+</script>
+
+
+<script>
+// Collapse only the sliders/content, not the footer
+(function(){
+  const panel = document.querySelector('#rs-float');
+  const sect  = panel && panel.querySelector('.rs-layer-section');
+  if (!sect) return;
+
+  // 1) Ensure a dedicated content wrapper exists and contains the slider rows
+  let content = sect.querySelector('.rs-layer-content');
+  if (!content) {
+    content = document.createElement('div');
+    content.className = 'rs-layer-content';
+    // Move slider rows into content
+    const rows = sect.querySelectorAll('.rs-historic-slider, .rs-layer-slider');
+    rows.forEach(r => content.appendChild(r));
+    // Insert content before the footer (if present), else at end
+    const footer = document.querySelector('#rs-footer-bar');
+    if (footer && footer.parentElement === panel) {
+      panel.insertBefore(content, footer);
+    } else {
+      sect.appendChild(content);
+    }
+  }
+
+  // 2) Bind header toggle to content only
+  const header = panel.querySelector('.rs-maplayers-header');
+  if (!header) return;
+  if (!header.dataset.rsLayersBound) {
+    header.dataset.rsLayersBound = '1';
+    header.addEventListener('click', () => {
+      content.classList.toggle('collapsed');
+      // force reflow after transition
+      const onEnd = () => { void content.offsetWidth; content.removeEventListener('transitionend', onEnd); };
+      content.addEventListener('transitionend', onEnd);
+    });
+  }
+})();
+</script>
+
+
+<script>
+// Ensure footer is a direct child of #rs-float (never inside a collapsible section)
+(function(){
+  const floatPanel = document.getElementById('rs-float');
+  const footer = document.getElementById('rs-footer-bar');
+  if (!floatPanel || !footer) return;
+  if (footer.parentElement !== floatPanel) {
+    floatPanel.appendChild(footer); // move to panel root, last child
+  }
+
+  // Build / verify content wrapper so collapse targets only sliders
+  const section = floatPanel.querySelector('.rs-layer-section');
+  if (!section) return;
+  let content = section.querySelector('.rs-layer-content');
+  if (!content) {
+    content = document.createElement('div');
+    content.className = 'rs-layer-content';
+    const rows = section.querySelectorAll('.rs-historic-slider, .rs-layer-slider');
+    rows.forEach(r => content.appendChild(r));
+    section.appendChild(content);
+  }
+
+  // Bind header toggle to content only
+  const header = floatPanel.querySelector('.rs-maplayers-header');
+  if (!header || header.dataset.rsBoundFooterFix) return;
+  header.dataset.rsBoundFooterFix = '1';
+  header.addEventListener('click', () => {
+    content.classList.toggle('collapsed');
+    // kick a reflow so widths recalc
+    void content.offsetWidth;
+  });
+})();
+</script>
+
+
+<script>
+// === Restructure theatre cards: group status chip + address into a single inline row ===
+(function(){
+  const cards = document.querySelectorAll('#rs-list .rs-li');
+  cards.forEach(card => {
+    const chip = card.querySelector('.rs-statuschip');
+    let addr = card.querySelector('.rs-addr, .rs-addr-inline');
+    if (!chip || !addr) return;
+
+    // ensure address has inline class
+    addr.classList.add('rs-addr-inline');
+
+    // if meta-line already exists, just ensure children order
+    let meta = card.querySelector('.rs-meta-line');
+    if (!meta) {
+      meta = document.createElement('div');
+      meta.className = 'rs-meta-line';
+
+      // Insert meta just after the title row if we can find it
+      const title = card.querySelector('h4, .rs-title, .rs-card-title');
+      if (title && title.parentElement === card) {
+        card.insertBefore(meta, title.nextSibling);
+      } else {
+        // fallback: place it before the chip's current position
+        chip.parentElement.insertBefore(meta, chip);
+      }
+    }
+
+    // Move chip and addr into the meta line (in correct order)
+    if (chip.parentElement !== meta) meta.appendChild(chip);
+    if (addr.parentElement !== meta) meta.appendChild(addr);
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  const cards = document.querySelectorAll('#rs-list .rs-li');
+  cards.forEach(card => {
+    const chip = card.querySelector('.rs-statuschip');
+    const addr = card.querySelector('.rs-addr, .rs-addr-inline');
+    if (!chip || !addr) return;
+
+    // Ensure an inline container exists immediately under the card
+    let meta = card.querySelector('.rs-meta-line');
+    if (!meta) {
+      meta = document.createElement('div');
+      meta.className = 'rs-meta-line';
+      // Insert meta just after the title band (the framed title row)
+      const titleBand = card.querySelector('.rs-titleband, h4, .rs-card-title');
+      if (titleBand) {
+        titleBand.insertAdjacentElement('afterend', meta);
+      } else {
+        // fallback at top of card content
+        card.insertBefore(meta, card.firstChild);
+      }
+    }
+
+    // Normalize address element
+    addr.classList.add('rs-addr-inline');
+
+    // Move elements into the meta row in the right order
+    if (chip.parentElement !== meta) meta.appendChild(chip);
+    if (addr.parentElement !== meta) meta.appendChild(addr);
+  });
+})();
+</script>
+
+
+<script>
+// === Robust inline meta grouping with MutationObserver ===
+(function(){
+  function wireCard(card){
+    if (card.dataset.rsMetaWired === '1') return;
+    const chip = card.querySelector('.rs-statuschip');
+    let addr = card.querySelector('.rs-addr, .rs-addr-inline, p.rs-addr');
+    if (!chip || !addr) { card.dataset.rsMetaWired = '1'; return; }
+
+    // Ensure/insert meta container just under the title band
+    let meta = card.querySelector('.rs-meta-line');
+    if (!meta) {
+      meta = document.createElement('div');
+      meta.className = 'rs-meta-line';
+      const titleBand = card.querySelector('.rs-titleband, h4, .rs-card-title');
+      if (titleBand) titleBand.insertAdjacentElement('afterend', meta);
+      else card.insertBefore(meta, card.firstChild);
+    }
+
+    // Normalize address into a span.rs-addr-inline while preserving HTML
+    let addrSpan;
+    if (addr.classList.contains('rs-addr-inline') && addr.tagName !== 'P') {
+      addrSpan = addr;
+    } else {
+      addrSpan = document.createElement('span');
+      addrSpan.className = 'rs-addr-inline';
+      addrSpan.innerHTML = addr.innerHTML || addr.textContent || '';
+      addr.replaceWith(addrSpan);
+    }
+
+    // Move chip then address into meta row
+    meta.appendChild(chip);
+    meta.appendChild(addrSpan);
+
+    // Mark wired
+    card.dataset.rsMetaWired = '1';
+  }
+
+  function scan(){
+    document.querySelectorAll('#rs-list .rs-li').forEach(wireCard);
+  }
+
+  const list = document.getElementById('rs-list');
+  if (list) {
+    // Initial pass
+    scan();
+    // Observe future changes (list refresh, pagination, search results)
+    const mo = new MutationObserver(() => scan());
+    mo.observe(list, { childList: true, subtree: true });
+  } else {
+    // Fallback if list is injected later
+    window.addEventListener('load', scan);
+    setTimeout(scan, 300);
+    setTimeout(scan, 1000);
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  const list = document.getElementById('rs-list');
+  if (!list) return;
+  // Namespace to ensure our consolidated rules win
+  list.classList.add('rs-inline-meta');
+
+  function rebuild(card){
+    const chips = card.querySelectorAll('.rs-statuschip');
+    const addr = card.querySelector('.rs-addr, .rs-addr-inline, p.rs-addr');
+    if (!chips.length || !addr) return;
+
+    // Ensure meta container exists just beneath the title band
+    let meta = card.querySelector('.rs-meta-line');
+    if (!meta) {
+      meta = document.createElement('div');
+      meta.className = 'rs-meta-line';
+      const titleBand = card.querySelector('.rs-titleband, h4, .rs-card-title');
+      if (titleBand) titleBand.insertAdjacentElement('afterend', meta);
+      else card.insertBefore(meta, card.firstChild);
+    }
+
+    // Use the first chip; remove any extras to prevent duplicates/layout overrides
+    const chip = chips[0];
+    // Normalize address into span.rs-addr-inline
+    let addrSpan = addr.matches('.rs-addr-inline') && addr.tagName !== 'P' ? addr : null;
+    if (!addrSpan) {
+      addrSpan = document.createElement('span');
+      addrSpan.className = 'rs-addr-inline';
+      addrSpan.innerHTML = addr.innerHTML || addr.textContent || '';
+      addr.replaceWith(addrSpan);
+    }
+
+    // Clean previous children of meta to avoid duplicate inserts
+    [...meta.children].forEach(n => {
+      if (!n.classList.contains('rs-statuschip') && !n.classList.contains('rs-addr-inline')) meta.removeChild(n);
+    });
+
+    // Append in final order
+    meta.appendChild(chip);
+    meta.appendChild(addrSpan);
+
+    // Remove any extra chips found elsewhere
+    chips.forEach((c,i)=>{ if(i>0) c.remove(); });
+  }
+
+  function scan() {
+    document.querySelectorAll('#rs-list .rs-li').forEach(rebuild);
+  }
+
+  // Initial + observe updates
+  scan();
+  const mo = new MutationObserver(scan);
+  mo.observe(list, { childList: true, subtree: true });
+})();
+</script>
+
+
+<script>
+(function(){
+  // --- Leaflet map normalization ---
+  function isLeaflet(m){ return m && typeof m.on==='function' && typeof m.setView==='function'; }
+  // prefer rsMap if defined
+  if (!isLeaflet(window.map)) {
+    if (isLeaflet(window.rsMap)) window.map = window.rsMap;
+    else if (isLeaflet(window.RS_MAP)) window.map = window.RS_MAP;
+  }
+  // last-resort no-op stubs to prevent crashes
+  if (!isLeaflet(window.map)) {
+    const noop = function(){};
+    window.map = { on: noop, off: noop, addLayer: noop, removeLayer: noop, setView: noop };
+  }
+
+  // --- Safe bind helper (null-guard) ---
+  function bind(sel, evt, fn){
+    const el = document.querySelector(sel);
+    if (el) el.addEventListener(evt, fn);
+  }
+  // Example bindings kept as placeholders; if your app wires these elsewhere, this won't conflict
+  bind('#rs-reset','click', function(){ /* reset handled elsewhere */ });
+  bind('.rs-maplayers-header','click', function(){ /* toggled elsewhere */ });
+})();
+</script>
+
+
+<script>
+(function(){
+  const list = document.getElementById('rs-list');
+  if (!list) return;
+
+  function buildMeta(card){
+    // find status chip (support variant classnames)
+    let chip = card.querySelector('.rs-statuschip, [class*="rs-statuschip"]');
+    // find the first address-like element
+    let addr = card.querySelector('.rs-addr, .rs-addr-inline, [class*="rs-addr"]');
+    if (!chip || !addr) return;
+
+    // ensure a meta container exists right under the title band
+    let meta = card.querySelector('.rs-meta-line');
+    if (!meta) {
+      meta = document.createElement('div');
+      meta.className = 'rs-meta-line';
+      // Try to place after a known title band, else first meaningful child
+      const titleBand = card.querySelector('.rs-titleband, h4, .rs-card-title, .rs-name, .rs-header');
+      if (titleBand) {
+        titleBand.insertAdjacentElement('afterend', meta);
+      } else {
+        card.insertBefore(meta, card.firstElementChild);
+      }
+    }
+
+    // Normalize address into a span to prevent block behavior
+    let addrSpan;
+    if (addr.tagName === 'SPAN' && (addr.classList.contains('rs-addr') || addr.classList.contains('rs-addr-inline'))) {
+      addrSpan = addr;
+      addrSpan.classList.add('rs-addr-inline');
+    } else {
+      addrSpan = document.createElement('span');
+      addrSpan.className = 'rs-addr-inline';
+      addrSpan.innerHTML = addr.innerHTML || addr.textContent || '';
+      addr.replaceWith(addrSpan);
+    }
+
+    // Clear any previous non-chip/addr children in meta (avoid dupes)
+    [...meta.children].forEach(n => {
+      if (!n.className || (!n.className.toString().includes('rs-statuschip') && !n.classList.contains('rs-addr-inline'))) {
+        meta.removeChild(n);
+      }
+    });
+
+    // Move chip & address into meta
+    if (chip.parentElement !== meta) meta.appendChild(chip);
+    if (addrSpan.parentElement !== meta) meta.appendChild(addrSpan);
+  }
+
+  function scan(){
+    document.querySelectorAll('#rs-list .rs-li').forEach(buildMeta);
+  }
+
+  // Initial + observe mutations
+  scan();
+  const mo = new MutationObserver(scan);
+  mo.observe(list, { childList: true, subtree: true });
+})();
+</script>
+
+
+<script>
+// === Move status chip into the title band (top-right) and keep address inline ===
+(function(){
+  const list = document.getElementById('rs-list');
+  if (!list) return;
+
+  function relocate(card){
+    // locate chip & address
+    const chip = card.querySelector('.rs-statuschip, [class*="rs-statuschip"]');
+    const addr = card.querySelector('.rs-addr-inline, .rs-addr, [class*="rs-addr"]');
+    if (!chip) return;
+
+    // ensure a title band exists; fallback to first heading
+    let band = card.querySelector('.rs-titleband, h4, .rs-card-title, .rs-name');
+    if (!band) {
+      // create a simple band using the first element
+      band = document.createElement('div');
+      band.className = 'rs-titleband';
+      // try to wrap existing first element (title text) if present
+      const first = card.firstElementChild;
+      if (first) {
+        card.insertBefore(band, first);
+        band.appendChild(first);
+      } else {
+        card.insertBefore(band, card.firstChild);
+      }
+    }
+
+    // move the chip into the title band (so absolute positioning anchors to it)
+    if (chip.parentElement !== band) band.appendChild(chip);
+
+    // build/keep a meta row for address only (chip removed from it)
+    if (addr) {
+      let meta = card.querySelector('.rs-meta-line');
+      if (!meta) {
+        meta = document.createElement('div');
+        meta.className = 'rs-meta-line';
+        band.insertAdjacentElement('afterend', meta);
+      }
+      // ensure addr lives in meta and is a span for inline behavior
+      let addrSpan;
+      if (addr.tagName === 'SPAN') {
+        addrSpan = addr;
+      } else {
+        addrSpan = document.createElement('span');
+        addrSpan.className = 'rs-addr-inline';
+        addrSpan.innerHTML = addr.innerHTML || addr.textContent || '';
+        addr.replaceWith(addrSpan);
+      }
+      if (addrSpan.parentElement !== meta) meta.appendChild(addrSpan);
+    }
+
+    // remove any duplicate chips left elsewhere
+    card.querySelectorAll('.rs-meta-line .rs-statuschip, .rs-meta-line [class*="rs-statuschip"]').forEach(n => n.remove());
+  }
+
+  function scan(){ document.querySelectorAll('#rs-list .rs-li').forEach(relocate); }
+
+  scan();
+  const mo = new MutationObserver(scan);
+  mo.observe(list, { childList:true, subtree:true });
+})();
+</script>
+
+
+<script>
+// === Simple guided tour (coach marks) ======================================
+(function(){
+  const steps = [
+    {
+      sel: '#rs-float .rs-search-wrap input, #rs-search',
+      title: 'Search everything',
+      text: 'Type a theatre, address, neighborhood, or film title. Clear with the × to start fresh.'
+    },
+    {
+      sel: '.rs-maplayers-header, #rs-float .rs-maplayers-header',
+      title: 'Map Layers',
+      text: 'Toggle layers and adjust the slider bars to fade Cleveland 1927–1937, Satellite, and Street.'
+    },
+    {
+      sel: '#rs-reset',
+      title: 'Reset Map',
+      text: 'Jump back to the default view and settings with one tap.'
+    },
+    {
+      sel: '#rs-list .rs-li:first-child .rs-titleband',
+      title: 'Details & Images',
+      text: 'Tap a theatre in the list or on the map to open details. Tap the image to view the gallery.'
+    },
+    {
+      sel: '#rs-float',
+      title: 'Panel Tips',
+      text: 'Collapse the panel to explore the map, then open it again to search or filter.'
+    }
+  ];
+
+  // Create overlay elements
+  const overlay = document.createElement('div');
+  overlay.className = 'rs-coach-overlay';
+  overlay.innerHTML = '<div class="rs-coach-highlight"></div><div class="rs-coach-tip"><h4></h4><div class="rs-coach-text"></div><div class="rs-coach-actions"><button class="btn alt" data-action="back">Back</button><button class="btn skip" data-action="skip">Skip</button><button class="btn" data-action="next">Next</button></div></div>';
+  document.body.appendChild(overlay);
+  const highlight = overlay.querySelector('.rs-coach-highlight');
+  const tip = overlay.querySelector('.rs-coach-tip');
+  const h4 = tip.querySelector('h4');
+  const txt = tip.querySelector('.rs-coach-text');
+  const nextBtn = tip.querySelector('[data-action="next"]');
+  const backBtn = tip.querySelector('[data-action="back"]');
+  const skipBtn = tip.querySelector('[data-action="skip"]');
+
+  let i = 0;
+  function place(el){
+    const r = el.getBoundingClientRect();
+    const pad = 8;
+    // highlight box
+    highlight.style.left = (r.left - pad) + 'px';
+    highlight.style.top = (r.top - pad) + 'px';
+    highlight.style.width = (r.width + pad*2) + 'px';
+    highlight.style.height = (r.height + pad*2) + 'px';
+
+    // tooltip placement (prefer right, fallback below/above/left)
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const tipW = Math.min(360, Math.max(260, r.width*1.1));
+    tip.style.maxWidth = tipW + 'px';
+    // try right
+    let left = r.right + 14, top = r.top;
+    if (left + tipW > vw) { left = r.left - tipW - 14; }                 // try left
+    if (left < 12) { left = Math.min(vw - tipW - 12, r.left); }          // clamp
+    if (top + 180 > vh) { top = Math.max(12, vh - 200); }                // clamp vertically
+    tip.style.left = left + 'px'; tip.style.top = top + 'px';
+  }
+
+  function showStep(k){
+    // find element for step; if missing, skip
+    while (k < steps.length) {
+      const el = document.querySelector(steps[k].sel);
+      if (el) { i = k; render(el); return; }
+      k++;
+    }
+    end();
+  }
+
+  function render(el){
+    overlay.classList.add('active');
+    h4.textContent = steps[i].title;
+    txt.textContent = steps[i].text;
+    place(el);
+  }
+
+  function end(){ overlay.classList.remove('active'); }
+
+  nextBtn.addEventListener('click', ()=> showStep(i+1));
+  backBtn.addEventListener('click', ()=> showStep(Math.max(0, i-1)));
+  skipBtn.addEventListener('click', end);
+  overlay.addEventListener('click', (e)=>{ if (e.target === overlay) end(); });
+  window.addEventListener('resize', ()=>{ const el = document.querySelector(steps[i]?.sel); if (el) place(el); });
+
+  // Public start function
+  window.RS_TIPS_START = () => showStep(0);
+
+  // Hook a visible "Tips" button in the float header if no HELP button is wired
+  function ensureTipsButton(){
+    if (document.querySelector('#rs-float .rs-tips-btn')) return;
+    const hdr = document.querySelector('#rs-float .rs-float__header') || document.querySelector('#rs-float');
+    if (!hdr) return;
+    const btn = document.createElement('button');
+    btn.className = 'rs-tips-btn';
+    btn.textContent = 'Tips';
+    btn.addEventListener('click', () => window.RS_TIPS_START());
+    hdr.appendChild(btn);
+  }
+  ensureTipsButton();
+
+  // Also start from an existing HELP button if present
+  const helpSel = '#helpButton, .rs-help, button[aria-label="Help"]';
+  const helpBtn = document.querySelector(helpSel);
+  if (helpBtn) helpBtn.addEventListener('click', () => window.RS_TIPS_START());
+})();
+</script>
+
+
+<script>
+window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
+</script>
+
+
+<script>
+(function(){
+  // Enhance existing RS_TIPS_START + add toolbar button near INFO/HELP
+  function ensureToolbarTips(){
+    // Try to find a toolbar container by locating HELP or INFO button
+    const helpBtn = document.querySelector('#helpButton, .rs-help, button[aria-label="Help"], button:contains("HELP")');
+    const infoBtn = document.querySelector('#infoButton, .rs-info, button[aria-label="Info"], button:contains("INFO")');
+    const anchor = helpBtn || infoBtn;
+    if (!anchor) return;
+    // Avoid duplicates
+    if (anchor.parentElement && anchor.parentElement.querySelector('.rs-tips-btn-toolbar')) return;
+
+    // Insert Tips button next to HELP in the same toolbar row
+    const tips = document.createElement('button');
+    tips.className = 'rs-tips-btn-toolbar';
+    tips.type = 'button';
+    tips.textContent = 'TIPS';
+    tips.addEventListener('click', ()=> (window.RS_TIPS_START && window.RS_TIPS_START()));
+
+    // Insert after HELP (or INFO if HELP missing)
+    if (anchor.nextSibling) anchor.parentElement.insertBefore(tips, anchor.nextSibling);
+    else anchor.parentElement.appendChild(tips);
+  }
+
+  // Upgrade placement to work regardless of #rs-float position by auto-scrolling
+  function upgradePlacement(){
+    if (!window.RS_TIPS_PLACE_UPGRADED) {
+      window.RS_TIPS_PLACE_UPGRADED = true;
+      const placeOrig = window.RS_TIPS_PLACE;
+      window.RS_TIPS_PLACE = function(el, overlayElems){
+        // Scroll into view for any scrollable container first
+        try {
+          // If element is outside viewport or inside a scroll container, bring to view
+          el.scrollIntoView({behavior:'instant', block:'center', inline:'center'});
+          // Also try its closest scroll parent (like the list)
+          const sp = el.closest('.scroll, .rs-float__list, #rs-list, .rs-modal, .rs-float');
+          if (sp && sp.scrollIntoView) sp.scrollIntoView({behavior:'instant', block:'nearest', inline:'nearest'});
+        } catch(e) {}
+        // Call original placement if present
+        if (typeof placeOrig === 'function') return placeOrig(el, overlayElems);
+      };
+    }
+  }
+
+  // If the earlier tour script defined RS_TIPS_START, add the toolbar button now.
+  const ready = () => { ensureToolbarTips(); upgradePlacement(); };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
+  else ready();
+
+  // Re-ensure if DOM mutates (some screens rebuild the toolbar)
+  const mo = new MutationObserver(()=> ensureToolbarTips());
+  mo.observe(document.body, { childList:true, subtree:true });
+})();
+</script>
+
+
+<script>
+(function(){
+  // Helper: find a toolbar outside #rs-float
+  function findExternalToolbar(){
+    const candidates = [
+      // common toolbars
+      '.rs-toolbar', '#rs-toolbar', '.hud-toolbar', '#hud-toolbar',
+      '#HUD', '.HUD', '.hud', '.topbar', '#topbar', '.map-toolbar', '#map-toolbar',
+      '.controls', '#controls', '.rs-hud', '#rs-hud'
+    ];
+    for (const sel of candidates) {
+      const el = document.querySelector(sel);
+      if (el && !el.closest('#rs-float')) return el;
+    }
+    // Try to infer via existing HELP/INFO buttons not in #rs-float
+    const help = [...document.querySelectorAll('#helpButton, .rs-help, [aria-label="Help"], button, a')]
+      .find(b => /help/i.test(b.textContent||'') && !b.closest('#rs-float'));
+    if (help) return help.parentElement || help;
+    const info = [...document.querySelectorAll('#infoButton, .rs-info, [aria-label="Info"], button, a')]
+      .find(b => /info/i.test(b.textContent||'') && !b.closest('#rs-float'));
+    if (info) return info.parentElement || info;
+    return null;
+  }
+
+  function ensureGlobalTips(){
+    // Remove any tips button inside #rs-float (previous versions)
+    document.querySelectorAll('#rs-float .rs-tips-btn, #rs-float .rs-tips-btn-toolbar').forEach(n => n.remove());
+
+    const toolbar = findExternalToolbar();
+    let btn = document.querySelector('.rs-tips-btn-global');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.className = 'rs-tips-btn-global';
+      btn.type = 'button';
+      btn.textContent = 'TIPS';
+      btn.addEventListener('click', () => window.RS_TIPS_START && window.RS_TIPS_START());
+    }
+
+    if (toolbar) {
+      // Insert after HELP or INFO if present; else append to toolbar
+      const help = [...toolbar.querySelectorAll('button,a')].find(b => /help/i.test(b.textContent||''));
+      const info = [...toolbar.querySelectorAll('button,a')].find(b => /info/i.test(b.textContent||''));
+      const anchor = help || info;
+      if (anchor && anchor.parentElement === toolbar) {
+        if (!btn.parentElement) toolbar.insertBefore(btn, anchor.nextSibling);
+        else if (btn.parentElement !== toolbar) { btn.remove(); toolbar.insertBefore(btn, anchor.nextSibling); }
+      } else {
+        if (!btn.parentElement) toolbar.appendChild(btn);
+        else if (btn.parentElement !== toolbar) { btn.remove(); toolbar.appendChild(btn); }
+      }
+      // Ensure not fixed if we're in a toolbar
+      btn.classList.remove('rs-tips-btn-fixed');
+    } else {
+      // Fallback: fixed-position on viewport
+      btn.classList.add('rs-tips-btn-fixed');
+      if (!btn.parentElement) document.body.appendChild(btn);
+    }
+  }
+
+  // Run now and on DOM changes (toolbars often render late)
+  const ready = () => ensureGlobalTips();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
+  else ready();
+  const mo = new MutationObserver(ensureGlobalTips);
+  mo.observe(document.body, { childList:true, subtree:true });
 })();
 </script>
 
