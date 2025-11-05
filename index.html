@@ -8303,6 +8303,49 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 </script>
+<script>
+(function(){
+  function fitRSFloat() {
+    const pad = 24; // breathing room from edges (px)
+    const f = document.getElementById('rs-float');
+    if(!f) return;
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Calculate max dimensions with breathing room
+    const maxW = vw - pad * 2;
+    const maxH = vh - pad * 2;
+
+    // Clamp width (ideally ~30% of viewport but never exceed maxW)
+    const targetW = Math.min(Math.max(vw * 0.28, 320), maxW);
+    const targetH = Math.min(vh - pad * 2, maxH);
+
+    // Apply via inline style so it overrides all other CSS
+    f.style.position = 'fixed';
+    f.style.top = pad + 'px';
+    f.style.right = pad + 'px';
+    f.style.maxHeight = targetH + 'px';
+    f.style.width = targetW + 'px';
+    f.style.overflow = 'hidden';
+    f.style.display = 'grid';
+    f.style.gridTemplateRows = 'auto minmax(0,1fr) auto';
+
+    // Ensure scroll area works
+    const list = document.getElementById('rs-list');
+    if(list){
+      list.style.minHeight = '0';
+      list.style.maxHeight = 'none';
+      list.style.overflowY = 'auto';
+      list.style.WebkitOverflowScrolling = 'touch';
+    }
+  }
+
+  // Run on load and resize
+  window.addEventListener('load', fitRSFloat);
+  window.addEventListener('resize', fitRSFloat);
+})();
+</script>     
 </body>
 </html>
 <!-- STAGE 1: canonical overrides appended by cleaner -->
