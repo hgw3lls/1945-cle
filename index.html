@@ -8912,6 +8912,97 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener('resize', forceTightHeader);
 })();
 </script>
+<script>
+(function(){
+  const PAD = 24;                    // breathing room from edges
+  const FLOAT_SEL  = '#rs-float';
+  const HANDLE_SEL = '.rs-float__header, #rs-header, .rs-titlebar';
+
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+  function enableDrag(){
+    const f = document.querySelector(FLOAT_SEL);
+    if(!f) return;
+    const handle = f.querySelector(HANDLE_SEL) || f;
+
+    // Ensure layout compatible with dragging
+    Object.assign(f.style, {
+      position: 'fixed',
+      right: 'auto',        // critical: drag uses left/top
+      bottom: 'auto',
+      transform: 'none',    // avoid transform interfering with pointer math
+      willChange: 'left, top'
+    });
+    handle.style.cursor = 'move';
+    handle.style.touchAction = 'none';
+
+    let startX=0, startY=0, startLeft=0, startTop=0, dragging=false;
+
+    const onPointerDown = (e)=>{
+      const rect = f.getBoundingClientRect();
+      // if left not set yet, derive from rect
+      if (!f.style.left) f.style.left = rect.left + 'px';
+      if (!f.style.top)  f.style.top  = rect.top  + 'px';
+
+      startX = ('touches' in e)? e.touches[0].clientX : e.clientX;
+      startY = ('touches' in e)? e.touches[0].clientY : e.clientY;
+      startLeft = parseFloat(f.style.left) || rect.left;
+      startTop  = parseFloat(f.style.top)  || rect.top;
+      dragging = true;
+
+      // capture
+      document.addEventListener('mousemove', onPointerMove, {passive:false});
+      document.addEventListener('touchmove', onPointerMove, {passive:false});
+      document.addEventListener('mouseup', onPointerUp, {once:true});
+      document.addEventListener('touchend', onPointerUp, {once:true});
+      e.preventDefault();
+    };
+
+    const onPointerMove = (e)=>{
+      if(!dragging) return;
+      const cx = ('touches' in e)? e.touches[0].clientX : e.clientX;
+      const cy = ('touches' in e)? e.touches[0].clientY : e.clientY;
+
+      const vw = window.visualViewport ? visualViewport.width  : window.innerWidth;
+      const vh = window.visualViewport ? visualViewport.height : window.innerHeight;
+      const rect = f.getBoundingClientRect();
+
+      const dx = cx - startX;
+      const dy = cy - startY;
+
+      const newLeft = clamp(startLeft + dx, PAD, vw - PAD - rect.width);
+      const newTop  = clamp(startTop  + dy, PAD, vh - PAD - rect.height);
+
+      f.style.left = newLeft + 'px';
+      f.style.top  = newTop  + 'px';
+      e.preventDefault();
+    };
+
+    const onPointerUp = ()=>{
+      dragging = false;
+      document.removeEventListener('mousemove', onPointerMove);
+      document.removeEventListener('touchmove', onPointerMove);
+    };
+
+    handle.addEventListener('mousedown', onPointerDown);
+    handle.addEventListener('touchstart', onPointerDown, {passive:false});
+
+    // keep it clamped on resize
+    const clampIntoView = ()=>{
+      const vw = window.visualViewport ? visualViewport.width  : window.innerWidth;
+      const vh = window.visualViewport ? visualViewport.height : window.innerHeight;
+      const rect = f.getBoundingClientRect();
+      f.style.left = clamp(rect.left, PAD, vw - PAD - rect.width) + 'px';
+      f.style.top  = clamp(rect.top,  PAD, vh - PAD - rect.height) + 'px';
+    };
+    window.addEventListener('resize', clampIntoView);
+    if (window.visualViewport) visualViewport.addEventListener('resize', clampIntoView);
+  }
+
+  // Important: remove any conflicting right/transform that previous scripts set
+  window.addEventListener('load', enableDrag);
+})();
+</script>
 
 </body>
 </html>
