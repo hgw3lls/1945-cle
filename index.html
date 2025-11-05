@@ -8345,7 +8345,360 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener('load', fitRSFloat);
   window.addEventListener('resize', fitRSFloat);
 })();
-</script>     
+</script>   
+<script>
+(function(){
+  // ---- Tunables ----
+  const BASE_PAD = 24;         // breathing room from edges (px)
+  const MIN_W    = 320;        // min usable width
+  const VW_FRACT = 0.28;       // preferred width as a fraction of viewport
+  const SAFETY   = 2;          // extra pixels of slack to avoid 1px clips
+
+  // Debounce helper
+  let rafId = 0;
+  function onResize(fn){
+    function run(){ cancelAnimationFrame(rafId); rafId = requestAnimationFrame(fn); }
+    window.addEventListener('resize', run, {passive:true});
+    window.addEventListener('orientationchange', run, {passive:true});
+    if (window.visualViewport) {
+      visualViewport.addEventListener('resize', run, {passive:true});
+    }
+    run();
+  }
+
+  function px(n){ return n.toFixed(2) + 'px'; }
+
+  function safePad(){
+    // Some TVs/Android webviews ignore safe-area. Use env() if present via CSS is tricky,
+    // so we just add a little extra margin; feel free to bump BASE_PAD for aggressive overscan.
+    return BASE_PAD;
+  }
+
+  function fitFloat(){
+    const f = document.getElementById('rs-float');
+    if(!f) return;
+
+    const pad = safePad();
+    // Use visualViewport when available (Android/TV URL bars, overscan, etc.)
+    const vw = (window.visualViewport ? visualViewport.width : window.innerWidth);
+    const vh = (window.visualViewport ? visualViewport.height: window.innerHeight);
+
+    // 1) Target size
+    const maxW = Math.max(0, vw - 2*pad);
+    const targetW = Math.min(Math.max(vw * VW_FRACT, MIN_W), maxW);
+    const maxH = Math.max(0, vh - 2*pad);
+
+    // 2) Hard inline styles that override anything else
+    Object.assign(f.style, {
+      position: 'fixed',
+      boxSizing: 'border-box',
+      top: px(pad),
+      // we position using LEFT so we can precisely clamp the right edge
+      left: px(Math.max(pad, vw - pad - targetW)),
+      right: 'auto',
+      width: px(targetW),
+      maxHeight: px(maxH),
+      overflow: 'hidden',
+      display: 'grid',
+      gridTemplateRows: 'auto minmax(0,1fr) auto',
+      transform: 'none' // avoid scaled transforms pushing it out
+    });
+
+    // 3) Ensure the scrollable middle can actually shrink & scroll
+    const list = document.getElementById('rs-list');
+    if (list) {
+      Object.assign(list.style, {
+        minHeight: '0',
+        maxHeight: 'none',
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch'
+      });
+    }
+
+    // 4) Make header/buttons wrap so they never create a "min-content" wider than the panel
+    const header = f.querySelector('#rs-header, .rs-header, .rs-top, .rs-titlebar');
+    if (header) {
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      header.style.gap = '8px';
+      header.style.flexWrap = 'wrap';
+      header.style.minWidth = '0';
+      header.style.maxWidth = '100%';
+    }
+    const buttons = f.querySelectorAll('button, .btn');
+    buttons.forEach(b=>{
+      b.style.maxWidth = '100%';
+      b.style.whiteSpace = 'nowrap';
+      b.style.textOverflow = 'ellipsis';
+      b.style.overflow = 'hidden';
+      b.style.minWidth = '0';
+    });
+
+    // 5) Post-layout clamp: if any part still sticks out, nudge it back in.
+    //    This handles box-shadows, borders, and weird font metrics on TVs.
+    const rect = f.getBoundingClientRect();
+    let left = parseFloat(f.style.left) || pad;
+
+    const overflowRight = (rect.right + SAFETY) - vw;
+    if (overflowRight > 0) left -= overflowRight;
+
+    const overflowLeft = pad - (rect.left - SAFETY);
+    if (overflowLeft > 0) left += overflowLeft;
+
+    f.style.left = px(Math.max(pad, Math.min(left, vw - pad - rect.width)));
+
+    // Optional: if height still clips due to URL bar toggling, reduce a tad
+    const overflowBottom = (rect.bottom + SAFETY) - vh;
+    if (overflowBottom > 0) {
+      const newMaxH = Math.max(200, maxH - overflowBottom);
+      f.style.maxHeight = px(newMaxH);
+    }
+  }
+
+  // Kick it
+  onResize(fitFloat);
+  window.addEventListener('load', fitFloat, {once:true});
+})();
+</script>
+<style>
+/* ===== FINAL FORCE-FIT OVERRIDES ===== */
+
+/* Safe breathing room from edges (handles TVs with overscan) */
+:root{ --rs-edge: 24px; }
+
+/* Force #rs-float inside the viewport with room on all sides */
+#rs-float{
+  position: fixed !important;
+  top: var(--rs-edge) !important;
+  left: auto !important;
+  right: var(--rs-edge) !important;  /* keep anchored to the safe right edge */
+  max-height: calc(100dvh - (var(--rs-edge) * 2)) !important;
+  width: clamp(320px, 28svw, calc(100svw - (var(--rs-edge) * 2))) !important;
+  max-width: calc(100svw - (var(--rs-edge) * 2)) !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0,1fr) auto !important; /* header | scroll | footer */
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Make the list the only scroller */
+#rs-list{
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+}
+
+/* Header must be able to wrap and shrink */
+#rs-float .rs-float__header{
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  min-width: 0 !important;
+}
+
+/* Title + count don’t force the row wider than the box */
+#rs-float .rs-float__title,
+#rs-float #rs-count{min-width: 0 !important; max-width: 100% !important}
+
+/* Actions area shrinks and keeps buttons inside */
+#rs-float .rs-float__actions{
+  margin-left: auto !important;
+  display: flex !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  flex: 0 1 auto !important;
+}
+
+/* Cap any header buttons so text can ellipsize rather than push width */
+#rs-float .rs-float__actions .rs-btn,
+#rs-float .rs-float__actions button{
+  min-width: 0 !important;
+  max-width: 10.5em !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Search row can drop to the next line on tight widths */
+#rs-float .rs-float__header .rs-search-wrap{
+  margin-left: auto !important;
+  flex: 1 1 260px !important;
+  min-width: 0 !important;
+}
+
+/* “Tight mode” nudges sizes a bit further on TV-ish widths */
+#rs-float.rs-tight .rs-float__title{font-size: clamp(22px, 4.6svw, 30px) !important}
+#rs-float.rs-tight .rs-float__actions .rs-btn{max-width: 9.2em !important}
+</style>
+
+<script>
+/* ===== FIT & TIGHT-MODE CLAMP ===== */
+(function(){
+  const PAD = 24;          // matches --rs-edge
+  const FRACT = 0.28;      // preferred width fraction
+
+  function fitFloat(){
+    const f = document.getElementById('rs-float');
+    if(!f) return;
+
+    // Compute target width with safe margins
+    const vw = (window.visualViewport ? visualViewport.width : innerWidth);
+    const vh = (window.visualViewport ? visualViewport.height: innerHeight);
+    const maxW = Math.max(0, vw - PAD*2);
+    const targetW = Math.min(Math.max(vw * FRACT, 320), maxW);
+
+    // Apply inline so we beat stylesheet duplicates
+    f.style.right = PAD + 'px';
+    f.style.left  = 'auto';
+    f.style.top   = PAD + 'px';
+    f.style.width = targetW + 'px';
+    f.style.maxHeight = (vh - PAD*2) + 'px';
+
+    // If header content would overflow, enable “tight” mode
+    const header = f.querySelector('.rs-float__header');
+    if (header){
+      // Allow layout to settle first
+      requestAnimationFrame(()=>{
+        const over = header.scrollWidth - header.clientWidth;
+        f.classList.toggle('rs-tight', over > 2);
+      });
+    }
+  }
+
+  const run = ()=>requestAnimationFrame(fitFloat);
+  addEventListener('load', run, {once:true});
+  addEventListener('resize', run, {passive:true});
+  if (window.visualViewport) visualViewport.addEventListener('resize', run, {passive:true});
+})();
+</script>
+<script>
+(function(){
+  function fixCollapseButton(){
+    const float = document.getElementById('rs-float');
+    if(!float) return;
+
+    const header = float.querySelector('.rs-float__header');
+    const btn = float.querySelector('.rs-float__actions button, .rs-float__actions .rs-btn');
+
+    if(header){
+      header.style.display = 'flex';
+      header.style.alignItems = 'center';
+      header.style.justifyContent = 'space-between';
+      header.style.flexWrap = 'nowrap';
+      header.style.gap = '6px';
+      header.style.minWidth = '0';
+    }
+
+    if(btn){
+      btn.style.fontSize = '0.8em';
+      btn.style.padding = '4px 10px';
+      btn.style.lineHeight = '1';
+      btn.style.letterSpacing = '0.03em';
+      btn.style.minWidth = 'auto';
+      btn.style.maxWidth = '7em';
+      btn.style.height = 'auto';
+      btn.style.whiteSpace = 'nowrap';
+      btn.style.flexShrink = '0';
+      btn.style.overflow = 'hidden';
+      btn.style.textOverflow = 'ellipsis';
+    }
+
+    // Prevent title from pushing the button off-screen
+    const title = float.querySelector('.rs-float__title');
+    if(title){
+      title.style.flexShrink = '1';
+      title.style.minWidth = '0';
+      title.style.overflow = 'hidden';
+      title.style.textOverflow = 'ellipsis';
+    }
+
+    // Auto-shrink text if still wraps
+    if(btn && header){
+      const checkOverflow = () => {
+        const isOverflowing = header.scrollWidth > header.clientWidth;
+        if(isOverflowing){
+          btn.style.fontSize = '0.7em';
+          btn.style.padding = '3px 8px';
+          btn.textContent = 'COLL.'; // fallback short label
+        } else {
+          btn.style.fontSize = '0.8em';
+          btn.textContent = 'COLLAPSE';
+        }
+      };
+      requestAnimationFrame(checkOverflow);
+    }
+  }
+
+  window.addEventListener('load', fixCollapseButton);
+  window.addEventListener('resize', fixCollapseButton);
+})();
+</script>
+<script>
+(function(){
+  function shrinkCollapse(){
+    const btn = document.querySelector('#rs-float .rs-float__actions button, #rs-float .rs-float__actions .rs-btn');
+    const header = document.querySelector('#rs-float .rs-float__header');
+    if(!btn || !header) return;
+
+    // Hard overrides for sizing
+    Object.assign(btn.style, {
+      fontSize: '0.6em',           // much smaller
+      padding: '2px 6px',          // compact padding
+      lineHeight: '1',
+      letterSpacing: '0.02em',
+      minWidth: 'auto',
+      maxWidth: '5.5em',
+      height: 'auto',
+      whiteSpace: 'nowrap',
+      flexShrink: '0',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      transform: 'scale(0.95)',    // visually tighten
+      transformOrigin: 'center right'
+    });
+
+    // Keep header in a single row, aligned center
+    Object.assign(header.style, {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      flexWrap: 'nowrap',
+      gap: '4px',
+      minWidth: '0',
+      lineHeight: '1'
+    });
+
+    // Shrink title area if needed
+    const title = document.querySelector('#rs-float .rs-float__title');
+    if(title){
+      title.style.flexShrink = '1';
+      title.style.minWidth = '0';
+      title.style.overflow = 'hidden';
+      title.style.textOverflow = 'ellipsis';
+      title.style.whiteSpace = 'nowrap';
+    }
+
+    // Auto-compress text if still overflowing
+    const checkOverflow = () => {
+      const over = header.scrollWidth > header.clientWidth;
+      if (over) {
+        btn.textContent = 'C'; // final fallback: single letter
+        btn.style.fontSize = '0.55em';
+        btn.style.padding = '2px 5px';
+        btn.style.transform = 'scale(0.9)';
+      } else {
+        btn.textContent = 'COLLAPSE';
+      }
+    };
+    requestAnimationFrame(checkOverflow);
+  }
+
+  window.addEventListener('load', shrinkCollapse);
+  window.addEventListener('resize', shrinkCollapse);
+})();
+</script>
+  
 </body>
 </html>
 <!-- STAGE 1: canonical overrides appended by cleaner -->
