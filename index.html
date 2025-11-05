@@ -8698,7 +8698,221 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener('resize', shrinkCollapse);
 })();
 </script>
-  
+<script>
+(function(){
+  // Tuning knobs
+  const PAD_BTN   = {base:'4px 10px', tight:'3px 8px', tiny:'2px 6px'};
+  const BTN_LABEL = {full:'COLLAPSE', short:'COLL.', tiny:'C'};
+  const TITLE_MIN_EM = 0.58;        // hard floor for title font-size (relative to computed)
+  const STEP = 0.92;                // shrink 8% per step when overflowing
+  const MAX_STEPS = 20;             // safety cap
+
+  function $q(sel,root=document){ return root.querySelector(sel); }
+
+  function fitHeader(){
+    const float  = document.getElementById('rs-float');
+    if(!float) return;
+
+    // Grab likely elements with broad selectors for your markup
+    const header = $q('.rs-float__header', float) || $q('#rs-header', float) || $q('.rs-titlebar', float);
+    if(!header) return;
+
+    const title  = $q('.rs-float__title', header) || $q('h1, .title, .rs-title', header);
+    const count  = $q('#rs-count, .rs-count', header);
+    const btn    = $q('.rs-float__actions button, .rs-float__actions .rs-btn, .rs-actions button, .rs-actions .rs-btn', header);
+
+    // Make it a single, no-wrap row
+    Object.assign(header.style, {
+      display:'flex', alignItems:'center', justifyContent:'space-between',
+      flexWrap:'nowrap', gap:'8px', minWidth:'0', lineHeight:'1'
+    });
+
+    // Title & count can shrink
+    if(title){
+      title.style.flexShrink = '1';
+      title.style.minWidth = '0';
+      title.style.whiteSpace = 'nowrap';
+      title.style.overflow = 'hidden';
+      title.style.textOverflow = 'ellipsis';
+    }
+    if(count){
+      count.style.flexShrink = '0';
+      count.style.transformOrigin = 'center';
+      count.style.transform = 'scale(0.9)';
+    }
+
+    // Button: start compact
+    if(btn){
+      Object.assign(btn.style, {
+        fontSize:'0.78em', padding: PAD_BTN.base, lineHeight:'1',
+        whiteSpace:'nowrap', minWidth:'auto', maxWidth:'9em',
+        overflow:'hidden', textOverflow:'ellipsis', flexShrink:'0'
+      });
+      if(!btn.dataset._orig){ btn.dataset._orig = btn.textContent.trim(); }
+      btn.textContent = BTN_LABEL.full;
+    }
+
+    // Compute initial sizes
+    const initTitleSize = title ? parseFloat(getComputedStyle(title).fontSize) : null;
+    const initTitleLS   = title ? getComputedStyle(title).letterSpacing : null;
+    const initBtnSize   = btn   ? parseFloat(getComputedStyle(btn).fontSize)   : null;
+
+    // Helper: does header overflow horizontally?
+    const overflows = () => header.scrollWidth > header.clientWidth + 1;
+
+    // Iteratively shrink until it fits
+    let steps = 0, stage = 0;
+    while (overflows() && steps++ < MAX_STEPS){
+      // Stage 0: tighten button + badge a bit
+      if(stage === 0){
+        if(btn){
+          btn.style.fontSize = (initBtnSize * 0.9) + 'px';
+          btn.style.padding = PAD_BTN.tight;
+          btn.style.maxWidth = '8em';
+        }
+        if(count){ count.style.transform = 'scale(0.85)'; }
+        stage = 1;
+        continue;
+      }
+
+      // Stage 1: reduce title font-size & letter-spacing
+      if(stage === 1 && title){
+        const cs = getComputedStyle(title);
+        const fs = parseFloat(cs.fontSize);
+        const ls = cs.letterSpacing === 'normal' ? 0 : parseFloat(cs.letterSpacing);
+        const nextFS = fs * STEP;
+        if (initTitleSize && nextFS < initTitleSize * TITLE_MIN_EM){
+          stage = 2; // drop to next stage
+        }else{
+          title.style.fontSize = nextFS + 'px';
+          title.style.letterSpacing = Math.max(-0.5, ls * STEP) + 'px';
+          continue;
+        }
+      }
+
+      // Stage 2: shorten button label and shrink harder
+      if(stage === 2 && btn){
+        if(btn.textContent !== BTN_LABEL.short){
+          btn.textContent = BTN_LABEL.short;
+          btn.style.fontSize = (initBtnSize * 0.8) + 'px';
+          btn.style.padding = PAD_BTN.tiny;
+          btn.style.maxWidth = '6.5em';
+          continue;
+        }else{
+          stage = 3;
+        }
+      }
+
+      // Stage 3: extreme—single letter & tiny title bump down
+      if(stage === 3){
+        if(btn && btn.textContent !== BTN_LABEL.tiny){
+          btn.textContent = BTN_LABEL.tiny;
+          btn.style.fontSize = (initBtnSize * 0.72) + 'px';
+          btn.style.maxWidth = '3.5em';
+          continue;
+        }
+        if(title){
+          const cs = getComputedStyle(title);
+          const fs = parseFloat(cs.fontSize);
+          title.style.fontSize = (fs * STEP) + 'px';
+          title.style.letterSpacing = '-0.3px';
+          continue;
+        }
+        stage = 4;
+      }
+
+      // Stage 4: last resort—scale the whole header slightly
+      const currentScale = parseFloat(header.dataset.scale || '1');
+      const nextScale = currentScale * 0.97; // -3%
+      header.style.transformOrigin = 'right center';
+      header.style.transform = `scale(${nextScale})`;
+      header.dataset.scale = String(nextScale);
+    }
+
+    // If it still overflowed after max steps, keep the tiny state but ensure single line
+    header.style.whiteSpace = 'nowrap';
+  }
+
+  const run = () => requestAnimationFrame(fitHeader);
+  addEventListener('load', run, {once:true});
+  addEventListener('resize', run, {passive:true});
+  if (window.visualViewport) visualViewport.addEventListener('resize', run, {passive:true});
+})();
+</script>
+<script>
+(function(){
+  function forceTightHeader(){
+    const float  = document.getElementById('rs-float');
+    if(!float) return;
+
+    const header = float.querySelector('.rs-float__header');
+    const title  = float.querySelector('.rs-float__title');
+    const count  = float.querySelector('#rs-count, .rs-count');
+    const btn    = float.querySelector('.rs-float__actions button, .rs-float__actions .rs-btn');
+
+    if(header){
+      Object.assign(header.style, {
+        display:'flex',
+        alignItems:'center',
+        justifyContent:'space-between',
+        flexWrap:'nowrap',
+        minWidth:'0',
+        gap:'6px',
+        lineHeight:'1'
+      });
+    }
+
+    // Force smaller title and tighter spacing
+    if(title){
+      Object.assign(title.style, {
+        fontSize:'1.25em',          // force smaller title
+        letterSpacing:'-0.02em',
+        flexShrink:'1',
+        minWidth:'0',
+        whiteSpace:'nowrap',
+        overflow:'hidden',
+        textOverflow:'ellipsis'
+      });
+    }
+
+    // Make count smaller
+    if(count){
+      count.style.transform = 'scale(0.85)';
+      count.style.marginLeft = '4px';
+    }
+
+    // Shrink and tighten the COLLAPSE button
+    if(btn){
+      Object.assign(btn.style, {
+        fontSize:'0.55em',          // much smaller text
+        padding:'2px 6px',          // compact padding
+        lineHeight:'1',
+        minWidth:'auto',
+        maxWidth:'5em',
+        whiteSpace:'nowrap',
+        overflow:'hidden',
+        textOverflow:'ellipsis',
+        flexShrink:'0'
+      });
+
+      // Optionally shorten the label
+      btn.textContent = 'C'; // or use 'COLL.' if you want
+    }
+
+    // If still wrapping, scale header slightly smaller
+    requestAnimationFrame(()=>{
+      if(header.scrollWidth > header.clientWidth){
+        header.style.transformOrigin = 'right center';
+        header.style.transform = 'scale(0.9)';
+      }
+    });
+  }
+
+  window.addEventListener('load', forceTightHeader);
+  window.addEventListener('resize', forceTightHeader);
+})();
+</script>
+
 </body>
 </html>
 <!-- STAGE 1: canonical overrides appended by cleaner -->
