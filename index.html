@@ -8055,17 +8055,37 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   }
 
   function ensureOnlineLayers(map){
-    var Lref = window.L;
-    if (!Lref) return;
-    var street = Lref.tileLayer(window.RS_ONLINE_TILES.street.url, window.RS_ONLINE_TILES.street.opts);
-    var sat = Lref.tileLayer(window.RS_ONLINE_TILES.satellite.url, window.RS_ONLINE_TILES.satellite.opts);
-    street.addTo(map);
-    try {
-      var baseLayers = { 'Street': street, 'Satellite': sat };
-      Lref.control.layers(baseLayers, null, { collapsed: false, position: 'topright' }).addTo(map);
-    } catch(e){ console.warn('[RS] layers control skipped', e); }
-    map._rs_online = { street: street, satellite: sat };
-  }
+       var Lref = window.L;
+       if (!Lref) return;
+       var street = Lref.tileLayer(window.RS_ONLINE_TILES.street.url, window.RS_ONLINE_TILES.street.opts);
+       var sat = Lref.tileLayer(window.RS_ONLINE_TILES.satellite.url, window.RS_ONLINE_TILES.satellite.opts);
+       street.addTo(map);
+     
+       // keep references but don't use Leaflet's control UI
+       map._rs_online = { street: street, satellite: sat, current: 'street' };
+     
+       // wire existing layer toggles (the buttons/sliders in #rs-layers)
+       try {
+         var btnStreet = document.querySelector('#rs-layers button[data-layer="street"]') ||
+                         document.querySelector('.rs-layer[data-layer="street"]');
+         var btnSat = document.querySelector('#rs-layers button[data-layer="satellite"]') ||
+                      document.querySelector('.rs-layer[data-layer="satellite"]');
+     
+         function activate(layerName){
+           if (map._rs_online.current === layerName) return;
+           if (map._rs_online.current === 'street') map.removeLayer(street);
+           if (map._rs_online.current === 'satellite') map.removeLayer(sat);
+     
+           if (layerName === 'street') street.addTo(map);
+           else if (layerName === 'satellite') sat.addTo(map);
+           map._rs_online.current = layerName;
+         }
+     
+         if (btnStreet) btnStreet.addEventListener('click', function(){ activate('street'); });
+         if (btnSat) btnSat.addEventListener('click', function(){ activate('satellite'); });
+       } catch(e){ console.warn('[RS] custom slider controls skipped', e); }
+     }
+
 
   function hideLocalLayerUI(){
     try {
