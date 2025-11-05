@@ -8912,19 +8912,7 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener('resize', forceTightHeader);
 })();
 </script>
-<script>
-window.addEventListener('DOMContentLoaded', () => {
-  const hook = (id, fn) => {
-    const el = document.getElementById(id);
-    if (!el) { console.warn('slider missing:', id); return; }
-    el.addEventListener('input', fn);
-    el.addEventListener('change', fn);
-  };
-  hook('sat-slider', e => satLayer.setOpacity(e.target.value));
-  hook('street-slider', e => streetLayer.setOpacity(e.target.value));
-  // add others...
-});
-</script>
+
 </body>
 </html>
 <!-- STAGE 1: canonical overrides appended by cleaner -->
