@@ -2940,7 +2940,21 @@ html.booting #rs-float{transition:none !important;}
   .rs-kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#eee; padding:1px 6px; border:1px solid #bbb; border-radius:3px; }
   .rs-inline-badge { display:inline-block; padding:0 6px; border:1px solid #000; font-size:12px; font-weight:700; margin-left:4px; }
 </style>
-
+<style>
+  /* Force larger headers inside the Help modal */
+  #rs-help-body h3,
+  .rs-help-body h3 {
+    font-family: var(--rs-font-display, 'Theater_Bold', Impact, sans-serif);
+    font-size: 4.5rem !important;  /* 24px */
+    font-weight: 800 !important;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #000;
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+    line-height: 1.2;
+  }
+</style>
 </head>
 <body>
 
@@ -3754,29 +3768,29 @@ Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call 
       wrap.insertAdjacentHTML('beforeend', `
 <h2>How to Explore</h2>
 <!-- HELP CONTENT: ONLINE MODE -->
-<h3>Map Layers</h3>
+<h2>Map Layers</h2>
 <p>There are two base layers: <strong>Street</strong> and <strong>Satellite</strong>. Use the layer switcher in the top-right to toggle.</p>
 
-<h3>Map Navigation</h3>
+<h2>Map Navigation</h2>
 <ul>
   <li><strong>Drag</strong> the map to pan. <strong>Scroll</strong> or use on-screen controls to zoom.</li>
   <li><strong>Click a theatre</strong> to open details. The popup shows <em>Address</em>, <em>Status</em>, and <em>Now Showing</em> (e.g., May 8, 1945 listings).</li>
   <li>Press the <strong>More details</strong> button in the popup to see expanded information (seating, notes, and image gallery if available).</li>
 </ul>
 
-<h3>Filters &amp; Legend</h3>
+<h2>Filters &amp; Legend</h2>
 <ul>
   <li>Use the status squares (e.g., <span class="rs-inline-badge">OPEN</span> <span class="rs-inline-badge">CLOSED</span> <span class="rs-inline-badge">REPURPOSED</span> <span class="rs-inline-badge">DEMOLISHED</span>) to filter which theatres appear.</li>
   <li>Click <strong>Show All</strong> to reset filters.</li>
 </ul>
 
-<h3>Floating Panel</h3>
+<h2>Floating Panel</h2>
 <ul>
   <li><strong>Tap &amp; hold</strong> the panel header to drag the floating list.</li>
   <li>Click <strong>Map Layers</strong> to minimize or expand the layers list.</li>
 </ul>
 
-<h3>Examples</h3>
+<h2>Examples</h2>
 <ul>
   <li>“Zoom to the <em>HIPPODROME</em> and open the popup.”</li>
   <li>“Filter to only <em>Open</em> and <em>Repurposed</em> theatres.”</li>
@@ -8162,7 +8176,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   function buildHelpHTML(mode){
     var isOnline = String(mode||'local').toLowerCase() === 'online';
     var lines = [];
-    lines.push('<h3>Map Layers</h3>');
+    lines.push('<h2>Map Layers</h2>');
     if (isOnline) {
       lines.push('<p>Two Base Layers <strong>Street</strong> and <strong>Satellite</strong>. Use the layer switcher in the top-right to toggle.</p>');
     } else {
@@ -8175,26 +8189,26 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
       lines.push('<p><em>Tip:</em> Drag the year slider to reveal different years of the historical map.</p>');
     }
 
-    lines.push('<h3>Map Navigation</h3>');
+    lines.push('<h2>Map Navigation</h2>');
     lines.push('<ul>');
     lines.push('<li><strong>Drag</strong> the map to pan. <strong>Scroll</strong> or use on-screen controls to zoom.</li>');
     lines.push('<li><strong>Click a theatre</strong> to open details. The popup shows <em>Address</em>, <em>Status</em>, and <em>Now Showing</em> (e.g., May 8, 1945 listings).</li>');
     lines.push('<li>Press the <strong>More details</strong> button in the popup to see expanded information (seating, notes, and image gallery if available).</li>');
     lines.push('</ul>');
 
-    lines.push('<h3>Filters & Legend</h3>');
+    lines.push('<h2>Filters & Legend</h2>');
     lines.push('<ul>');
     lines.push('<li>Use the status squares (e.g., <span class=\"rs-inline-badge\">OPEN</span> <span class=\"rs-inline-badge\">CLOSED</span> <span class=\"rs-inline-badge\">REPURPOSED</span> <span class=\"rs-inline-badge\">DEMOLISHED</span>) to filter which theatres appear.</li>');
     lines.push('<li>Click <strong>Show All</strong> to reset filters.</li>');
     lines.push('</ul>');
 
-    lines.push('<h3>Floating Panel</h3>');
+    lines.push('<h2>Floating Panel</h2>');
     lines.push('<ul>');
     lines.push('<li><strong>Tap & hold</strong> the panel header to drag the floating list.</li>');
     lines.push('<li>Click <strong>Map Layers</strong> to minimize or expand the layers list.</li>');
     lines.push('</ul>');
 
-    lines.push('<h3>Examples</h3>');
+    lines.push('<h2>Examples</h2>');
     lines.push('<ul>');
     lines.push('<li>“Zoom to the <em>Euclid Tavern</em> and open the popup.”</li>');
     lines.push('<li>“Filter to only <em>Open</em> and <em>Repurposed</em> theatres.”</li>');
@@ -8265,7 +8279,31 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   mo.observe(document.body, { childList:true, subtree:true });
 })();
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const applyHelpHeaderStyle = () => {
+    document.querySelectorAll('#rs-help-body h3, .rs-help-body h3').forEach(el => {
+      el.style.fontSize = '2.6rem';
+      el.style.fontWeight = '900';
+      el.style.letterSpacing = '0.05em';
+      el.style.textTransform = 'uppercase';
+      el.style.marginTop = '1.2em';
+      el.style.marginBottom = '0.6em';
+      el.style.lineHeight = '1.2';
+    });
+  };
 
+  // Apply immediately
+  applyHelpHeaderStyle();
+
+  // Also re-apply if Help content changes dynamically
+  const target = document.getElementById('rs-help-body');
+  if (target) {
+    const observer = new MutationObserver(applyHelpHeaderStyle);
+    observer.observe(target, { childList: true, subtree: true });
+  }
+});
+</script>
 </body>
 </html>
 <!-- STAGE 1: canonical overrides appended by cleaner -->
