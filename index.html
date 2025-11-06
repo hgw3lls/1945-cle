@@ -788,16 +788,20 @@ html,body {
 .rs-details-panel {
 
   position:absolute;
-  top:5vh;
+  top:max(4vh, 32px);
   left:50%;
   transform:translateX(-50%);
-  width:min(880px,94vw);
-  max-height:90vh;
+  width:min(640px,90vw);
+  max-width:min(640px,90vw);
+  max-height:88vh;
   overflow:auto;
   background:#fff;
   border-radius:12px;
   box-shadow:0 24px 80px rgba(0,0,0,.55);
-  padding:18px 18px 22px;
+  padding:clamp(18px, 2vw + 12px, 28px);
+  font-size:clamp(1rem, 0.92rem + 0.32vw, 1.22rem);
+  line-height:1.6;
+  letter-spacing:0.01em;
 }
 
 
@@ -5698,7 +5702,11 @@ html.booting #rs-float {
       line-height: 1.4;
     }
     /* Reduce popup/modal width so long lines are more readable */
-    html.tv .rs-details-panel,
+    html.tv .rs-details-panel {
+      max-width: min(62vw, 620px);
+      font-size: calc(1.12rem * var(--tv-scale));
+      line-height: 1.68;
+    }
     html.tv #rs-infohelp-modal .panel {
       max-width: 70vw;
     }
@@ -6976,7 +6984,7 @@ html.booting #rs-float {
 <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
 <span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
 </div>
-<div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" id="rs-hist-bar" role="slider" tabindex="0">
+<div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:100%"></div>
 <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
 <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
@@ -6991,8 +6999,8 @@ html.booting #rs-float {
 <div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
 <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
 </div>
-<div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" id="rs-sat-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:0%"></div>
+<div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
+<div class="rs-hist-bar-fill" style="width:100%"></div>
 <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
 <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
 <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
@@ -7004,7 +7012,7 @@ html.booting #rs-float {
 <div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
 <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
 </div>
-<div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" id="rs-street-bar" role="slider" tabindex="0">
+<div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:0%"></div>
 <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
 <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
@@ -9427,25 +9435,62 @@ try {
 // === Segmented sliders for Historic, Street, Satellite with overlaid labels ===
 (function(){
   function gm(){ return window.map || (typeof map !== 'undefined' ? map : null); }
-  var layers = {
-    osm:    (window.baseOSM || (typeof baseOSM !== 'undefined' ? baseOSM : null)),
-    historic: (window.historic || (typeof historic !== 'undefined' ? historic : null)),
-    street: (window.street || (typeof street !== 'undefined' ? street : null)),
-    sat:    (window.sat || (typeof sat !== 'undefined' ? sat : null))
-  };
+  function getLayerRef(name){
+    var m = gm();
+    var online = m && m._rs_online ? m._rs_online : null;
+    var alt = (name === 'sat') ? 'satellite' : name;
+    if (online) {
+      if (online[name]) return online[name];
+      if (alt !== name && online[alt]) return online[alt];
+    }
+    var mode = (document.body && document.body.dataset && document.body.dataset.rsMode) || '';
+    if (mode === 'online' && (name === 'osm' || name === 'historic')) return null;
+    if (name === 'osm') {
+      if (typeof window !== 'undefined' && window.baseOSM) return window.baseOSM;
+      if (typeof baseOSM !== 'undefined') return baseOSM;
+      return null;
+    }
+    if (name === 'historic') {
+      if (typeof window !== 'undefined' && window.historic) return window.historic;
+      if (typeof historic !== 'undefined') return historic;
+      return null;
+    }
+    if (name === 'street') {
+      if (typeof window !== 'undefined' && window.street) return window.street;
+      if (typeof street !== 'undefined') return street;
+      return null;
+    }
+    if (name === 'sat') {
+      if (typeof window !== 'undefined' && window.sat) return window.sat;
+      if (typeof sat !== 'undefined') return sat;
+      return null;
+    }
+    return null;
+  }
 
   function ensureBase(){
     var m = gm(); if(!m) return;
-    try { if (layers.osm && !m.hasLayer(layers.osm)) layers.osm.addTo(m); } catch(_){}
-    try { if (layers.historic && !m.hasLayer(layers.historic)) layers.historic.addTo(m); } catch(_){}
+    var osm = getLayerRef('osm');
+    var hist = getLayerRef('historic');
+    try { if (osm && !m.hasLayer(osm)) osm.addTo(m); } catch(_){}
+    try { if (hist && !m.hasLayer(hist)) hist.addTo(m); } catch(_){}
   }
   function enforceOrder(){
     var m = gm(); if(!m) return;
     ensureBase();
-    try { if (layers.osm && m.hasLayer(layers.osm)) layers.osm.setZIndex(100); } catch(_){}
-    try { if (layers.sat && m.hasLayer(layers.sat)) layers.sat.setZIndex(300); } catch(_){}
-    try { if (layers.street && m.hasLayer(layers.street)) layers.street.setZIndex(500); } catch(_){}
-    try { if (layers.historic && m.hasLayer(layers.historic)) layers.historic.setZIndex(700); if (layers.historic && layers.historic.bringToFront) layers.historic.bringToFront(); } catch(_){}
+    var osm = getLayerRef('osm');
+    var sat = getLayerRef('sat');
+    var street = getLayerRef('street');
+    var hist = getLayerRef('historic');
+    try { if (osm && m.hasLayer(osm)) osm.setZIndex(100); } catch(_){}
+    try { if (sat && m.hasLayer(sat)) sat.setZIndex(300); } catch(_){}
+    try { if (street && m.hasLayer(street)) street.setZIndex(500); } catch(_){}
+    try {
+      if (hist && m.hasLayer(hist)) {
+        hist.setZIndex(700);
+        if (hist.bringToFront) hist.bringToFront();
+      }
+    } catch(_){}
   }
 
   function setBarVal(bar, v){
@@ -9466,31 +9511,37 @@ try {
       var frac = v / 100;
 
       if (opts.key === 'historic'){
-        if (layers.historic){
-          if (!m.hasLayer(layers.historic)) layers.historic.addTo(m);
-          try { layers.historic.setOpacity(frac); } catch(_){}
+        var historicLayer = getLayerRef('historic');
+        if (historicLayer){
+          if (!m.hasLayer(historicLayer)) historicLayer.addTo(m);
+          try { historicLayer.setOpacity(frac); } catch(_){}
         }
       } else if (opts.key === 'street'){
-        if (layers.street){
+        var streetLayer = getLayerRef('street');
+        if (streetLayer){
           if (v === 0){
-            try { if (m.hasLayer(layers.street)) m.removeLayer(layers.street); } catch(_){}
+            try { if (m.hasLayer(streetLayer)) m.removeLayer(streetLayer); } catch(_){}
           } else {
-            if (!m.hasLayer(layers.street)) layers.street.addTo(m);
-            try { layers.street.setOpacity(frac); } catch(_){}
+            if (!m.hasLayer(streetLayer)) streetLayer.addTo(m);
+            try { streetLayer.setOpacity(frac); } catch(_){}
           }
         }
       } else if (opts.key === 'sat'){
-        if (layers.sat){
+        var satLayer = getLayerRef('sat');
+        if (satLayer){
           if (v === 0){
-            try { if (m.hasLayer(layers.sat)) m.removeLayer(layers.sat); } catch(_){}
+            try { if (m.hasLayer(satLayer)) m.removeLayer(satLayer); } catch(_){}
           } else {
-            if (!m.hasLayer(layers.sat)) layers.sat.addTo(m);
-            try { layers.sat.setOpacity(frac); } catch(_){}
+            if (!m.hasLayer(satLayer)) satLayer.addTo(m);
+            try { satLayer.setOpacity(frac); } catch(_){}
           }
         }
       }
       enforceOrder();
     }
+
+    bar._rsApplyValue = apply;
+    bar._rsLayerKey = opts.key;
 
     // Clicks
     steps.forEach(function(btn){
@@ -9513,13 +9564,19 @@ try {
     });
 
     // Init value
-    apply(opts.init || 0);
+    var initial = (typeof opts.init === 'number') ? opts.init : Number(bar.getAttribute('data-val') || bar.getAttribute('aria-valuenow') || '0');
+    apply(initial);
   }
 
   function initAll(){
     initSegBar({ id: 'rs-hist-bar',   key: 'historic', init: 100 });
+    initSegBar({ id: 'rs-sat-bar',    key: 'sat',      init: 100 });
     initSegBar({ id: 'rs-street-bar', key: 'street',   init: 0 });
-    initSegBar({ id: 'rs-sat-bar',    key: 'sat',      init: 0 });
+    try {
+      if (typeof window.RS_syncLayerSliders === 'function') {
+        window.RS_syncLayerSliders();
+      }
+    } catch(_){}
   }
 
   if (document.readyState === 'complete') initAll();
@@ -11920,25 +11977,35 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
 (function(){
   function hideClevelandSlider(){
     try {
+      var slider = document.getElementById('rs-hist-bar');
+      if (slider) {
+        slider.style.display = 'none';
+        var block = slider.closest('.rs-historic-slider');
+        if (block) {
+          block.style.display = 'none';
+          var label = block.querySelector('.rs-hist-label');
+          if (label) label.style.display = 'none';
+        }
+      }
+
       var candidates = [
         '#cleveland-slider', '#year-slider', '#rs-year', '#rs-cleveland-range',
         '.rs-cleveland-slider', '.rs-year-slider'
       ];
-      var hidden = false;
       candidates.forEach(function(sel){
         document.querySelectorAll(sel).forEach(function(el){
           el.style.display = 'none';
-          hidden = true;
         });
       });
-      if (!hidden) {
-        Array.from(document.querySelectorAll('*')).forEach(function(el){
-          var t = (el.getAttribute('aria-label') || el.textContent || '').toLowerCase();
-          if (/1927|1937|cleveland/.test(t) && (el.matches('input[type=range], .slider, [role=slider]') || /slider/.test(el.className||''))) {
-            el.style.display = 'none';
-          }
-        });
-      }
+
+      Array.from(document.querySelectorAll('*')).forEach(function(el){
+        var text = (el.getAttribute('aria-label') || el.textContent || '').toLowerCase();
+        if (/(1927|1937|1947|cleveland)/.test(text) && (el.matches('input[type=range], .slider, [role=slider]') || /slider/.test(el.className||''))) {
+          el.style.display = 'none';
+          var wrap = el.closest('.rs-historic-slider');
+          if (wrap) wrap.style.display = 'none';
+        }
+      });
     } catch(e) { console.warn('[RS] hideClevelandSlider skipped', e); }
   }
 
@@ -11958,9 +12025,12 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
        var street = Lref.tileLayer(window.RS_ONLINE_TILES.street.url, window.RS_ONLINE_TILES.street.opts);
        var sat = Lref.tileLayer(window.RS_ONLINE_TILES.satellite.url, window.RS_ONLINE_TILES.satellite.opts);
        street.addTo(map);
-     
+
        // keep references but don't use Leaflet's control UI
-       map._rs_online = { street: street, satellite: sat, current: 'street' };
+       map._rs_online = { street: street, satellite: sat, sat: sat, current: 'street' };
+
+       try { window.street = street; } catch(_){}
+       try { window.sat = sat; } catch(_){}
      
        // wire existing layer toggles (the buttons/sliders in #rs-layers)
        try {
@@ -11985,6 +12055,25 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
      }
 
 
+  function syncLayerSliders(){
+    try {
+      var mode = (document.body && document.body.dataset && document.body.dataset.rsMode) || '';
+      document.querySelectorAll('.rs-hist-bar[data-layer]').forEach(function(bar){
+        var key = (bar.getAttribute('data-layer') || bar._rsLayerKey || '').toLowerCase();
+        if (mode === 'online' && key === 'historic') return;
+        var apply = bar._rsApplyValue;
+        if (typeof apply !== 'function') return;
+        var fallback = key === 'sat' ? 100 : 0;
+        var raw = bar.getAttribute('data-val') || bar.getAttribute('aria-valuenow');
+        var value = Number(raw);
+        if (!isFinite(value)) value = fallback;
+        apply(value);
+      });
+    } catch(e){ console.warn('[RS] slider sync skipped', e); }
+  }
+
+  try { window.RS_syncLayerSliders = syncLayerSliders; } catch(_){}
+
   function hideLocalLayerUI(){
     try {
       var layerHosts = ['#rs-layers', '.rs-layer-toggles', '#layerControls', '.rs-float-layers'];
@@ -12003,6 +12092,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     hideLocalLayerUI();
     removeExistingTileLayers(map);
     ensureOnlineLayers(map);
+    syncLayerSliders();
   }
 
   function whenMapReady(cb, limitMs){
