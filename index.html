@@ -6710,13 +6710,35 @@ html.booting #rs-float {
 .rs-coach-actions .btn.alt { background:#222; color:#ddd; border:1px solid #3fc4ff; }
 .rs-coach-actions .btn.skip { background:#444; color:#ddd; }
 
-/* Floating 'Tips' button in the panel header (added if HELP not wired) */
-#rs-float .rs-tips-btn {
-  position:absolute; top:10px; right:10px;
-  background:#3fc4ff; color:#081018; border-radius:8px; border:none;
-  padding:6px 10px; font-weight:800; cursor:pointer; z-index:4;
+/* Float footer actions layout */
+#rs-footer-bar .rs-footer-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
-#rs-float .rs-tips-btn:active { transform: translateY(1px); }
+
+/* Dedicated Tips button inside the footer actions */
+#rs-footer-bar .rs-tips-btn-panel {
+  background: #3fc4ff;
+  color: #081018;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: transform 0.1s ease;
+}
+#rs-footer-bar .rs-tips-btn-panel:focus-visible {
+  outline: 3px solid rgba(0, 64, 94, 0.75);
+  outline-offset: 2px;
+}
+#rs-footer-bar .rs-tips-btn-panel:active {
+  transform: translateY(1px);
+}
 </style>
 <style>
 /* === Toolbar Tips button (next to INFO/HELP) ============================ */
@@ -6816,19 +6838,7 @@ html.booting #rs-float {
     line-height: 1.2;
   }
 </style>
-<style id="rs-float-bottom-right-style">
-/* Scoped: position the Tips inside #rs-float at bottom-right */
-#rs-float { position: relative; }
-#rs-float .rs-tips-btn-toolbar,
-#rs-float .rs-tips-btn-global,
-#rs-float .rs-tips-btn-float {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  z-index: 100;
-  pointer-events: auto;
-}
-</style><style>
+<style>
 
 /* === RS-FLOAT: Header-only collapse mode === */
 #rs-float.rs-header-only{
@@ -7197,11 +7207,13 @@ html.booting #rs-float {
 <span class="rs-sr-only" data-slider-live="rs-street-bar" aria-live="polite">Street 0%</span>
 </div>
 </div>
+<div class="rs-footer-actions">
 <button class="rs-btn" id="rs-reset" title="Reset map view">Reset Map</button>
 </div>
 </div>
 </div>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-float" type="button">Tips</button></section>
+</div>
+</section>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -12976,14 +12988,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Hook a visible "Tips" button in the float header if no HELP button is wired
   function ensureTipsButton(){
-    if (document.querySelector('#rs-float .rs-tips-btn')) return;
-    const hdr = document.querySelector('#rs-float .rs-float__header') || document.querySelector('#rs-float');
-    if (!hdr) return;
+    if (document.querySelector('#rs-footer-bar .rs-tips-btn-panel')) return;
+    const actions = document.querySelector('#rs-footer-bar .rs-footer-actions');
+    const host = actions || document.querySelector('#rs-footer-bar .rs-footer-inner:last-of-type');
+    if (!host) return;
+    const wrap = actions || (function(){
+      const el = document.createElement('div');
+      el.className = 'rs-footer-actions';
+      host.appendChild(el);
+      return el;
+    })();
     const btn = document.createElement('button');
-    btn.className = 'rs-tips-btn';
-    btn.textContent = 'Tips';
+    btn.className = 'rs-btn rs-tips-btn-panel';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Tips tour');
+    btn.textContent = 'Tips Tour';
     btn.addEventListener('click', () => window.RS_TIPS_START());
-    hdr.appendChild(btn);
+    wrap.appendChild(btn);
   }
   ensureTipsButton();
 
@@ -13759,8 +13780,8 @@ document.addEventListener("DOMContentLoaded", function() {
   function rsIsAllowedTipsContainer(el){
     if (!(el && el.closest)) return false;
     if (el.closest('.rs-toolbar')) return true;
-    if (el.closest('#rs-float')) return true;
-    if (el.classList && el.classList.contains('rs-tips-btn-float')) return true;
+    if (el.closest('#rs-footer-bar')) return true;
+    if (el.closest('.rs-footer-actions')) return true;
     return false;
   }
 
