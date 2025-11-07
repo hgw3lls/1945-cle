@@ -1993,7 +1993,7 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
 */
 #rs-float .rs-li h4 {
 
-  margin: 0 72px 6px 0;
+  margin: 0 0 10px;
     padding: 3px 6px 1px;
     display: inline-block;
     background: #121212;
@@ -2009,6 +2009,15 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
    #rs-float .rs-li .rs-addr,
 #rs-float .rs-li .rs-movie
 */
+#rs-float .rs-li .rs-li-meta {
+
+  display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    row-gap: 6px;
+    align-items: start;
+}
+
 #rs-float .rs-li .rs-addr,
 #rs-float .rs-li .rs-movie {
 
@@ -2016,8 +2025,34 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
     color: #d9d3c3;
     font-weight: 600;
     line-height: 1.25;
+}
+
+#rs-float .rs-li .rs-addr {
+
+  display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: calc(1.25em * 2);
+}
+
+#rs-float .rs-li .rs-addr .rs-addr-line {
+
+  display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#rs-float .rs-li .rs-addr.rs-addr--empty {
+
+  min-height: calc(1.25em * 2);
+}
+
+#rs-float .rs-li .rs-movie {
+
+  margin-top: 12px;
     display: -webkit-box;
-    -webkit-line-clamp: 1;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2188,9 +2223,8 @@ body[data-rs-tour-variant='skyline-glow'] #rs-float {
 */
 #rs-float.rs-dense .rs-li .rs-chip-status {
 
-  top: 8px;
-  right: 10px;
   transform: scale(.92);
+  justify-self: end;
 }
 
 
@@ -3096,6 +3130,8 @@ html.tv #rs-list .rs-movie {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    justify-self: end;
+    align-self: start;
     padding: 4px 6px;
     border-radius: 4px;
     border-width: 2px;
@@ -8082,12 +8118,29 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
+  function buildAddressMarkup(raw){
+    var address = (raw == null ? '' : String(raw)).trim();
+    if (!address) return '<p class="rs-addr rs-addr--empty">&nbsp;</p>';
+
+    var parts = address.split(',').map(function(part){ return part.trim(); }).filter(Boolean);
+    var line1 = parts.length ? parts.shift() : address;
+    var line2 = parts.length ? parts.join(', ') : '';
+    var html = '<span class="rs-addr-line">'+line1+'</span>';
+    if (line2) html += '<span class="rs-addr-line">'+line2+'</span>';
+    return '<p class="rs-addr">'+html+'</p>';
+  }
+
   function liHTML(p, idx){
-    var badge = '<span class="rs-chip-status" style="margin-left:6px;">'+statusLabel(Number(p.map_status))+'</span>';
+    var statusRaw = Number(p.map_status);
+    var statusAttr = isFinite(statusRaw) ? statusRaw : '';
+    var badge = '<span class="rs-chip-status" data-map-status="'+statusAttr+'">'+statusLabel(statusRaw)+'</span>';
     var movie = p.Movie ? ('<p class="rs-movie"><strong>Now Showing:</strong> '+String(p.Movie)+'</p>') : '';
-    return '<div class="rs-li" data-idx="'+idx+'">'
-      + '<h4>'+ (p.Theatre||'') +'</h4>' + badge
-      + '<p class="rs-addr">'+ (p.Address||'') +'</p>'
+    return '<div class="rs-li" data-idx="'+idx+'" data-status="'+statusAttr+'">'
+      + '<h4>'+ (p.Theatre||'') +'</h4>'
+      + '<div class="rs-li-meta">'
+      +   buildAddressMarkup(p.Address)
+      +   badge
+      + '</div>'
       + movie
       + '</div>';
   }
