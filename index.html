@@ -5971,11 +5971,12 @@ html.booting #rs-float {
 
 
 /* === RS Patch: Strict toolbar-only Tips === */
-.rs-tips-btn-toolbar, .rs-tips-btn-global { display: none !important; }
-.rs-toolbar .rs-tips-btn-toolbar, .rs-toolbar .rs-tips-btn-global { display: inline-flex !important; }
+.rs-tips-btn-toolbar:not([data-rs-allow-tips]), .rs-tips-btn-global:not([data-rs-allow-tips]) { display: none !important; }
+.rs-toolbar .rs-tips-btn-toolbar, .rs-toolbar .rs-tips-btn-global,
+.rs-tips-btn-toolbar[data-rs-allow-tips], .rs-tips-btn-global[data-rs-allow-tips] { display: inline-flex !important; }
 /* Extra guard for any accidental insertion */
-:not(.rs-toolbar) > .rs-tips-btn-toolbar,
-:not(.rs-toolbar) .rs-tips-btn-toolbar { display: none !important; }
+:not(.rs-toolbar) > .rs-tips-btn-toolbar:not([data-rs-allow-tips]),
+:not(.rs-toolbar) .rs-tips-btn-toolbar:not([data-rs-allow-tips]) { display: none !important; }
 
 
 /* === RS-FLOAT: header-only collapse support (brutalist) === */
@@ -7199,7 +7200,7 @@ html.booting #rs-float {
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
 <div aria-label="Info and Help" class="rs-toolbar-infohelp">
 <button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
-<button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button><button aria-label="Tips" class="rs-btn rs-tips-btn-toolbar" type="button">Tips</button>
+<button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button><button aria-label="Tips" class="rs-btn rs-tips-btn-toolbar" data-rs-allow-tips="true" type="button">Tips</button>
 </div>
 <div id="rs-toggle-list"> </div>
 </div>
@@ -7270,7 +7271,7 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-float" type="button">Tips</button></section>
+<button aria-label="Tips" class="rs-btn rs-tips-btn-float" data-rs-allow-tips="true" type="button">Tips</button></section>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -11962,17 +11963,33 @@ document.addEventListener('DOMContentLoaded', function() {
   window.RS_TIPS_START = () => showStep(0);
 
   // Hook a visible "Tips" button in the float header if no HELP button is wired
+  const safeOn = (window.rsSafeOn) ? window.rsSafeOn : function(el, ev, fn, opts){ if (el && el.addEventListener) el.addEventListener(ev, fn, opts||false); };
+
+  function wireTipsButton(btn){
+    if (!btn) return;
+    if (!btn.classList.contains('rs-tips-btn-float')) btn.classList.add('rs-tips-btn-float');
+    if (!btn.classList.contains('rs-btn')) btn.classList.add('rs-btn');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Tips');
+    btn.setAttribute('data-rs-allow-tips', 'true');
+    if (!btn.textContent || !btn.textContent.trim()) btn.textContent = 'Tips';
+    if (!btn._rsBound){
+      btn._rsBound = true;
+      safeOn(btn, 'click', () => window.RS_TIPS_START && window.RS_TIPS_START());
+    }
+  }
+
   function ensureTipsButton(){
-    if (document.querySelector('#rs-float .rs-tips-btn')) return;
+    const existing = document.querySelector('#rs-float .rs-tips-btn, #rs-float .rs-tips-btn-float');
+    if (existing){
+      wireTipsButton(existing);
+      return;
+    }
     const hdr = document.querySelector('#rs-float .rs-float__header') || document.querySelector('#rs-float');
     if (!hdr) return;
     const btn = document.createElement('button');
-    btn.className = 'rs-btn rs-tips-btn-float';
-    btn.type = 'button';
-    btn.setAttribute('aria-label', 'Tips');
     btn.textContent = 'Tips';
-    const safeOn = (window.rsSafeOn) ? window.rsSafeOn : function(el, ev, fn, opts){ if (el && el.addEventListener) el.addEventListener(ev, fn, opts||false); };
-    safeOn(btn, 'click', () => window.RS_TIPS_START());
+    wireTipsButton(btn);
     hdr.appendChild(btn);
   }
   ensureTipsButton();
@@ -11988,26 +12005,45 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
 </script>
 <script>
 (function(){
+  const safeOn = (window.rsSafeOn) ? window.rsSafeOn : function(el, ev, fn, opts){ if (el && el.addEventListener) el.addEventListener(ev, fn, opts||false); };
+
+  function bindToolbarTips(btn){
+    if (!btn) return;
+    if (!btn.classList.contains('rs-tips-btn-toolbar')) btn.classList.add('rs-tips-btn-toolbar');
+    if (!btn.classList.contains('rs-btn')) btn.classList.add('rs-btn');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Tips');
+    btn.setAttribute('data-rs-allow-tips', 'true');
+    if (!btn.textContent || !btn.textContent.trim()) btn.textContent = 'Tips';
+    if (!btn._rsBound){
+      btn._rsBound = true;
+      safeOn(btn, 'click', () => {
+        if (window.RS_TIPS_START) {
+          window.RS_TIPS_START();
+        } else {
+          document.dispatchEvent(new CustomEvent('rs:open-help', { bubbles: true }));
+        }
+      });
+    }
+  }
+
   // Enhance existing RS_TIPS_START + add toolbar button near INFO/HELP
   function ensureToolbarTips(){
     // Try to find a toolbar container by locating HELP or INFO button
     const helpBtn = window.rsFindHelpButton();
     const infoBtn = window.rsFindInfoButton();
     const anchor = helpBtn || infoBtn;
-    if (!anchor) return;
-    // Avoid duplicates
-    if (anchor.parentElement && anchor.parentElement.querySelector('.rs-tips-btn-toolbar')) return;
+    if (!anchor || !anchor.parentElement) return;
 
-    // Insert Tips button next to HELP in the same toolbar row
-    const tips = document.createElement('button');
-    tips.className = 'rs-tips-btn-toolbar';
-    tips.type = 'button';
-    tips.textContent = 'TIPS';
-    tips.addEventListener('click', ()=> (window.RS_TIPS_START && window.RS_TIPS_START()));
+    let tips = anchor.parentElement.querySelector('.rs-tips-btn-toolbar');
+    if (!tips){
+      tips = document.createElement('button');
+      tips.textContent = 'Tips';
+      if (anchor.nextSibling) anchor.parentElement.insertBefore(tips, anchor.nextSibling);
+      else anchor.parentElement.appendChild(tips);
+    }
 
-    // Insert after HELP (or INFO if HELP missing)
-    if (anchor.nextSibling) anchor.parentElement.insertBefore(tips, anchor.nextSibling);
-    else anchor.parentElement.appendChild(tips);
+    bindToolbarTips(tips);
   }
 
   // Upgrade placement to work regardless of #rs-float position by auto-scrolling
@@ -12534,22 +12570,28 @@ document.addEventListener("DOMContentLoaded", function() {
     var btn = toolbar.querySelector('.rs-tips-btn-toolbar');
     if (!btn){
       btn = document.createElement('button');
-      btn.className = 'rs-btn rs-tips-btn-toolbar';
-      btn.type = 'button';
-      btn.setAttribute('aria-label','Tips');
-      btn.textContent = 'Tips';
       toolbar.appendChild(btn);
     }
+    if (!btn.classList.contains('rs-tips-btn-toolbar')) btn.classList.add('rs-tips-btn-toolbar');
+    if (!btn.classList.contains('rs-btn')) btn.classList.add('rs-btn');
+    btn.type = 'button';
+    btn.setAttribute('aria-label','Tips');
+    btn.setAttribute('data-rs-allow-tips','true');
+    if (!btn.textContent || !btn.textContent.trim()) btn.textContent = 'Tips';
     if (!btn._rsBound){
       btn._rsBound = true;
       var safeOn = (window.rsSafeOn) ? window.rsSafeOn : function(el, ev, fn, opts){ if (el && el.addEventListener) el.addEventListener(ev, fn, opts||false); };
       safeOn(btn, 'click', function(){
-        var m = document.getElementById('rs-infohelp-modal') || document.getElementById('rs-help-modal') || document.getElementById('rs-info-modal');
-        if (m){
-          m.setAttribute('aria-hidden','false');
-          m.classList && m.classList.remove('is-hidden','hidden','sr-only');
+        if (window.RS_TIPS_START) {
+          window.RS_TIPS_START();
         } else {
-          document.dispatchEvent(new CustomEvent('rs:open-help', {bubbles:true}));
+          var m = document.getElementById('rs-infohelp-modal') || document.getElementById('rs-help-modal') || document.getElementById('rs-info-modal');
+          if (m){
+            m.setAttribute('aria-hidden','false');
+            m.classList && m.classList.remove('is-hidden','hidden','sr-only');
+          } else {
+            document.dispatchEvent(new CustomEvent('rs:open-help', {bubbles:true}));
+          }
         }
       });
     }
@@ -12561,6 +12603,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
       if (!(el.closest && el.closest('.rs-toolbar'))){
+        if (el.hasAttribute('data-rs-allow-tips')) continue;
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12580,6 +12623,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i=0;i<candidates.length;i++){
       var el = candidates[i];
       if (rsLooksLikeTips(el) && !(el.closest && el.closest('.rs-toolbar'))){
+        if (el.hasAttribute('data-rs-allow-tips')) continue;
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
