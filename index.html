@@ -473,6 +473,26 @@ html,body {
   inset:0;
 }
 
+/* Stylized theatre dots for easier tapping */
+.rs-map-dot {
+  stroke: rgba(12, 12, 12, 0.9) !important;
+  stroke-width: 2.5px !important;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+  transition: stroke-width 0.15s ease, transform 0.15s ease;
+}
+
+.rs-map-dot:hover,
+.rs-map-dot.leaflet-interactive:focus,
+.rs-map-dot.leaflet-interactive:focus-visible {
+  stroke-width: 3.4px !important;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.55));
+}
+
+.rs-map-dot.leaflet-interactive:focus-visible {
+  outline: none;
+  transform: scale(1.08);
+}
+
 
 
 /* Toolbar */
@@ -7817,7 +7837,15 @@ function rsRestoreLayers(state){
   var markerLayer = L.geoJSON(THEATRES, {
     pointToLayer: function(f, latlng){
       var p = f.properties||{}; var col = colorForStatus(p.map_status);
-      return L.circleMarker(latlng, {radius:7, color: col, fillColor: col, fillOpacity: 0.9, weight:1.5});
+      return L.circleMarker(latlng, {
+        radius: 9,
+        color: col,
+        fillColor: col,
+        fillOpacity: 0.95,
+        weight: 2.5,
+        opacity: 1,
+        className: 'rs-map-dot'
+      });
     },
     onEachFeature: function(f, layer){
       var p = f.properties||{};
@@ -11939,9 +11967,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const hdr = document.querySelector('#rs-float .rs-float__header') || document.querySelector('#rs-float');
     if (!hdr) return;
     const btn = document.createElement('button');
-    btn.className = 'rs-tips-btn';
+    btn.className = 'rs-btn rs-tips-btn-float';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Tips');
     btn.textContent = 'Tips';
-    btn.addEventListener('click', () => window.RS_TIPS_START());
+    const safeOn = (window.rsSafeOn) ? window.rsSafeOn : function(el, ev, fn, opts){ if (el && el.addEventListener) el.addEventListener(ev, fn, opts||false); };
+    safeOn(btn, 'click', () => window.RS_TIPS_START());
     hdr.appendChild(btn);
   }
   ensureTipsButton();
