@@ -927,9 +927,9 @@ html,body {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-addr, #rs-float .rs-li .rs-movie
+   #rs-float .rs-li .rs-addr
 */
-#rs-float .rs-li .rs-addr, #rs-float .rs-li .rs-movie {
+#rs-float .rs-li .rs-addr {
 
   font-family: var(--font-ui);
 }
@@ -1014,23 +1014,349 @@ html,body {
 
 
 
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   .rs-pop-nowshowing
-*/
-.rs-pop-nowshowing {
+/* === Now Showing preview chips === */
+.rs-ns-preview {
 
-  font-family: var(--font-ui);
+  margin: 12px 0;
+    font-family: var(--font-ui, system-ui);
 }
 
 
 
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   .rs-pop-nowshowing strong
-*/
-.rs-pop-nowshowing strong {
+.rs-ns-heading {
 
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  font: 700 11px/1.2 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+}
+
+
+
+.rs-ns-preview--popup .rs-ns-heading {
+
+  color: #111;
+}
+
+
+
+.rs-ns-preview--list .rs-ns-heading {
+
+  color: #bfb8a5;
+}
+
+
+
+.rs-ns-chip-row {
+
+  display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+
+
+.rs-ns-chip {
+
+  display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(17,17,17,0.86);
+    color: #f4efe2;
+    cursor: pointer;
+    text-align: left;
+    flex: 1 1 160px;
+    min-width: 0;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+
+
+.rs-ns-chip:focus,
+.rs-ns-chip:hover {
+
+  transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    outline: none;
+}
+
+
+
+.rs-ns-chip-thumb {
+
+  width: 52px;
+    height: 74px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex: 0 0 auto;
+    background: #000;
+}
+
+
+
+.rs-ns-chip-title {
+
+  font: 700 12px/1.25 var(--font-ui, system-ui);
+    letter-spacing: 0.2px;
+    color: inherit;
+    display: block;
+    max-width: 100%;
+}
+
+
+
+.rs-ns-preview--popup .rs-ns-chip {
+
+  background: rgba(20,20,20,0.88);
+    color: #fefaf1;
+    flex: 1 1 140px;
+}
+
+
+
+.rs-ns-preview--popup .rs-ns-chip-thumb {
+
+  width: 48px;
+    height: 68px;
+}
+
+
+
+.rs-ns-preview--list .rs-ns-chip {
+
+  background: rgba(15,15,15,0.85);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #f3efe4;
+    width: 100%;
+    flex: 1 1 auto;
+}
+
+
+
+.rs-ns-preview--list .rs-ns-chip:hover,
+.rs-ns-preview--list .rs-ns-chip:focus {
+
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+
+
+
+.rs-details-tabs {
+
+  margin-top: 26px;
+    font-family: var(--font-ui, system-ui);
+}
+
+
+
+.rs-tablist {
+
+  display: flex;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.14);
+    padding-bottom: 6px;
+}
+
+
+
+.rs-tab {
+
+  appearance: none;
+    background: rgba(18,18,18,0.8);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #f6efe0;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font: 700 13px/1.2 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+
+.rs-tab:hover,
+.rs-tab:focus {
+
+  box-shadow: 0 0 0 2px rgba(255,215,160,0.22);
+}
+
+
+
+.rs-tab.is-active {
+
+  background: rgba(255,215,160,0.18);
+    color: #ffe7c6;
+    border-color: rgba(255,215,160,0.4);
+}
+
+
+
+.rs-tabpanel {
+
+  display: none;
+    padding-top: 18px;
+}
+
+
+
+.rs-tabpanel.is-active {
+
+  display: block;
+}
+
+
+
+.rs-details-nowshowing {
+
+  margin-top: 4px;
+    font-family: var(--font-ui, system-ui);
+}
+
+
+
+.rs-details-nowshowing > h3 {
+
+  font: 800 16px/1.2 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin: 0 0 16px;
+    color: #f3efe4;
+}
+
+
+
+.rs-film-grid {
+
+  display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+
+
+.rs-film-card {
+
+  background: rgba(12,12,12,0.92);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    color: #f5efe0;
+}
+
+
+
+.rs-film-card.is-highlight {
+
+  box-shadow: 0 0 0 3px rgba(255,221,150,0.75);
+}
+
+
+
+.rs-film-poster {
+
+  width: 100%;
+    height: 260px;
+    object-fit: cover;
+    background: #000;
+}
+
+
+
+.rs-film-body {
+
+  padding: 14px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+
+.rs-film-body > h4 {
+
+  font: 800 18px/1.2 var(--font-ui, system-ui);
+    text-transform: none;
+    letter-spacing: 0.2px;
+    margin: 0;
+    color: inherit;
+}
+
+
+
+.rs-film-year {
+
+  font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+
+
+.rs-film-synopsis {
+
+  margin: 0;
+    font: 500 13px/1.5 var(--font-ui, system-ui);
+    color: rgba(245,239,224,0.9);
+}
+
+
+
+.rs-film-meta {
+
+  margin: 0;
+    display: grid;
+    gap: 8px;
+}
+
+
+
+.rs-film-meta div {
+
+  display: grid;
+    grid-template-columns: minmax(0, 90px) 1fr;
+    gap: 8px;
+}
+
+
+
+.rs-film-meta dt {
+
+  font: 700 11px/1.2 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: rgba(255,255,255,0.68);
+}
+
+
+
+.rs-film-meta dd {
+
+  margin: 0;
+    font: 500 13px/1.4 var(--font-ui, system-ui);
+    color: inherit;
+}
+
+
+
+@media (max-width: 640px) {
+
+  .rs-film-meta div {
+
+    grid-template-columns: 1fr;
+  }
+
+
+
+  .rs-film-meta dt {
+
+    opacity: 0.7;
+  }
 }
 
 
@@ -1060,9 +1386,9 @@ html,body {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   .rs-addr,.rs-movie
+   .rs-addr
 */
-.rs-addr,.rs-movie {
+.rs-addr {
 
   font-family: var(--font-ui, system-ui);
 }
@@ -1794,9 +2120,9 @@ html.tv .rs-li h4 {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   html.tv .rs-addr, html.tv .rs-movie
+   html.tv .rs-addr
 */
-html.tv .rs-addr, html.tv .rs-movie {
+html.tv .rs-addr {
 
   font-size: calc(13px * var(--tv-scale));
 }
@@ -1948,11 +2274,9 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-addr,
-#rs-float .rs-li .rs-movie
+   #rs-float .rs-li .rs-addr
 */
-#rs-float .rs-li .rs-addr,
-#rs-float .rs-li .rs-movie {
+#rs-float .rs-li .rs-addr {
 
   margin: 0;
     color: #d9d3c3;
@@ -1963,18 +2287,6 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-movie::before
-*/
-#rs-float .rs-li .rs-movie::before {
-
-  content: "Now Showing: ";
-    color: #bfb8a5;
-    font-weight: 700;
 }
 
 
@@ -2551,11 +2863,9 @@ html.tv #rs-list .rs-li h4 {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   html.tv #rs-list .rs-addr,
-html.tv #rs-list .rs-movie
+   html.tv #rs-list .rs-addr
 */
-html.tv #rs-list .rs-addr,
-html.tv #rs-list .rs-movie {
+html.tv #rs-list .rs-addr {
 
   font-size: 16px;
 }
@@ -2902,18 +3212,6 @@ html.tv #rs-list .rs-movie {
 
 
 
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-movie
-*/
-#rs-float .rs-li .rs-movie {
-
-  flex: 1 1 auto;
-    white-space: pre-wrap;
-    text-align: right;
-    font-weight: 600;
-    color: #d9d3c3;
-    line-height: 1.25;
-}
 
 
 
@@ -2943,82 +3241,9 @@ html.tv #rs-list .rs-movie {
 
 
 
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-movie strong
-*/
-#rs-float .rs-li .rs-movie strong {
-
-  display: block;
-    text-transform: uppercase;
-    color: #bfb8a5;
-    font-weight: 700;
-    margin-bottom: 2px;
-}
 
 
 
-/* === NOW SHOWING reveal panel below cards (injected) === */
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-movie
-*/
-#rs-float .rs-li .rs-movie {
-
-  display: none !important;
-  /* original inline movies hidden */
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-nowshowing
-*/
-#rs-float .rs-li .rs-nowshowing {
-
-  display: none;
-    margin: 8px 10px 2px;
-    padding: 10px 12px;
-    background: #0f0f0f;
-    border: 2px solid #222;
-    border-radius: 8px;
-    color: #f3efe4;
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-nowshowing .rs-ns-title
-*/
-#rs-float .rs-li .rs-nowshowing .rs-ns-title {
-
-  font: 800 12px/1.2 system-ui, sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: #bfb8a5;
-    margin-bottom: 4px;
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-nowshowing .rs-ns-lines
-*/
-#rs-float .rs-li .rs-nowshowing .rs-ns-lines {
-
-  font: 600 12px/1.25 system-ui, sans-serif;
-    color: #d9d3c3;
-    white-space: pre-wrap;
-}
-
-
-
-/* Reveal only when the item is selected/active */
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li.active .rs-nowshowing
-*/
-#rs-float .rs-li.active .rs-nowshowing {
-
-  display: block;
-}
 
 
 
@@ -5692,7 +5917,6 @@ html.booting #rs-float {
       font-size: calc(22px * var(--tv-scale));
     }
     html.tv #rs-list .rs-addr,
-    html.tv #rs-list .rs-movie,
     html.tv .rs-dt,
     html.tv .rs-dd {
       font-size: calc(13px * var(--tv-scale));
@@ -7082,7 +7306,19 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
 });
 </script>
 <script>
-(function(){
+(async function(){
+  var nowShowingList = [];
+  try {
+    var response = await fetch('nowshowing.json');
+    if (response && response.ok) {
+      nowShowingList = await response.json();
+    } else {
+      console.warn('nowshowing.json request failed', response && response.status);
+    }
+  } catch (err) {
+    console.error('Failed to load nowshowing.json', err);
+  }
+  setNowShowingData(nowShowingList);
   // Bounds & limits
   var WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
   var BOUNDS = L.latLngBounds([[SOUTH, WEST],[NORTH, EAST]]);
@@ -7326,10 +7562,162 @@ function rsRestoreLayers(state){
     return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/&/g,' and ').replace(/['’]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').toLowerCase();
   }
 
+  function esc(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(ch){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch]);
+    });
+  }
+
+  var NOW_SHOWING_INDEX = {};
+
+  function normalizeMovieKey(title){
+    return String(title || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/&/g,' and ')
+      .replace(/['’]/g,'')
+      .replace(/[^a-z0-9]+/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function setNowShowingData(list){
+    NOW_SHOWING_INDEX = {};
+    (Array.isArray(list) ? list : []).forEach(function(item){
+      if (!item || !item.Title) return;
+      var key = normalizeMovieKey(item.Title);
+      if (!key) return;
+      NOW_SHOWING_INDEX[key] = item;
+    });
+  }
+
+  function filmPoster(meta){
+    var path = meta && meta.PosterPath;
+    if (path && String(path).trim()) return String(path).trim();
+    return 'images/placeholder.png';
+  }
+
+  function filmYear(meta){
+    if (!meta) return '';
+    var year = meta.Year;
+    if (year == null) return '';
+    var num = Number(year);
+    if (!isNaN(num) && isFinite(num)) return String(Math.round(num));
+    var str = String(year).trim();
+    return str && str.toLowerCase() !== 'nan' ? str : '';
+  }
+
+  function filmEntriesFor(p){
+    var raw = p && p.Movie;
+    if (!raw) return [];
+    return String(raw).split(';').map(function(part){
+      var title = part && part.trim();
+      if (!title) return null;
+      var key = normalizeMovieKey(title);
+      if (!key) key = safeSlug(title);
+      var meta = key ? NOW_SHOWING_INDEX[key] : null;
+      return { title: title, key: key || safeSlug(title), meta: meta || null };
+    }).filter(Boolean);
+  }
+
+  function renderNowShowingPreview(entries, opts){
+    opts = opts || {};
+    if (!entries.length) return '';
+    var variant = opts.variant || 'list';
+    var theatreIdx = (typeof opts.theatreIdx === 'number' && opts.theatreIdx >= 0) ? String(opts.theatreIdx) : '';
+    var heading = opts.heading === false ? '' : '<div class="rs-ns-heading">Now Showing</div>';
+    var containerAttr = theatreIdx ? ' data-theatre-idx="'+esc(theatreIdx)+'"' : '';
+    var buttonAttr = theatreIdx ? ' data-theatre-idx="'+esc(theatreIdx)+'"' : '';
+    var html = '<div class="rs-ns-preview rs-ns-preview--'+esc(variant)+'"'+containerAttr+'>';
+    html += heading;
+    html += '<div class="rs-ns-chip-row" role="list">';
+    entries.forEach(function(entry){
+      var meta = entry.meta || {};
+      var poster = esc(filmPoster(meta));
+      var year = filmYear(meta);
+      var aria = ' aria-label="'+esc('View '+entry.title+' details')+'"';
+      html += '<button type="button" class="rs-ns-chip" role="listitem" data-film-key="'+esc(entry.key)+'"'+buttonAttr+aria+'>';
+      html += '<img class="rs-ns-chip-thumb" src="'+poster+'" alt="'+esc(entry.title)+' poster" onerror="this.onerror=null;this.src=\'images/placeholder.png\';" />';
+      html += '<span class="rs-ns-chip-title">'+esc(entry.title)+(year ? ' ('+esc(year)+')' : '')+'</span>';
+      html += '</button>';
+    });
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderNowShowingDetails(entries){
+    if (!entries.length) return '';
+    var html = '<section class="rs-details-nowshowing"><h3>Now Showing</h3><div class="rs-film-grid">';
+    entries.forEach(function(entry){
+      var meta = entry.meta || {};
+      var poster = esc(filmPoster(meta));
+      var year = filmYear(meta);
+      html += '<article class="rs-film-card" data-film-card="'+esc(entry.key)+'" id="rs-film-'+esc(entry.key)+'">';
+      html += '<img class="rs-film-poster" src="'+poster+'" alt="'+esc(entry.title)+' poster" onerror="this.onerror=null;this.src=\'images/placeholder.png\';" />';
+      html += '<div class="rs-film-body">';
+      html += '<h4>'+esc(entry.title)+(year ? ' <span class="rs-film-year">('+esc(year)+')</span>' : '')+'</h4>';
+      if (meta.Synopsis) html += '<p class="rs-film-synopsis">'+esc(meta.Synopsis)+'</p>';
+      html += '<dl class="rs-film-meta">';
+      if (meta.Director) html += '<div><dt>Director</dt><dd>'+esc(meta.Director)+'</dd></div>';
+      if (meta.Stars) html += '<div><dt>Stars</dt><dd>'+esc(meta.Stars)+'</dd></div>';
+      if (meta.Awards) html += '<div><dt>Awards</dt><dd>'+esc(meta.Awards)+'</dd></div>';
+      html += '</dl>';
+      html += '</div></article>';
+    });
+    html += '</div></section>';
+    return html;
+  }
+
+  function initDetailsTabs(root){
+    if (!root) return function(){};
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('.rs-tab'));
+    var panels = Array.prototype.slice.call(root.querySelectorAll('.rs-tabpanel'));
+    if (!tabs.length || !panels.length) return function(name){ return name; };
+
+    function activate(name){
+      if (!name && tabs[0]) name = tabs[0].getAttribute('data-tab');
+      if (!name) return null;
+      tabs.forEach(function(tab){
+        var active = tab.getAttribute('data-tab') === name;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        tab.setAttribute('tabindex', active ? '0' : '-1');
+      });
+      panels.forEach(function(panel){
+        var active = panel.getAttribute('data-panel') === name;
+        panel.classList.toggle('is-active', active);
+        panel.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+      return name;
+    }
+
+    tabs.forEach(function(tab){
+      tab.addEventListener('click', function(){
+        activate(tab.getAttribute('data-tab'));
+      });
+      tab.addEventListener('keydown', function(e){
+        var key = e.key;
+        if (key !== 'ArrowLeft' && key !== 'ArrowRight' && key !== 'Home' && key !== 'End') return;
+        e.preventDefault();
+        var order = tabs;
+        var idx = order.indexOf(tab);
+        if (key === 'Home'){ order[0].focus(); return; }
+        if (key === 'End'){ order[order.length - 1].focus(); return; }
+        var next = key === 'ArrowRight' ? idx + 1 : idx - 1;
+        if (next < 0) next = order.length - 1;
+        if (next >= order.length) next = 0;
+        order[next].focus();
+      });
+    });
+
+    return activate;
+  }
+
   // Build popup HTML (NOW SHOWING appears here)
   function buildPopupHTML(p){
     var img = (p.Image && String(p.Image).trim()) || (p.Theatre ? ('images/'+safeSlug(p.Theatre)+'.jpg') : 'images/placeholder.png');
-    var nowShowing = p.Movie ? '<p class="rs-pop-nowshowing"><strong>NOW SHOWING:</strong> '+String(p.Movie)+'</p>' : '';
+    var films = filmEntriesFor(p);
+    var nowShowing = films.length ? renderNowShowingPreview(films, { variant: 'popup', heading: false, theatreIdx: typeof p.__idx === 'number' ? p.__idx : null }) : '';
     var badge = '<div class="rs-pop-badge"><span class="rs-chip-status">'+statusLabel(Number(p.map_status))+'</span></div>';
     var grid =
       '<div class="rs-pop-grid">'+
@@ -7369,23 +7757,61 @@ function rsRestoreLayers(state){
     rows += row('Operated by','Operated_By');
     rows += row('Seats','Seats');
     rows += row('Description','Description');
-
-    var html = ''
+    var films = filmEntriesFor(p);
+    var header = ''
       + '<h2 class="rs-details-title">'+(p.Theatre||'Details')+'</h2>'
       + ((p.Previous_Names && String(p.Previous_Names).trim()) ? ('<div class=\"rs-aka\">aka: ' + String(p.Previous_Names) + '</div>') : '') + '<div class=\"rs-hero-expand-wrap\">'
       + '  <img class="rs-details-hero" src="'+img+'" alt="'+(p.Theatre||'')+'" onerror="this.onerror=null;this.src=\'images/placeholder.png\';" />'
       + '  <div class="rs-hero-expand-hint">Click image to expand</div>'
-      + '</div>'
-      + '<div class="rs-details-grid">'+(rows || '<div class="rs-dd">No details</div>')+'</div>';
-    return html;
+      + '</div>';
+
+    if (!films.length){
+      return header + '<div class="rs-details-grid">'+(rows || '<div class="rs-dd">No details</div>')+'</div>';
+    }
+
+    var slug = safeSlug(p.Theatre || 'theatre');
+    var detailsPanelId = 'rs-panel-details-'+slug;
+    var nowPanelId = 'rs-panel-nowshowing-'+slug;
+
+    var tabs = '<div class="rs-details-tabs">';
+    tabs += '<div class="rs-tablist" role="tablist" aria-label="Theatre details">';
+    tabs += '<button type="button" class="rs-tab is-active" role="tab" aria-selected="true" tabindex="0" data-tab="details" aria-controls="'+detailsPanelId+'" id="'+detailsPanelId+'-tab">Details</button>';
+    tabs += '<button type="button" class="rs-tab" role="tab" aria-selected="false" tabindex="-1" data-tab="nowshowing" aria-controls="'+nowPanelId+'" id="'+nowPanelId+'-tab">Now Showing</button>';
+    tabs += '</div>';
+    tabs += '<div class="rs-tabpanels">';
+    tabs += '<div class="rs-tabpanel is-active" role="tabpanel" data-panel="details" id="'+detailsPanelId+'" aria-labelledby="'+detailsPanelId+'-tab" aria-hidden="false">';
+    tabs += '<section class="rs-details-about"><div class="rs-details-grid">'+(rows || '<div class="rs-dd">No details</div>')+'</div></section>';
+    tabs += '</div>';
+    tabs += '<div class="rs-tabpanel" role="tabpanel" data-panel="nowshowing" id="'+nowPanelId+'" aria-labelledby="'+nowPanelId+'-tab" aria-hidden="true">'+renderNowShowingDetails(films)+'</div>';
+    tabs += '</div></div>';
+
+    return header + tabs;
   }
 
-  function openDetails(p){
+  function openDetails(p, focusFilmKey){
     var root = modal.querySelector('#rs-details-content');
     root.innerHTML = buildDetailsHTML(p);
+    var activateTab = initDetailsTabs(root);
     try{ var hero = root.querySelector('.rs-details-hero'); if (hero){ var full = hero.getAttribute('src'); hero.addEventListener('click', function(){ openImageViewer(full); }); } }catch(e){}
+    var hasNowShowing = !!root.querySelector('.rs-tabpanel[data-panel="nowshowing"]');
+    if (typeof activateTab === 'function') activateTab(focusFilmKey && hasNowShowing ? 'nowshowing' : 'details');
+    if (focusFilmKey && hasNowShowing){
+      try{
+        var card = root.querySelector('[data-film-card="'+focusFilmKey+'"]');
+        if (card){
+          card.classList.add('is-highlight');
+          setTimeout(function(){ try{ card.classList.remove('is-highlight'); }catch(_){} }, 1800);
+          try{ card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }catch(_){ card.scrollIntoView(true); }
+        }
+      }catch(_){}
+    }
     modal.style.display='block'; modal.setAttribute('aria-hidden','false');
   }
+
+  var features = (THEATRES && Array.isArray(THEATRES.features)) ? THEATRES.features : [];
+  features.forEach(function(f, idx){
+    if (f && f.properties){ f.properties.__idx = idx; }
+  });
 
   // Layer of theatre points
   var markerLayer = L.geoJSON(THEATRES, {
@@ -7432,22 +7858,32 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   var listRoot = document.getElementById('rs-list');
   function liHTML(p, idx){
     var badge = '<span class="rs-chip-status" style="margin-left:6px;">'+statusLabel(Number(p.map_status))+'</span>';
-    var movie = p.Movie ? ('<p class="rs-movie"><strong>Now Showing:</strong> '+String(p.Movie)+'</p>') : '';
+    var films = filmEntriesFor(p);
+    var preview = films.length ? renderNowShowingPreview(films, { variant: 'list', theatreIdx: idx }) : '';
     return '<div class="rs-li" data-idx="'+idx+'">'
       + '<h4>'+ (p.Theatre||'') +'</h4>' + badge
       + '<p class="rs-addr">'+ (p.Address||'') +'</p>'
-      + movie
+      + preview
       + '</div>';
   }
-  var features = THEATRES.features||[];
-  listRoot.innerHTML = features.map(function(f,i){ return liHTML(f.properties||{}, i); }).join('');
+  var theatreProps = features.map(function(f,i){
+    var props = f.properties || {};
+    props.__idx = i;
+    return props;
+  });
+  listRoot.innerHTML = theatreProps.map(function(p,i){ return liHTML(p, i); }).join('');
   document.getElementById('rs-count').textContent = features.length;
 
   // Map theatre index -> layer for fly-to
   var idxToLayer = [];
-  markerLayer.eachLayer(function(l){ idxToLayer.push(l); });
+  markerLayer.eachLayer(function(l){
+    var props = (l.feature && l.feature.properties) || {};
+    var idx = typeof props.__idx === 'number' ? props.__idx : idxToLayer.length;
+    idxToLayer[idx] = l;
+  });
 
   listRoot.addEventListener('click', function(e){
+    if (e.target && e.target.closest('.rs-ns-chip')) return;
     var item = e.target.closest('.rs-li'); if (!item) return;
     var idx = Number(item.getAttribute('data-idx'));
     var layer = idxToLayer[idx]; if (!layer) return;
@@ -7461,6 +7897,17 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-li'), function(n){ n.classList.remove('active'); });
     item.classList.add('active');
   });
+
+  document.addEventListener('click', function(e){
+    var chip = e.target && e.target.closest ? e.target.closest('.rs-ns-chip') : null;
+    if (!chip) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var idx = Number(chip.getAttribute('data-theatre-idx'));
+    if (!isFinite(idx) || idx < 0 || idx >= theatreProps.length) return;
+    var filmKey = chip.getAttribute('data-film-key') || '';
+    openDetails(theatreProps[idx], filmKey || null);
+  }, true);
 
   // Footer legend filters
   var activeStatuses = {1:true, 0:true, 2:true, 3:true};
@@ -7816,7 +8263,7 @@ function zoomHere(lat, lon) {
     try{
       var title = li.querySelector('h4') ? li.querySelector('h4').textContent : '';
       var addr  = li.querySelector('.rs-addr') ? li.querySelector('.rs-addr').textContent : '';
-      var film  = li.querySelector('.rs-movie') ? li.querySelector('.rs-movie').textContent : '';
+      var film  = Array.prototype.map.call(li.querySelectorAll('.rs-ns-chip-title'), function(node){ return node.textContent || ''; }).join(' ');
       return normalize([title, addr, film].join(' '));
     }catch(e){ return ''; }
   }
@@ -8233,7 +8680,7 @@ function zoomHere(lat, lon) {
     // Combine key fields for matching
     var title = li.querySelector('h4')?.textContent || "";
     var addr  = li.querySelector('.rs-addr')?.textContent || "";
-    var movie = li.querySelector('.rs-movie')?.textContent || "";
+    var movie = Array.from(li.querySelectorAll('.rs-ns-chip-title')).map(function(node){ return node.textContent || ''; }).join(' ');
     var extra = (li.getAttribute('data-prevnames')||"") + " " + (li.getAttribute('data-notes')||"");
     return norm([title, addr, movie, extra].join(' '));
   }
@@ -9587,232 +10034,6 @@ try {
     m.on('layeradd', enforceOrder);
     m.on('layerremove', enforceOrder);
   }
-})();
-</script>
-<script>
-// === Format theatre cards: status + movies side-by-side, movies split by ';' ===
-(function(){
-  function formatItem(li){
-    try{
-      if (!li || li.__rsRowDone) return;
-      var status = li.querySelector('.rs-chip-status');
-      var movie = li.querySelector('.rs-movie');
-      var addr  = li.querySelector('.rs-addr');
-
-      // Ensure order: Title (h4) -> Address (.rs-addr) -> Row(status + movies)
-      if (movie){
-        // Split movies by semicolon into separate lines
-        var html = movie.innerHTML;
-        var parts = html.split(';').map(function(m){ return m.trim(); }).filter(Boolean);
-        movie.innerHTML = '<strong>Now Showing:</strong>' + (parts.length ? parts.join('<br>') : '');
-      }
-
-      if (status && movie){
-        // Create row container if missing
-        var row = li.querySelector('.rs-bottom-row');
-        if (!row){
-          row = document.createElement('div');
-          row.className = 'rs-bottom-row';
-          // Insert row after the address (preferred), else after title
-          if (addr && addr.parentNode === li){
-            addr.insertAdjacentElement('afterend', row);
-          } else {
-            var title = li.querySelector('h4');
-            if (title && title.parentNode === li){
-              title.insertAdjacentElement('afterend', row);
-            } else {
-              li.appendChild(row);
-            }
-          }
-        }
-
-        // Move status and movie into the row (left/right)
-        if (status.parentNode !== row) row.appendChild(status);
-        if (movie.parentNode !== row) row.appendChild(movie);
-
-        li.__rsRowDone = true;
-      }
-    }catch(e){}
-  }
-
-  function formatAll(){
-    document.querySelectorAll('#rs-list .rs-li').forEach(formatItem);
-  }
-
-  // Initial pass after DOM ready
-  document.addEventListener('DOMContentLoaded', formatAll);
-
-  // Also observe for dynamically added list items
-  var list = document.getElementById('rs-list');
-  if (list){
-    var mo = new MutationObserver(function(muts){
-      muts.forEach(function(m){
-        m.addedNodes && m.addedNodes.forEach(function(n){
-          if (n && n.nodeType === 1 && n.classList && n.classList.contains('rs-li')){
-            formatItem(n);
-          } else if (n && n.querySelectorAll){
-            n.querySelectorAll('.rs-li').forEach(formatItem);
-          }
-        });
-      });
-    });
-    mo.observe(list, { childList: true, subtree: true });
-  }
-})();
-</script>
-<script>
-// === Build and reveal NOW SHOWING panel per theatre ===
-(function(){
-  function buildPanel(li){
-    try{
-      if (!li || li.__rsNowShowingBuilt) return;
-      var movie = li.querySelector('.rs-movie');
-      var panel = li.querySelector('.rs-nowshowing');
-      var afterNode = li.querySelector('.rs-bottom-row') || li.querySelector('.rs-addr') || li.querySelector('h4');
-
-      // Create panel if missing
-      if (!panel){
-        panel = document.createElement('div');
-        panel.className = 'rs-nowshowing';
-        var title = document.createElement('div');
-        title.className = 'rs-ns-title';
-        title.textContent = 'Now Showing:';
-        var lines = document.createElement('div');
-        lines.className = 'rs-ns-lines';
-        panel.appendChild(title);
-        panel.appendChild(lines);
-
-        if (afterNode && afterNode.parentNode === li){
-          afterNode.insertAdjacentElement('afterend', panel);
-        } else {
-          li.appendChild(panel);
-        }
-      }
-
-      // Fill lines from .rs-movie (semicolon-separated)
-      var linesEl = panel.querySelector('.rs-ns-lines');
-      if (movie && linesEl){
-        var raw = movie.innerHTML || movie.textContent || '';
-        var parts = raw.split(';').map(function(m){ return m.trim(); }).filter(Boolean);
-        linesEl.innerHTML = parts.join('<br>');
-      }
-
-      li.__rsNowShowingBuilt = true;
-    }catch(e){}
-  }
-
-  function wireActive(li){
-    try{
-      if (!li || li.dataset.rsActiveHandler === '1') return;
-      li.addEventListener('click', function(ev){
-        try{
-          var list = document.getElementById('rs-list');
-          if (!list) return;
-          // remove active from siblings
-          list.querySelectorAll('.rs-li.active').forEach(function(x){ if (x !== li) x.classList.remove('active'); });
-          // toggle this one on
-          li.classList.add('active');
-        }catch(_){}
-      }, false);
-      li.dataset.rsActiveHandler = '1';
-    }catch(e){}
-  }
-
-  function prepare(li){
-    buildPanel(li);
-    wireActive(li);
-  }
-
-  function prepareAll(){
-    document.querySelectorAll('#rs-list .rs-li').forEach(prepare);
-  }
-
-  // DOM ready
-  document.addEventListener('DOMContentLoaded', prepareAll);
-
-  // Observe dynamic list updates
-  var list = document.getElementById('rs-list');
-  if (list){
-    var mo = new MutationObserver(function(muts){
-      muts.forEach(function(m){
-        (m.addedNodes || []).forEach(function(n){
-          if (n && n.nodeType === 1){
-            if (n.classList && n.classList.contains('rs-li')){
-              prepare(n);
-            } else if (n.querySelectorAll){
-              n.querySelectorAll('.rs-li').forEach(prepare);
-            }
-          }
-        });
-      });
-    });
-    mo.observe(list, { childList: true, subtree: true });
-  }
-})();
-</script>
-<script>
-// === Sanitize Now Showing content to avoid duplicated labels ===
-(function(){
-  function stripNowShowing(text){
-    try{
-      if (!text) return "";
-      // Remove HTML tags around the phrase and the phrase itself (case-insensitive)
-      var t = text.replace(/<\/?strong[^>]*>/gi, '');
-      t = t.replace(/\bnow\s*showing\s*:\s*/i, '');
-      return t.trim();
-    }catch(e){ return text || ''; }
-  }
-
-  function refreshNowShowing(li){
-    try{
-      var movie = li.querySelector('.rs-movie');
-      var panel = li.querySelector('.rs-nowshowing .rs-ns-lines');
-      if (!movie || !panel) return;
-      var raw = movie.innerHTML || movie.textContent || '';
-      raw = stripNowShowing(raw);
-      var parts = raw.split(';').map(function(m){ return m.trim(); }).filter(Boolean);
-      panel.innerHTML = parts.join('<br>');
-    }catch(_){}
-  }
-
-  function refreshAll(){
-    document.querySelectorAll('#rs-list .rs-li').forEach(refreshNowShowing);
-  }
-
-  document.addEventListener('DOMContentLoaded', refreshAll);
-
-  var list = document.getElementById('rs-list');
-  if (list){
-    var mo = new MutationObserver(function(muts){
-      muts.forEach(function(m){
-        (m.addedNodes || []).forEach(function(n){
-          if (n && n.nodeType === 1){
-            if (n.classList && n.classList.contains('rs-li')){
-              refreshNowShowing(n);
-            } else if (n.querySelectorAll){
-              n.querySelectorAll('.rs-li').forEach(refreshNowShowing);
-            }
-          }
-        });
-      });
-    });
-    mo.observe(list, { childList: true, subtree: true });
-  }
-})();
-</script>
-<script>
-// === Fix double 'Now Showing:' display ===
-(function(){
-  document.addEventListener('DOMContentLoaded', function(){
-    document.querySelectorAll('#rs-list .rs-li .rs-nowshowing').forEach(function(panel){
-      var lines = panel.querySelector('.rs-ns-lines');
-      if(!lines) return;
-      var html = lines.innerHTML;
-      // If the text already contains 'Now Showing:', remove duplicate titles
-      html = html.replace(/Now\s*Showing\s*:/gi, '').trim();
-      lines.innerHTML = html;
-    });
-  });
 })();
 </script>
 <script>
