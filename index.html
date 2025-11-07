@@ -7219,7 +7219,8 @@ html.booting #rs-float {
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
   try {
-    var target = 19;
+    var clampZoom = (typeof window !== "undefined" && window.RS_clampZoomValue) ? window.RS_clampZoomValue : function(z){ return z; };
+    var target = clampZoom(17);
     var current = map.getZoom();
     var center = [lat, lon];
     try { map.closePopup(); } catch(_){}
@@ -7730,6 +7731,43 @@ function rsGetActiveTileLayers(){
   try{ if (typeof historic !== 'undefined' && map.hasLayer(historic)) arr.push(historic); }catch(_){}
   return arr;
 }
+function rsCollectZoomLayers(){
+  var layers = rsGetActiveTileLayers().slice();
+  try{ if (typeof baseOSM !== 'undefined' && map.hasLayer(baseOSM) && layers.indexOf(baseOSM) === -1) layers.push(baseOSM); }catch(_){}
+  try{ if (window.baseTiles && map.hasLayer(window.baseTiles) && layers.indexOf(window.baseTiles) === -1) layers.push(window.baseTiles); }catch(_){}
+  try{
+    if (map && map._rs_online){
+      var online = map._rs_online;
+      ['base','street','satellite','sat'].forEach(function(key){
+        var layer = online && online[key];
+        if (layer && layers.indexOf(layer) === -1 && map.hasLayer(layer)) layers.push(layer);
+      });
+    }
+  }catch(_){}
+  return layers;
+}
+function rsComputeZoomLimits(){
+  var min = (typeof map.getMinZoom === 'function') ? map.getMinZoom() : 0;
+  var max = (typeof map.getMaxZoom === 'function') ? map.getMaxZoom() : min;
+  rsCollectZoomLayers().forEach(function(layer){
+    try{
+      if (!layer || !layer.options) return;
+      if (typeof layer.options.minZoom === 'number') min = Math.max(min, layer.options.minZoom);
+      if (typeof layer.options.maxZoom === 'number') max = Math.min(max, layer.options.maxZoom);
+      if (typeof layer.options.maxNativeZoom === 'number') max = Math.min(max, layer.options.maxNativeZoom);
+    }catch(_){}
+  });
+  if (!isFinite(max) || max < min) max = min;
+  return { min: min, max: max };
+}
+function rsClampZoomValue(value){
+  var limits = rsComputeZoomLimits();
+  var desired = (typeof value === 'number' && isFinite(value)) ? value : limits.max;
+  if (desired > limits.max) desired = limits.max;
+  if (desired < limits.min) desired = limits.min;
+  return desired;
+}
+try{ window.RS_clampZoomValue = rsClampZoomValue; }catch(_){}
 function rsDimNonTopLayers(){
   var active = rsGetActiveTileLayers();
   if (!active.length) return { hidden: [] };
@@ -7756,7 +7794,7 @@ function rsRestoreLayers(state){
   }catch(_){}
 }
 
-// Override flyTo to two-phase: zoom-out -> fly -> zoom-in (target zoom=17) with smoothing
+// Override flyTo to two-phase: zoom-out -> fly -> zoom-in with smoothing (clamps to available tile zooms)
 (function(){
   if (!map || typeof map.flyTo !== 'function') return;
   var originalFlyTo = map.flyTo.bind(map);
@@ -7775,7 +7813,9 @@ function rsRestoreLayers(state){
   }
 
   map.flyTo = function(latlng, zoom, options){
-    var targetZoom = 19;
+    var requestedZoom = (typeof zoom === 'number' && isFinite(zoom)) ? zoom : 17;
+    var targetZoom = rsClampZoomValue(requestedZoom);
+    var limits = rsComputeZoomLimits();
     var opts = Object.assign({}, options||{});
     if (typeof opts.animate === 'undefined') opts.animate = true;
     if (typeof opts.duration === 'undefined') opts.duration = 1.6;   // main leg
@@ -7784,10 +7824,12 @@ function rsRestoreLayers(state){
 
     // Phase A: light zoom-out to reveal motion
     var currentZoom = map.getZoom();
-    var midZoom = Math.max(currentZoom - 2, 13);
+    var midZoom = Math.max(Math.min(targetZoom - 1, currentZoom - 1), limits.min);
+    if (!isFinite(midZoom)) midZoom = limits.min;
+    if (midZoom >= targetZoom) midZoom = Math.max(targetZoom - 0.5, limits.min);
     var phaseAOpts = { animate:true, duration:0.7, easeLinearity:0.16 };
     // Only do the zoom-out if we're already fairly close
-    if (currentZoom >= 15) {
+    if (currentZoom >= 15 && midZoom < currentZoom) {
       try { originalFlyTo(map.getCenter(), midZoom, phaseAOpts); } catch(_){}
     }
 
@@ -8102,7 +8144,8 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
   try {
-    var target = 19;
+    var clampZoom = (typeof window !== "undefined" && window.RS_clampZoomValue) ? window.RS_clampZoomValue : function(z){ return z; };
+    var target = clampZoom(17);
     var current = map.getZoom();
     var center = [lat, lon];
     try { map.closePopup(); } catch(_){}
@@ -8210,7 +8253,8 @@ function zoomHere(lat, lon) {
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
   try {
-    var target = 19;
+    var clampZoom = (typeof window !== "undefined" && window.RS_clampZoomValue) ? window.RS_clampZoomValue : function(z){ return z; };
+    var target = clampZoom(17);
     var current = map.getZoom();
     var center = [lat, lon];
     try { map.closePopup(); } catch(_){}
@@ -8274,7 +8318,8 @@ function zoomHere(lat, lon) {
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
   try {
-    var target = 19;
+    var clampZoom = (typeof window !== "undefined" && window.RS_clampZoomValue) ? window.RS_clampZoomValue : function(z){ return z; };
+    var target = clampZoom(17);
     var current = map.getZoom();
     var center = [lat, lon];
     try { map.closePopup(); } catch(_){}
@@ -8387,7 +8432,8 @@ Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call 
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
   try {
-    var target = 19;
+    var clampZoom = (typeof window !== "undefined" && window.RS_clampZoomValue) ? window.RS_clampZoomValue : function(z){ return z; };
+    var target = clampZoom(17);
     var current = map.getZoom();
     var center = [lat, lon];
     try { map.closePopup(); } catch(_){}
@@ -8513,7 +8559,8 @@ function zoomHere(lat, lon) {
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
   try {
-    var target = 19;
+    var clampZoom = (typeof window !== "undefined" && window.RS_clampZoomValue) ? window.RS_clampZoomValue : function(z){ return z; };
+    var target = clampZoom(17);
     var current = map.getZoom();
     var center = [lat, lon];
     try { map.closePopup(); } catch(_){}
@@ -8666,7 +8713,8 @@ function zoomHere(lat, lon) {
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
   try {
-    var target = 19;
+    var clampZoom = (typeof window !== "undefined" && window.RS_clampZoomValue) ? window.RS_clampZoomValue : function(z){ return z; };
+    var target = clampZoom(17);
     var current = map.getZoom();
     var center = [lat, lon];
     try { map.closePopup(); } catch(_){}
@@ -8794,7 +8842,8 @@ function zoomHere(lat, lon) {
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
   try {
-    var target = 19;
+    var clampZoom = (typeof window !== "undefined" && window.RS_clampZoomValue) ? window.RS_clampZoomValue : function(z){ return z; };
+    var target = clampZoom(17);
     var current = map.getZoom();
     var center = [lat, lon];
     try { map.closePopup(); } catch(_){}
@@ -11373,7 +11422,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!(typeof map !== 'undefined' && map)) return;
     if (!layer || typeof layer.getLatLng !== 'function') return;
     var ll = layer.getLatLng();
-    map.flyTo(ll, 19, { animate: true, duration: 0.8, easeLinearity: 0.25, noMoveStart: false });
+    var clampZoom = (typeof window !== 'undefined' && window.RS_clampZoomValue) ? window.RS_clampZoomValue : function(z){ return z; };
+    map.flyTo(ll, clampZoom(19), { animate: true, duration: 0.8, easeLinearity: 0.25, noMoveStart: false });
     var once = function() {
       map.off('moveend', once);
       try {
