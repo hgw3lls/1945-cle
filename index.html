@@ -1314,12 +1314,113 @@ html,body {
 
 
 
+.rs-film-card.is-expanded {
+
+  border-color: rgba(255,221,150,0.55);
+    box-shadow: 0 18px 34px -18px rgba(0,0,0,0.72);
+}
+
+
+
+.rs-film-toggle {
+
+  border: none;
+    margin: 0;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    display: block;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+
+
+.rs-film-toggle:focus-visible {
+
+  outline: 2px solid rgba(255,221,150,0.85);
+    outline-offset: 2px;
+}
+
+
+
+.rs-film-toggle::after {
+
+  content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,0.32) 100%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 160ms ease-in-out;
+}
+
+
+
+.rs-film-toggle:hover::after,
+.rs-film-toggle:focus-visible::after {
+
+  opacity: 1;
+}
+
+
+
 .rs-film-poster {
 
   width: 100%;
     height: 260px;
     object-fit: cover;
     background: #000;
+    display: block;
+}
+
+
+
+.rs-film-toggle-label {
+
+  position: absolute;
+    inset: auto 12px 10px;
+    font: 600 13px/1.25 var(--font-ui, system-ui);
+    text-transform: none;
+    letter-spacing: 0.2px;
+    color: rgba(255,255,255,0.92);
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: none;
+    padding: 8px 12px 7px;
+    background: rgba(10,10,10,0.74);
+    border-radius: 999px;
+}
+
+
+
+.rs-film-toggle-title {
+
+  font: 800 16px/1.2 var(--font-display, var(--font-ui, system-ui));
+    text-transform: none;
+    letter-spacing: 0.15px;
+}
+
+
+
+.rs-film-toggle-action {
+
+  font: 700 11px/1 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    opacity: 0.86;
+}
+
+
+
+.rs-film-toggle-icon {
+
+  font-size: 14px;
+    line-height: 1;
+    display: inline-block;
+    margin-left: auto;
 }
 
 
@@ -1330,6 +1431,20 @@ html,body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+
+
+.rs-film-card .rs-film-body {
+
+  display: none;
+}
+
+
+
+.rs-film-card.is-expanded .rs-film-body {
+
+  display: flex;
 }
 
 
@@ -7745,9 +7860,14 @@ function rsRestoreLayers(state){
       var meta = entry.meta || {};
       var poster = esc(filmPoster(meta));
       var year = filmYear(meta);
+      var bodyId = 'rs-film-body-'+esc(entry.key);
+      var aria = esc('Show details for '+entry.title);
       html += '<article class="rs-film-card" data-film-card="'+esc(entry.key)+'" id="rs-film-'+esc(entry.key)+'">';
+      html += '<button type="button" class="rs-film-toggle" data-film-title="'+esc(entry.title)+'" aria-expanded="false" aria-controls="'+bodyId+'" aria-label="'+aria+'">';
       html += '<img class="rs-film-poster" src="'+poster+'" alt="'+esc(entry.title)+' poster" onerror="this.onerror=null;this.src=\'images/placeholder.png\';" />';
-      html += '<div class="rs-film-body">';
+      html += '<span class="rs-film-toggle-label"><span class="rs-film-toggle-title">'+esc(entry.title)+'</span><span class="rs-film-toggle-action">Tap for details</span><span class="rs-film-toggle-icon" aria-hidden="true">⤵</span></span>';
+      html += '</button>';
+      html += '<div class="rs-film-body" data-film-body id="'+bodyId+'" aria-hidden="true">';
       html += '<h4>'+esc(entry.title)+(year ? ' <span class="rs-film-year">('+esc(year)+')</span>' : '')+'</h4>';
       if (meta.Synopsis) html += '<p class="rs-film-synopsis">'+esc(meta.Synopsis)+'</p>';
       html += '<dl class="rs-film-meta">';
@@ -7759,6 +7879,72 @@ function rsRestoreLayers(state){
     });
     html += '</div></section>';
     return html;
+  }
+
+  function initFilmCardToggles(root){
+    if (!root) return null;
+    var cards = Array.prototype.slice.call(root.querySelectorAll('.rs-film-card'));
+    if (!cards.length) return null;
+    var setters = {};
+    var order = [];
+    cards.forEach(function(card){
+      var key = card.getAttribute('data-film-card');
+      if (!key) return;
+      var toggle = card.querySelector('.rs-film-toggle');
+      var body = card.querySelector('[data-film-body]');
+      if (!toggle || !body) return;
+      order.push(key);
+      var expanded = false;
+      function set(state){
+        expanded = !!state;
+        card.classList.toggle('is-expanded', expanded);
+        card.setAttribute('data-film-expanded', expanded ? 'true' : 'false');
+        toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        var title = (toggle.getAttribute('data-film-title') || '').trim();
+        var labelBase = expanded ? 'Hide details' : 'Show details';
+        var fullLabel = title ? labelBase + ' for ' + title : labelBase;
+        toggle.setAttribute('aria-label', fullLabel);
+        var action = toggle.querySelector('.rs-film-toggle-action');
+        if (action) action.textContent = expanded ? 'Hide details' : 'Tap for details';
+        var icon = toggle.querySelector('.rs-film-toggle-icon');
+        if (icon) icon.textContent = expanded ? '⤴' : '⤵';
+        body.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+      }
+      toggle.addEventListener('click', function(){
+        var next = !expanded;
+        if (next){
+          Object.keys(setters).forEach(function(id){ if (id !== key && typeof setters[id] === 'function') setters[id](false); });
+        }
+        set(next);
+      });
+      toggle.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          toggle.click();
+        }
+      });
+      setters[key] = set;
+      set(false);
+    });
+
+    function expand(key, state){
+      if (!key){
+        if (order.length) expand(order[0], state);
+        return;
+      }
+      if (!setters[key]) return;
+      if (state === false){
+        setters[key](false);
+        return;
+      }
+      Object.keys(setters).forEach(function(id){ if (id !== key) setters[id](false); });
+      setters[key](true);
+    }
+
+    return {
+      expand: expand,
+      firstKey: order.length ? order[0] : null
+    };
   }
 
   function initDetailsTabs(root){
@@ -7884,12 +8070,19 @@ function rsRestoreLayers(state){
   function openDetails(p, focusFilmKey){
     var root = modal.querySelector('#rs-details-content');
     root.innerHTML = buildDetailsHTML(p);
+    var filmToggles = initFilmCardToggles(root);
+    if (filmToggles && filmToggles.firstKey && !focusFilmKey){
+      try { filmToggles.expand(filmToggles.firstKey, true); } catch(_){}
+    }
     var activateTab = initDetailsTabs(root);
     try{ var hero = root.querySelector('.rs-details-hero'); if (hero){ var full = hero.getAttribute('src'); hero.addEventListener('click', function(){ openImageViewer(full); }); } }catch(e){}
     var hasNowShowing = !!root.querySelector('.rs-tabpanel[data-panel="nowshowing"]');
     if (typeof activateTab === 'function') activateTab(focusFilmKey && hasNowShowing ? 'nowshowing' : 'details');
     if (focusFilmKey && hasNowShowing){
       try{
+        if (filmToggles && typeof filmToggles.expand === 'function'){
+          filmToggles.expand(focusFilmKey, true);
+        }
         var card = root.querySelector('[data-film-card="'+focusFilmKey+'"]');
         if (card){
           card.classList.add('is-highlight');
