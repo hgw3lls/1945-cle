@@ -15,11 +15,23 @@
       onlineTiles: {
         street: {
           url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          opts: { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }
+          opts: {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors',
+            keepBuffer: 4,
+            updateWhenIdle: false,
+            updateWhenZooming: true
+          }
         },
         satellite: {
           url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          opts: { maxZoom: 19, attribution: 'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community' }
+          opts: {
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+            keepBuffer: 4,
+            updateWhenIdle: false,
+            updateWhenZooming: true
+          }
         }
       },
       resolutions: {
@@ -471,6 +483,49 @@ html,body {
 
   position:absolute;
   inset:0;
+}
+
+/* Stylized theatre dots for easier tapping */
+.rs-map-dot {
+  stroke: rgba(5, 6, 8, 0.92) !important;
+  stroke-width: 3px !important;
+  stroke-opacity: 1 !important;
+  fill-opacity: 1 !important;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0 1.4px rgba(6, 8, 12, 0.7)) drop-shadow(0 2px 7px rgba(0, 0, 0, 0.5));
+  transition: transform 0.18s ease, stroke-width 0.18s ease;
+}
+
+.rs-map-dot.rs-status-open {
+  fill: #19a974 !important;
+}
+
+.rs-map-dot.rs-status-closed {
+  fill: #e03131 !important;
+}
+
+.rs-map-dot.rs-status-repurposed {
+  fill: #fcc419 !important;
+}
+
+.rs-map-dot.rs-status-demolished {
+  fill: #495057 !important;
+}
+
+.rs-map-dot.rs-status-unknown {
+  fill: #00d1ff !important;
+}
+
+.rs-map-dot:hover,
+.rs-map-dot.leaflet-interactive:focus,
+.rs-map-dot.leaflet-interactive:focus-visible {
+  stroke-width: 3.8px !important;
+  filter: drop-shadow(0 0 1.4px rgba(5, 5, 5, 0.7)) drop-shadow(0 3px 10px rgba(0, 0, 0, 0.6));
+}
+
+.rs-map-dot.leaflet-interactive:focus-visible {
+  outline: none;
+  transform: scale(1.08);
 }
 
 
@@ -927,9 +982,9 @@ html,body {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-addr, #rs-float .rs-li .rs-movie
+   #rs-float .rs-li .rs-addr
 */
-#rs-float .rs-li .rs-addr, #rs-float .rs-li .rs-movie {
+#rs-float .rs-li .rs-addr {
 
   font-family: var(--font-ui);
 }
@@ -1014,23 +1069,473 @@ html,body {
 
 
 
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   .rs-pop-nowshowing
-*/
-.rs-pop-nowshowing {
+/* === Now Showing preview chips === */
+.rs-ns-preview {
 
-  font-family: var(--font-ui);
+  margin: 12px 0;
+    font-family: var(--font-ui, system-ui);
 }
 
 
 
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   .rs-pop-nowshowing strong
-*/
-.rs-pop-nowshowing strong {
+.rs-ns-heading {
 
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  font: 700 11px/1.2 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+}
+
+
+
+.rs-ns-preview--popup .rs-ns-heading {
+
+  color: #111;
+}
+
+
+
+.rs-ns-preview--list .rs-ns-heading {
+
+  color: #bfb8a5;
+}
+
+
+
+.rs-ns-chip-row {
+
+  display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+
+
+.rs-ns-chip {
+
+  display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(17,17,17,0.86);
+    color: #f4efe2;
+    cursor: pointer;
+    text-align: left;
+    flex: 1 1 160px;
+    min-width: 0;
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+
+
+.rs-ns-chip:focus,
+.rs-ns-chip:hover {
+
+  transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    outline: none;
+}
+
+
+
+.rs-ns-chip-thumb {
+
+  width: 52px;
+    height: 74px;
+    object-fit: cover;
+    border-radius: 6px;
+    flex: 0 0 auto;
+    background: #000;
+}
+
+
+
+.rs-ns-chip-title {
+
+  font: 700 12px/1.25 var(--font-ui, system-ui);
+    letter-spacing: 0.2px;
+    color: inherit;
+    display: block;
+    max-width: 100%;
+}
+
+
+
+.rs-ns-preview--popup .rs-ns-chip {
+
+  background: rgba(20,20,20,0.88);
+    color: #fefaf1;
+    flex: 1 1 140px;
+}
+
+
+
+.rs-ns-preview--popup .rs-ns-chip-thumb {
+
+  width: 48px;
+    height: 68px;
+}
+
+
+
+.rs-ns-preview--list .rs-ns-chip {
+
+  background: rgba(15,15,15,0.85);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #f3efe4;
+    width: 100%;
+    flex: 1 1 auto;
+}
+
+
+
+.rs-ns-preview--list .rs-ns-chip:hover,
+.rs-ns-preview--list .rs-ns-chip:focus {
+
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+
+
+
+#rs-float .rs-li .rs-ns-preview--list {
+  display: none;
+}
+
+#rs-float .rs-li.active .rs-ns-preview--list,
+#rs-float .rs-li:focus-within .rs-ns-preview--list {
+  display: block;
+}
+
+.rs-details-tabs {
+
+  margin-top: 26px;
+    font-family: var(--font-ui, system-ui);
+}
+
+
+
+.rs-tablist {
+
+  display: flex;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.14);
+    padding-bottom: 6px;
+}
+
+
+
+.rs-tab {
+
+  appearance: none;
+    background: rgba(18,18,18,0.8);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #f6efe0;
+    border-radius: 999px;
+    padding: 6px 16px;
+    font: 700 13px/1.2 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+
+.rs-tab:hover,
+.rs-tab:focus {
+
+  box-shadow: 0 0 0 2px rgba(255,215,160,0.22);
+}
+
+
+
+.rs-tab.is-active {
+
+  background: rgba(255,215,160,0.18);
+    color: #ffe7c6;
+    border-color: rgba(255,215,160,0.4);
+}
+
+
+
+.rs-tabpanel {
+
+  display: none;
+    padding-top: 18px;
+}
+
+
+
+.rs-tabpanel.is-active {
+
+  display: block;
+}
+
+
+
+.rs-details-nowshowing {
+
+  margin-top: 4px;
+    font-family: var(--font-ui, system-ui);
+}
+
+
+
+.rs-details-nowshowing > h3 {
+
+  font: 800 16px/1.2 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin: 0 0 16px;
+    color: #f3efe4;
+}
+
+
+
+.rs-film-grid {
+
+  display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+
+
+.rs-film-card {
+
+  background: rgba(12,12,12,0.92);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    color: #f5efe0;
+}
+
+
+
+.rs-film-card.is-highlight {
+
+  box-shadow: 0 0 0 3px rgba(255,221,150,0.75);
+}
+
+
+
+.rs-film-card.is-expanded {
+
+  border-color: rgba(255,221,150,0.55);
+    box-shadow: 0 18px 34px -18px rgba(0,0,0,0.72);
+}
+
+
+
+.rs-film-toggle {
+
+  border: none;
+    margin: 0;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    display: block;
+    position: relative;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+
+
+.rs-film-toggle:focus-visible {
+
+  outline: 2px solid rgba(255,221,150,0.85);
+    outline-offset: 2px;
+}
+
+
+
+.rs-film-toggle::after {
+
+  content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 55%, rgba(0,0,0,0.32) 100%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 160ms ease-in-out;
+}
+
+
+
+.rs-film-toggle:hover::after,
+.rs-film-toggle:focus-visible::after {
+
+  opacity: 1;
+}
+
+
+
+.rs-film-poster {
+
+  width: 100%;
+    height: 260px;
+    object-fit: cover;
+    background: #000;
+    display: block;
+}
+
+
+
+.rs-film-toggle-label {
+
+  position: absolute;
+    inset: auto 12px 10px;
+    font: 600 13px/1.25 var(--font-ui, system-ui);
+    text-transform: none;
+    letter-spacing: 0.2px;
+    color: rgba(255,255,255,0.92);
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: none;
+    padding: 8px 12px 7px;
+    background: rgba(10,10,10,0.74);
+    border-radius: 999px;
+}
+
+
+
+.rs-film-toggle-title {
+
+  font: 800 16px/1.2 var(--font-display, var(--font-ui, system-ui));
+    text-transform: none;
+    letter-spacing: 0.15px;
+}
+
+
+
+.rs-film-toggle-action {
+
+  font: 700 11px/1 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    opacity: 0.86;
+}
+
+
+
+.rs-film-toggle-icon {
+
+  font-size: 14px;
+    line-height: 1;
+    display: inline-block;
+    margin-left: auto;
+}
+
+
+
+.rs-film-body {
+
+  padding: 14px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+
+.rs-film-card .rs-film-body {
+
+  display: none;
+}
+
+
+
+.rs-film-card.is-expanded .rs-film-body {
+
+  display: flex;
+}
+
+
+
+.rs-film-body > h4 {
+
+  font: 800 18px/1.2 var(--font-ui, system-ui);
+    text-transform: none;
+    letter-spacing: 0.2px;
+    margin: 0;
+    color: inherit;
+}
+
+
+
+.rs-film-year {
+
+  font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+
+
+.rs-film-synopsis {
+
+  margin: 0;
+    font: 500 13px/1.5 var(--font-ui, system-ui);
+    color: rgba(245,239,224,0.9);
+}
+
+
+
+.rs-film-meta {
+
+  margin: 0;
+    display: grid;
+    gap: 8px;
+}
+
+
+
+.rs-film-meta div {
+
+  display: grid;
+    grid-template-columns: minmax(0, 90px) 1fr;
+    gap: 8px;
+}
+
+
+
+.rs-film-meta dt {
+
+  font: 700 11px/1.2 var(--font-ui, system-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: rgba(255,255,255,0.68);
+}
+
+
+
+.rs-film-meta dd {
+
+  margin: 0;
+    font: 500 13px/1.4 var(--font-ui, system-ui);
+    color: inherit;
+}
+
+
+
+@media (max-width: 640px) {
+
+  .rs-film-meta div {
+
+    grid-template-columns: 1fr;
+  }
+
+
+
+  .rs-film-meta dt {
+
+    opacity: 0.7;
+  }
 }
 
 
@@ -1060,9 +1565,9 @@ html,body {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   .rs-addr,.rs-movie
+   .rs-addr
 */
-.rs-addr,.rs-movie {
+.rs-addr {
 
   font-family: var(--font-ui, system-ui);
 }
@@ -1794,9 +2299,9 @@ html.tv .rs-li h4 {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   html.tv .rs-addr, html.tv .rs-movie
+   html.tv .rs-addr
 */
-html.tv .rs-addr, html.tv .rs-movie {
+html.tv .rs-addr {
 
   font-size: calc(13px * var(--tv-scale));
 }
@@ -1948,11 +2453,9 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-addr,
-#rs-float .rs-li .rs-movie
+   #rs-float .rs-li .rs-addr
 */
-#rs-float .rs-li .rs-addr,
-#rs-float .rs-li .rs-movie {
+#rs-float .rs-li .rs-addr {
 
   margin: 0;
     color: #d9d3c3;
@@ -1963,18 +2466,6 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-movie::before
-*/
-#rs-float .rs-li .rs-movie::before {
-
-  content: "Now Showing: ";
-    color: #bfb8a5;
-    font-weight: 700;
 }
 
 
@@ -2551,11 +3042,9 @@ html.tv #rs-list .rs-li h4 {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   html.tv #rs-list .rs-addr,
-html.tv #rs-list .rs-movie
+   html.tv #rs-list .rs-addr
 */
-html.tv #rs-list .rs-addr,
-html.tv #rs-list .rs-movie {
+html.tv #rs-list .rs-addr {
 
   font-size: 16px;
 }
@@ -2902,18 +3391,6 @@ html.tv #rs-list .rs-movie {
 
 
 
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-movie
-*/
-#rs-float .rs-li .rs-movie {
-
-  flex: 1 1 auto;
-    white-space: pre-wrap;
-    text-align: right;
-    font-weight: 600;
-    color: #d9d3c3;
-    line-height: 1.25;
-}
 
 
 
@@ -2943,82 +3420,9 @@ html.tv #rs-list .rs-movie {
 
 
 
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-movie strong
-*/
-#rs-float .rs-li .rs-movie strong {
-
-  display: block;
-    text-transform: uppercase;
-    color: #bfb8a5;
-    font-weight: 700;
-    margin-bottom: 2px;
-}
 
 
 
-/* === NOW SHOWING reveal panel below cards (injected) === */
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-movie
-*/
-#rs-float .rs-li .rs-movie {
-
-  display: none !important;
-  /* original inline movies hidden */
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-nowshowing
-*/
-#rs-float .rs-li .rs-nowshowing {
-
-  display: none;
-    margin: 8px 10px 2px;
-    padding: 10px 12px;
-    background: #0f0f0f;
-    border: 2px solid #222;
-    border-radius: 8px;
-    color: #f3efe4;
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-nowshowing .rs-ns-title
-*/
-#rs-float .rs-li .rs-nowshowing .rs-ns-title {
-
-  font: 800 12px/1.2 system-ui, sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    color: #bfb8a5;
-    margin-bottom: 4px;
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li .rs-nowshowing .rs-ns-lines
-*/
-#rs-float .rs-li .rs-nowshowing .rs-ns-lines {
-
-  font: 600 12px/1.25 system-ui, sans-serif;
-    color: #d9d3c3;
-    white-space: pre-wrap;
-}
-
-
-
-/* Reveal only when the item is selected/active */
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float .rs-li.active .rs-nowshowing
-*/
-#rs-float .rs-li.active .rs-nowshowing {
-
-  display: block;
-}
 
 
 
@@ -5692,7 +6096,6 @@ html.booting #rs-float {
       font-size: calc(22px * var(--tv-scale));
     }
     html.tv #rs-list .rs-addr,
-    html.tv #rs-list .rs-movie,
     html.tv .rs-dt,
     html.tv .rs-dd {
       font-size: calc(13px * var(--tv-scale));
@@ -5727,11 +6130,12 @@ html.booting #rs-float {
 
 
 /* === RS Patch: Strict toolbar-only Tips === */
-.rs-tips-btn-toolbar, .rs-tips-btn-global { display: none !important; }
-.rs-toolbar .rs-tips-btn-toolbar, .rs-toolbar .rs-tips-btn-global { display: inline-flex !important; }
+.rs-tips-btn-toolbar:not([data-rs-allow-tips]), .rs-tips-btn-global:not([data-rs-allow-tips]) { display: none !important; }
+.rs-toolbar .rs-tips-btn-toolbar, .rs-toolbar .rs-tips-btn-global,
+.rs-tips-btn-toolbar[data-rs-allow-tips], .rs-tips-btn-global[data-rs-allow-tips] { display: inline-flex !important; }
 /* Extra guard for any accidental insertion */
-:not(.rs-toolbar) > .rs-tips-btn-toolbar,
-:not(.rs-toolbar) .rs-tips-btn-toolbar { display: none !important; }
+:not(.rs-toolbar) > .rs-tips-btn-toolbar:not([data-rs-allow-tips]),
+:not(.rs-toolbar) .rs-tips-btn-toolbar:not([data-rs-allow-tips]) { display: none !important; }
 
 
 /* === RS-FLOAT: header-only collapse support (brutalist) === */
@@ -6652,12 +7056,30 @@ html.booting #rs-float {
 #rs-float { position: relative; }
 #rs-float .rs-tips-btn-toolbar,
 #rs-float .rs-tips-btn-global,
-#rs-float .rs-tips-btn-float {
+#rs-float .rs-tips-btn-float,
+#rs-reset-app {
   position: absolute;
   right: 12px;
   bottom: 12px;
   z-index: 100;
   pointer-events: auto;
+}
+#rs-reset-app {
+  background: #f8f5ec;
+  color: #111;
+  border: 2px solid #111;
+  border-radius: 8px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  padding: 10px 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+#rs-reset-app:focus {
+  outline: 3px solid rgba(63,196,255,0.65);
+  outline-offset: 2px;
+}
+#rs-reset-app:active {
+  transform: translateY(1px);
 }
 </style><style>
 
@@ -6955,11 +7377,11 @@ html.booting #rs-float {
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
 <div aria-label="Info and Help" class="rs-toolbar-infohelp">
 <button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
-<button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button><button aria-label="Tips" class="rs-btn rs-tips-btn-toolbar" type="button">Tips</button>
+<button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button><button aria-label="Tips" class="rs-btn rs-tips-btn-toolbar" data-rs-allow-tips="true" type="button">Tips</button>
 </div>
 <div id="rs-toggle-list"> </div>
 </div>
-<section class="rs-float" id="rs-float">
+<section class="rs-float" data-disable-tips="true" id="rs-float">
 <header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
 <div><span class="rs-float__title">Theatres</span>
 <span class="rs-chip" id="rs-count">0</span></div>
@@ -7026,7 +7448,7 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-float" type="button">Tips</button></section>
+<button aria-label="Reset application" class="rs-btn" id="rs-reset-app" title="Restart experience" type="button">Reset App</button></section>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -7040,6 +7462,829 @@ html.booting #rs-float {
 </div>
 </div>
 <script src="vendor/leaflet/leaflet.js"></script>
+<script id="rs-nowshowing-data" type="application/json">
+[
+  {
+    "Title": "A Night to Remember",
+    "Year": 1943,
+    "Director": "Richard Wallace",
+    "Stars": "Brian Aherne; Loretta Young",
+    "Synopsis": "A shell-shocked soldier’s return from war strains his marriage and identity, pushing him toward a desperate act.",
+    "Awards": null,
+    "PosterPath": "images/posters/anighttoremember.jpg"
+  },
+  {
+    "Title": "A Song to Remember",
+    "Year": 1945,
+    "Director": "Charles Vidor",
+    "Stars": "Cornel Wilde; Merle Oberon",
+    "Synopsis": "Chopin’s genius blossoms under political upheaval and a tempestuous romance with George Sand.",
+    "Awards": "Nominated for 6 Oscars",
+    "PosterPath": "images/posters/asongtoremember.jpg"
+  },
+  {
+    "Title": "A Tree Grows in Brooklyn",
+    "Year": 1945,
+    "Director": "Elia Kazan",
+    "Stars": "Dorothy McGuire; James Dunn",
+    "Synopsis": "A young girl comes of age while her family fights to survive poverty and heartbreak in early Brooklyn.",
+    "Awards": "Oscar — Best Supporting Actor",
+    "PosterPath": "images/posters/atreegrowsinbrooklyn.jpg"
+  },
+  {
+    "Title": "Abroad With Two Yanks",
+    "Year": 1944,
+    "Director": "Allan Dwan",
+    "Stars": "William Bendix; Helen Walker",
+    "Synopsis": "Two Marines on leave stumble into danger and romance when they cross a nightclub singer with a secret.",
+    "Awards": null,
+    "PosterPath": "images/posters/abroadwithtwoyanks.jpg"
+  },
+  {
+    "Title": "Alaska",
+    "Year": 1944,
+    "Director": "George Archainbaud",
+    "Stars": "Kent Taylor, Margaret Lindsay, John Carradine",
+    "Synopsis": "Adventure-drama about frontier rivalry, murder, and redemption in the Alaskan wilderness.",
+    "Awards": null,
+    "PosterPath": "images/posters/alaska.jpg"
+  },
+  {
+    "Title": "Attack",
+    "Year": 1956,
+    "Director": "Robert Aldrich",
+    "Stars": "Jack Palance, Eddie Albert, Lee Marvin",
+    "Synopsis": "WWII drama on command cowardice and moral conflict. *(Note: post-1945)*",
+    "Awards": null,
+    "PosterPath": "images/posters/attack.jpg"
+  },
+  {
+    "Title": "Bahama Passage",
+    "Year": 1941,
+    "Director": "Edward H. Griffith",
+    "Stars": "Madeleine Carroll; Sterling Hayden",
+    "Synopsis": "A foreman and his boss’s daughter clash and fall in love on a Caribbean island poised for unrest.",
+    "Awards": null,
+    "PosterPath": "images/posters/bahamapassage.jpg"
+  },
+  {
+    "Title": "Beachhead to Berlin",
+    "Year": 1944,
+    "Director": null,
+    "Stars": "N/A; N/A",
+    "Synopsis": "Documentary compiled from Allied combat footage chronicling amphibious assaults in the Pacific theater.",
+    "Awards": "Oscar-related doc honors",
+    "PosterPath": "images/posters/beachheadtoberlin.jpg"
+  },
+  {
+    "Title": "Between Two Women",
+    "Year": 1945,
+    "Director": "William McGann",
+    "Stars": "Van Johnson; Gloria DeHaven",
+    "Synopsis": "A junior doctor balances ambition and love while navigating loyalty inside a pressure-cooker hospital.",
+    "Awards": null,
+    "PosterPath": "images/posters/betweentwowomen.jpg"
+  },
+  {
+    "Title": "Bluebeard",
+    "Year": 1944,
+    "Director": "Edgar G. Ulmer",
+    "Stars": "John Carradine; Jean Parker",
+    "Synopsis": "A Parisian painter hides a murderous secret as his portraits become graves for the women who inspire them.",
+    "Awards": null,
+    "PosterPath": "images/posters/bluebeard.jpg"
+  },
+  {
+    "Title": "Bombalera",
+    "Year": null,
+    "Director": null,
+    "Stars": null,
+    "Synopsis": "Unverified title. Could not identify a pre-1946 film with this exact name; likely a misspelling or alternate title (e.g., 'Bombardier' 1943). Needs manual check.",
+    "Awards": null,
+    "PosterPath": "images/posters/bombalera.jpg"
+  },
+  {
+    "Title": "Buckskin Frontier",
+    "Year": 1943,
+    "Director": "Lesley Selander",
+    "Stars": "Richard Dix; Jane Wyatt",
+    "Synopsis": "A railroad scout and a gambler’s daughter find love and conflict as trains push west into hostile territory.",
+    "Awards": null,
+    "PosterPath": "images/posters/buckskinfrontier.jpg"
+  },
+  {
+    "Title": "Candy's Dream Girl",
+    "PosterPath": "images/posters/gandysdreamgirl.jpg",
+    "Year": 1944,
+    "Director": "Howard Bretherton",
+    "Stars": "Jane Powell; Ralph Bell; Carmen Amaya",
+    "Synopsis": "A wartime musical short built around stage performer Candy Johnson, whose whirlwind daydream sparkles with swing routines and specialty acts staged for servicemen.",
+    "Awards": null
+  },
+  {
+    "Title": "Dark Mountain",
+    "Year": 1944,
+    "Director": "William A. Berke",
+    "Stars": "Regis Toomey; Ellen Drew",
+    "Synopsis": "On the run from the mob, a businessman’s remarried ex-wife must choose between safety and love in the wilderness.",
+    "Awards": null,
+    "PosterPath": "images/posters/darkmountain.jpg"
+  },
+  {
+    "Title": "Dark Waters",
+    "Year": 1944,
+    "Director": "André de Toth",
+    "Stars": "Merle Oberon; Franchot Tone",
+    "Synopsis": "A traumatized young woman suspects her relatives’ Southern mansion hides deadly intentions.",
+    "Awards": null,
+    "PosterPath": "images/posters/darkwaters.jpg"
+  },
+  {
+    "Title": "Days of Glory",
+    "Year": 1944,
+    "Director": "Jacques Tourneur",
+    "Stars": "Tamara Toumanova; Gregory Peck",
+    "Synopsis": "Soviet partisans fight Nazis in the forest where courage and sacrifice become daily ration.",
+    "Awards": "Nominated for Best Supporting Actress",
+    "PosterPath": "images/posters/daysofglory.jpg"
+  },
+  {
+    "Title": "Enter Arsène Lupin",
+    "Year": 1944,
+    "Director": "Ford Beebe",
+    "Stars": "Charles Korvin, Ella Raines, J. Carrol Naish",
+    "Synopsis": "Gentleman thief Lupin foils a criminal plot targeting a young heiress aboard a London train.",
+    "Awards": null,
+    "PosterPath": "images/posters/enterarsenelupin.jpg"
+  },
+  {
+    "Title": "Escort Girl",
+    "Year": 1941,
+    "Director": "Edward Cahn",
+    "Stars": "Betty Compson; Margaret Marquis",
+    "Synopsis": "A nightclub hostess hides her profession to protect her daughter from corruption.",
+    "Awards": null,
+    "PosterPath": "images/posters/escortgirl.jpg"
+  },
+  {
+    "Title": "Experiment Perilous",
+    "Year": 1944,
+    "Director": "Jacques Tourneur",
+    "Stars": "Hedy Lamarr; George Brent",
+    "Synopsis": "A psychiatrist is drawn into a glamorous woman’s dangerous domestic nightmare in Manhattan.",
+    "Awards": null,
+    "PosterPath": "images/posters/experimentperilous.jpg"
+  },
+  {
+    "Title": "Fast Company",
+    "Year": 1938,
+    "Director": "Edward Buzzell",
+    "Stars": "Melvyn Douglas, Florence Rice",
+    "Synopsis": "Rare-book dealers moonlight as amateur sleuths investigating a collector’s murder.",
+    "Awards": null,
+    "PosterPath": "images/posters/fastcompany.jpg"
+  },
+  {
+    "Title": "Frisco Sal",
+    "Year": 1945,
+    "Director": "George Waggner",
+    "Stars": "Susanna Foster, Turhan Bey, Alan Curtis",
+    "Synopsis": "Nightclub singer seeks revenge for her brother’s death on the Barbary Coast.",
+    "Awards": null,
+    "PosterPath": "images/posters/friscosal.jpg"
+  },
+  {
+    "Title": "German Atrocities--Lublin Death Factory",
+    "PosterPath": "images/posters/lublindeathfactory.jpg",
+    "Year": 1944,
+    "Director": "U.S. Army Signal Corps",
+    "Stars": "Documentary footage",
+    "Synopsis": "Liberation footage of the Majdanek concentration camp assembled to expose Nazi war crimes to Allied audiences under the German Atrocities newsreel banner.",
+    "Awards": null
+  },
+  {
+    "Title": "God Is My Co-Pilot",
+    "Year": 1945,
+    "Director": "Robert Florey",
+    "Stars": "Dennis Morgan, Dane Clark, Raymond Massey",
+    "Synopsis": "Biopic of Flying Tiger pilot Robert L. Scott Jr., dramatizing his WWII missions in China.",
+    "Awards": null,
+    "PosterPath": "images/posters/godismycopilot.jpg"
+  },
+  {
+    "Title": "Guest in the House",
+    "Year": 1944,
+    "Director": "John Brahm",
+    "Stars": "Anne Baxter, Ralph Bellamy",
+    "Synopsis": "A manipulative convalescent disrupts a painter’s household through deceit and obsession.",
+    "Awards": null,
+    "PosterPath": "images/posters/guestinthehouse.jpg"
+  },
+  {
+    "Title": "Gypsy Wildcat",
+    "Year": 1944,
+    "Director": "Roy William Neill",
+    "Stars": "Maria Montez; Jon Hall",
+    "Synopsis": "A woman raised among gypsies learns the secret of her birth while resisting tyranny.",
+    "Awards": null,
+    "PosterPath": "images/posters/gypsywildcat.jpg"
+  },
+  {
+    "Title": "Hangover Square",
+    "Year": 1945,
+    "Director": "John Brahm",
+    "Stars": "Laird Cregar, Linda Darnell, George Sanders",
+    "Synopsis": "Period noir of a composer’s murderous blackouts and descent into madness.",
+    "Awards": null,
+    "PosterPath": "images/posters/hangoversquare.jpg"
+  },
+  {
+    "Title": "Heather and Yon",
+    "Year": 1944,
+    "Director": "Unknown (short)",
+    "Stars": null,
+    "Synopsis": "Short subject (archival data scarce).",
+    "Awards": null,
+    "PosterPath": "images/posters/heatherandyon.jpg"
+  },
+  {
+    "Title": "Heavenly Days",
+    "Year": 1944,
+    "Director": "Howard Estabrook",
+    "Stars": "Edgar Bergen; Charlie McCarthy",
+    "Synopsis": "A patriotic comedy of civilians visiting Washington, D.C. during WWII and stumbling through bureaucracy.",
+    "Awards": null,
+    "PosterPath": "images/posters/heavenlydays.jpg"
+  },
+  {
+    "Title": "Here Come the Co-Eds",
+    "Year": 1945,
+    "Director": "Jean Yarbrough",
+    "Stars": "Bud Abbott, Lou Costello, Peggy Ryan",
+    "Synopsis": "Comic chaos as two caretakers try to save a women’s college from foreclosure.",
+    "Awards": null,
+    "PosterPath": "images/posters/herecomethecoeds.jpg"
+  },
+  {
+    "Title": "Here Come the Waves",
+    "Year": 1944,
+    "Director": "Mark Sandrich",
+    "Stars": "Bing Crosby, Betty Hutton",
+    "Synopsis": "Musical salute to the Navy WAVES with songs, romance, and wartime morale.",
+    "Awards": null,
+    "PosterPath": "images/posters/herecomethewaves.jpg"
+  },
+  {
+    "Title": "Hotel Berlin",
+    "PosterPath": "images/posters/hotelberlin.jpg",
+    "Year": 1945,
+    "Director": "Peter Godfrey",
+    "Stars": "Faye Emerson; Helmut Dantine; Raymond Massey; Andrea King",
+    "Synopsis": "Hotel Berlin is an American drama film made by Warner Bros. in late 1944 to early 1945 starring Faye Emerson, Helmut Dantine, Raymond Massey and Andrea King. Directed by Peter Godfrey, it is set in Berlin near the close of World War II, and is based on the novel Hotel Berlin by Vicki Baum.",
+    "Awards": null
+  },
+  {
+    "Title": "Ice-Capades Revue",
+    "Year": 1942,
+    "Director": "Bernard Vorhaus",
+    "Stars": "Ellen Drew; Richard Denning; Jerry Colonna; Barbara Jo Allen",
+    "Synopsis": "Backstage musical about launching a rival ice show, built around the touring Ice-Capades troupe.",
+    "Awards": null,
+    "PosterPath": "images/posters/icecapadesrevue.jpg"
+  },
+  {
+    "Title": "In Old California",
+    "Year": 1942,
+    "Director": "William C. McGann",
+    "Stars": "John Wayne; Binnie Barnes; Albert Dekker; Helen Parrish",
+    "Synopsis": "Gold Rush–era pharmacist takes on a corrupt saloon boss in Sacramento.",
+    "Awards": null,
+    "PosterPath": "images/posters/inoldcalifornia.jpg"
+  },
+  {
+    "Title": "Isle of Tabu",
+    "PosterPath": "images/posters/isleoftabu.jpg",
+    "Year": 1945,
+    "Director": "R. G. Springsteen",
+    "Stars": "Susanna Foster; David Bruce; Turhan Bey",
+    "Synopsis": "A South Seas adventure-romance in which an American nurse marooned on a Polynesian isle uncovers smuggling and forbidden rituals while choosing between duty and love.",
+    "Awards": null
+  },
+  {
+    "Title": "I’ll Be Seeing You",
+    "Year": 1944,
+    "Director": "William Dieterle",
+    "Stars": "Ginger Rogers, Joseph Cotten, Shirley Temple",
+    "Synopsis": "Tender Christmas romance between a parolee and a PTSD-stricken soldier.",
+    "Awards": null,
+    "PosterPath": "images/posters/illbeseeingyou.jpg"
+  },
+  {
+    "Title": "I’ll Sell My Life",
+    "Year": 1941,
+    "Director": "Elmer Clifton",
+    "Stars": "Rose Hobart, Michael Whalen",
+    "Synopsis": "Reporter’s strange ad leads to intrigue and murder in this low-budget thriller.",
+    "Awards": null,
+    "PosterPath": "images/posters/illsellmylife.jpg"
+  },
+  {
+    "Title": "Jail-talking (Polish picture)",
+    "Year": null,
+    "Director": null,
+    "Stars": null,
+    "Synopsis": null,
+    "Awards": null,
+    "PosterPath": "images/placeholder.png"
+  },
+  {
+    "Title": "Keep Your Powder Dry",
+    "PosterPath": "images/posters/keepyourpowderdry.jpg",
+    "Year": 1945,
+    "Director": "Edward Buzzell",
+    "Stars": "Lana Turner; Susan Peters; Laraine Day; Agnes Moorehead",
+    "Synopsis": "Keep Your Powder Dry is a 1945 American drama film directed by Edward Buzzell and starring Lana Turner, Susan Peters, and Laraine Day. Its plot follows three women who join the Women's Army Corps during World War II. The screenplay was written by George Bruce and Mary C. McCall, Jr.",
+    "Awards": null
+  },
+  {
+    "Title": "Lake Placid Serenade",
+    "Year": 1944,
+    "Director": "Steve Sekely",
+    "Stars": "Vera Ralston; Eugene Pallette; Alan Curtis; Barbara Jo Allen",
+    "Synopsis": "Ukrainian skater finds opportunity and romance in upstate New York; Republic ice-skating musical.",
+    "Awards": null,
+    "PosterPath": "images/posters/lakeplacidserenade.jpg"
+  },
+  {
+    "Title": "Lili Marlene",
+    "PosterPath": "images/posters/lillimarlene.jpg",
+    "Year": 1944,
+    "Director": "Arthur Lubin",
+    "Stars": "Dorothy Lamour; John Hodiak; Patricia Morison",
+    "Synopsis": "Drama inspired by the famed wartime song, following a cabaret singer torn between her Nazi lover and an Allied spy as Europe descends into war.",
+    "Awards": null
+  },
+  {
+    "Title": "Lucky Jordan",
+    "Year": 1942,
+    "Director": "Frank Tuttle",
+    "Stars": "Alan Ladd; Helen Walker; Sheldon Leonard",
+    "Synopsis": "A draft-dodging New York gangster stumbles into a spy plot and reluctant patriotism.",
+    "Awards": null,
+    "PosterPath": "images/posters/luckyjordan.jpg"
+  },
+  {
+    "Title": "Made for Each Other",
+    "Year": 1939,
+    "Director": "John Cromwell",
+    "Stars": "Carole Lombard; James Stewart; Charles Coburn",
+    "Synopsis": "Newlyweds struggle through financial hardship and personal crises in New York.",
+    "Awards": null,
+    "PosterPath": "images/posters/madeforeachother.jpg"
+  },
+  {
+    "Title": "Mark of the Whistler",
+    "Year": 1944,
+    "Director": "William Castle",
+    "Stars": "Richard Dix; Janis Carter",
+    "Synopsis": "A drifter adopts a dead man’s identity for his inheritance — but danger follows.",
+    "Awards": null,
+    "PosterPath": "images/posters/markofthewhistler.jpg"
+  },
+  {
+    "Title": "Meet Me in St. Louis",
+    "Year": 1944,
+    "Director": "Vincente Minnelli",
+    "Stars": "Judy Garland; Margaret O’Brien; Mary Astor",
+    "Synopsis": "Turn-of-the-century family musical built around the 1904 World’s Fair; includes “Have Yourself a Merry Little Christmas.”",
+    "Awards": "Oscar nominations (incl. Best Cinematography, Best Song)",
+    "PosterPath": "images/posters/meetmeinstlouis.jpg"
+  },
+  {
+    "Title": "Ministry of Fear",
+    "Year": 1944,
+    "Director": "Fritz Lang",
+    "Stars": "Ray Milland, Marjorie Reynolds",
+    "Synopsis": "Man accidentally entangled in a Nazi spy ring after winning a cake.",
+    "Awards": null,
+    "PosterPath": "images/posters/ministryoffear.jpg"
+  },
+  {
+    "Title": "Moonlight and Cactus",
+    "Year": 1944,
+    "Director": "Edward F. Cline",
+    "Stars": "Leo Carrillo; Ann Savage",
+    "Synopsis": "Three traveling singers get stranded at a desert ranch where romance and sabotage collide.",
+    "Awards": null,
+    "PosterPath": "images/posters/moonlightandcactus.jpg"
+  },
+  {
+    "Title": "Music for Millions",
+    "Year": 1944,
+    "Director": "Henry Koster",
+    "Stars": "Margaret O’Brien; Jimmy Durante",
+    "Synopsis": "A pregnant woman fears her soldier husband’s fate while an orchestra shields her from heartbreak.",
+    "Awards": null,
+    "PosterPath": "images/posters/musicformillions.jpg"
+  },
+  {
+    "Title": "Music in Manhattan",
+    "Year": 1944,
+    "Director": "John H. Auer",
+    "Stars": "Anne Shirley; Dennis Day; Phillip Terry",
+    "Synopsis": "A mistaken-identity romance propels two small-time performers toward the big time; musical comedy.",
+    "Awards": "Oscar nomination (Best Sound Recording)",
+    "PosterPath": "images/posters/musicinmanhattan.jpg"
+  },
+  {
+    "Title": "Nevada",
+    "Year": 1944,
+    "Director": "Edward Killy",
+    "Stars": "Robert Mitchum; Anne Jeffreys",
+    "Synopsis": "A cowboy with a new identity returns to face a corrupt cattle baron and his gang.",
+    "Awards": null,
+    "PosterPath": "images/posters/nevada.jpg"
+  },
+  {
+    "Title": "Objective, Burma!",
+    "PosterPath": "images/posters/objectiveburma.jpg",
+    "Year": 1945,
+    "Director": "Raoul Walsh",
+    "Stars": "Errol Flynn; James Brown; William Prince",
+    "Synopsis": "Objective, Burma! is a 1945 American war film that is loosely based on the six-month raid by Merrill's Marauders in the Burma Campaign during the Second World War. Directed by Raoul Walsh and starring Errol Flynn, the film was made by Warner Bros. immediately after the raid.",
+    "Awards": null
+  },
+  {
+    "Title": "Our Hearts Were Young and Gay",
+    "PosterPath": "images/posters/ourheartswereyoungandgay.jpg",
+    "Year": 1944,
+    "Director": "Lewis Allen",
+    "Stars": "Gail Russell; Diana Lynn; Charlie Ruggles; Dorothy Gish",
+    "Synopsis": "Our Hearts Were Young and Gay is a 1944 American comedy film directed by Lewis Allen and written by Sheridan Gibney, based on the memoir by Emily Kimbrough and Cornelia Otis Skinner about their misadventures abroad.",
+    "Awards": null
+  },
+  {
+    "Title": "Partners of the Trail",
+    "Year": 1944,
+    "Director": "Elmer Clifton",
+    "Stars": "Robert Livingston; Smiley Burnette",
+    "Synopsis": "Frontier marshals pursue a scheming land baron’s violent land-grab.",
+    "Awards": null,
+    "PosterPath": "images/posters/partnersofthetrail.jpg"
+  },
+  {
+    "Title": "Practically Yours",
+    "Year": 1944,
+    "Director": "Mitchell Leisen",
+    "Stars": "Claudette Colbert, Fred MacMurray",
+    "Synopsis": "Radio correspondent returns from war to a comedic case of mistaken engagement.",
+    "Awards": null,
+    "PosterPath": "images/posters/practicallyyours.jpg"
+  },
+  {
+    "Title": "Rough, Tough and Ready",
+    "PosterPath": "images/posters/roughtoughandready.jpg",
+    "Year": 1945,
+    "Director": "Del Lord",
+    "Stars": "Chester Morris; Victor McLaglen; Jean Rogers",
+    "Synopsis": "Rough, Tough and Ready is a 1945 American war comedy drama film directed by Del Lord and starring Chester Morris, Victor McLaglen and Jean Rogers about two merchant seamen drawn back into wartime service.",
+    "Awards": null
+  },
+  {
+    "Title": "Salty O'Rourke",
+    "PosterPath": "images/posters/saltyorourke.jpg",
+    "Year": 1945,
+    "Director": "Raoul Walsh",
+    "Stars": "Alan Ladd; Gail Russell",
+    "Synopsis": "Salty O'Rourke is a 1945 American sports drama directed by Raoul Walsh in which a racetrack grifter turns a hot-headed jockey into a contender while falling for the trainer who can save them both.",
+    "Awards": null
+  },
+  {
+    "Title": "Sergeant Mike",
+    "PosterPath": "images/posters/sergeantmike.jpg",
+    "Year": 1944,
+    "Director": "Henry Levin",
+    "Stars": "Larry Parks; Jeanne Bates; Loren Tindall",
+    "Synopsis": "Sergeant Mike is a 1944 American drama directed by Henry Levin about a war correspondent whose adopted pup becomes a Marine mascot and morale booster.",
+    "Awards": null
+  },
+  {
+    "Title": "She's a Soldier Too",
+    "PosterPath": "images/posters/shesasoldiertoo.jpg",
+    "Year": 1944,
+    "Director": "William Castle",
+    "Stars": "Beulah Bondi; Nina Foch; Jess Barker; Lloyd Bridges",
+    "Synopsis": "She's a Soldier Too is a 1944 American drama directed by William Castle following three women whose lives intersect through wartime service and sacrifice on the home front.",
+    "Awards": null
+  },
+  {
+    "Title": "Shine On, Harvest Moon",
+    "PosterPath": "images/posters/shineonharvestmoon.jpg",
+    "Year": 1944,
+    "Director": "David Butler",
+    "Stars": "Ann Sheridan; Dennis Morgan; Jack Carson",
+    "Synopsis": "Shine On, Harvest Moon is a 1944 musical biopic directed by David Butler dramatizing the vaudeville partnership and romance of songwriters Nora Bayes and Jack Norworth.",
+    "Awards": null
+  },
+  {
+    "Title": "Since You Went Away",
+    "PosterPath": "images/posters/sinceyouwentaway.jpg",
+    "Year": 1944,
+    "Director": "John Cromwell",
+    "Stars": "Claudette Colbert; Jennifer Jones; Joseph Cotten; Shirley Temple",
+    "Synopsis": "Since You Went Away is a 1944 American epic wartime drama directed by John Cromwell chronicling how a middle-class family endures separation and sacrifice while the patriarch serves overseas.",
+    "Awards": "Won Academy Award for Best Original Score"
+  },
+  {
+    "Title": "Something for the Boys",
+    "PosterPath": "images/posters/somethingfortheboys.jpg",
+    "Year": 1944,
+    "Director": "Lewis Seiler",
+    "Stars": "Carmen Miranda Michael O'Shea Vivian Blaine Phil Silvers",
+    "Synopsis": "Something for the Boys is a 1944 musical comedy directed by Lewis Seiler in which three cousins inherit a Texas ranch and turn it into a USO training camp full of music, mishaps, and romance.",
+    "Awards": null
+  },
+  {
+    "Title": "Storm Over Lisbon",
+    "Year": 1944,
+    "Director": "George Sherman",
+    "Stars": "Erich von Stroheim; Vera Ralston",
+    "Synopsis": "A nightclub owner gets drawn into espionage when an American pilot seeks escape from Nazi agents.",
+    "Awards": null,
+    "PosterPath": "images/posters/stormoverlisbon.jpg"
+  },
+  {
+    "Title": "Strange Affair",
+    "Year": 1944,
+    "Director": "Alfred E. Green",
+    "Stars": "Allyn Joslyn; Evelyn Keyes",
+    "Synopsis": "A naval cadet investigates his brother’s death and uncovers blackmail and deceit.",
+    "Awards": null,
+    "PosterPath": "images/posters/strangeaffair.jpg"
+  },
+  {
+    "Title": "Sunday Dinner for a Soldier",
+    "PosterPath": "images/posters/SundayDinnerforaSoldier.jpg",
+    "Year": 1944,
+    "Director": "Lloyd Bacon",
+    "Stars": "Anne Baxter; John Hodiak",
+    "Synopsis": "Sunday Dinner for a Soldier is a 1944 wartime drama directed by Lloyd Bacon about a struggling Florida family who save for months to host a lonely serviceman, only to find unexpected love instead.",
+    "Awards": null
+  },
+  {
+    "Title": "Sundown Valley",
+    "Year": 1944,
+    "Director": "Benjamin H. Kline",
+    "Stars": "Charles Starrett; Dub Taylor",
+    "Synopsis": "A rancher resists a mine owner’s tyranny while defending his home.",
+    "Awards": null,
+    "PosterPath": "images/posters/sundownvalley.jpg"
+  },
+  {
+    "Title": "Swing Hostess",
+    "Year": 1944,
+    "Director": "Sam Newfield",
+    "Stars": "Martha Tilton, Iris Adrian",
+    "Synopsis": "Telephone operator lands radio singing gig in B-musical vehicle for Tilton.",
+    "Awards": null,
+    "PosterPath": "images/posters/swinghostess.jpg"
+  },
+  {
+    "Title": "Tampico",
+    "PosterPath": "images/posters/tampico.jpg",
+    "Year": 1944,
+    "Director": "Lothar Mendes",
+    "Stars": "Edward G. Robinson; Lynn Bari; Victor McLaglen",
+    "Synopsis": "Tampico is a 1944 wartime suspense film directed by Lothar Mendes about a sea captain who rescues a mysterious survivor and uncovers a Nazi sabotage plot in the Gulf of Mexico.",
+    "Awards": null
+  },
+  {
+    "Title": "The Ape",
+    "Year": 1940,
+    "Director": "William Nigh",
+    "Stars": "Boris Karloff; Maris Wrixon",
+    "Synopsis": "A doctor dons an ape-suit to harvest spinal fluid from terrified victims in hopes of curing paralysis.",
+    "Awards": null,
+    "PosterPath": "images/posters/theape.jpg"
+  },
+  {
+    "Title": "The Ape Man",
+    "PosterPath": "images/posters/theape.jpg",
+    "Year": 1943,
+    "Director": "William Beaudine",
+    "Stars": "Bela Lugosi; Louise Currie; Wallace Ford",
+    "Synopsis": "The Ape Man is a 1943 horror feature directed by William Beaudine starring Bela Lugosi as a scientist whose experiments leave him half-simian and desperate for a cure.",
+    "Awards": null
+  },
+  {
+    "Title": "The Big Showoff",
+    "PosterPath": "images/posters/thebigshow-off.jpg",
+    "Year": 1945,
+    "Director": "Howard Bretherton",
+    "Stars": "Arthur Lake; Dale Evans; Lionel Stander",
+    "Synopsis": "The Big Show-Off is a 1945 Republic Pictures comedy directed by Howard Bretherton in which a meek pianist poses as a masked pugilist to impress a nightclub singer.",
+    "Awards": null
+  },
+  {
+    "Title": "The Climax",
+    "Year": 1944,
+    "Director": "George Waggner",
+    "Stars": "Susanna Foster; Boris Karloff",
+    "Synopsis": "A sinister physician obsessed with a vanished star plots to silence a new opera singer forever.",
+    "Awards": null,
+    "PosterPath": "images/posters/theclimax.jpg"
+  },
+  {
+    "Title": "The Devil Bat",
+    "Year": 1940,
+    "Director": "Jean Yarbrough",
+    "Stars": "Bela Lugosi; Suzanne Kaaren",
+    "Synopsis": "A mad scientist trains giant bats to kill his enemies by scent.",
+    "Awards": null,
+    "PosterPath": "images/posters/devilbat.jpg"
+  },
+  {
+    "Title": "The Falcon in Hollywood",
+    "Year": 1944,
+    "Director": "Gordon Douglas",
+    "Stars": "Tom Conway; Barbara Hale; Jean Brooks; Rita Corday",
+    "Synopsis": "Sleuth Tom Lawrence (‘The Falcon’) investigates a murder on an RKO studio lot amid Hollywood intrigue.",
+    "Awards": null,
+    "PosterPath": "images/posters/thefalconinhollywood.jpg"
+  },
+  {
+    "Title": "The Fighting Lady",
+    "PosterPath": "images/posters/thefightinglady.jpg",
+    "Year": 1944,
+    "Director": "Edward Steichen",
+    "Stars": "Robert Taylor (narrator); US Navy personnel",
+    "Synopsis": "The Fighting Lady is a 1944 Technicolor Navy documentary directed by Edward Steichen that chronicles a U.S. aircraft carrier and its crew through Pacific theater combat.",
+    "Awards": "Won Academy Award for Best Documentary Feature"
+  },
+  {
+    "Title": "The Keys of the Kingdom",
+    "Year": 1944,
+    "Director": "John M. Stahl",
+    "Stars": "Gregory Peck; Thomas Mitchell; Vincent Price; Rose Stradner",
+    "Synopsis": "A humble Scottish priest’s decades of missionary work in China; reflective religious drama.",
+    "Awards": "Oscar nomination (Best Actor: Gregory Peck)",
+    "PosterPath": "images/posters/keysofthekingdom.jpg"
+  },
+  {
+    "Title": "The Navy Way",
+    "Year": 1944,
+    "Director": "William Berke",
+    "Stars": "Robert Lowery; Jean Parker",
+    "Synopsis": "A sailor competes for love and honor at a wartime training base.",
+    "Awards": null,
+    "PosterPath": "images/posters/thenavyway.jpg"
+  },
+  {
+    "Title": "The Sky’s the Limit",
+    "Year": 1943,
+    "Director": "Edward H. Griffith",
+    "Stars": "Fred Astaire; Joan Leslie",
+    "Synopsis": "A pilot on leave hides his identity and trauma while falling for a photographer.",
+    "Awards": null,
+    "PosterPath": "images/posters/theskysthelimit.jpg"
+  },
+  {
+    "Title": "The Strangler",
+    "PosterPath": "images/posters/thestrangler.jpg",
+    "Year": 1943,
+    "Director": "Max Nosseck",
+    "Stars": "Victor Jory; Otto Kruger; June Duprez",
+    "Synopsis": "Noir thriller about a returning soldier haunted by blackouts who fears he may be the serial killer stalking women through a blackout-shrouded city.",
+    "Awards": null
+  },
+  {
+    "Title": "The Thin Man Goes Home",
+    "Year": 1945,
+    "Director": "Richard Thorpe",
+    "Stars": "William Powell; Myrna Loy",
+    "Synopsis": "Nick and Nora vacation with his parents — but murder tags along.",
+    "Awards": null,
+    "PosterPath": "images/posters/thethinmangoeshome.jpg"
+  },
+  {
+    "Title": "The Unseen",
+    "PosterPath": "images/posters/theunseen.jpg",
+    "Year": 1945,
+    "Director": "Lewis Allen",
+    "Stars": "Joel McCrea; Gail Russell; Herbert Marshall",
+    "Synopsis": "The Unseen is a 1945 mystery thriller directed by Lewis Allen about a governess who suspects the widower she works for is linked to a string of murders in their gloomy row house.",
+    "Awards": null
+  },
+  {
+    "Title": "The Woman in the Window",
+    "Year": 1944,
+    "Director": "Fritz Lang",
+    "Stars": "Edward G. Robinson, Joan Bennett, Raymond Massey",
+    "Synopsis": "Professor’s chance encounter with a mysterious woman leads to murder and guilt.",
+    "Awards": null,
+    "PosterPath": "images/posters/thewomaninthewindow.jpg"
+  },
+  {
+    "Title": "Thoroughbreds",
+    "PosterPath": "images/posters/thoroughbreds.jpg",
+    "Year": 1944,
+    "Director": "George Blair",
+    "Stars": "Tom Neal; Adele Mara; Roger Pryor",
+    "Synopsis": "Thoroughbreds is a 1944 Republic Pictures racing drama directed by George Blair about a struggling stable owner pinning his hopes on an upstart colt and a talented jockey.",
+    "Awards": null
+  },
+  {
+    "Title": "Three Is a Family",
+    "PosterPath": "images/posters/3isafamily.jpg",
+    "Year": 1944,
+    "Director": "Edward Ludwig",
+    "Stars": "Marjorie Reynolds; Charlie Ruggles; Fay Bainter",
+    "Synopsis": "Three Is a Family is a 1944 comedy directed by Edward Ludwig following a couple whose cramped New York apartment bursts with relatives after wartime housing shortages.",
+    "Awards": "Academy Award nomination for Best Sound Recording"
+  },
+  {
+    "Title": "To Have and Have Not",
+    "PosterPath": "images/posters/tohaveandhavenot.jpg",
+    "Year": 1944,
+    "Director": "Howard Hawks",
+    "Stars": "Humphrey Bogart; Lauren Bacall; Walter Brennan",
+    "Synopsis": "To Have and Have Not is a 1944 romantic adventure directed by Howard Hawks pairing Humphrey Bogart and Lauren Bacall in a wartime tale of smugglers aiding the French Resistance in Martinique.",
+    "Awards": null
+  },
+  {
+    "Title": "Tonight and Every Night",
+    "Year": 1945,
+    "Director": "Victor Saville",
+    "Stars": "Rita Hayworth; Lee Bowman",
+    "Synopsis": "A music hall troupe keeps performing through the Blitz, refusing to surrender joy to war.",
+    "Awards": null,
+    "PosterPath": "images/posters/tonightandeverynight.jpg"
+  },
+  {
+    "Title": "Topper",
+    "Year": 1937,
+    "Director": "Norman Z. McLeod",
+    "Stars": "Cary Grant; Constance Bennett",
+    "Synopsis": "An uptight banker’s life spins into chaos when two carefree spirits push him toward joy.",
+    "Awards": "Nominated for 2 Oscars",
+    "PosterPath": "images/posters/topper.jpg"
+  },
+  {
+    "Title": "Turnabout",
+    "Year": 1940,
+    "Director": "Hal Roach",
+    "Stars": "Adolphe Menjou; Carole Landis",
+    "Synopsis": "A feuding couple swap bodies after a mystical curse and must live one another’s lives.",
+    "Awards": null,
+    "PosterPath": "images/posters/turnabout.jpg"
+  },
+  {
+    "Title": "Two Girls and a Sailor",
+    "Year": 1944,
+    "Director": "Richard Thorpe",
+    "Stars": "June Allyson, Gloria DeHaven, Van Johnson",
+    "Synopsis": "Sisters open a canteen for servicemen and find love amid musical numbers.",
+    "Awards": null,
+    "PosterPath": "images/posters/twogirlsandasailor.jpg"
+  },
+  {
+    "Title": "Wedded Bliss",
+    "PosterPath": "images/posters/weddedbliss.jpg",
+    "Year": 1946,
+    "Director": "B. Reeves Eason",
+    "Stars": "Lynne Roberts; Robert Livingston",
+    "Synopsis": "A postwar comedy short chronicling newlyweds whose bargain honeymoon cabin turns into a farcical parade of relatives and mishaps before true bliss sets in.",
+    "Awards": null
+  },
+  {
+    "Title": "When the Lights Go on Again",
+    "PosterPath": "images/posters/whenthelightsgoonagain.jpg",
+    "Year": 1944,
+    "Director": "William K. Howard",
+    "Stars": "Jimmy Lydon; Barbara Belden; Regis Toomey",
+    "Synopsis": "When the Lights Go on Again is a 1944 drama directed by William K. Howard about a young man leaving his small town to fight overseas while his family wrestles with rationing, housing shortages, and hope for reunion.",
+    "Awards": null
+  },
+  {
+    "Title": "Woo Woo",
+    "PosterPath": "images/posters/woowoo.jpg",
+    "Year": 1941,
+    "Director": "Bert Gilroy",
+    "Stars": "Kay Kyser; Georgia Carroll; Harry Babbitt",
+    "Synopsis": "A jitterbug-filled musical short where Kay Kyser and his band debut the novelty tune 'Whooo?' for an ecstatic ballroom crowd.",
+    "Awards": null
+  },
+  {
+    "Title": "Youth on Trial",
+    "Year": 1945,
+    "Director": "Albert S. Rogell",
+    "Stars": "Cora Sue Collins; Warren Mills",
+    "Synopsis": "Courtroom drama about a boy who shoots his abusive stepfather and the debate over guilt and trauma.",
+    "Awards": null,
+    "PosterPath": "images/posters/youthontrial.jpg"
+  }
+]
+</script>
 <script>
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
@@ -7083,6 +8328,16 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
 </script>
 <script>
 (function(){
+  var nowShowingList = [];
+  var dataScript = document.getElementById('rs-nowshowing-data');
+  if (dataScript) {
+    try {
+      nowShowingList = JSON.parse(dataScript.textContent || dataScript.innerText || '[]');
+    } catch (err) {
+      console.error('Failed to parse inline nowshowing data', err);
+    }
+  }
+  setNowShowingData(nowShowingList);
   // Bounds & limits
   var WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
   var BOUNDS = L.latLngBounds([[SOUTH, WEST],[NORTH, EAST]]);
@@ -7092,7 +8347,14 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     zoomControl: false,
     maxBounds: BOUNDS,
     maxBoundsViscosity: 1.0,
-    worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
+    worldCopyJump: false,
+    inertia: true,
+    inertiaDeceleration: 1500,
+    inertiaMaxSpeed: 1000,
+    preferCanvas: true,
+    fadeAnimation: true,
+    zoomAnimation: true,
+    updateWhenIdle: false
   });
   map.fitBounds(BOUNDS, {padding:[20,20]});
 
@@ -7112,19 +8374,116 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   L.control.zoom({ position: 'topright' }).addTo(map);
 
   // Offline tiles
-  var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:200}).addTo(map);
-  var sat = L.tileLayer('tiles/sat/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:210, opacity:1.0, updateWhenZooming:false});
+  var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {
+    minZoom: 12,
+    maxZoom: 19,
+    tms: false,
+    zIndex: 200,
+    keepBuffer: 4,
+    updateWhenIdle: false,
+    updateWhenZooming: true,
+    unloadInvisibleTiles: false
+  }).addTo(map);
+  try { window.baseTiles = baseOSM; } catch(_) {}
+  var sat = L.tileLayer('tiles/sat/{z}/{x}/{y}.png', {
+    minZoom: 12,
+    maxZoom: 19,
+    tms: false,
+    zIndex: 210,
+    opacity: 1.0,
+    keepBuffer: 4,
+    updateWhenIdle: false,
+    updateWhenZooming: true,
+    unloadInvisibleTiles: false
+  });
   try { window.sat = sat; } catch(_) {}
 
-  var street = L.tileLayer('tiles/street/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:220, opacity:1.0, updateWhenZooming:false});
+  var street = L.tileLayer('tiles/street/{z}/{x}/{y}.png', {
+    minZoom: 12,
+    maxZoom: 19,
+    tms: false,
+    zIndex: 220,
+    opacity: 1.0,
+    keepBuffer: 4,
+    updateWhenIdle: false,
+    updateWhenZooming: true,
+    unloadInvisibleTiles: false
+  });
   try { window.street = street; } catch(_) {};
-  var historic = L.tileLayer('tiles/historic/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:400, opacity:1.0, updateWhenZooming:false}).addTo(map);
+  var historic = L.tileLayer('tiles/historic/{z}/{x}/{y}.png', {
+    minZoom: 12,
+    maxZoom: 19,
+    tms: false,
+    zIndex: 400,
+    opacity: 1.0,
+    keepBuffer: 4,
+    updateWhenIdle: false,
+    updateWhenZooming: true,
+    unloadInvisibleTiles: false
+  }).addTo(map);
   try { window.historic = historic; } catch(_) {}
+  function prefetchLayerTiles(layer, radius){
+    try {
+      if (!layer || !map || typeof map.getZoom !== 'function' || typeof map.project !== 'function') return;
+      var r = Math.max(1, radius || 1);
+      var zoom = map.getZoom();
+      var center = map.getCenter();
+      var tileSizePoint = typeof layer.getTileSize === 'function' ? layer.getTileSize() : null;
+      var tileSize = tileSizePoint && tileSizePoint.x ? tileSizePoint.x : 256;
+      var projected = map.project(center, zoom);
+      var baseX = Math.floor(projected.x / tileSize);
+      var baseY = Math.floor(projected.y / tileSize);
+      for (var dx = -r; dx <= r; dx++) {
+        for (var dy = -r; dy <= r; dy++) {
+          var coords = { x: baseX + dx, y: baseY + dy, z: zoom };
+          try {
+            if (typeof layer.getTileUrl === 'function') {
+              var url = layer.getTileUrl(coords);
+              if (url) {
+                var img = new Image();
+                img.decoding = 'async';
+                img.loading = 'lazy';
+                img.referrerPolicy = 'no-referrer';
+                img.src = url;
+              }
+            }
+          } catch(_) {}
+        }
+      }
+    } catch(_) {}
+  }
+
+  function warmVisibleTiles(){
+    var radius = 2;
+    prefetchLayerTiles(baseOSM, radius);
+    try {
+      if (sat && map.hasLayer && map.hasLayer(sat)) prefetchLayerTiles(sat, radius);
+    } catch(_) {}
+    try {
+      if (street && map.hasLayer && map.hasLayer(street)) prefetchLayerTiles(street, radius);
+    } catch(_) {}
+    try {
+      if (historic && map.hasLayer && map.hasLayer(historic)) prefetchLayerTiles(historic, radius);
+    } catch(_) {}
+  }
+
+  var warmTimeout;
+  function scheduleWarm(){
+    try { if (warmTimeout) clearTimeout(warmTimeout); } catch(_) {}
+    warmTimeout = setTimeout(warmVisibleTiles, 140);
+  }
+
+  warmVisibleTiles();
+  if (window.map && typeof window.map.on === "function") {
+    map.on('moveend', scheduleWarm);
+    map.on('zoomend', scheduleWarm);
+  }
   function refreshZ(){
     try{
-      if (sat && map.hasLayer(sat) && sat.bringToFront) sat.bringToFront();
-      if (street && map.hasLayer(street) && street.bringToFront) street.bringToFront();
-      if (historic && map.hasLayer(historic) && historic.bringToFront) historic.bringToFront();
+      var hasLayer = (map && typeof map.hasLayer === 'function') ? map.hasLayer.bind(map) : function(){ return false; };
+      if (sat && hasLayer(sat) && sat.bringToFront) sat.bringToFront();
+      if (street && hasLayer(street) && street.bringToFront) street.bringToFront();
+      if (historic && hasLayer(historic) && historic.bringToFront) historic.bringToFront();
     }catch(e){}
   }
   if (window.map && typeof window.map.on === "function") map.on('overlayadd', refreshZ);
@@ -7133,9 +8492,9 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 // --- Smooth flyTo patch: hide non-top tile layers during animation to prevent cross-fade glitches ---
 function rsGetActiveTileLayers(){
   var arr = [];
-  try{ if (typeof sat !== 'undefined' && map.hasLayer(sat)) arr.push(sat); }catch(_){}
-  try{ if (typeof street !== 'undefined' && map.hasLayer(street)) arr.push(street); }catch(_){}
-  try{ if (typeof historic !== 'undefined' && map.hasLayer(historic)) arr.push(historic); }catch(_){}
+  try{ if (typeof sat !== 'undefined' && map && typeof map.hasLayer === 'function' && map.hasLayer(sat)) arr.push(sat); }catch(_){}
+  try{ if (typeof street !== 'undefined' && map && typeof map.hasLayer === 'function' && map.hasLayer(street)) arr.push(street); }catch(_){}
+  try{ if (typeof historic !== 'undefined' && map && typeof map.hasLayer === 'function' && map.hasLayer(historic)) arr.push(historic); }catch(_){}
   return arr;
 }
 function rsDimNonTopLayers(){
@@ -7240,10 +8599,18 @@ function rsRestoreLayers(state){
       return null;
     }
     function setPressed(btn, on){ if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
-    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return False; } }
+    function has(layer){
+      try {
+        var g = gm();
+        if (!layer || !g || typeof g.hasLayer !== 'function') return false;
+        return g.hasLayer(layer);
+      } catch(_) {
+        return false;
+      }
+    }
 
     function syncButtons(){
-      var g = gm(); if (!g) return;
+      var g = gm(); if (!g || typeof g.on !== 'function') return;
       document.querySelectorAll('.rs-layer-btn[data-layer]').forEach(function(btn){
         var key = btn.getAttribute('data-layer');
         var layer = layerFor(key);
@@ -7276,7 +8643,7 @@ function rsRestoreLayers(state){
 
     try{
       var g = gm();
-      if (g){ g.on('layeradd', syncButtons); g.on('layerremove', syncButtons); }
+      if (g && typeof g.on === 'function'){ g.on('layeradd', syncButtons); g.on('layerremove', syncButtons); }
     }catch(_){}
 
     if (document.readyState === 'complete'){ syncButtons(); }
@@ -7319,6 +8686,15 @@ function rsRestoreLayers(state){
       default: return '#00d1ff';
     }
   }
+  function statusClassName(code){
+    switch(Number(code)){
+      case 1: return 'open';
+      case 0: return 'closed';
+      case 2: return 'repurposed';
+      case 3: return 'demolished';
+      default: return 'unknown';
+    }
+  }
   function statusLabel(code){
     var map = {1:'Open',0:'Closed',2:'Repurposed',3:'Demolished'}; return map.hasOwnProperty(code)?map[code]:String(code);
   }
@@ -7326,17 +8702,307 @@ function rsRestoreLayers(state){
     return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/&/g,' and ').replace(/['’]/g,'').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'').toLowerCase();
   }
 
+  function esc(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(ch){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[ch]);
+    });
+  }
+
+  var NOW_SHOWING_INDEX = {};
+  var NOW_SHOWING_ALIAS_SOURCE = {
+    'Falcon in Hollywood': 'The Falcon in Hollywood',
+    'Keys of the Kingdom': 'The Keys of the Kingdom',
+    'Sandy Dinner for a Soldier': 'Sunday Dinner for a Soldier',
+    'There Is a Family': 'Three Is a Family',
+    'Thoroughbred': 'Thoroughbreds',
+    'The The Woman in the Window': 'The Woman in the Window',
+    'The Unasen': 'The Unseen'
+  };
+
+  function normalizeMovieKey(title){
+    return String(title || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/&/g,' and ')
+      .replace(/['’]/g,'')
+      .replace(/[^a-z0-9]+/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function mapNowShowingEntries(raw){
+    if (!raw) return [];
+    return String(raw).split(';').map(function(part){
+      var title = part && part.trim();
+      if (!title) return null;
+      var key = normalizeMovieKey(title);
+      if (!key) key = safeSlug(title);
+      var meta = key ? NOW_SHOWING_INDEX[key] : null;
+      return { title: title, key: key || safeSlug(title), meta: meta || null };
+    }).filter(Boolean);
+  }
+
+  function setNowShowingData(list){
+    NOW_SHOWING_INDEX = {};
+    function register(key, meta){
+      if (!key || !meta) return;
+      if (!NOW_SHOWING_INDEX[key]) {
+        NOW_SHOWING_INDEX[key] = meta;
+      }
+    }
+    (Array.isArray(list) ? list : []).forEach(function(item){
+      if (!item || !item.Title) return;
+      var primaryKey = normalizeMovieKey(item.Title);
+      if (!primaryKey) return;
+      register(primaryKey, item);
+      register(safeSlug(item.Title), item);
+      var trimmedArticle = primaryKey.replace(/^(the|a|an)\s+/, '');
+      if (trimmedArticle && trimmedArticle !== primaryKey) register(trimmedArticle, item);
+      var altSlug = safeSlug(String(item.Title).replace(/^(The|A|An)\s+/i, ''));
+      if (altSlug) register(altSlug, item);
+    });
+    if (NOW_SHOWING_ALIAS_SOURCE && typeof NOW_SHOWING_ALIAS_SOURCE === 'object') {
+      Object.keys(NOW_SHOWING_ALIAS_SOURCE).forEach(function(aliasTitle){
+        var aliasKey = normalizeMovieKey(aliasTitle);
+        var targetKey = normalizeMovieKey(NOW_SHOWING_ALIAS_SOURCE[aliasTitle]);
+        var meta = NOW_SHOWING_INDEX[targetKey];
+        if (meta) {
+          NOW_SHOWING_INDEX[aliasKey] = meta;
+        }
+      });
+    }
+    try {
+      if (THEATRES && Array.isArray(THEATRES.features)) {
+        THEATRES.features.forEach(function(feature){
+          var props = feature && feature.properties;
+          if (!props) return;
+          var entries = mapNowShowingEntries(props.Movie);
+          props.__nowShowingEntries = entries;
+          props.NowShowing = entries.map(function(entry){
+            var meta = entry.meta || {};
+            return {
+              Key: entry.key,
+              Title: meta.Title || entry.title,
+              OriginalTitle: entry.title,
+              Year: meta.Year != null ? meta.Year : null,
+              Director: meta.Director || null,
+              Stars: meta.Stars || null,
+              Synopsis: meta.Synopsis || null,
+              Awards: meta.Awards || null,
+              PosterPath: filmPoster(meta)
+            };
+          });
+        });
+      }
+    } catch (err) {
+      console.error('Failed to attach now showing metadata to theatres', err);
+    }
+  }
+
+  function filmPoster(meta){
+    var path = meta && meta.PosterPath;
+    if (path && String(path).trim()) return String(path).trim();
+    return 'images/placeholder.png';
+  }
+
+  function filmYear(meta){
+    if (!meta) return '';
+    var year = meta.Year;
+    if (year == null) return '';
+    var num = Number(year);
+    if (!isNaN(num) && isFinite(num)) return String(Math.round(num));
+    var str = String(year).trim();
+    return str && str.toLowerCase() !== 'nan' ? str : '';
+  }
+
+  function filmEntriesFor(p){
+    if (!p) return [];
+    if (Array.isArray(p.__nowShowingEntries)) return p.__nowShowingEntries;
+    var entries = mapNowShowingEntries(p.Movie);
+    if (p) p.__nowShowingEntries = entries;
+    return entries;
+  }
+
+  function renderNowShowingPreview(entries, opts){
+    opts = opts || {};
+    if (!entries.length) return '';
+    var variant = opts.variant || 'list';
+    var theatreIdx = (typeof opts.theatreIdx === 'number' && opts.theatreIdx >= 0) ? String(opts.theatreIdx) : '';
+    var heading = opts.heading === false ? '' : '<div class="rs-ns-heading">Now Showing</div>';
+    var containerAttr = theatreIdx ? ' data-theatre-idx="'+esc(theatreIdx)+'"' : '';
+    var buttonAttr = theatreIdx ? ' data-theatre-idx="'+esc(theatreIdx)+'"' : '';
+    var html = '<div class="rs-ns-preview rs-ns-preview--'+esc(variant)+'"'+containerAttr+'>';
+    html += heading;
+    html += '<div class="rs-ns-chip-row" role="list">';
+    entries.forEach(function(entry){
+      var meta = entry.meta || {};
+      var poster = esc(filmPoster(meta));
+      var year = filmYear(meta);
+      var aria = ' aria-label="'+esc('View '+entry.title+' details')+'"';
+      html += '<button type="button" class="rs-ns-chip" role="listitem" data-film-key="'+esc(entry.key)+'"'+buttonAttr+aria+'>';
+      html += '<img class="rs-ns-chip-thumb" src="'+poster+'" alt="'+esc(entry.title)+' poster" onerror="this.onerror=null;this.src=\'images/placeholder.png\';" />';
+      html += '<span class="rs-ns-chip-title">'+esc(entry.title)+(year ? ' ('+esc(year)+')' : '')+'</span>';
+      html += '</button>';
+    });
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderNowShowingDetails(entries){
+    if (!entries.length) return '';
+    var html = '<section class="rs-details-nowshowing"><h3>Now Showing</h3><div class="rs-film-grid">';
+    entries.forEach(function(entry){
+      var meta = entry.meta || {};
+      var poster = esc(filmPoster(meta));
+      var year = filmYear(meta);
+      var bodyId = 'rs-film-body-'+esc(entry.key);
+      var aria = esc('Show details for '+entry.title);
+      html += '<article class="rs-film-card" data-film-card="'+esc(entry.key)+'" id="rs-film-'+esc(entry.key)+'">';
+      html += '<button type="button" class="rs-film-toggle" data-film-title="'+esc(entry.title)+'" aria-expanded="false" aria-controls="'+bodyId+'" aria-label="'+aria+'">';
+      html += '<img class="rs-film-poster" src="'+poster+'" alt="'+esc(entry.title)+' poster" onerror="this.onerror=null;this.src=\'images/placeholder.png\';" />';
+      html += '<span class="rs-film-toggle-label"><span class="rs-film-toggle-title">'+esc(entry.title)+'</span><span class="rs-film-toggle-action">Tap for details</span><span class="rs-film-toggle-icon" aria-hidden="true">⤵</span></span>';
+      html += '</button>';
+      html += '<div class="rs-film-body" data-film-body id="'+bodyId+'" aria-hidden="true">';
+      html += '<h4>'+esc(entry.title)+(year ? ' <span class="rs-film-year">('+esc(year)+')</span>' : '')+'</h4>';
+      if (meta.Synopsis) html += '<p class="rs-film-synopsis">'+esc(meta.Synopsis)+'</p>';
+      html += '<dl class="rs-film-meta">';
+      if (meta.Director) html += '<div><dt>Director</dt><dd>'+esc(meta.Director)+'</dd></div>';
+      if (meta.Stars) html += '<div><dt>Stars</dt><dd>'+esc(meta.Stars)+'</dd></div>';
+      if (meta.Awards) html += '<div><dt>Awards</dt><dd>'+esc(meta.Awards)+'</dd></div>';
+      html += '</dl>';
+      html += '</div></article>';
+    });
+    html += '</div></section>';
+    return html;
+  }
+
+  function initFilmCardToggles(root){
+    if (!root) return null;
+    var cards = Array.prototype.slice.call(root.querySelectorAll('.rs-film-card'));
+    if (!cards.length) return null;
+    var setters = {};
+    var order = [];
+    cards.forEach(function(card){
+      var key = card.getAttribute('data-film-card');
+      if (!key) return;
+      var toggle = card.querySelector('.rs-film-toggle');
+      var body = card.querySelector('[data-film-body]');
+      if (!toggle || !body) return;
+      order.push(key);
+      var expanded = false;
+      function set(state){
+        expanded = !!state;
+        card.classList.toggle('is-expanded', expanded);
+        card.setAttribute('data-film-expanded', expanded ? 'true' : 'false');
+        toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        var title = (toggle.getAttribute('data-film-title') || '').trim();
+        var labelBase = expanded ? 'Hide details' : 'Show details';
+        var fullLabel = title ? labelBase + ' for ' + title : labelBase;
+        toggle.setAttribute('aria-label', fullLabel);
+        var action = toggle.querySelector('.rs-film-toggle-action');
+        if (action) action.textContent = expanded ? 'Hide details' : 'Tap for details';
+        var icon = toggle.querySelector('.rs-film-toggle-icon');
+        if (icon) icon.textContent = expanded ? '⤴' : '⤵';
+        body.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+      }
+      toggle.addEventListener('click', function(){
+        var next = !expanded;
+        if (next){
+          Object.keys(setters).forEach(function(id){ if (id !== key && typeof setters[id] === 'function') setters[id](false); });
+        }
+        set(next);
+      });
+      toggle.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          toggle.click();
+        }
+      });
+      setters[key] = set;
+      set(false);
+    });
+
+    function expand(key, state){
+      if (!key){
+        if (order.length) expand(order[0], state);
+        return;
+      }
+      if (!setters[key]) return;
+      if (state === false){
+        setters[key](false);
+        return;
+      }
+      Object.keys(setters).forEach(function(id){ if (id !== key) setters[id](false); });
+      setters[key](true);
+    }
+
+    return {
+      expand: expand,
+      firstKey: order.length ? order[0] : null
+    };
+  }
+
+  function initDetailsTabs(root){
+    if (!root) return function(){};
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('.rs-tab'));
+    var panels = Array.prototype.slice.call(root.querySelectorAll('.rs-tabpanel'));
+    if (!tabs.length || !panels.length) return function(name){ return name; };
+
+    function activate(name){
+      if (!name && tabs[0]) name = tabs[0].getAttribute('data-tab');
+      if (!name) return null;
+      tabs.forEach(function(tab){
+        var active = tab.getAttribute('data-tab') === name;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        tab.setAttribute('tabindex', active ? '0' : '-1');
+      });
+      panels.forEach(function(panel){
+        var active = panel.getAttribute('data-panel') === name;
+        panel.classList.toggle('is-active', active);
+        panel.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+      return name;
+    }
+
+    tabs.forEach(function(tab){
+      tab.addEventListener('click', function(){
+        activate(tab.getAttribute('data-tab'));
+      });
+      tab.addEventListener('keydown', function(e){
+        var key = e.key;
+        if (key !== 'ArrowLeft' && key !== 'ArrowRight' && key !== 'Home' && key !== 'End') return;
+        e.preventDefault();
+        var order = tabs;
+        var idx = order.indexOf(tab);
+        if (key === 'Home'){ order[0].focus(); return; }
+        if (key === 'End'){ order[order.length - 1].focus(); return; }
+        var next = key === 'ArrowRight' ? idx + 1 : idx - 1;
+        if (next < 0) next = order.length - 1;
+        if (next >= order.length) next = 0;
+        order[next].focus();
+      });
+    });
+
+    return activate;
+  }
+
   // Build popup HTML (NOW SHOWING appears here)
   function buildPopupHTML(p){
     var img = (p.Image && String(p.Image).trim()) || (p.Theatre ? ('images/'+safeSlug(p.Theatre)+'.jpg') : 'images/placeholder.png');
-    var nowShowing = p.Movie ? '<p class="rs-pop-nowshowing"><strong>NOW SHOWING:</strong> '+String(p.Movie)+'</p>' : '';
+    var films = filmEntriesFor(p);
+    var nowShowing = films.length ? renderNowShowingPreview(films, { variant: 'popup', heading: false, theatreIdx: typeof p.__idx === 'number' ? p.__idx : null }) : '';
     var badge = '<div class="rs-pop-badge"><span class="rs-chip-status">'+statusLabel(Number(p.map_status))+'</span></div>';
     var grid =
       '<div class="rs-pop-grid">'+
         '<div class="rs-label">Address</div><div class="rs-val">'+(p.Address||'')+'</div>'+
         '<div class="rs-label">Status</div><div class="rs-val">'+(p.Status||'')+'</div>'+
       '</div>';
-    var btn = '<div class="rs-pop-actions"><button class="rs-btn-more" data-more>More details</button></div>';
+    var btn = ''
+      + '<div class="rs-pop-actions">'
+      + '  <button class="rs-btn-more" data-more data-action="more-details">More details</button>'
+      + '  <button class="rs-btn-more rs-btn-zoomto" data-action="zoom-to">Zoom to</button>'
+      + '</div>';
     return ''
       + '<div class="rs-pop">'
       + '  <div class="rs-pop-hero">'
@@ -7369,29 +9035,83 @@ function rsRestoreLayers(state){
     rows += row('Operated by','Operated_By');
     rows += row('Seats','Seats');
     rows += row('Description','Description');
-
-    var html = ''
+    var films = filmEntriesFor(p);
+    var header = ''
       + '<h2 class="rs-details-title">'+(p.Theatre||'Details')+'</h2>'
       + ((p.Previous_Names && String(p.Previous_Names).trim()) ? ('<div class=\"rs-aka\">aka: ' + String(p.Previous_Names) + '</div>') : '') + '<div class=\"rs-hero-expand-wrap\">'
       + '  <img class="rs-details-hero" src="'+img+'" alt="'+(p.Theatre||'')+'" onerror="this.onerror=null;this.src=\'images/placeholder.png\';" />'
       + '  <div class="rs-hero-expand-hint">Click image to expand</div>'
-      + '</div>'
-      + '<div class="rs-details-grid">'+(rows || '<div class="rs-dd">No details</div>')+'</div>';
-    return html;
+      + '</div>';
+
+    if (!films.length){
+      return header + '<div class="rs-details-grid">'+(rows || '<div class="rs-dd">No details</div>')+'</div>';
+    }
+
+    var slug = safeSlug(p.Theatre || 'theatre');
+    var detailsPanelId = 'rs-panel-details-'+slug;
+    var nowPanelId = 'rs-panel-nowshowing-'+slug;
+
+    var tabs = '<div class="rs-details-tabs">';
+    tabs += '<div class="rs-tablist" role="tablist" aria-label="Theatre details">';
+    tabs += '<button type="button" class="rs-tab is-active" role="tab" aria-selected="true" tabindex="0" data-tab="details" aria-controls="'+detailsPanelId+'" id="'+detailsPanelId+'-tab">Details</button>';
+    tabs += '<button type="button" class="rs-tab" role="tab" aria-selected="false" tabindex="-1" data-tab="nowshowing" aria-controls="'+nowPanelId+'" id="'+nowPanelId+'-tab">Now Showing</button>';
+    tabs += '</div>';
+    tabs += '<div class="rs-tabpanels">';
+    tabs += '<div class="rs-tabpanel is-active" role="tabpanel" data-panel="details" id="'+detailsPanelId+'" aria-labelledby="'+detailsPanelId+'-tab" aria-hidden="false">';
+    tabs += '<section class="rs-details-about"><div class="rs-details-grid">'+(rows || '<div class="rs-dd">No details</div>')+'</div></section>';
+    tabs += '</div>';
+    tabs += '<div class="rs-tabpanel" role="tabpanel" data-panel="nowshowing" id="'+nowPanelId+'" aria-labelledby="'+nowPanelId+'-tab" aria-hidden="true">'+renderNowShowingDetails(films)+'</div>';
+    tabs += '</div></div>';
+
+    return header + tabs;
   }
 
-  function openDetails(p){
+  function openDetails(p, focusFilmKey){
     var root = modal.querySelector('#rs-details-content');
     root.innerHTML = buildDetailsHTML(p);
+    var filmToggles = initFilmCardToggles(root);
+    if (filmToggles && filmToggles.firstKey && !focusFilmKey){
+      try { filmToggles.expand(filmToggles.firstKey, true); } catch(_){}
+    }
+    var activateTab = initDetailsTabs(root);
     try{ var hero = root.querySelector('.rs-details-hero'); if (hero){ var full = hero.getAttribute('src'); hero.addEventListener('click', function(){ openImageViewer(full); }); } }catch(e){}
+    var hasNowShowing = !!root.querySelector('.rs-tabpanel[data-panel="nowshowing"]');
+    if (typeof activateTab === 'function') activateTab(focusFilmKey && hasNowShowing ? 'nowshowing' : 'details');
+    if (focusFilmKey && hasNowShowing){
+      try{
+        if (filmToggles && typeof filmToggles.expand === 'function'){
+          filmToggles.expand(focusFilmKey, true);
+        }
+        var card = root.querySelector('[data-film-card="'+focusFilmKey+'"]');
+        if (card){
+          card.classList.add('is-highlight');
+          setTimeout(function(){ try{ card.classList.remove('is-highlight'); }catch(_){} }, 1800);
+          try{ card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }catch(_){ card.scrollIntoView(true); }
+        }
+      }catch(_){}
+    }
     modal.style.display='block'; modal.setAttribute('aria-hidden','false');
   }
+
+  var features = (THEATRES && Array.isArray(THEATRES.features)) ? THEATRES.features : [];
+  features.forEach(function(f, idx){
+    if (f && f.properties){ f.properties.__idx = idx; }
+  });
 
   // Layer of theatre points
   var markerLayer = L.geoJSON(THEATRES, {
     pointToLayer: function(f, latlng){
       var p = f.properties||{}; var col = colorForStatus(p.map_status);
-      return L.circleMarker(latlng, {radius:7, color: col, fillColor: col, fillOpacity: 0.9, weight:1.5});
+      var statusSlug = statusClassName(p.map_status);
+      return L.circleMarker(latlng, {
+        radius: 9,
+        color: col,
+        fillColor: col,
+        fillOpacity: 1,
+        weight: 2.5,
+        opacity: 1,
+        className: 'rs-map-dot rs-status-' + statusSlug
+      });
     },
     onEachFeature: function(f, layer){
       var p = f.properties||{};
@@ -7406,7 +9126,12 @@ function rsRestoreLayers(state){
   }).addTo(map);
 
   // Reset button -> fit to bounds
-  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ map.fitBounds(BOUNDS, {padding:[20,20]});
+  var resetBtn = document.getElementById('rs-reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function(){
+      map.fitBounds(BOUNDS, { padding:[20,20] });
+    });
+  }
 
   // Expose globally for kiosk scripts
   try { window.map = map; } catch(_) {}
@@ -7420,34 +9145,98 @@ document.getElementById('map').style.backgroundColor = '#000';
 // Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
 if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
   if (e.tile) e.tile.style.display = 'none';
-}); });
+});
 
   // Floating list toggle/collapse/close
   var floatEl = document.getElementById('rs-float');
-  document.getElementById('rs-toggle-list'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = !floatEl.hidden; });
-  document.getElementById('rs-close'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = true; });
-  document.getElementById('rs-collapse'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ var list = document.getElementById('rs-list'); list.style.display = (list.style.display==='none' ? '' : 'none'); });
+  var toggleBtn = document.getElementById('rs-toggle-list');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function(){
+      if (!floatEl) return;
+      floatEl.hidden = !floatEl.hidden;
+      if (!floatEl.hidden) syncListNowShowingVisibility();
+    });
+  }
+  var closeBtn = document.getElementById('rs-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function(){
+      if (!floatEl) return;
+      floatEl.hidden = true;
+    });
+  }
+  var collapseBtn = document.getElementById('rs-collapse');
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', function(){
+      if (!floatEl) return;
+      floatEl.classList.toggle('rs-collapsed');
+      syncListNowShowingVisibility();
+    });
+  }
+  var resetAppBtn = document.getElementById('rs-reset-app');
+  if (resetAppBtn) {
+    resetAppBtn.addEventListener('click', function(){
+      window.location.reload();
+    });
+  }
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
+
+  function syncListNowShowingVisibility(){
+    if (!listRoot) return;
+    var floatPanel = document.getElementById('rs-float');
+    var panelInactive = !floatPanel || floatPanel.hidden || floatPanel.classList.contains('rs-collapsed');
+    Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-ns-preview--list'), function(preview){
+      if (!preview || !preview.closest) return;
+      var host = preview.closest('.rs-li');
+      if (!host) return;
+      var expanded = !panelInactive && host.classList && host.classList.contains('active');
+      if (!expanded){
+        var activeEl = document.activeElement;
+        if (activeEl && typeof host.contains === 'function' && host.contains(activeEl)){
+          expanded = !panelInactive;
+        }
+      }
+      preview.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+      preview.setAttribute('data-expanded', expanded ? 'true' : 'false');
+    });
+  }
+
+  try { window.rsSyncListNowShowingVisibility = syncListNowShowingVisibility; } catch(_) {}
+
   function liHTML(p, idx){
     var badge = '<span class="rs-chip-status" style="margin-left:6px;">'+statusLabel(Number(p.map_status))+'</span>';
-    var movie = p.Movie ? ('<p class="rs-movie"><strong>Now Showing:</strong> '+String(p.Movie)+'</p>') : '';
+    var films = filmEntriesFor(p);
+    var preview = films.length ? renderNowShowingPreview(films, { variant: 'list', theatreIdx: idx }) : '';
     return '<div class="rs-li" data-idx="'+idx+'">'
       + '<h4>'+ (p.Theatre||'') +'</h4>' + badge
       + '<p class="rs-addr">'+ (p.Address||'') +'</p>'
-      + movie
+      + preview
       + '</div>';
   }
-  var features = THEATRES.features||[];
-  listRoot.innerHTML = features.map(function(f,i){ return liHTML(f.properties||{}, i); }).join('');
+  var theatreProps = features.map(function(f,i){
+    var props = f.properties || {};
+    props.__idx = i;
+    return props;
+  });
+  listRoot.innerHTML = theatreProps.map(function(p,i){ return liHTML(p, i); }).join('');
+  syncListNowShowingVisibility();
   document.getElementById('rs-count').textContent = features.length;
+  if (listRoot && listRoot.addEventListener){
+    listRoot.addEventListener('focusin', function(){ syncListNowShowingVisibility(); });
+    listRoot.addEventListener('focusout', function(){ setTimeout(syncListNowShowingVisibility, 0); });
+  }
 
   // Map theatre index -> layer for fly-to
   var idxToLayer = [];
-  markerLayer.eachLayer(function(l){ idxToLayer.push(l); });
+  markerLayer.eachLayer(function(l){
+    var props = (l.feature && l.feature.properties) || {};
+    var idx = typeof props.__idx === 'number' ? props.__idx : idxToLayer.length;
+    idxToLayer[idx] = l;
+  });
 
   listRoot.addEventListener('click', function(e){
+    if (e.target && e.target.closest('.rs-ns-chip')) return;
     var item = e.target.closest('.rs-li'); if (!item) return;
     var idx = Number(item.getAttribute('data-idx'));
     var layer = idxToLayer[idx]; if (!layer) return;
@@ -7460,7 +9249,19 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     setTimeout(function(){ layer.openPopup(); }, 650);
     Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-li'), function(n){ n.classList.remove('active'); });
     item.classList.add('active');
+    syncListNowShowingVisibility();
   });
+
+  document.addEventListener('click', function(e){
+    var chip = e.target && e.target.closest ? e.target.closest('.rs-ns-chip') : null;
+    if (!chip) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var idx = Number(chip.getAttribute('data-theatre-idx'));
+    if (!isFinite(idx) || idx < 0 || idx >= theatreProps.length) return;
+    var filmKey = chip.getAttribute('data-film-key') || '';
+    openDetails(theatreProps[idx], filmKey || null);
+  }, true);
 
   // Footer legend filters
   var activeStatuses = {1:true, 0:true, 2:true, 3:true};
@@ -7816,7 +9617,7 @@ function zoomHere(lat, lon) {
     try{
       var title = li.querySelector('h4') ? li.querySelector('h4').textContent : '';
       var addr  = li.querySelector('.rs-addr') ? li.querySelector('.rs-addr').textContent : '';
-      var film  = li.querySelector('.rs-movie') ? li.querySelector('.rs-movie').textContent : '';
+      var film  = Array.prototype.map.call(li.querySelectorAll('.rs-ns-chip-title'), function(node){ return node.textContent || ''; }).join(' ');
       return normalize([title, addr, film].join(' '));
     }catch(e){ return ''; }
   }
@@ -8233,7 +10034,7 @@ function zoomHere(lat, lon) {
     // Combine key fields for matching
     var title = li.querySelector('h4')?.textContent || "";
     var addr  = li.querySelector('.rs-addr')?.textContent || "";
-    var movie = li.querySelector('.rs-movie')?.textContent || "";
+    var movie = Array.from(li.querySelectorAll('.rs-ns-chip-title')).map(function(node){ return node.textContent || ''; }).join(' ');
     var extra = (li.getAttribute('data-prevnames')||"") + " " + (li.getAttribute('data-notes')||"");
     return norm([title, addr, movie, extra].join(' '));
   }
@@ -8429,10 +10230,12 @@ function zoomHere(lat, lon) {
 
   function clearActive(){
     getItems().forEach(function(n){ n.classList.remove('active'); });
+    if (typeof window.rsSyncListNowShowingVisibility === 'function') window.rsSyncListNowShowingVisibility();
   }
   function activate(el){
     if (!el) return;
     el.classList.add('active');
+    if (typeof window.rsSyncListNowShowingVisibility === 'function') window.rsSyncListNowShowingVisibility();
     try { el.scrollIntoView({block:'center', behavior:'smooth'}); }
     catch(e){ el.scrollIntoView(true); }
   }
@@ -8569,10 +10372,12 @@ function zoomHere(lat, lon) {
   }
   function clearActive(){
     getItems().forEach(function(n){ n.classList.remove('active'); });
+    if (typeof window.rsSyncListNowShowingVisibility === 'function') window.rsSyncListNowShowingVisibility();
   }
   function activate(el){
     if (!el) return;
     el.classList.add('active');
+    if (typeof window.rsSyncListNowShowingVisibility === 'function') window.rsSyncListNowShowingVisibility();
     var container = getListRoot();
     // Ensure container can scroll
     if (container){
@@ -9472,8 +11277,9 @@ try {
     var m = gm(); if(!m) return;
     var osm = getLayerRef('osm');
     var hist = getLayerRef('historic');
-    try { if (osm && !m.hasLayer(osm)) osm.addTo(m); } catch(_){}
-    try { if (hist && !m.hasLayer(hist)) hist.addTo(m); } catch(_){}
+    var hasLayer = (m && typeof m.hasLayer === 'function') ? m.hasLayer.bind(m) : function(){ return false; };
+    try { if (osm && !hasLayer(osm)) osm.addTo(m); } catch(_){}
+    try { if (hist && !hasLayer(hist)) hist.addTo(m); } catch(_){}
   }
   function enforceOrder(){
     var m = gm(); if(!m) return;
@@ -9482,11 +11288,11 @@ try {
     var sat = getLayerRef('sat');
     var street = getLayerRef('street');
     var hist = getLayerRef('historic');
-    try { if (osm && m.hasLayer(osm)) osm.setZIndex(100); } catch(_){}
-    try { if (sat && m.hasLayer(sat)) sat.setZIndex(300); } catch(_){}
-    try { if (street && m.hasLayer(street)) street.setZIndex(500); } catch(_){}
+    try { if (osm && hasLayer(osm)) osm.setZIndex(100); } catch(_){}
+    try { if (sat && hasLayer(sat)) sat.setZIndex(300); } catch(_){}
+    try { if (street && hasLayer(street)) street.setZIndex(500); } catch(_){}
     try {
-      if (hist && m.hasLayer(hist)) {
+      if (hist && hasLayer(hist)) {
         hist.setZIndex(700);
         if (hist.bringToFront) hist.bringToFront();
       }
@@ -9510,19 +11316,21 @@ try {
       var m = gm(); if(!m) return;
       var frac = v / 100;
 
+      var hasLayer = (m && typeof m.hasLayer === 'function') ? m.hasLayer.bind(m) : function(){ return false; };
+
       if (opts.key === 'historic'){
         var historicLayer = getLayerRef('historic');
         if (historicLayer){
-          if (!m.hasLayer(historicLayer)) historicLayer.addTo(m);
+          if (!hasLayer(historicLayer)) historicLayer.addTo(m);
           try { historicLayer.setOpacity(frac); } catch(_){}
         }
       } else if (opts.key === 'street'){
         var streetLayer = getLayerRef('street');
         if (streetLayer){
           if (v === 0){
-            try { if (m.hasLayer(streetLayer)) m.removeLayer(streetLayer); } catch(_){}
+            try { if (hasLayer(streetLayer)) m.removeLayer(streetLayer); } catch(_){}
           } else {
-            if (!m.hasLayer(streetLayer)) streetLayer.addTo(m);
+            if (!hasLayer(streetLayer)) streetLayer.addTo(m);
             try { streetLayer.setOpacity(frac); } catch(_){}
           }
         }
@@ -9530,9 +11338,9 @@ try {
         var satLayer = getLayerRef('sat');
         if (satLayer){
           if (v === 0){
-            try { if (m.hasLayer(satLayer)) m.removeLayer(satLayer); } catch(_){}
+            try { if (hasLayer(satLayer)) m.removeLayer(satLayer); } catch(_){}
           } else {
-            if (!m.hasLayer(satLayer)) satLayer.addTo(m);
+            if (!hasLayer(satLayer)) satLayer.addTo(m);
             try { satLayer.setOpacity(frac); } catch(_){}
           }
         }
@@ -9583,236 +11391,10 @@ try {
   else window.addEventListener('load', initAll, { once: true });
 
   var m = gm();
-  if (m){
+  if (m && typeof m.on === 'function'){
     m.on('layeradd', enforceOrder);
     m.on('layerremove', enforceOrder);
   }
-})();
-</script>
-<script>
-// === Format theatre cards: status + movies side-by-side, movies split by ';' ===
-(function(){
-  function formatItem(li){
-    try{
-      if (!li || li.__rsRowDone) return;
-      var status = li.querySelector('.rs-chip-status');
-      var movie = li.querySelector('.rs-movie');
-      var addr  = li.querySelector('.rs-addr');
-
-      // Ensure order: Title (h4) -> Address (.rs-addr) -> Row(status + movies)
-      if (movie){
-        // Split movies by semicolon into separate lines
-        var html = movie.innerHTML;
-        var parts = html.split(';').map(function(m){ return m.trim(); }).filter(Boolean);
-        movie.innerHTML = '<strong>Now Showing:</strong>' + (parts.length ? parts.join('<br>') : '');
-      }
-
-      if (status && movie){
-        // Create row container if missing
-        var row = li.querySelector('.rs-bottom-row');
-        if (!row){
-          row = document.createElement('div');
-          row.className = 'rs-bottom-row';
-          // Insert row after the address (preferred), else after title
-          if (addr && addr.parentNode === li){
-            addr.insertAdjacentElement('afterend', row);
-          } else {
-            var title = li.querySelector('h4');
-            if (title && title.parentNode === li){
-              title.insertAdjacentElement('afterend', row);
-            } else {
-              li.appendChild(row);
-            }
-          }
-        }
-
-        // Move status and movie into the row (left/right)
-        if (status.parentNode !== row) row.appendChild(status);
-        if (movie.parentNode !== row) row.appendChild(movie);
-
-        li.__rsRowDone = true;
-      }
-    }catch(e){}
-  }
-
-  function formatAll(){
-    document.querySelectorAll('#rs-list .rs-li').forEach(formatItem);
-  }
-
-  // Initial pass after DOM ready
-  document.addEventListener('DOMContentLoaded', formatAll);
-
-  // Also observe for dynamically added list items
-  var list = document.getElementById('rs-list');
-  if (list){
-    var mo = new MutationObserver(function(muts){
-      muts.forEach(function(m){
-        m.addedNodes && m.addedNodes.forEach(function(n){
-          if (n && n.nodeType === 1 && n.classList && n.classList.contains('rs-li')){
-            formatItem(n);
-          } else if (n && n.querySelectorAll){
-            n.querySelectorAll('.rs-li').forEach(formatItem);
-          }
-        });
-      });
-    });
-    mo.observe(list, { childList: true, subtree: true });
-  }
-})();
-</script>
-<script>
-// === Build and reveal NOW SHOWING panel per theatre ===
-(function(){
-  function buildPanel(li){
-    try{
-      if (!li || li.__rsNowShowingBuilt) return;
-      var movie = li.querySelector('.rs-movie');
-      var panel = li.querySelector('.rs-nowshowing');
-      var afterNode = li.querySelector('.rs-bottom-row') || li.querySelector('.rs-addr') || li.querySelector('h4');
-
-      // Create panel if missing
-      if (!panel){
-        panel = document.createElement('div');
-        panel.className = 'rs-nowshowing';
-        var title = document.createElement('div');
-        title.className = 'rs-ns-title';
-        title.textContent = 'Now Showing:';
-        var lines = document.createElement('div');
-        lines.className = 'rs-ns-lines';
-        panel.appendChild(title);
-        panel.appendChild(lines);
-
-        if (afterNode && afterNode.parentNode === li){
-          afterNode.insertAdjacentElement('afterend', panel);
-        } else {
-          li.appendChild(panel);
-        }
-      }
-
-      // Fill lines from .rs-movie (semicolon-separated)
-      var linesEl = panel.querySelector('.rs-ns-lines');
-      if (movie && linesEl){
-        var raw = movie.innerHTML || movie.textContent || '';
-        var parts = raw.split(';').map(function(m){ return m.trim(); }).filter(Boolean);
-        linesEl.innerHTML = parts.join('<br>');
-      }
-
-      li.__rsNowShowingBuilt = true;
-    }catch(e){}
-  }
-
-  function wireActive(li){
-    try{
-      if (!li || li.dataset.rsActiveHandler === '1') return;
-      li.addEventListener('click', function(ev){
-        try{
-          var list = document.getElementById('rs-list');
-          if (!list) return;
-          // remove active from siblings
-          list.querySelectorAll('.rs-li.active').forEach(function(x){ if (x !== li) x.classList.remove('active'); });
-          // toggle this one on
-          li.classList.add('active');
-        }catch(_){}
-      }, false);
-      li.dataset.rsActiveHandler = '1';
-    }catch(e){}
-  }
-
-  function prepare(li){
-    buildPanel(li);
-    wireActive(li);
-  }
-
-  function prepareAll(){
-    document.querySelectorAll('#rs-list .rs-li').forEach(prepare);
-  }
-
-  // DOM ready
-  document.addEventListener('DOMContentLoaded', prepareAll);
-
-  // Observe dynamic list updates
-  var list = document.getElementById('rs-list');
-  if (list){
-    var mo = new MutationObserver(function(muts){
-      muts.forEach(function(m){
-        (m.addedNodes || []).forEach(function(n){
-          if (n && n.nodeType === 1){
-            if (n.classList && n.classList.contains('rs-li')){
-              prepare(n);
-            } else if (n.querySelectorAll){
-              n.querySelectorAll('.rs-li').forEach(prepare);
-            }
-          }
-        });
-      });
-    });
-    mo.observe(list, { childList: true, subtree: true });
-  }
-})();
-</script>
-<script>
-// === Sanitize Now Showing content to avoid duplicated labels ===
-(function(){
-  function stripNowShowing(text){
-    try{
-      if (!text) return "";
-      // Remove HTML tags around the phrase and the phrase itself (case-insensitive)
-      var t = text.replace(/<\/?strong[^>]*>/gi, '');
-      t = t.replace(/\bnow\s*showing\s*:\s*/i, '');
-      return t.trim();
-    }catch(e){ return text || ''; }
-  }
-
-  function refreshNowShowing(li){
-    try{
-      var movie = li.querySelector('.rs-movie');
-      var panel = li.querySelector('.rs-nowshowing .rs-ns-lines');
-      if (!movie || !panel) return;
-      var raw = movie.innerHTML || movie.textContent || '';
-      raw = stripNowShowing(raw);
-      var parts = raw.split(';').map(function(m){ return m.trim(); }).filter(Boolean);
-      panel.innerHTML = parts.join('<br>');
-    }catch(_){}
-  }
-
-  function refreshAll(){
-    document.querySelectorAll('#rs-list .rs-li').forEach(refreshNowShowing);
-  }
-
-  document.addEventListener('DOMContentLoaded', refreshAll);
-
-  var list = document.getElementById('rs-list');
-  if (list){
-    var mo = new MutationObserver(function(muts){
-      muts.forEach(function(m){
-        (m.addedNodes || []).forEach(function(n){
-          if (n && n.nodeType === 1){
-            if (n.classList && n.classList.contains('rs-li')){
-              refreshNowShowing(n);
-            } else if (n.querySelectorAll){
-              n.querySelectorAll('.rs-li').forEach(refreshNowShowing);
-            }
-          }
-        });
-      });
-    });
-    mo.observe(list, { childList: true, subtree: true });
-  }
-})();
-</script>
-<script>
-// === Fix double 'Now Showing:' display ===
-(function(){
-  document.addEventListener('DOMContentLoaded', function(){
-    document.querySelectorAll('#rs-list .rs-li .rs-nowshowing').forEach(function(panel){
-      var lines = panel.querySelector('.rs-ns-lines');
-      if(!lines) return;
-      var html = lines.innerHTML;
-      // If the text already contains 'Now Showing:', remove duplicate titles
-      html = html.replace(/Now\s*Showing\s*:/gi, '').trim();
-      lines.innerHTML = html;
-    });
-  });
 })();
 </script>
 <script>
@@ -10188,31 +11770,51 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  function wireZoomButton(btn, contextEvent) {
+    if (!btn) return;
+    if (contextEvent) btn.__rsZoomContext = contextEvent;
+    if (!btn.__rsZoomWired) {
+      btn.addEventListener('click', function(ev){
+        ev.preventDefault();
+        if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+        var ctx = btn.__rsZoomContext;
+        if (!ctx || !ctx.popup) {
+          try {
+            var popup = (typeof map !== 'undefined' && map && map._popup) ? map._popup : null;
+            if (popup) ctx = { popup: popup };
+          } catch(_) {}
+        }
+        zoomToExact(ctx || { popup: null });
+        return false;
+      }, { passive: false });
+      btn.__rsZoomWired = true;
+    }
+    if (contextEvent) btn.__rsZoomContext = contextEvent;
+  }
+
   function ensureZoomToButtonForPopup(e) {
     try {
       var popupEl = e && e.popup && e.popup.getElement && e.popup.getElement();
       if (!popupEl) return;
       // Prefer a dedicated actions row if present
       var actions = popupEl.querySelector('.rs-pop-actions') || popupEl.querySelector('.popup-actions') || popupEl;
-      if (!actions.querySelector('.rs-btn-zoomto')) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'rs-btn-more rs-btn-zoomto';
-        btn.textContent = 'Zoom To';
-        // Try to place next to an existing "More details" button
-        var more = actions.querySelector('.rs-btn-more, .rs-more, a.more, button.more');
-        if (more && more.parentNode === actions) {
-          more.insertAdjacentElement('afterend', btn);
-        } else {
-          actions.appendChild(btn);
-        }
-        btn.addEventListener('click', function(ev){
-          ev.preventDefault();
-          ev.stopImmediatePropagation && ev.stopImmediatePropagation();
-          zoomToExact(e);
-          return false;
-        }, { passive: false });
+      var existing = actions.querySelector('.rs-btn-zoomto');
+      if (existing) {
+        wireZoomButton(existing, e);
+        return;
       }
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'rs-btn-more rs-btn-zoomto';
+      btn.textContent = 'Zoom To';
+      // Try to place next to an existing "More details" button
+      var more = actions.querySelector('.rs-btn-more, .rs-more, a.more, button.more');
+      if (more && more.parentNode === actions) {
+        more.insertAdjacentElement('afterend', btn);
+      } else {
+        actions.appendChild(btn);
+      }
+      wireZoomButton(btn, e);
     } catch (err) {
       console && console.warn && console.warn('ensureZoomToButtonForPopup error:', err);
     }
@@ -11713,14 +13315,35 @@ document.addEventListener('DOMContentLoaded', function() {
   window.RS_TIPS_START = () => showStep(0);
 
   // Hook a visible "Tips" button in the float header if no HELP button is wired
+  const safeOn = (window.rsSafeOn) ? window.rsSafeOn : function(el, ev, fn, opts){ if (el && el.addEventListener) el.addEventListener(ev, fn, opts||false); };
+
+  function wireTipsButton(btn){
+    if (!btn) return;
+    if (!btn.classList.contains('rs-tips-btn-float')) btn.classList.add('rs-tips-btn-float');
+    if (!btn.classList.contains('rs-btn')) btn.classList.add('rs-btn');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Tips');
+    btn.setAttribute('data-rs-allow-tips', 'true');
+    if (!btn.textContent || !btn.textContent.trim()) btn.textContent = 'Tips';
+    if (!btn._rsBound){
+      btn._rsBound = true;
+      safeOn(btn, 'click', () => window.RS_TIPS_START && window.RS_TIPS_START());
+    }
+  }
+
   function ensureTipsButton(){
-    if (document.querySelector('#rs-float .rs-tips-btn')) return;
+    const floatPanel = document.getElementById('rs-float');
+    if (floatPanel && floatPanel.hasAttribute('data-disable-tips')) return;
+    const existing = document.querySelector('#rs-float .rs-tips-btn, #rs-float .rs-tips-btn-float');
+    if (existing){
+      wireTipsButton(existing);
+      return;
+    }
     const hdr = document.querySelector('#rs-float .rs-float__header') || document.querySelector('#rs-float');
     if (!hdr) return;
     const btn = document.createElement('button');
-    btn.className = 'rs-tips-btn';
     btn.textContent = 'Tips';
-    btn.addEventListener('click', () => window.RS_TIPS_START());
+    wireTipsButton(btn);
     hdr.appendChild(btn);
   }
   ensureTipsButton();
@@ -11736,26 +13359,45 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
 </script>
 <script>
 (function(){
+  const safeOn = (window.rsSafeOn) ? window.rsSafeOn : function(el, ev, fn, opts){ if (el && el.addEventListener) el.addEventListener(ev, fn, opts||false); };
+
+  function bindToolbarTips(btn){
+    if (!btn) return;
+    if (!btn.classList.contains('rs-tips-btn-toolbar')) btn.classList.add('rs-tips-btn-toolbar');
+    if (!btn.classList.contains('rs-btn')) btn.classList.add('rs-btn');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Tips');
+    btn.setAttribute('data-rs-allow-tips', 'true');
+    if (!btn.textContent || !btn.textContent.trim()) btn.textContent = 'Tips';
+    if (!btn._rsBound){
+      btn._rsBound = true;
+      safeOn(btn, 'click', () => {
+        if (window.RS_TIPS_START) {
+          window.RS_TIPS_START();
+        } else {
+          document.dispatchEvent(new CustomEvent('rs:open-help', { bubbles: true }));
+        }
+      });
+    }
+  }
+
   // Enhance existing RS_TIPS_START + add toolbar button near INFO/HELP
   function ensureToolbarTips(){
     // Try to find a toolbar container by locating HELP or INFO button
     const helpBtn = window.rsFindHelpButton();
     const infoBtn = window.rsFindInfoButton();
     const anchor = helpBtn || infoBtn;
-    if (!anchor) return;
-    // Avoid duplicates
-    if (anchor.parentElement && anchor.parentElement.querySelector('.rs-tips-btn-toolbar')) return;
+    if (!anchor || !anchor.parentElement) return;
 
-    // Insert Tips button next to HELP in the same toolbar row
-    const tips = document.createElement('button');
-    tips.className = 'rs-tips-btn-toolbar';
-    tips.type = 'button';
-    tips.textContent = 'TIPS';
-    tips.addEventListener('click', ()=> (window.RS_TIPS_START && window.RS_TIPS_START()));
+    let tips = anchor.parentElement.querySelector('.rs-tips-btn-toolbar');
+    if (!tips){
+      tips = document.createElement('button');
+      tips.textContent = 'Tips';
+      if (anchor.nextSibling) anchor.parentElement.insertBefore(tips, anchor.nextSibling);
+      else anchor.parentElement.appendChild(tips);
+    }
 
-    // Insert after HELP (or INFO if HELP missing)
-    if (anchor.nextSibling) anchor.parentElement.insertBefore(tips, anchor.nextSibling);
-    else anchor.parentElement.appendChild(tips);
+    bindToolbarTips(tips);
   }
 
   // Upgrade placement to work regardless of #rs-float position by auto-scrolling
@@ -11812,9 +13454,36 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     return null;
   }
 
- 
+
+  function ensureGlobalTips(){
+    const toolbar = findExternalToolbar();
+    if (!toolbar) return;
+
+    let btn = toolbar.querySelector('[data-rs-allow-tips="true"], .rs-tips-btn-global');
+    if (!btn){
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Tips';
+      toolbar.appendChild(btn);
+    }
+
+    btn.setAttribute('data-rs-allow-tips', 'true');
+    btn.classList.add('rs-btn', 'rs-tips-btn-global');
+    btn.setAttribute('aria-label', 'Tips');
+
+    if (!btn._rsBound){
+      btn._rsBound = true;
+      btn.addEventListener('click', function(){
+        if (typeof window.RS_TIPS_START === 'function') window.RS_TIPS_START();
+        else document.dispatchEvent(new CustomEvent('rs:open-help', { bubbles: true }));
+      });
+    }
+  }
+
+
 
   // Run now and on DOM changes (toolbars often render late)
+  try { window.ensureGlobalTips = ensureGlobalTips; } catch(_) {}
   const ready = () => ensureGlobalTips();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
   else ready();
@@ -12010,6 +13679,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   }
 
   function removeExistingTileLayers(map){
+    if (!map || !map._layers) return;
     try {
       Object.values(map._layers).forEach(function(layer){
         if (layer && layer._url) {
@@ -12282,22 +13952,28 @@ document.addEventListener("DOMContentLoaded", function() {
     var btn = toolbar.querySelector('.rs-tips-btn-toolbar');
     if (!btn){
       btn = document.createElement('button');
-      btn.className = 'rs-btn rs-tips-btn-toolbar';
-      btn.type = 'button';
-      btn.setAttribute('aria-label','Tips');
-      btn.textContent = 'Tips';
       toolbar.appendChild(btn);
     }
+    if (!btn.classList.contains('rs-tips-btn-toolbar')) btn.classList.add('rs-tips-btn-toolbar');
+    if (!btn.classList.contains('rs-btn')) btn.classList.add('rs-btn');
+    btn.type = 'button';
+    btn.setAttribute('aria-label','Tips');
+    btn.setAttribute('data-rs-allow-tips','true');
+    if (!btn.textContent || !btn.textContent.trim()) btn.textContent = 'Tips';
     if (!btn._rsBound){
       btn._rsBound = true;
       var safeOn = (window.rsSafeOn) ? window.rsSafeOn : function(el, ev, fn, opts){ if (el && el.addEventListener) el.addEventListener(ev, fn, opts||false); };
       safeOn(btn, 'click', function(){
-        var m = document.getElementById('rs-infohelp-modal') || document.getElementById('rs-help-modal') || document.getElementById('rs-info-modal');
-        if (m){
-          m.setAttribute('aria-hidden','false');
-          m.classList && m.classList.remove('is-hidden','hidden','sr-only');
+        if (window.RS_TIPS_START) {
+          window.RS_TIPS_START();
         } else {
-          document.dispatchEvent(new CustomEvent('rs:open-help', {bubbles:true}));
+          var m = document.getElementById('rs-infohelp-modal') || document.getElementById('rs-help-modal') || document.getElementById('rs-info-modal');
+          if (m){
+            m.setAttribute('aria-hidden','false');
+            m.classList && m.classList.remove('is-hidden','hidden','sr-only');
+          } else {
+            document.dispatchEvent(new CustomEvent('rs:open-help', {bubbles:true}));
+          }
         }
       });
     }
@@ -12309,6 +13985,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
       if (!(el.closest && el.closest('.rs-toolbar'))){
+        if (el.hasAttribute('data-rs-allow-tips')) continue;
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12328,6 +14005,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i=0;i<candidates.length;i++){
       var el = candidates[i];
       if (rsLooksLikeTips(el) && !(el.closest && el.closest('.rs-toolbar'))){
+        if (el.hasAttribute('data-rs-allow-tips')) continue;
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12427,6 +14105,9 @@ document.addEventListener("DOMContentLoaded", function() {
     btn.addEventListener('click', function(ev){
       ev.stopPropagation();
       float.classList.toggle('rs-collapsed');
+      if (typeof window.rsSyncListNowShowingVisibility === 'function') {
+        window.rsSyncListNowShowingVisibility();
+      }
     });
   }
   if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', init, {once:true}); } else { init(); }
