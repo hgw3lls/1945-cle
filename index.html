@@ -7047,12 +7047,30 @@ html.booting #rs-float {
 #rs-float { position: relative; }
 #rs-float .rs-tips-btn-toolbar,
 #rs-float .rs-tips-btn-global,
-#rs-float .rs-tips-btn-float {
+#rs-float .rs-tips-btn-float,
+#rs-reset-app {
   position: absolute;
   right: 12px;
   bottom: 12px;
   z-index: 100;
   pointer-events: auto;
+}
+#rs-reset-app {
+  background: #f8f5ec;
+  color: #111;
+  border: 2px solid #111;
+  border-radius: 8px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  padding: 10px 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+#rs-reset-app:focus {
+  outline: 3px solid rgba(63,196,255,0.65);
+  outline-offset: 2px;
+}
+#rs-reset-app:active {
+  transform: translateY(1px);
 }
 </style><style>
 
@@ -7354,7 +7372,7 @@ html.booting #rs-float {
 </div>
 <div id="rs-toggle-list"> </div>
 </div>
-<section class="rs-float" id="rs-float">
+<section class="rs-float" data-disable-tips="true" id="rs-float">
 <header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
 <div><span class="rs-float__title">Theatres</span>
 <span class="rs-chip" id="rs-count">0</span></div>
@@ -7421,7 +7439,7 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-float" data-rs-allow-tips="true" type="button">Tips</button></section>
+<button aria-label="Reset application" class="rs-btn" id="rs-reset-app" title="Restart experience" type="button">Reset App</button></section>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -8992,7 +9010,12 @@ function rsRestoreLayers(state){
   }).addTo(map);
 
   // Reset button -> fit to bounds
-  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ map.fitBounds(BOUNDS, {padding:[20,20]});
+  var resetBtn = document.getElementById('rs-reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function(){
+      map.fitBounds(BOUNDS, { padding:[20,20] });
+    });
+  }
 
   // Expose globally for kiosk scripts
   try { window.map = map; } catch(_) {}
@@ -9010,24 +9033,52 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 
   // Floating list toggle/collapse/close
   var floatEl = document.getElementById('rs-float');
-  document.getElementById('rs-toggle-list'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = !floatEl.hidden; });
-  document.getElementById('rs-close'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = true; });
-  document.getElementById('rs-collapse'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ var list = document.getElementById('rs-list'); list.style.display = (list.style.display==='none' ? '' : 'none'); });
+  var toggleBtn = document.getElementById('rs-toggle-list');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function(){
+      if (!floatEl) return;
+      floatEl.hidden = !floatEl.hidden;
+      if (!floatEl.hidden) syncListNowShowingVisibility();
+    });
+  }
+  var closeBtn = document.getElementById('rs-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function(){
+      if (!floatEl) return;
+      floatEl.hidden = true;
+    });
+  }
+  var collapseBtn = document.getElementById('rs-collapse');
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', function(){
+      if (!floatEl) return;
+      floatEl.classList.toggle('rs-collapsed');
+      syncListNowShowingVisibility();
+    });
+  }
+  var resetAppBtn = document.getElementById('rs-reset-app');
+  if (resetAppBtn) {
+    resetAppBtn.addEventListener('click', function(){
+      window.location.reload();
+    });
+  }
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
 
   function syncListNowShowingVisibility(){
     if (!listRoot) return;
+    var floatPanel = document.getElementById('rs-float');
+    var panelInactive = !floatPanel || floatPanel.hidden || floatPanel.classList.contains('rs-collapsed');
     Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-ns-preview--list'), function(preview){
       if (!preview || !preview.closest) return;
       var host = preview.closest('.rs-li');
       if (!host) return;
-      var expanded = host.classList && host.classList.contains('active');
+      var expanded = !panelInactive && host.classList && host.classList.contains('active');
       if (!expanded){
         var activeEl = document.activeElement;
         if (activeEl && typeof host.contains === 'function' && host.contains(activeEl)){
-          expanded = true;
+          expanded = !panelInactive;
         }
       }
       preview.setAttribute('aria-hidden', expanded ? 'false' : 'true');
@@ -13145,6 +13196,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function ensureTipsButton(){
+    const floatPanel = document.getElementById('rs-float');
+    if (floatPanel && floatPanel.hasAttribute('data-disable-tips')) return;
     const existing = document.querySelector('#rs-float .rs-tips-btn, #rs-float .rs-tips-btn-float');
     if (existing){
       wireTipsButton(existing);
@@ -13915,6 +13968,9 @@ document.addEventListener("DOMContentLoaded", function() {
     btn.addEventListener('click', function(ev){
       ev.stopPropagation();
       float.classList.toggle('rs-collapsed');
+      if (typeof window.rsSyncListNowShowingVisibility === 'function') {
+        window.rsSyncListNowShowingVisibility();
+      }
     });
   }
   if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', init, {once:true}); } else { init(); }
