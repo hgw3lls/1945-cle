@@ -1190,6 +1190,15 @@ html,body {
 
 
 
+#rs-float .rs-li .rs-ns-preview--list {
+  display: none;
+}
+
+#rs-float .rs-li.active .rs-ns-preview--list,
+#rs-float .rs-li:focus-within .rs-ns-preview--list {
+  display: block;
+}
+
 .rs-details-tabs {
 
   margin-top: 26px;
@@ -7949,6 +7958,27 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
+
+  function syncListNowShowingVisibility(){
+    if (!listRoot) return;
+    Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-ns-preview--list'), function(preview){
+      if (!preview || !preview.closest) return;
+      var host = preview.closest('.rs-li');
+      if (!host) return;
+      var expanded = host.classList && host.classList.contains('active');
+      if (!expanded){
+        var activeEl = document.activeElement;
+        if (activeEl && typeof host.contains === 'function' && host.contains(activeEl)){
+          expanded = true;
+        }
+      }
+      preview.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+      preview.setAttribute('data-expanded', expanded ? 'true' : 'false');
+    });
+  }
+
+  try { window.rsSyncListNowShowingVisibility = syncListNowShowingVisibility; } catch(_) {}
+
   function liHTML(p, idx){
     var badge = '<span class="rs-chip-status" style="margin-left:6px;">'+statusLabel(Number(p.map_status))+'</span>';
     var films = filmEntriesFor(p);
@@ -7965,7 +7995,12 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     return props;
   });
   listRoot.innerHTML = theatreProps.map(function(p,i){ return liHTML(p, i); }).join('');
+  syncListNowShowingVisibility();
   document.getElementById('rs-count').textContent = features.length;
+  if (listRoot && listRoot.addEventListener){
+    listRoot.addEventListener('focusin', function(){ syncListNowShowingVisibility(); });
+    listRoot.addEventListener('focusout', function(){ setTimeout(syncListNowShowingVisibility, 0); });
+  }
 
   // Map theatre index -> layer for fly-to
   var idxToLayer = [];
@@ -7989,6 +8024,7 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     setTimeout(function(){ layer.openPopup(); }, 650);
     Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-li'), function(n){ n.classList.remove('active'); });
     item.classList.add('active');
+    syncListNowShowingVisibility();
   });
 
   document.addEventListener('click', function(e){
@@ -8969,10 +9005,12 @@ function zoomHere(lat, lon) {
 
   function clearActive(){
     getItems().forEach(function(n){ n.classList.remove('active'); });
+    if (typeof window.rsSyncListNowShowingVisibility === 'function') window.rsSyncListNowShowingVisibility();
   }
   function activate(el){
     if (!el) return;
     el.classList.add('active');
+    if (typeof window.rsSyncListNowShowingVisibility === 'function') window.rsSyncListNowShowingVisibility();
     try { el.scrollIntoView({block:'center', behavior:'smooth'}); }
     catch(e){ el.scrollIntoView(true); }
   }
@@ -9109,10 +9147,12 @@ function zoomHere(lat, lon) {
   }
   function clearActive(){
     getItems().forEach(function(n){ n.classList.remove('active'); });
+    if (typeof window.rsSyncListNowShowingVisibility === 'function') window.rsSyncListNowShowingVisibility();
   }
   function activate(el){
     if (!el) return;
     el.classList.add('active');
+    if (typeof window.rsSyncListNowShowingVisibility === 'function') window.rsSyncListNowShowingVisibility();
     var container = getListRoot();
     // Ensure container can scroll
     if (container){
