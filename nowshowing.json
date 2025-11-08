@@ -4,7 +4,7 @@
     "Year": 1943.0,
     "Director": "Richard Wallace",
     "Stars": "Brian Aherne; Loretta Young",
-    "Synopsis": "A shell-shocked soldier\u2019s return from war strains his marriage and identity, pushing him toward a desperate act.",
+    "Synopsis": "A shell-shocked soldier’s return from war strains his marriage and identity, pushing him toward a desperate act.",
     "Awards": null,
     "PosterPath": "images/posters/anighttoremember.jpg"
   },
@@ -13,7 +13,7 @@
     "Year": 1945.0,
     "Director": "Charles Vidor",
     "Stars": "Cornel Wilde; Merle Oberon",
-    "Synopsis": "Chopin\u2019s genius blossoms under political upheaval and a tempestuous romance with George Sand.",
+    "Synopsis": "Chopin’s genius blossoms under political upheaval and a tempestuous romance with George Sand.",
     "Awards": "Nominated for 6 Oscars",
     "PosterPath": "images/posters/asongtoremember.jpg"
   },
@@ -23,7 +23,7 @@
     "Director": "Elia Kazan",
     "Stars": "Dorothy McGuire; James Dunn",
     "Synopsis": "A young girl comes of age while her family fights to survive poverty and heartbreak in early Brooklyn.",
-    "Awards": "Oscar \u2014 Best Supporting Actor",
+    "Awards": "Oscar — Best Supporting Actor",
     "PosterPath": "images/posters/atreegrowsinbrooklyn.jpg"
   },
   {
@@ -58,7 +58,7 @@
     "Year": 1941.0,
     "Director": "Edward H. Griffith",
     "Stars": "Madeleine Carroll; Sterling Hayden",
-    "Synopsis": "A foreman and his boss\u2019s daughter clash and fall in love on a Caribbean island poised for unrest.",
+    "Synopsis": "A foreman and his boss’s daughter clash and fall in love on a Caribbean island poised for unrest.",
     "Awards": null,
     "PosterPath": "images/posters/bahamapassage.jpg"
   },
@@ -103,25 +103,34 @@
     "Year": 1943.0,
     "Director": "Lesley Selander",
     "Stars": "Richard Dix; Jane Wyatt",
-    "Synopsis": "A railroad scout and a gambler\u2019s daughter find love and conflict as trains push west into hostile territory.",
+    "Synopsis": "A railroad scout and a gambler’s daughter find love and conflict as trains push west into hostile territory.",
     "Awards": null,
     "PosterPath": "images/posters/buckskinfrontier.jpg"
+  },
+  {
+    "Title": "Candy's Dream Girl",
+    "PosterPath": "images/posters/gandysdreamgirl.jpg",
+    "Year": 1944,
+    "Director": "Howard Bretherton",
+    "Stars": "Jane Powell; Ralph Bell; Carmen Amaya",
+    "Synopsis": "A wartime musical short built around stage performer Candy Johnson, whose whirlwind daydream sparkles with swing routines and specialty acts staged for servicemen.",
+    "Awards": null
   },
   {
     "Title": "Dark Mountain",
     "Year": 1944.0,
     "Director": "William A. Berke",
     "Stars": "Regis Toomey; Ellen Drew",
-    "Synopsis": "On the run from the mob, a businessman\u2019s remarried ex-wife must choose between safety and love in the wilderness.",
+    "Synopsis": "On the run from the mob, a businessman’s remarried ex-wife must choose between safety and love in the wilderness.",
     "Awards": null,
     "PosterPath": "images/posters/darkmountain.jpg"
   },
   {
     "Title": "Dark Waters",
     "Year": 1944.0,
-    "Director": "Andr\u00e9 de Toth",
+    "Director": "André de Toth",
     "Stars": "Merle Oberon; Franchot Tone",
-    "Synopsis": "A traumatized young woman suspects her relatives\u2019 Southern mansion hides deadly intentions.",
+    "Synopsis": "A traumatized young woman suspects her relatives’ Southern mansion hides deadly intentions.",
     "Awards": null,
     "PosterPath": "images/posters/darkwaters.jpg"
   },
@@ -135,7 +144,7 @@
     "PosterPath": "images/posters/daysofglory.jpg"
   },
   {
-    "Title": "Enter Ars\u00e8ne Lupin",
+    "Title": "Enter Arsène Lupin",
     "Year": 1944.0,
     "Director": "Ford Beebe",
     "Stars": "Charles Korvin, Ella Raines, J. Carrol Naish",
@@ -157,25 +166,16 @@
     "Year": 1944.0,
     "Director": "Jacques Tourneur",
     "Stars": "Hedy Lamarr; George Brent",
-    "Synopsis": "A psychiatrist is drawn into a glamorous woman\u2019s dangerous domestic nightmare in Manhattan.",
+    "Synopsis": "A psychiatrist is drawn into a glamorous woman’s dangerous domestic nightmare in Manhattan.",
     "Awards": null,
     "PosterPath": "images/posters/experimentperilous.jpg"
-  },
-  {
-    "Title": "The Falcon in Hollywood",
-    "Year": 1944.0,
-    "Director": "Gordon Douglas",
-    "Stars": "Tom Conway; Barbara Hale; Jean Brooks; Rita Corday",
-    "Synopsis": "Sleuth Tom Lawrence (\u2018The Falcon\u2019) investigates a murder on an RKO studio lot amid Hollywood intrigue.",
-    "Awards": null,
-    "PosterPath": "images/posters/thefalconinhollywood.jpg"
   },
   {
     "Title": "Fast Company",
     "Year": 1938.0,
     "Director": "Edward Buzzell",
     "Stars": "Melvyn Douglas, Florence Rice",
-    "Synopsis": "Rare-book dealers moonlight as amateur sleuths investigating a collector\u2019s murder.",
+    "Synopsis": "Rare-book dealers moonlight as amateur sleuths investigating a collector’s murder.",
     "Awards": null,
     "PosterPath": "images/posters/fastcompany.jpg"
   },
@@ -184,9 +184,18 @@
     "Year": 1945.0,
     "Director": "George Waggner",
     "Stars": "Susanna Foster, Turhan Bey, Alan Curtis",
-    "Synopsis": "Nightclub singer seeks revenge for her brother\u2019s death on the Barbary Coast.",
+    "Synopsis": "Nightclub singer seeks revenge for her brother’s death on the Barbary Coast.",
     "Awards": null,
     "PosterPath": "images/posters/friscosal.jpg"
+  },
+  {
+    "Title": "German Atrocities--Lublin Death Factory",
+    "PosterPath": "images/posters/lublindeathfactory.jpg",
+    "Year": 1944,
+    "Director": "U.S. Army Signal Corps",
+    "Stars": "Documentary footage",
+    "Synopsis": "Liberation footage of the Majdanek concentration camp assembled to expose Nazi war crimes to Allied audiences under the German Atrocities newsreel banner.",
+    "Awards": null
   },
   {
     "Title": "God Is My Co-Pilot",
@@ -202,7 +211,7 @@
     "Year": 1944.0,
     "Director": "John Brahm",
     "Stars": "Anne Baxter, Ralph Bellamy",
-    "Synopsis": "A manipulative convalescent disrupts a painter\u2019s household through deceit and obsession.",
+    "Synopsis": "A manipulative convalescent disrupts a painter’s household through deceit and obsession.",
     "Awards": null,
     "PosterPath": "images/posters/guestinthehouse.jpg"
   },
@@ -220,7 +229,7 @@
     "Year": 1945.0,
     "Director": "John Brahm",
     "Stars": "Laird Cregar, Linda Darnell, George Sanders",
-    "Synopsis": "Period noir of a composer\u2019s murderous blackouts and descent into madness.",
+    "Synopsis": "Period noir of a composer’s murderous blackouts and descent into madness.",
     "Awards": null,
     "PosterPath": "images/posters/hangoversquare.jpg"
   },
@@ -247,7 +256,7 @@
     "Year": 1945.0,
     "Director": "Jean Yarbrough",
     "Stars": "Bud Abbott, Lou Costello, Peggy Ryan",
-    "Synopsis": "Comic chaos as two caretakers try to save a women\u2019s college from foreclosure.",
+    "Synopsis": "Comic chaos as two caretakers try to save a women’s college from foreclosure.",
     "Awards": null,
     "PosterPath": "images/posters/herecomethecoeds.jpg"
   },
@@ -261,22 +270,13 @@
     "PosterPath": "images/posters/herecomethewaves.jpg"
   },
   {
-    "Title": "I\u2019ll Be Seeing You",
-    "Year": 1944.0,
-    "Director": "William Dieterle",
-    "Stars": "Ginger Rogers, Joseph Cotten, Shirley Temple",
-    "Synopsis": "Tender Christmas romance between a parolee and a PTSD-stricken soldier.",
-    "Awards": null,
-    "PosterPath": "images/posters/illbeseeingyou.jpg"
-  },
-  {
-    "Title": "I\u2019ll Sell My Life",
-    "Year": 1941.0,
-    "Director": "Elmer Clifton",
-    "Stars": "Rose Hobart, Michael Whalen",
-    "Synopsis": "Reporter\u2019s strange ad leads to intrigue and murder in this low-budget thriller.",
-    "Awards": null,
-    "PosterPath": "images/posters/illsellmylife.jpg"
+    "Title": "Hotel Berlin",
+    "PosterPath": "images/posters/hotelberlin.jpg",
+    "Year": 1945,
+    "Director": "Peter Godfrey",
+    "Stars": "Faye Emerson; Helmut Dantine; Raymond Massey; Andrea King",
+    "Synopsis": "Hotel Berlin is an American drama film made by Warner Bros. in late 1944 to early 1945 starring Faye Emerson, Helmut Dantine, Raymond Massey and Andrea King. Directed by Peter Godfrey, it is set in Berlin near the close of World War II, and is based on the novel Hotel Berlin by Vicki Baum.",
+    "Awards": null
   },
   {
     "Title": "Ice-Capades Revue",
@@ -292,9 +292,36 @@
     "Year": 1942.0,
     "Director": "William C. McGann",
     "Stars": "John Wayne; Binnie Barnes; Albert Dekker; Helen Parrish",
-    "Synopsis": "Gold Rush\u2013era pharmacist takes on a corrupt saloon boss in Sacramento.",
+    "Synopsis": "Gold Rush–era pharmacist takes on a corrupt saloon boss in Sacramento.",
     "Awards": null,
     "PosterPath": "images/posters/inoldcalifornia.jpg"
+  },
+  {
+    "Title": "Isle of Tabu",
+    "PosterPath": "images/posters/isleoftabu.jpg",
+    "Year": 1945,
+    "Director": "R. G. Springsteen",
+    "Stars": "Susanna Foster; David Bruce; Turhan Bey",
+    "Synopsis": "A South Seas adventure-romance in which an American nurse marooned on a Polynesian isle uncovers smuggling and forbidden rituals while choosing between duty and love.",
+    "Awards": null
+  },
+  {
+    "Title": "I’ll Be Seeing You",
+    "Year": 1944.0,
+    "Director": "William Dieterle",
+    "Stars": "Ginger Rogers, Joseph Cotten, Shirley Temple",
+    "Synopsis": "Tender Christmas romance between a parolee and a PTSD-stricken soldier.",
+    "Awards": null,
+    "PosterPath": "images/posters/illbeseeingyou.jpg"
+  },
+  {
+    "Title": "I’ll Sell My Life",
+    "Year": 1941.0,
+    "Director": "Elmer Clifton",
+    "Stars": "Rose Hobart, Michael Whalen",
+    "Synopsis": "Reporter’s strange ad leads to intrigue and murder in this low-budget thriller.",
+    "Awards": null,
+    "PosterPath": "images/posters/illsellmylife.jpg"
   },
   {
     "Title": "Jail-talking (Polish picture)",
@@ -306,13 +333,13 @@
     "PosterPath": null
   },
   {
-    "Title": "The Keys of the Kingdom",
-    "Year": 1944.0,
-    "Director": "John M. Stahl",
-    "Stars": "Gregory Peck; Thomas Mitchell; Vincent Price; Rose Stradner",
-    "Synopsis": "A humble Scottish priest\u2019s decades of missionary work in China; reflective religious drama.",
-    "Awards": "Oscar nomination (Best Actor: Gregory Peck)",
-    "PosterPath": "images/posters/keysofthekingdom.jpg"
+    "Title": "Keep Your Powder Dry",
+    "PosterPath": "images/posters/keepyourpowderdry.jpg",
+    "Year": 1945,
+    "Director": "Edward Buzzell",
+    "Stars": "Lana Turner; Susan Peters; Laraine Day; Agnes Moorehead",
+    "Synopsis": "Keep Your Powder Dry is a 1945 American drama film directed by Edward Buzzell and starring Lana Turner, Susan Peters, and Laraine Day. Its plot follows three women who join the Women's Army Corps during World War II. The screenplay was written by George Bruce and Mary C. McCall, Jr.",
+    "Awards": null
   },
   {
     "Title": "Lake Placid Serenade",
@@ -322,6 +349,15 @@
     "Synopsis": "Ukrainian skater finds opportunity and romance in upstate New York; Republic ice-skating musical.",
     "Awards": null,
     "PosterPath": "images/posters/lakeplacidserenade.jpg"
+  },
+  {
+    "Title": "Lili Marlene",
+    "PosterPath": "images/posters/lillimarlene.jpg",
+    "Year": 1944,
+    "Director": "Arthur Lubin",
+    "Stars": "Dorothy Lamour; John Hodiak; Patricia Morison",
+    "Synopsis": "Drama inspired by the famed wartime song, following a cabaret singer torn between her Nazi lover and an Allied spy as Europe descends into war.",
+    "Awards": null
   },
   {
     "Title": "Lucky Jordan",
@@ -346,7 +382,7 @@
     "Year": 1944.0,
     "Director": "William Castle",
     "Stars": "Richard Dix; Janis Carter",
-    "Synopsis": "A drifter adopts a dead man\u2019s identity for his inheritance \u2014 but danger follows.",
+    "Synopsis": "A drifter adopts a dead man’s identity for his inheritance — but danger follows.",
     "Awards": null,
     "PosterPath": "images/posters/markofthewhistler.jpg"
   },
@@ -354,8 +390,8 @@
     "Title": "Meet Me in St. Louis",
     "Year": 1944.0,
     "Director": "Vincente Minnelli",
-    "Stars": "Judy Garland; Margaret O\u2019Brien; Mary Astor",
-    "Synopsis": "Turn-of-the-century family musical built around the 1904 World\u2019s Fair; includes \u201cHave Yourself a Merry Little Christmas.\u201d",
+    "Stars": "Judy Garland; Margaret O’Brien; Mary Astor",
+    "Synopsis": "Turn-of-the-century family musical built around the 1904 World’s Fair; includes “Have Yourself a Merry Little Christmas.”",
     "Awards": "Oscar nominations (incl. Best Cinematography, Best Song)",
     "PosterPath": "images/posters/meetmeinstlouis.jpg"
   },
@@ -381,8 +417,8 @@
     "Title": "Music for Millions",
     "Year": 1944.0,
     "Director": "Henry Koster",
-    "Stars": "Margaret O\u2019Brien; Jimmy Durante",
-    "Synopsis": "A pregnant woman fears her soldier husband\u2019s fate while an orchestra shields her from heartbreak.",
+    "Stars": "Margaret O’Brien; Jimmy Durante",
+    "Synopsis": "A pregnant woman fears her soldier husband’s fate while an orchestra shields her from heartbreak.",
     "Awards": null,
     "PosterPath": "images/posters/musicformillions.jpg"
   },
@@ -405,20 +441,29 @@
     "PosterPath": "images/posters/nevada.jpg"
   },
   {
-    "Title": "Dark Waters",
-    "Year": 1944.0,
-    "Director": "Andr\u00e9 de Toth",
-    "Stars": "Merle Oberon; Franchot Tone",
-    "Synopsis": "A traumatized young woman suspects her relatives\u2019 Southern mansion hides deadly intentions.",
-    "Awards": null,
-    "PosterPath": "images/posters/darkwaters.jpg"
+    "Title": "Objective, Burma!",
+    "PosterPath": "images/posters/objectiveburma.jpg",
+    "Year": 1945,
+    "Director": "Raoul Walsh",
+    "Stars": "Errol Flynn; James Brown; William Prince",
+    "Synopsis": "Objective, Burma! is a 1945 American war film that is loosely based on the six-month raid by Merrill's Marauders in the Burma Campaign during the Second World War. Directed by Raoul Walsh and starring Errol Flynn, the film was made by Warner Bros. immediately after the raid.",
+    "Awards": null
+  },
+  {
+    "Title": "Our Hearts Were Young and Gay",
+    "PosterPath": "images/posters/ourheartswereyoungandgay.jpg",
+    "Year": 1944,
+    "Director": "Lewis Allen",
+    "Stars": "Gail Russell; Diana Lynn; Charlie Ruggles; Dorothy Gish",
+    "Synopsis": "Our Hearts Were Young and Gay is a 1944 American comedy film directed by Lewis Allen and written by Sheridan Gibney, based on the memoir by Emily Kimbrough and Cornelia Otis Skinner about their misadventures abroad.",
+    "Awards": null
   },
   {
     "Title": "Partners of the Trail",
     "Year": 1944.0,
     "Director": "Elmer Clifton",
     "Stars": "Robert Livingston; Smiley Burnette",
-    "Synopsis": "Frontier marshals pursue a scheming land baron\u2019s violent land-grab.",
+    "Synopsis": "Frontier marshals pursue a scheming land baron’s violent land-grab.",
     "Awards": null,
     "PosterPath": "images/posters/partnersofthetrail.jpg"
   },
@@ -430,6 +475,69 @@
     "Synopsis": "Radio correspondent returns from war to a comedic case of mistaken engagement.",
     "Awards": null,
     "PosterPath": "images/posters/practicallyyours.jpg"
+  },
+  {
+    "Title": "Rough, Tough and Ready",
+    "PosterPath": "images/posters/roughtoughandready.jpg",
+    "Year": 1945,
+    "Director": "Del Lord",
+    "Stars": "Chester Morris; Victor McLaglen; Jean Rogers",
+    "Synopsis": "Rough, Tough and Ready is a 1945 American war comedy drama film directed by Del Lord and starring Chester Morris, Victor McLaglen and Jean Rogers about two merchant seamen drawn back into wartime service.",
+    "Awards": null
+  },
+  {
+    "Title": "Salty O'Rourke",
+    "PosterPath": "images/posters/saltyorourke.jpg",
+    "Year": 1945,
+    "Director": "Raoul Walsh",
+    "Stars": "Alan Ladd; Gail Russell",
+    "Synopsis": "Salty O'Rourke is a 1945 American sports drama directed by Raoul Walsh in which a racetrack grifter turns a hot-headed jockey into a contender while falling for the trainer who can save them both.",
+    "Awards": null
+  },
+  {
+    "Title": "Sergeant Mike",
+    "PosterPath": "images/posters/sergeantmike.jpg",
+    "Year": 1944,
+    "Director": "Henry Levin",
+    "Stars": "Larry Parks; Jeanne Bates; Loren Tindall",
+    "Synopsis": "Sergeant Mike is a 1944 American drama directed by Henry Levin about a war correspondent whose adopted pup becomes a Marine mascot and morale booster.",
+    "Awards": null
+  },
+  {
+    "Title": "She's a Soldier Too",
+    "PosterPath": "images/posters/shesasoldiertoo.jpg",
+    "Year": 1944,
+    "Director": "William Castle",
+    "Stars": "Beulah Bondi; Nina Foch; Jess Barker; Lloyd Bridges",
+    "Synopsis": "She's a Soldier Too is a 1944 American drama directed by William Castle following three women whose lives intersect through wartime service and sacrifice on the home front.",
+    "Awards": null
+  },
+  {
+    "Title": "Shine On, Harvest Moon",
+    "PosterPath": "images/posters/shineonharvestmoon.jpg",
+    "Year": 1944,
+    "Director": "David Butler",
+    "Stars": "Ann Sheridan; Dennis Morgan; Jack Carson",
+    "Synopsis": "Shine On, Harvest Moon is a 1944 musical biopic directed by David Butler dramatizing the vaudeville partnership and romance of songwriters Nora Bayes and Jack Norworth.",
+    "Awards": null
+  },
+  {
+    "Title": "Since You Went Away",
+    "PosterPath": "images/posters/sinceyouwentaway.jpg",
+    "Year": 1944,
+    "Director": "John Cromwell",
+    "Stars": "Claudette Colbert; Jennifer Jones; Joseph Cotten; Shirley Temple",
+    "Synopsis": "Since You Went Away is a 1944 American epic wartime drama directed by John Cromwell chronicling how a middle-class family endures separation and sacrifice while the patriarch serves overseas.",
+    "Awards": "Won Academy Award for Best Original Score"
+  },
+  {
+    "Title": "Something for the Boys",
+    "PosterPath": "images/posters/somethingfortheboys.jpg",
+    "Year": 1944,
+    "Director": "Lewis Seiler",
+    "Stars": "Carmen Miranda Michael O'Shea Vivian Blaine Phil Silvers",
+    "Synopsis": "Something for the Boys is a 1944 musical comedy directed by Lewis Seiler in which three cousins inherit a Texas ranch and turn it into a USO training camp full of music, mishaps, and romance.",
+    "Awards": null
   },
   {
     "Title": "Storm Over Lisbon",
@@ -445,16 +553,25 @@
     "Year": 1944.0,
     "Director": "Alfred E. Green",
     "Stars": "Allyn Joslyn; Evelyn Keyes",
-    "Synopsis": "A naval cadet investigates his brother\u2019s death and uncovers blackmail and deceit.",
+    "Synopsis": "A naval cadet investigates his brother’s death and uncovers blackmail and deceit.",
     "Awards": null,
     "PosterPath": "images/posters/strangeaffair.jpg"
+  },
+  {
+    "Title": "Sunday Dinner for a Soldier",
+    "PosterPath": "images/posters/SundayDinnerforaSoldier.jpg",
+    "Year": 1944,
+    "Director": "Lloyd Bacon",
+    "Stars": "Anne Baxter; John Hodiak",
+    "Synopsis": "Sunday Dinner for a Soldier is a 1944 wartime drama directed by Lloyd Bacon about a struggling Florida family who save for months to host a lonely serviceman, only to find unexpected love instead.",
+    "Awards": null
   },
   {
     "Title": "Sundown Valley",
     "Year": 1944.0,
     "Director": "Benjamin H. Kline",
     "Stars": "Charles Starrett; Dub Taylor",
-    "Synopsis": "A rancher resists a mine owner\u2019s tyranny while defending his home.",
+    "Synopsis": "A rancher resists a mine owner’s tyranny while defending his home.",
     "Awards": null,
     "PosterPath": "images/posters/sundownvalley.jpg"
   },
@@ -468,6 +585,15 @@
     "PosterPath": "images/posters/swinghostess.jpg"
   },
   {
+    "Title": "Tampico",
+    "PosterPath": "images/posters/tampico.jpg",
+    "Year": 1944,
+    "Director": "Lothar Mendes",
+    "Stars": "Edward G. Robinson; Lynn Bari; Victor McLaglen",
+    "Synopsis": "Tampico is a 1944 wartime suspense film directed by Lothar Mendes about a sea captain who rescues a mysterious survivor and uncovers a Nazi sabotage plot in the Gulf of Mexico.",
+    "Awards": null
+  },
+  {
     "Title": "The Ape",
     "Year": 1940.0,
     "Director": "William Nigh",
@@ -475,6 +601,24 @@
     "Synopsis": "A doctor dons an ape-suit to harvest spinal fluid from terrified victims in hopes of curing paralysis.",
     "Awards": null,
     "PosterPath": "images/posters/theape.jpg"
+  },
+  {
+    "Title": "The Ape Man",
+    "PosterPath": "images/posters/theape.jpg",
+    "Year": 1943,
+    "Director": "William Beaudine",
+    "Stars": "Bela Lugosi; Louise Currie; Wallace Ford",
+    "Synopsis": "The Ape Man is a 1943 horror feature directed by William Beaudine starring Bela Lugosi as a scientist whose experiments leave him half-simian and desperate for a cure.",
+    "Awards": null
+  },
+  {
+    "Title": "The Big Showoff",
+    "PosterPath": "images/posters/thebigshow-off.jpg",
+    "Year": 1945,
+    "Director": "Howard Bretherton",
+    "Stars": "Arthur Lake; Dale Evans; Lionel Stander",
+    "Synopsis": "The Big Show-Off is a 1945 Republic Pictures comedy directed by Howard Bretherton in which a meek pianist poses as a masked pugilist to impress a nightclub singer.",
+    "Awards": null
   },
   {
     "Title": "The Climax",
@@ -495,6 +639,33 @@
     "PosterPath": "images/poster/devilbat.jpg"
   },
   {
+    "Title": "The Falcon in Hollywood",
+    "Year": 1944.0,
+    "Director": "Gordon Douglas",
+    "Stars": "Tom Conway; Barbara Hale; Jean Brooks; Rita Corday",
+    "Synopsis": "Sleuth Tom Lawrence (‘The Falcon’) investigates a murder on an RKO studio lot amid Hollywood intrigue.",
+    "Awards": null,
+    "PosterPath": "images/posters/thefalconinhollywood.jpg"
+  },
+  {
+    "Title": "The Fighting Lady",
+    "PosterPath": "images/posters/thefightinglady.jpg",
+    "Year": 1944,
+    "Director": "Edward Steichen",
+    "Stars": "Robert Taylor (narrator); US Navy personnel",
+    "Synopsis": "The Fighting Lady is a 1944 Technicolor Navy documentary directed by Edward Steichen that chronicles a U.S. aircraft carrier and its crew through Pacific theater combat.",
+    "Awards": "Won Academy Award for Best Documentary Feature"
+  },
+  {
+    "Title": "The Keys of the Kingdom",
+    "Year": 1944.0,
+    "Director": "John M. Stahl",
+    "Stars": "Gregory Peck; Thomas Mitchell; Vincent Price; Rose Stradner",
+    "Synopsis": "A humble Scottish priest’s decades of missionary work in China; reflective religious drama.",
+    "Awards": "Oscar nomination (Best Actor: Gregory Peck)",
+    "PosterPath": "images/posters/keysofthekingdom.jpg"
+  },
+  {
     "Title": "The Navy Way",
     "Year": 1944.0,
     "Director": "William Berke",
@@ -504,7 +675,7 @@
     "PosterPath": "images/posters/thenavyway.jpg"
   },
   {
-    "Title": "The Sky\u2019s the Limit",
+    "Title": "The Sky’s the Limit",
     "Year": 1943.0,
     "Director": "Edward H. Griffith",
     "Stars": "Fred Astaire; Joan Leslie",
@@ -513,22 +684,67 @@
     "PosterPath": "images/posters/theskysthelimit.jpg"
   },
   {
+    "Title": "The Strangler",
+    "PosterPath": "images/posters/thestrangler.jpg",
+    "Year": 1943,
+    "Director": "Max Nosseck",
+    "Stars": "Victor Jory; Otto Kruger; June Duprez",
+    "Synopsis": "Noir thriller about a returning soldier haunted by blackouts who fears he may be the serial killer stalking women through a blackout-shrouded city.",
+    "Awards": null
+  },
+  {
     "Title": "The Thin Man Goes Home",
     "Year": 1945.0,
     "Director": "Richard Thorpe",
     "Stars": "William Powell; Myrna Loy",
-    "Synopsis": "Nick and Nora vacation with his parents \u2014 but murder tags along.",
+    "Synopsis": "Nick and Nora vacation with his parents — but murder tags along.",
     "Awards": null,
     "PosterPath": "images/posters/thethinmangoeshome.jpg"
+  },
+  {
+    "Title": "The Unseen",
+    "PosterPath": "images/posters/theunseen.jpg",
+    "Year": 1945,
+    "Director": "Lewis Allen",
+    "Stars": "Joel McCrea; Gail Russell; Herbert Marshall",
+    "Synopsis": "The Unseen is a 1945 mystery thriller directed by Lewis Allen about a governess who suspects the widower she works for is linked to a string of murders in their gloomy row house.",
+    "Awards": null
   },
   {
     "Title": "The Woman in the Window",
     "Year": 1944.0,
     "Director": "Fritz Lang",
     "Stars": "Edward G. Robinson, Joan Bennett, Raymond Massey",
-    "Synopsis": "Professor\u2019s chance encounter with a mysterious woman leads to murder and guilt.",
+    "Synopsis": "Professor’s chance encounter with a mysterious woman leads to murder and guilt.",
     "Awards": null,
     "PosterPath": "images/posters/thewomaninthewindow.jpg"
+  },
+  {
+    "Title": "Thoroughbreds",
+    "PosterPath": "images/posters/thoroughbreds.jpg",
+    "Year": 1944,
+    "Director": "George Blair",
+    "Stars": "Tom Neal; Adele Mara; Roger Pryor",
+    "Synopsis": "Thoroughbreds is a 1944 Republic Pictures racing drama directed by George Blair about a struggling stable owner pinning his hopes on an upstart colt and a talented jockey.",
+    "Awards": null
+  },
+  {
+    "Title": "Three Is a Family",
+    "PosterPath": "images/posters/3isafamily.jpg",
+    "Year": 1944,
+    "Director": "Edward Ludwig",
+    "Stars": "Marjorie Reynolds; Charlie Ruggles; Fay Bainter",
+    "Synopsis": "Three Is a Family is a 1944 comedy directed by Edward Ludwig following a couple whose cramped New York apartment bursts with relatives after wartime housing shortages.",
+    "Awards": "Academy Award nomination for Best Sound Recording"
+  },
+  {
+    "Title": "To Have and Have Not",
+    "PosterPath": "images/posters/tohaveandhavenot.jpg",
+    "Year": 1944,
+    "Director": "Howard Hawks",
+    "Stars": "Humphrey Bogart; Lauren Bacall; Walter Brennan",
+    "Synopsis": "To Have and Have Not is a 1944 romantic adventure directed by Howard Hawks pairing Humphrey Bogart and Lauren Bacall in a wartime tale of smugglers aiding the French Resistance in Martinique.",
+    "Awards": null
   },
   {
     "Title": "Tonight and Every Night",
@@ -544,7 +760,7 @@
     "Year": 1937.0,
     "Director": "Norman Z. McLeod",
     "Stars": "Cary Grant; Constance Bennett",
-    "Synopsis": "An uptight banker\u2019s life spins into chaos when two carefree spirits push him toward joy.",
+    "Synopsis": "An uptight banker’s life spins into chaos when two carefree spirits push him toward joy.",
     "Awards": "Nominated for 2 Oscars",
     "PosterPath": "images/posters/topper.jpg"
   },
@@ -553,7 +769,7 @@
     "Year": 1940.0,
     "Director": "Hal Roach",
     "Stars": "Adolphe Menjou; Carole Landis",
-    "Synopsis": "A feuding couple swap bodies after a mystical curse and must live one another\u2019s lives.",
+    "Synopsis": "A feuding couple swap bodies after a mystical curse and must live one another’s lives.",
     "Awards": null,
     "PosterPath": "images/posters/turnabout.jpg"
   },
@@ -567,13 +783,31 @@
     "PosterPath": "images/posters/twogirlsandasailor.jpg"
   },
   {
-    "Title": "The Woman in the Window",
-    "Year": 1944.0,
-    "Director": "Fritz Lang",
-    "Stars": "Edward G. Robinson, Joan Bennett, Raymond Massey",
-    "Synopsis": "Professor\u2019s chance encounter with a mysterious woman leads to murder and guilt.",
-    "Awards": null,
-    "PosterPath": "images/posters/thewomaninthewindow.jpg"
+    "Title": "Wedded Bliss",
+    "PosterPath": "images/posters/weddedbliss.jpg",
+    "Year": 1946,
+    "Director": "B. Reeves Eason",
+    "Stars": "Lynne Roberts; Robert Livingston",
+    "Synopsis": "A postwar comedy short chronicling newlyweds whose bargain honeymoon cabin turns into a farcical parade of relatives and mishaps before true bliss sets in.",
+    "Awards": null
+  },
+  {
+    "Title": "When the Lights Go on Again",
+    "PosterPath": "images/posters/whenthelightsgoonagain.jpg",
+    "Year": 1944,
+    "Director": "William K. Howard",
+    "Stars": "Jimmy Lydon; Barbara Belden; Regis Toomey",
+    "Synopsis": "When the Lights Go on Again is a 1944 drama directed by William K. Howard about a young man leaving his small town to fight overseas while his family wrestles with rationing, housing shortages, and hope for reunion.",
+    "Awards": null
+  },
+  {
+    "Title": "Woo Woo",
+    "PosterPath": "images/posters/woowoo.jpg",
+    "Year": 1941,
+    "Director": "Bert Gilroy",
+    "Stars": "Kay Kyser; Georgia Carroll; Harry Babbitt",
+    "Synopsis": "A jitterbug-filled musical short where Kay Kyser and his band debut the novelty tune 'Whooo?' for an ecstatic ballroom crowd.",
+    "Awards": null
   },
   {
     "Title": "Youth on Trial",

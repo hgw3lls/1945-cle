@@ -7625,6 +7625,15 @@ function rsRestoreLayers(state){
   }
 
   var NOW_SHOWING_INDEX = {};
+  var NOW_SHOWING_ALIAS_SOURCE = {
+    'Falcon in Hollywood': 'The Falcon in Hollywood',
+    'Keys of the Kingdom': 'The Keys of the Kingdom',
+    'Sandy Dinner for a Soldier': 'Sunday Dinner for a Soldier',
+    'There Is a Family': 'Three Is a Family',
+    'Thoroughbred': 'Thoroughbreds',
+    'The The Woman in the Window': 'The Woman in the Window',
+    'The Unasen': 'The Unseen'
+  };
 
   function normalizeMovieKey(title){
     return String(title || '')
@@ -7639,11 +7648,30 @@ function rsRestoreLayers(state){
 
   function setNowShowingData(list){
     NOW_SHOWING_INDEX = {};
+    function register(key, meta){
+      if (!key || !meta) return;
+      if (!NOW_SHOWING_INDEX[key]) {
+        NOW_SHOWING_INDEX[key] = meta;
+      }
+    }
     (Array.isArray(list) ? list : []).forEach(function(item){
       if (!item || !item.Title) return;
-      var key = normalizeMovieKey(item.Title);
-      if (!key) return;
-      NOW_SHOWING_INDEX[key] = item;
+      var primaryKey = normalizeMovieKey(item.Title);
+      if (!primaryKey) return;
+      register(primaryKey, item);
+      register(safeSlug(item.Title), item);
+      var trimmedArticle = primaryKey.replace(/^(the|a|an)\s+/, '');
+      if (trimmedArticle && trimmedArticle !== primaryKey) register(trimmedArticle, item);
+      var altSlug = safeSlug(String(item.Title).replace(/^(The|A|An)\s+/i, ''));
+      if (altSlug) register(altSlug, item);
+    });
+    Object.keys(NOW_SHOWING_ALIAS_SOURCE).forEach(function(aliasTitle){
+      var aliasKey = normalizeMovieKey(aliasTitle);
+      var targetKey = normalizeMovieKey(NOW_SHOWING_ALIAS_SOURCE[aliasTitle]);
+      var meta = NOW_SHOWING_INDEX[targetKey];
+      if (meta) {
+        NOW_SHOWING_INDEX[aliasKey] = meta;
+      }
     });
   }
 
