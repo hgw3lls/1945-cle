@@ -15,11 +15,23 @@
       onlineTiles: {
         street: {
           url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          opts: { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }
+          opts: {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors',
+            keepBuffer: 4,
+            updateWhenIdle: false,
+            updateWhenZooming: true
+          }
         },
         satellite: {
           url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          opts: { maxZoom: 19, attribution: 'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community' }
+          opts: {
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+            keepBuffer: 4,
+            updateWhenIdle: false,
+            updateWhenZooming: true
+          }
         }
       },
       resolutions: {
@@ -475,36 +487,33 @@ html,body {
 
 /* Stylized theatre dots for easier tapping */
 .rs-map-dot {
+  stroke: rgba(5, 6, 8, 0.92) !important;
   stroke-width: 3px !important;
+  stroke-opacity: 1 !important;
   fill-opacity: 1 !important;
   paint-order: stroke fill;
-  filter: drop-shadow(0 0 1.2px rgba(5, 5, 5, 0.65)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 0 1.4px rgba(6, 8, 12, 0.7)) drop-shadow(0 2px 7px rgba(0, 0, 0, 0.5));
   transition: transform 0.18s ease, stroke-width 0.18s ease;
 }
 
 .rs-map-dot.rs-status-open {
   fill: #19a974 !important;
-  stroke: #19a974 !important;
 }
 
 .rs-map-dot.rs-status-closed {
   fill: #e03131 !important;
-  stroke: #e03131 !important;
 }
 
 .rs-map-dot.rs-status-repurposed {
   fill: #fcc419 !important;
-  stroke: #fcc419 !important;
 }
 
 .rs-map-dot.rs-status-demolished {
   fill: #495057 !important;
-  stroke: #495057 !important;
 }
 
 .rs-map-dot.rs-status-unknown {
   fill: #00d1ff !important;
-  stroke: #00d1ff !important;
 }
 
 .rs-map-dot:hover,
@@ -8338,7 +8347,14 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     zoomControl: false,
     maxBounds: BOUNDS,
     maxBoundsViscosity: 1.0,
-    worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
+    worldCopyJump: false,
+    inertia: true,
+    inertiaDeceleration: 1500,
+    inertiaMaxSpeed: 1000,
+    preferCanvas: true,
+    fadeAnimation: true,
+    zoomAnimation: true,
+    updateWhenIdle: false
   });
   map.fitBounds(BOUNDS, {padding:[20,20]});
 
@@ -8358,14 +8374,110 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   L.control.zoom({ position: 'topright' }).addTo(map);
 
   // Offline tiles
-  var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:200}).addTo(map);
-  var sat = L.tileLayer('tiles/sat/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:210, opacity:1.0, updateWhenZooming:false});
+  var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {
+    minZoom: 12,
+    maxZoom: 19,
+    tms: false,
+    zIndex: 200,
+    keepBuffer: 4,
+    updateWhenIdle: false,
+    updateWhenZooming: true,
+    unloadInvisibleTiles: false
+  }).addTo(map);
+  try { window.baseTiles = baseOSM; } catch(_) {}
+  var sat = L.tileLayer('tiles/sat/{z}/{x}/{y}.png', {
+    minZoom: 12,
+    maxZoom: 19,
+    tms: false,
+    zIndex: 210,
+    opacity: 1.0,
+    keepBuffer: 4,
+    updateWhenIdle: false,
+    updateWhenZooming: true,
+    unloadInvisibleTiles: false
+  });
   try { window.sat = sat; } catch(_) {}
 
-  var street = L.tileLayer('tiles/street/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:220, opacity:1.0, updateWhenZooming:false});
+  var street = L.tileLayer('tiles/street/{z}/{x}/{y}.png', {
+    minZoom: 12,
+    maxZoom: 19,
+    tms: false,
+    zIndex: 220,
+    opacity: 1.0,
+    keepBuffer: 4,
+    updateWhenIdle: false,
+    updateWhenZooming: true,
+    unloadInvisibleTiles: false
+  });
   try { window.street = street; } catch(_) {};
-  var historic = L.tileLayer('tiles/historic/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:400, opacity:1.0, updateWhenZooming:false}).addTo(map);
+  var historic = L.tileLayer('tiles/historic/{z}/{x}/{y}.png', {
+    minZoom: 12,
+    maxZoom: 19,
+    tms: false,
+    zIndex: 400,
+    opacity: 1.0,
+    keepBuffer: 4,
+    updateWhenIdle: false,
+    updateWhenZooming: true,
+    unloadInvisibleTiles: false
+  }).addTo(map);
   try { window.historic = historic; } catch(_) {}
+  function prefetchLayerTiles(layer, radius){
+    try {
+      if (!layer || !map || typeof map.getZoom !== 'function' || typeof map.project !== 'function') return;
+      var r = Math.max(1, radius || 1);
+      var zoom = map.getZoom();
+      var center = map.getCenter();
+      var tileSizePoint = typeof layer.getTileSize === 'function' ? layer.getTileSize() : null;
+      var tileSize = tileSizePoint && tileSizePoint.x ? tileSizePoint.x : 256;
+      var projected = map.project(center, zoom);
+      var baseX = Math.floor(projected.x / tileSize);
+      var baseY = Math.floor(projected.y / tileSize);
+      for (var dx = -r; dx <= r; dx++) {
+        for (var dy = -r; dy <= r; dy++) {
+          var coords = { x: baseX + dx, y: baseY + dy, z: zoom };
+          try {
+            if (typeof layer.getTileUrl === 'function') {
+              var url = layer.getTileUrl(coords);
+              if (url) {
+                var img = new Image();
+                img.decoding = 'async';
+                img.loading = 'lazy';
+                img.referrerPolicy = 'no-referrer';
+                img.src = url;
+              }
+            }
+          } catch(_) {}
+        }
+      }
+    } catch(_) {}
+  }
+
+  function warmVisibleTiles(){
+    var radius = 2;
+    prefetchLayerTiles(baseOSM, radius);
+    try {
+      if (sat && map.hasLayer && map.hasLayer(sat)) prefetchLayerTiles(sat, radius);
+    } catch(_) {}
+    try {
+      if (street && map.hasLayer && map.hasLayer(street)) prefetchLayerTiles(street, radius);
+    } catch(_) {}
+    try {
+      if (historic && map.hasLayer && map.hasLayer(historic)) prefetchLayerTiles(historic, radius);
+    } catch(_) {}
+  }
+
+  var warmTimeout;
+  function scheduleWarm(){
+    try { if (warmTimeout) clearTimeout(warmTimeout); } catch(_) {}
+    warmTimeout = setTimeout(warmVisibleTiles, 140);
+  }
+
+  warmVisibleTiles();
+  if (window.map && typeof window.map.on === "function") {
+    map.on('moveend', scheduleWarm);
+    map.on('zoomend', scheduleWarm);
+  }
   function refreshZ(){
     try{
       var hasLayer = (map && typeof map.hasLayer === 'function') ? map.hasLayer.bind(map) : function(){ return false; };
@@ -8886,7 +8998,11 @@ function rsRestoreLayers(state){
         '<div class="rs-label">Address</div><div class="rs-val">'+(p.Address||'')+'</div>'+
         '<div class="rs-label">Status</div><div class="rs-val">'+(p.Status||'')+'</div>'+
       '</div>';
-    var btn = '<div class="rs-pop-actions"><button class="rs-btn-more" data-more data-action="more-details">More details</button></div>';
+    var btn = ''
+      + '<div class="rs-pop-actions">'
+      + '  <button class="rs-btn-more" data-more data-action="more-details">More details</button>'
+      + '  <button class="rs-btn-more rs-btn-zoomto" data-action="zoom-to">Zoom to</button>'
+      + '</div>';
     return ''
       + '<div class="rs-pop">'
       + '  <div class="rs-pop-hero">'
@@ -11654,31 +11770,51 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  function wireZoomButton(btn, contextEvent) {
+    if (!btn) return;
+    if (contextEvent) btn.__rsZoomContext = contextEvent;
+    if (!btn.__rsZoomWired) {
+      btn.addEventListener('click', function(ev){
+        ev.preventDefault();
+        if (ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+        var ctx = btn.__rsZoomContext;
+        if (!ctx || !ctx.popup) {
+          try {
+            var popup = (typeof map !== 'undefined' && map && map._popup) ? map._popup : null;
+            if (popup) ctx = { popup: popup };
+          } catch(_) {}
+        }
+        zoomToExact(ctx || { popup: null });
+        return false;
+      }, { passive: false });
+      btn.__rsZoomWired = true;
+    }
+    if (contextEvent) btn.__rsZoomContext = contextEvent;
+  }
+
   function ensureZoomToButtonForPopup(e) {
     try {
       var popupEl = e && e.popup && e.popup.getElement && e.popup.getElement();
       if (!popupEl) return;
       // Prefer a dedicated actions row if present
       var actions = popupEl.querySelector('.rs-pop-actions') || popupEl.querySelector('.popup-actions') || popupEl;
-      if (!actions.querySelector('.rs-btn-zoomto')) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'rs-btn-more rs-btn-zoomto';
-        btn.textContent = 'Zoom To';
-        // Try to place next to an existing "More details" button
-        var more = actions.querySelector('.rs-btn-more, .rs-more, a.more, button.more');
-        if (more && more.parentNode === actions) {
-          more.insertAdjacentElement('afterend', btn);
-        } else {
-          actions.appendChild(btn);
-        }
-        btn.addEventListener('click', function(ev){
-          ev.preventDefault();
-          ev.stopImmediatePropagation && ev.stopImmediatePropagation();
-          zoomToExact(e);
-          return false;
-        }, { passive: false });
+      var existing = actions.querySelector('.rs-btn-zoomto');
+      if (existing) {
+        wireZoomButton(existing, e);
+        return;
       }
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'rs-btn-more rs-btn-zoomto';
+      btn.textContent = 'Zoom To';
+      // Try to place next to an existing "More details" button
+      var more = actions.querySelector('.rs-btn-more, .rs-more, a.more, button.more');
+      if (more && more.parentNode === actions) {
+        more.insertAdjacentElement('afterend', btn);
+      } else {
+        actions.appendChild(btn);
+      }
+      wireZoomButton(btn, e);
     } catch (err) {
       console && console.warn && console.warn('ensureZoomToButtonForPopup error:', err);
     }
