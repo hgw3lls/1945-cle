@@ -9029,7 +9029,7 @@ document.getElementById('map').style.backgroundColor = '#000';
 // Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
 if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
   if (e.tile) e.tile.style.display = 'none';
-}); });
+});
 
   // Floating list toggle/collapse/close
   var floatEl = document.getElementById('rs-float');
@@ -11275,7 +11275,7 @@ try {
   else window.addEventListener('load', initAll, { once: true });
 
   var m = gm();
-  if (m){
+  if (m && typeof m.on === 'function'){
     m.on('layeradd', enforceOrder);
     m.on('layerremove', enforceOrder);
   }
@@ -13347,6 +13347,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
 
 
   // Run now and on DOM changes (toolbars often render late)
+  try { window.ensureGlobalTips = ensureGlobalTips; } catch(_) {}
   const ready = () => ensureGlobalTips();
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
   else ready();
