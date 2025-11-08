@@ -7529,9 +7529,10 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   try { window.historic = historic; } catch(_) {}
   function refreshZ(){
     try{
-      if (sat && map.hasLayer(sat) && sat.bringToFront) sat.bringToFront();
-      if (street && map.hasLayer(street) && street.bringToFront) street.bringToFront();
-      if (historic && map.hasLayer(historic) && historic.bringToFront) historic.bringToFront();
+      var hasLayer = (map && typeof map.hasLayer === 'function') ? map.hasLayer.bind(map) : function(){ return false; };
+      if (sat && hasLayer(sat) && sat.bringToFront) sat.bringToFront();
+      if (street && hasLayer(street) && street.bringToFront) street.bringToFront();
+      if (historic && hasLayer(historic) && historic.bringToFront) historic.bringToFront();
     }catch(e){}
   }
   if (window.map && typeof window.map.on === "function") map.on('overlayadd', refreshZ);
@@ -7540,9 +7541,9 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 // --- Smooth flyTo patch: hide non-top tile layers during animation to prevent cross-fade glitches ---
 function rsGetActiveTileLayers(){
   var arr = [];
-  try{ if (typeof sat !== 'undefined' && map.hasLayer(sat)) arr.push(sat); }catch(_){}
-  try{ if (typeof street !== 'undefined' && map.hasLayer(street)) arr.push(street); }catch(_){}
-  try{ if (typeof historic !== 'undefined' && map.hasLayer(historic)) arr.push(historic); }catch(_){}
+  try{ if (typeof sat !== 'undefined' && map && typeof map.hasLayer === 'function' && map.hasLayer(sat)) arr.push(sat); }catch(_){}
+  try{ if (typeof street !== 'undefined' && map && typeof map.hasLayer === 'function' && map.hasLayer(street)) arr.push(street); }catch(_){}
+  try{ if (typeof historic !== 'undefined' && map && typeof map.hasLayer === 'function' && map.hasLayer(historic)) arr.push(historic); }catch(_){}
   return arr;
 }
 function rsDimNonTopLayers(){
@@ -7647,10 +7648,18 @@ function rsRestoreLayers(state){
       return null;
     }
     function setPressed(btn, on){ if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
-    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return False; } }
+    function has(layer){
+      try {
+        var g = gm();
+        if (!layer || !g || typeof g.hasLayer !== 'function') return false;
+        return g.hasLayer(layer);
+      } catch(_) {
+        return false;
+      }
+    }
 
     function syncButtons(){
-      var g = gm(); if (!g) return;
+      var g = gm(); if (!g || typeof g.on !== 'function') return;
       document.querySelectorAll('.rs-layer-btn[data-layer]').forEach(function(btn){
         var key = btn.getAttribute('data-layer');
         var layer = layerFor(key);
@@ -7683,7 +7692,7 @@ function rsRestoreLayers(state){
 
     try{
       var g = gm();
-      if (g){ g.on('layeradd', syncButtons); g.on('layerremove', syncButtons); }
+      if (g && typeof g.on === 'function'){ g.on('layeradd', syncButtons); g.on('layerremove', syncButtons); }
     }catch(_){}
 
     if (document.readyState === 'complete'){ syncButtons(); }
@@ -7789,14 +7798,16 @@ function rsRestoreLayers(state){
       var altSlug = safeSlug(String(item.Title).replace(/^(The|A|An)\s+/i, ''));
       if (altSlug) register(altSlug, item);
     });
-    Object.keys(NOW_SHOWING_ALIAS_SOURCE).forEach(function(aliasTitle){
-      var aliasKey = normalizeMovieKey(aliasTitle);
-      var targetKey = normalizeMovieKey(NOW_SHOWING_ALIAS_SOURCE[aliasTitle]);
-      var meta = NOW_SHOWING_INDEX[targetKey];
-      if (meta) {
-        NOW_SHOWING_INDEX[aliasKey] = meta;
-      }
-    });
+    if (NOW_SHOWING_ALIAS_SOURCE && typeof NOW_SHOWING_ALIAS_SOURCE === 'object') {
+      Object.keys(NOW_SHOWING_ALIAS_SOURCE).forEach(function(aliasTitle){
+        var aliasKey = normalizeMovieKey(aliasTitle);
+        var targetKey = normalizeMovieKey(NOW_SHOWING_ALIAS_SOURCE[aliasTitle]);
+        var meta = NOW_SHOWING_INDEX[targetKey];
+        if (meta) {
+          NOW_SHOWING_INDEX[aliasKey] = meta;
+        }
+      });
+    }
   }
 
   function filmPoster(meta){
@@ -10245,8 +10256,9 @@ try {
     var m = gm(); if(!m) return;
     var osm = getLayerRef('osm');
     var hist = getLayerRef('historic');
-    try { if (osm && !m.hasLayer(osm)) osm.addTo(m); } catch(_){}
-    try { if (hist && !m.hasLayer(hist)) hist.addTo(m); } catch(_){}
+    var hasLayer = (m && typeof m.hasLayer === 'function') ? m.hasLayer.bind(m) : function(){ return false; };
+    try { if (osm && !hasLayer(osm)) osm.addTo(m); } catch(_){}
+    try { if (hist && !hasLayer(hist)) hist.addTo(m); } catch(_){}
   }
   function enforceOrder(){
     var m = gm(); if(!m) return;
@@ -10255,11 +10267,11 @@ try {
     var sat = getLayerRef('sat');
     var street = getLayerRef('street');
     var hist = getLayerRef('historic');
-    try { if (osm && m.hasLayer(osm)) osm.setZIndex(100); } catch(_){}
-    try { if (sat && m.hasLayer(sat)) sat.setZIndex(300); } catch(_){}
-    try { if (street && m.hasLayer(street)) street.setZIndex(500); } catch(_){}
+    try { if (osm && hasLayer(osm)) osm.setZIndex(100); } catch(_){}
+    try { if (sat && hasLayer(sat)) sat.setZIndex(300); } catch(_){}
+    try { if (street && hasLayer(street)) street.setZIndex(500); } catch(_){}
     try {
-      if (hist && m.hasLayer(hist)) {
+      if (hist && hasLayer(hist)) {
         hist.setZIndex(700);
         if (hist.bringToFront) hist.bringToFront();
       }
@@ -10283,19 +10295,21 @@ try {
       var m = gm(); if(!m) return;
       var frac = v / 100;
 
+      var hasLayer = (m && typeof m.hasLayer === 'function') ? m.hasLayer.bind(m) : function(){ return false; };
+
       if (opts.key === 'historic'){
         var historicLayer = getLayerRef('historic');
         if (historicLayer){
-          if (!m.hasLayer(historicLayer)) historicLayer.addTo(m);
+          if (!hasLayer(historicLayer)) historicLayer.addTo(m);
           try { historicLayer.setOpacity(frac); } catch(_){}
         }
       } else if (opts.key === 'street'){
         var streetLayer = getLayerRef('street');
         if (streetLayer){
           if (v === 0){
-            try { if (m.hasLayer(streetLayer)) m.removeLayer(streetLayer); } catch(_){}
+            try { if (hasLayer(streetLayer)) m.removeLayer(streetLayer); } catch(_){}
           } else {
-            if (!m.hasLayer(streetLayer)) streetLayer.addTo(m);
+            if (!hasLayer(streetLayer)) streetLayer.addTo(m);
             try { streetLayer.setOpacity(frac); } catch(_){}
           }
         }
@@ -10303,9 +10317,9 @@ try {
         var satLayer = getLayerRef('sat');
         if (satLayer){
           if (v === 0){
-            try { if (m.hasLayer(satLayer)) m.removeLayer(satLayer); } catch(_){}
+            try { if (hasLayer(satLayer)) m.removeLayer(satLayer); } catch(_){}
           } else {
-            if (!m.hasLayer(satLayer)) satLayer.addTo(m);
+            if (!hasLayer(satLayer)) satLayer.addTo(m);
             try { satLayer.setOpacity(frac); } catch(_){}
           }
         }
@@ -12397,7 +12411,33 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     return null;
   }
 
- 
+
+  function ensureGlobalTips(){
+    const toolbar = findExternalToolbar();
+    if (!toolbar) return;
+
+    let btn = toolbar.querySelector('[data-rs-allow-tips="true"], .rs-tips-btn-global');
+    if (!btn){
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = 'Tips';
+      toolbar.appendChild(btn);
+    }
+
+    btn.setAttribute('data-rs-allow-tips', 'true');
+    btn.classList.add('rs-btn', 'rs-tips-btn-global');
+    btn.setAttribute('aria-label', 'Tips');
+
+    if (!btn._rsBound){
+      btn._rsBound = true;
+      btn.addEventListener('click', function(){
+        if (typeof window.RS_TIPS_START === 'function') window.RS_TIPS_START();
+        else document.dispatchEvent(new CustomEvent('rs:open-help', { bubbles: true }));
+      });
+    }
+  }
+
+
 
   // Run now and on DOM changes (toolbars often render late)
   const ready = () => ensureGlobalTips();
@@ -12595,6 +12635,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   }
 
   function removeExistingTileLayers(map){
+    if (!map || !map._layers) return;
     try {
       Object.values(map._layers).forEach(function(layer){
         if (layer && layer._url) {
