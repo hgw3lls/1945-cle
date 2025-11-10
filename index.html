@@ -7431,6 +7431,7 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
+  var features = (window.THEATRES && window.THEATRES.features) || [];
   function liHTML(p, idx){
     var badge = '<span class="rs-chip-status" style="margin-left:6px;">'+statusLabel(Number(p.map_status))+'</span>';
     var movie = p.Movie ? ('<p class="rs-movie"><strong>Now Showing:</strong> '+String(p.Movie)+'</p>') : '';
@@ -7440,30 +7441,31 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
       + movie
       + '</div>';
   }
+
   function getFeatures(){
-    var data = (window.THEATRES && window.THEATRES.features);
+    var data = (window.THEATRES && window.THEATRES.features) || [];
     return Array.isArray(data) ? data : [];
   }
 
   function populateList(){
-    var list = document.getElementById('rs-list');
-    if (!list) return getFeatures();
-    var data = getFeatures();
-    list.innerHTML = data.map(function(f,i){ return liHTML((f && f.properties) || {}, i); }).join('');
+    if (!listRoot) listRoot = document.getElementById('rs-list');
+    var list = listRoot;
+    if (!list) return features;
+    features = getFeatures();
+    list.innerHTML = features.map(function(f,i){ return liHTML((f && f.properties) || {}, i); }).join('');
     var countEl = document.getElementById('rs-count');
-    if (countEl) countEl.textContent = data.length;
-    return data;
+    if (countEl) countEl.textContent = features.length;
+    return features;
   }
 
-  var features = populateList();
+  populateList();
 
   window.RS = window.RS || {};
   window.RS.populateList = populateList;
   window.RS.ensureListPopulated = function(){
     try {
-      var list = document.getElementById('rs-list');
-      if (!list) return;
-      if (!list.querySelector('.rs-li')) {
+      if (!listRoot) listRoot = document.getElementById('rs-list');
+      if (listRoot && !listRoot.querySelector('.rs-li')) {
         populateList();
       }
     } catch(e) {
@@ -11742,6 +11744,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Hook a visible "Tips" button in the float header if no HELP button is wired
   function ensureTipsButton(){
+    const floatBtn = document.querySelector('#rs-float .rs-tips-btn-float');
+    if (floatBtn) {
+      if (!floatBtn.dataset.rsTipsWired) {
+        floatBtn.addEventListener('click', () => window.RS_TIPS_START());
+        floatBtn.dataset.rsTipsWired = 'true';
+      }
+      const stray = document.querySelector('#rs-float .rs-tips-btn');
+      if (stray && stray !== floatBtn) {
+        stray.remove();
+      }
+      return;
+    }
     if (document.querySelector('#rs-float .rs-tips-btn')) return;
     const hdr = document.querySelector('#rs-float .rs-float__header') || document.querySelector('#rs-float');
     if (!hdr) return;
