@@ -508,6 +508,54 @@ html,body {
 
 
 
+.rs-layer-panel {
+
+  position:fixed;
+  left:16px;
+  bottom:16px;
+  width:min(420px, 92vw);
+  max-width:420px;
+  background:var(--panel-bg, rgba(10,10,10,.92));
+  border:1px solid var(--panel-border, rgba(255,255,255,0.18));
+  border-radius:16px;
+  box-shadow:var(--shadow, 0 10px 30px rgba(0,0,0,0.35));
+  padding:16px 18px 18px;
+  z-index:10008;
+  pointer-events:auto;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.rs-layer-panel .rs-footer-inner {
+
+  background:transparent;
+  padding:0;
+}
+
+.rs-layer-panel .rs-layer-sliders {
+
+  width:100%;
+  flex-direction:column;
+  align-items:stretch;
+  gap:14px;
+}
+
+.rs-layer-panel .rs-historic-slider,
+.rs-layer-panel .rs-layer-slider {
+
+  width:100% !important;
+  max-width:none;
+  margin:0 0 10px;
+}
+
+.rs-layer-panel .rs-maplayers-header {
+
+  text-align:left;
+}
+
+
+
 /* Draggable list panel */
   .rs-float {
 
@@ -523,6 +571,52 @@ html,body {
   border-radius:12px;
   overflow:hidden;
   z-index:10011;
+}
+
+
+.rs-float.rs-sidebar {
+
+  top:0;
+    right:0;
+    bottom:0;
+    left:auto;
+    width:min(420px,90vw);
+    max-height:none;
+    height:100vh;
+    border-radius:0;
+    border-right:none;
+    border-left:2px solid var(--panel-border);
+    transition:transform .3s ease, opacity .2s ease;
+    opacity:1;
+}
+
+.rs-float.rs-sidebar:not(.rs-sidebar-hidden) {
+
+  transform:translateX(0);
+}
+
+
+.rs-float.rs-sidebar.rs-sidebar-hidden {
+
+  transform:translateX(100%);
+    pointer-events:none;
+    opacity:0;
+}
+
+.rs-float.rs-sidebar #rs-float-drag,
+.rs-float.rs-sidebar .rs-float__title {
+
+  cursor:default;
+}
+
+body.rs-sidebar-open #map {
+
+  right:min(420px,90vw);
+}
+
+body.rs-sidebar-open .leaflet-control-container {
+
+  margin-right:min(420px,90vw);
 }
 
 
@@ -1536,6 +1630,7 @@ html,body {
   display:flex;
   gap:8px;
   margin-top:8px;
+  flex-wrap:wrap;
 }
 
 
@@ -1848,7 +1943,7 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
 
 
 /* === Draggable float panel fix === */
-.rs-float {
+.rs-float:not(.rs-sidebar) {
 
   position: absolute;
   /* allow movement */
@@ -6998,27 +7093,14 @@ html.booting #rs-float {
 <div aria-label="Info and Help" class="rs-toolbar-infohelp">
 <button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
+<button aria-label="Tips" class="rs-btn rs-tips-btn-toolbar" title="Guided tour" type="button">Tips</button>
+<button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
-<div id="rs-toggle-list"> </div>
+<button aria-controls="rs-float" aria-expanded="true" aria-pressed="false" class="rs-btn" id="rs-toggle-list" type="button">Dock Sidebar</button>
 </div>
-<section class="rs-float" id="rs-float">
-<header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
-<div><span class="rs-float__title">Theatres</span>
-<span class="rs-chip" id="rs-count">0</span></div>
-<div class="rs-float__actions">
-<button class="rs-btn" id="rs-collapse" title="Collapse list">Collapse</button>
-<div id="rs-close" title="Hide list"></div>
-</div>
-</header>
-<div class="rs-search-wrap" role="search">
-<input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
-<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
-</div>
-<div class="rs-float__list" id="rs-list" role="list"></div>
-<div class="rs-footer-bar" id="rs-footer-bar">
+<div class="rs-layer-panel rs-footer-bar" id="rs-footer-bar">
 <div class="rs-footer-inner">
-<!-- Historic opacity slider (Stage 1) -->
 <div class="rs-footer-inner">
 <div class="rs-maplayers-header">MAP LAYERS</div>
 <!-- Historic opacity segmented bar -->
@@ -7065,11 +7147,24 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
-<button class="rs-btn" id="rs-reset" title="Reset map view">Reset Map</button>
 </div>
 </div>
 </div>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-float" type="button">Tips</button></section>
+<section class="rs-float" id="rs-float">
+<header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
+<div><span class="rs-float__title">Theatres</span>
+<span class="rs-chip" id="rs-count">0</span></div>
+<div class="rs-float__actions">
+<button class="rs-btn" id="rs-collapse" title="Collapse list">Collapse</button>
+<div id="rs-close" title="Hide list"></div>
+</div>
+</header>
+<div class="rs-search-wrap" role="search">
+<input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
+<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+</div>
+<div class="rs-float__list" id="rs-list" role="list"></div>
+</section>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -8243,6 +8338,7 @@ function zoomHere(lat, lon) {
   function onPointerDown(e){
     // Only left click or touch
     if (e.type === 'mousedown' && e.button !== 0) return;
+    if (floatEl.classList && floatEl.classList.contains('rs-sidebar')) return;
     dragging = true;
     floatEl.classList.add('rs-floating');
     var rect = floatEl.getBoundingClientRect();
@@ -11301,8 +11397,9 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 // === Ensure reflow after toggling MAP LAYERS ===
 (function(){
-  const sect = document.querySelector('#rs-float .rs-layer-section');
-  const header = document.querySelector('#rs-float .rs-maplayers-header');
+  const panel = document.querySelector('.rs-layer-panel') || document.getElementById('rs-footer-bar');
+  const sect = panel ? panel.querySelector('.rs-layer-section') : document.querySelector('.rs-layer-section');
+  const header = panel ? panel.querySelector('.rs-maplayers-header') : document.querySelector('.rs-maplayers-header');
   if (!sect || !header) return;
 
   function toggleSection(){
@@ -11328,10 +11425,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script>
 // Collapse only the sliders/content, not the footer
+
 (function(){
-  const panel = document.querySelector('#rs-float');
+  const panel = document.querySelector('.rs-layer-panel') || document.getElementById('rs-footer-bar');
   const sect  = panel && panel.querySelector('.rs-layer-section');
-  if (!sect) return;
+  if (!panel || !sect) return;
 
   // 1) Ensure a dedicated content wrapper exists and contains the slider rows
   let content = sect.querySelector('.rs-layer-content');
@@ -11341,13 +11439,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Move slider rows into content
     const rows = sect.querySelectorAll('.rs-historic-slider, .rs-layer-slider');
     rows.forEach(r => content.appendChild(r));
-    // Insert content before the footer (if present), else at end
-    const footer = document.querySelector('#rs-footer-bar');
-    if (footer && footer.parentElement === panel) {
-      panel.insertBefore(content, footer);
-    } else {
-      sect.appendChild(content);
-    }
+    sect.appendChild(content);
   }
 
   // 2) Bind header toggle to content only
@@ -11370,6 +11462,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const floatPanel = document.getElementById('rs-float');
   const footer = document.getElementById('rs-footer-bar');
   if (!floatPanel || !footer) return;
+  if (!floatPanel.contains(footer)) return;
   if (footer.parentElement !== floatPanel) {
     floatPanel.appendChild(footer); // move to panel root, last child
   }
@@ -11820,6 +11913,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Hook a visible "Tips" button in the float header if no HELP button is wired
   function ensureTipsButton(){
+    const toolbarBtn = document.querySelector('.rs-toolbar .rs-tips-btn-toolbar, .rs-toolbar .rs-tips-btn-global');
+    if (toolbarBtn && !toolbarBtn.dataset.rsTipsWired) {
+      toolbarBtn.addEventListener('click', () => window.RS_TIPS_START());
+      toolbarBtn.dataset.rsTipsWired = 'true';
+    }
+
     const floatBtn = document.querySelector('#rs-float .rs-tips-btn-float');
     if (floatBtn) {
       if (!floatBtn.dataset.rsTipsWired) {
@@ -11832,6 +11931,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       return;
     }
+    if (toolbarBtn) return;
     if (document.querySelector('#rs-float .rs-tips-btn')) return;
     const hdr = document.querySelector('#rs-float .rs-float__header') || document.querySelector('#rs-float');
     if (!hdr) return;
@@ -11857,7 +11957,9 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   // Enhance existing RS_TIPS_START but keep Tips button scoped to the float
   function ensureToolbarTips(){
     document.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
-      if (btn && btn.parentElement) {
+      if (!btn) return;
+      if (btn.closest && (btn.closest('#rs-float') || btn.closest('.rs-toolbar'))) return;
+      if (btn.parentElement) {
         btn.parentElement.removeChild(btn);
       }
     });
@@ -11922,7 +12024,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     const scopedRemoval = (root) => {
       if (!root) return;
       root.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
-        if (btn && !btn.closest('#rs-float')) {
+        if (btn && !(btn.closest && (btn.closest('#rs-float') || btn.closest('.rs-toolbar')))) {
           btn.remove();
         }
       });
@@ -11931,7 +12033,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     if (toolbar) scopedRemoval(toolbar);
 
     document.querySelectorAll('button, [role="button"], .rs-btn').forEach(btn => {
-      if (btn.closest && btn.closest('#rs-float')) return;
+      if (btn.closest && (btn.closest('#rs-float') || btn.closest('.rs-toolbar'))) return;
       const label = (btn.getAttribute('aria-label')||'').trim();
       const title = (btn.getAttribute('title')||'').trim();
       const text = (btn.textContent||'').trim();
@@ -12422,9 +12524,9 @@ document.addEventListener("DOMContentLoaded", function() {
     var tips = scope.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global');
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
-      if (el && !(el.classList && el.classList.contains('rs-tips-btn-float'))){
-        if (el.parentNode) el.parentNode.removeChild(el);
-      }
+      if (!el || (el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))) continue;
+      if (el.classList && el.classList.contains('rs-tips-btn-float')) continue;
+      if (el.parentNode) el.parentNode.removeChild(el);
     }
   }
 
@@ -12433,9 +12535,8 @@ document.addEventListener("DOMContentLoaded", function() {
     var tips = scope.querySelectorAll('.rs-tips-btn-global, .rs-tips-btn-toolbar');
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
-      if (!(el.closest && el.closest('#rs-float'))){
-        if (el.parentNode) el.parentNode.removeChild(el);
-      }
+      if (el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar'))) continue;
+      if (el.parentNode) el.parentNode.removeChild(el);
     }
   }
 
@@ -12452,7 +12553,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var candidates = scope.querySelectorAll('button, [role="button"], .btn, .chip, .pill, .badge, .tag, .rs-btn');
     for (var i=0;i<candidates.length;i++){
       var el = candidates[i];
-      if (rsLooksLikeTips(el) && !(el.closest && el.closest('#rs-float'))){
+      if (rsLooksLikeTips(el) && !(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))){
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12608,6 +12709,132 @@ document.addEventListener("DOMContentLoaded", function() {
 <script>console.info('%cStage 1 canonical overrides active','background:#3fc4ff;color:#000;padding:2px 6px;font-weight:900');</script>
 <script>console.info('%cStage 2 CSS consolidation active','background:#00ff9c;color:#000;padding:2px 6px;font-weight:900');</script>
 <script>console.info('%cStage 3 HTML trim active','background:#ffd166;color:#000;padding:2px 6px;font-weight:900');</script>
+<script id="rs-sidebar-toggle-script">
+(function(){
+  var STORAGE_KEY = 'rs-sidebar-state';
+  var BODY_CLASS = 'rs-sidebar-open';
+
+  function init(){
+    var floatPanel = document.getElementById('rs-float');
+    var toggleBtn = document.getElementById('rs-toggle-list');
+    if (!floatPanel || !toggleBtn) return;
+
+    function persist(){
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          docked: floatPanel.classList.contains('rs-sidebar'),
+          hidden: floatPanel.classList.contains('rs-sidebar-hidden')
+        }));
+      } catch(_) {}
+    }
+
+    function updateUI(){
+      var docked = floatPanel.classList.contains('rs-sidebar');
+      var hidden = floatPanel.classList.contains('rs-sidebar-hidden');
+      var label = 'Dock Sidebar';
+
+      if (!docked){
+        toggleBtn.setAttribute('aria-pressed', 'false');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        floatPanel.removeAttribute('aria-hidden');
+        label = 'Dock Sidebar';
+      } else if (hidden){
+        toggleBtn.setAttribute('aria-pressed', 'false');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        floatPanel.setAttribute('aria-hidden', 'true');
+        label = 'Show Sidebar';
+      } else {
+        toggleBtn.setAttribute('aria-pressed', 'true');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        floatPanel.setAttribute('aria-hidden', 'false');
+        label = 'Hide Sidebar';
+      }
+
+      var titleText = label;
+      if (docked){
+        titleText += ' (Alt+Click to undock)';
+      }
+
+      toggleBtn.textContent = label;
+      toggleBtn.setAttribute('title', titleText);
+      floatPanel.hidden = false;
+      document.body.classList.toggle(BODY_CLASS, docked && !hidden);
+      persist();
+    }
+
+    function dockSidebar(){
+      floatPanel.classList.add('rs-sidebar');
+      floatPanel.classList.remove('rs-sidebar-hidden');
+      floatPanel.hidden = false;
+      floatPanel.style.left = '';
+      floatPanel.style.top = '';
+      floatPanel.classList.remove('rs-floating');
+      try { sessionStorage.removeItem('rs-float-pos'); } catch(_) {}
+    }
+
+    function hideSidebar(){
+      floatPanel.classList.add('rs-sidebar');
+      floatPanel.classList.add('rs-sidebar-hidden');
+      floatPanel.hidden = false;
+    }
+
+    function undockSidebar(){
+      floatPanel.classList.remove('rs-sidebar');
+      floatPanel.classList.remove('rs-sidebar-hidden');
+      floatPanel.removeAttribute('aria-hidden');
+      document.body.classList.remove(BODY_CLASS);
+    }
+
+    toggleBtn.addEventListener('click', function(ev){
+      // Alt-click restores the original floating panel behavior
+      if (ev.altKey){
+        undockSidebar();
+        updateUI();
+        return;
+      }
+
+      var docked = floatPanel.classList.contains('rs-sidebar');
+      var hidden = floatPanel.classList.contains('rs-sidebar-hidden');
+
+      if (!docked){
+        dockSidebar();
+      } else if (hidden){
+        floatPanel.classList.remove('rs-sidebar-hidden');
+      } else {
+        hideSidebar();
+      }
+
+      updateUI();
+    });
+
+    var closeBtn = document.getElementById('rs-close');
+    if (closeBtn){
+      closeBtn.addEventListener('click', function(ev){
+        if (!floatPanel.classList.contains('rs-sidebar')) return;
+        ev.preventDefault();
+        hideSidebar();
+        updateUI();
+      });
+    }
+
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+      if (saved && saved.docked){
+        dockSidebar();
+        if (saved.hidden) floatPanel.classList.add('rs-sidebar-hidden');
+      }
+    } catch(_) {}
+
+    updateUI();
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+})();
+</script>
 <!-- STAGE 4: unified JS (idempotent) -->
 <script id="stage4-unified-js">
 (function(){
