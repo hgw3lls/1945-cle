@@ -9,7 +9,7 @@
 <script id="rs-config">
   (function(){
     var defaults = {
-      tileMode: 'online',
+      tileMode: 'local_online',
       resolution: 'auto',        // 'auto' | 'jaszdot-4k'
       autoDetectResolution: true,
       onlineTiles: {
@@ -7103,6 +7103,25 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
   // Adjust center lower and left over dense cluster
   map.setView([41.507, -81.638129], 13);
 
+  var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
+  var isLocalOnlineMode = tileMode === 'local_online';
+  var onlineTiles = window.RS_ONLINE_TILES || {};
+
+  if (isLocalOnlineMode && document && document.body && document.body.dataset) {
+    document.body.dataset.rsMode = 'local-online';
+  }
+
+  function createOnlineLayer(key, extraOpts) {
+    try {
+      var info = onlineTiles[key] || {};
+      if (!info.url) return null;
+      var opts = Object.assign({}, info.opts || {}, extraOpts || {});
+      return L.tileLayer(info.url, opts);
+    } catch (_) {
+      return null;
+    }
+  }
+
 // Make unloaded / missing tiles appear black
 document.getElementById('map').style.backgroundColor = '#000';
 
@@ -7114,7 +7133,22 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 
   // Offline tiles
   var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:200}).addTo(map);
-  var sat = L.tileLayer('tiles/sat/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:210, opacity:1.0, updateWhenZooming:false});
+  var fallbackOSM = null;
+  if (isLocalOnlineMode) {
+    var baseZ = (baseOSM && baseOSM.options && typeof baseOSM.options.zIndex === 'number') ? baseOSM.options.zIndex : 200;
+    fallbackOSM = createOnlineLayer('street', { zIndex: baseZ - 10, opacity: 1.0 });
+    if (fallbackOSM) {
+      try { fallbackOSM.addTo(map); } catch (_) {}
+      try { window.baseOSMOnline = fallbackOSM; } catch (_) {}
+    }
+  }
+  var sat = null;
+  if (isLocalOnlineMode) {
+    sat = createOnlineLayer('satellite', { minZoom:12, maxZoom:19, zIndex:210, opacity:1.0, updateWhenZooming:false });
+  }
+  if (!sat) {
+    sat = L.tileLayer('tiles/sat/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:210, opacity:1.0, updateWhenZooming:false});
+  }
   try { window.sat = sat; } catch(_) {}
 
   var street = L.tileLayer('tiles/street/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:220, opacity:1.0, updateWhenZooming:false});
@@ -12197,13 +12231,22 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
 <script>
 (function(){
   function buildHelpHTML(mode){
-    var isOnline = String(mode||'local').toLowerCase() === 'online';
+    var normalized = String(mode||'local').toLowerCase();
+    var isOnline = normalized === 'online';
+    var isLocalOnline = normalized === 'local_online' || normalized === 'local-online';
     var lines = [];
     lines.push('<h2>Map Layers</h2>');
     if (isOnline) {
       lines.push('<p>Two Base Layers <strong>Street</strong> and <strong>Satellite</strong>. Use the layer switcher in the top-right to toggle.</p>');
+    } else if (isLocalOnline) {
+      lines.push('<p>Street and Historic layers load from the included tiles. Missing base map squares automatically fall back to live OpenStreetMap data, and Satellite imagery streams online.</p>');
+      lines.push('<ul>');
+      lines.push('<li><strong>Street</strong> — Offline tiles with live OSM filling any gaps.</li>');
+      lines.push('<li><strong>Satellite</strong> — Online aerial imagery.</li>');
+      lines.push('<li><strong>Cleveland 1927–1937</strong> — Historical map overlay with a year slider.</li>');
+      lines.push('</ul>');
     } else {
-      lines.push('<pMultiple base layers and archives. Use <strong>Map Layers</strong> to toggle categories.</p>');
+      lines.push('<p>Multiple base layers and archives. Use <strong>Map Layers</strong> to toggle categories.</p>');
       lines.push('<ul>');
       lines.push('<li><strong>Street</strong> — Street map for navigation.</li>');
       lines.push('<li><strong>Satellite</strong> — Aerial imagery for context.</li>');
@@ -12235,10 +12278,13 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     lines.push('<ul>');
     lines.push('<li>“Zoom to the <em>Euclid Tavern</em> and open the popup.”</li>');
     lines.push('<li>“Filter to only <em>Open</em> and <em>Repurposed</em> theatres.”</li>');
-    if (!isOnline) {
-      lines.push('<li>“Set the year to <em>1930</em> on the Cleveland slider and compare streets.”</li>');
-    } else {
+    if (isOnline) {
       lines.push('<li>“Switch from <em>Street</em> to <em>Satellite</em> using the control in the top-right.”</li>');
+    } else if (isLocalOnline) {
+      lines.push('<li>“Set the year to <em>1930</em> on the Cleveland slider and compare streets while live tiles fill in the gaps.”</li>');
+      lines.push('<li>“Toggle to <em>Satellite</em> when you need current aerial imagery.”</li>');
+    } else {
+      lines.push('<li>“Set the year to <em>1930</em> on the Cleveland slider and compare streets.”</li>');
     }
     lines.push('</ul>');
 
