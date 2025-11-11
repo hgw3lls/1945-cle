@@ -7174,78 +7174,9 @@ body:not(.rs-sidebar-open) .rs-sidebar {
 <button class="rs-btn" style="font-size:20px; padding:14px 18px;">Start Exploring</button>
 </div>
 </div>
-<button aria-controls="rs-float" aria-expanded="true" class="rs-sidebar-toggle rs-btn" id="rs-toggle-list" type="button">
-Hide Sidebar
-</button>
-<section aria-hidden="false" class="rs-float rs-sidebar rs-sidebar--open" id="rs-float">
-<header class="rs-sidebar__header">
+<div class="rs-toolbar">
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
-<button aria-label="Hide sidebar" class="rs-btn rs-sidebar__close" id="rs-sidebar-close" type="button">Close</button>
-</header>
-<div aria-label="Map tools" class="rs-sidebar__actions" role="group">
-<button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
-<button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-toolbar" title="Guided tour" type="button">Tips</button>
-<button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
-<button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
-<div class="rs-layer-panel rs-footer-bar" id="rs-footer-bar">
-<div class="rs-footer-inner">
-<div class="rs-maplayers-header">Map Layers</div>
-<div class="rs-historic-slider">
-<div class="rs-hist-label">
-<span class="rs-label">Cleveland</span>
-<span class="rs-label">1927–1937</span>
-</div>
-<div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:100%"></div>
-<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-</div>
-</div>
-<div class="rs-layer-sliders">
-<div class="rs-layer-slider">
-<div class="rs-hist-label">
-<span class="rs-label">Satellite</span>
-</div>
-<div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="sat" data-val="100" id="rs-sat-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:100%"></div>
-<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-</div>
-</div>
-<div class="rs-layer-slider">
-<div class="rs-hist-label">
-<span class="rs-label">Street</span>
-</div>
-<div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-layer="street" data-val="0" id="rs-street-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:0%"></div>
-<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="rs-sidebar__list-header">
-<span class="rs-float__title">Theatres</span>
-<span class="rs-chip" id="rs-count">0</span>
-</div>
-<div class="rs-search-wrap" role="search">
-<input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
-<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
-</div>
-<div class="rs-float__list" id="rs-list" role="list"></div>
-</section>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -7775,20 +7706,22 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   var idxToLayer = [];
   markerLayer.eachLayer(function(l){ idxToLayer.push(l); });
 
-  listRoot.addEventListener('click', function(e){
-    var item = e.target.closest('.rs-li'); if (!item) return;
-    var idx = Number(item.getAttribute('data-idx'));
-    var layer = idxToLayer[idx]; if (!layer) return;
-    var latlng = layer.getLatLng();
-    var z = Math.max(map.getZoom(), 16);
-    var px = map.project(latlng, z);
-    var offsetY = Math.round(map.getSize().y * -0.20);
-    var target = L.point(px.x, px.y + offsetY);
-    map.flyTo(map.unproject(target, z), z, { duration: 0.6 });
-    setTimeout(function(){ layer.openPopup(); }, 650);
-    Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-li'), function(n){ n.classList.remove('active'); });
-    item.classList.add('active');
-  });
+  if (listRoot){
+    listRoot.addEventListener('click', function(e){
+      var item = e.target.closest('.rs-li'); if (!item) return;
+      var idx = Number(item.getAttribute('data-idx'));
+      var layer = idxToLayer[idx]; if (!layer) return;
+      var latlng = layer.getLatLng();
+      var z = Math.max(map.getZoom(), 16);
+      var px = map.project(latlng, z);
+      var offsetY = Math.round(map.getSize().y * -0.20);
+      var target = L.point(px.x, px.y + offsetY);
+      map.flyTo(map.unproject(target, z), z, { duration: 0.6 });
+      setTimeout(function(){ layer.openPopup(); }, 650);
+      Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-li'), function(n){ n.classList.remove('active'); });
+      item.classList.add('active');
+    });
+  }
 
   // Footer legend filters
   var activeStatuses = {1:true, 0:true, 2:true, 3:true};
