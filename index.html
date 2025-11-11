@@ -6979,80 +6979,166 @@ html.booting #rs-float {
 
 </style>
 <style>
+:root {
+  --rs-sidebar-width: min(92vw, 420px);
+}
 
-/* === RS-FLOAT COLLAPSE v2 (non-destructive) === */
-#rs-float .rs-float__head,
-#rs-float .rs-float__header,
-#rs-float .rs-float-header { position: relative; }
+#map {
+  transition: margin-right .3s ease;
+}
 
-#rs-float .rs-collapse-btn {
-  position: absolute;
-  right: 12px;
-  top: 10px;
-  appearance: none;
-  -webkit-appearance: none;
-  background: #f3efe4;
-  color: #000;
-  border: 2px solid #000;
-  padding: 4px;
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
+body.rs-sidebar-open #map {
+  margin-right: var(--rs-sidebar-width);
+}
+
+.rs-sidebar-toggle {
+  position: fixed;
+  top: 18px;
+  right: var(--rs-sidebar-toggle-right, 18px);
+  z-index: 10110;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+body.rs-sidebar-open {
+  --rs-sidebar-toggle-right: calc(var(--rs-sidebar-width) + 18px);
+}
+
+.rs-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--rs-sidebar-width);
+  max-width: var(--rs-sidebar-width);
+  min-width: min(100vw, clamp(300px, 32vw, 460px));
+  display: flex;
+  flex-direction: column;
+  background: rgba(22, 22, 22, 0.96);
+  box-shadow: -12px 0 28px rgba(0, 0, 0, 0.45);
+  transform: translateX(0);
+  transition: transform .3s ease;
+  z-index: 10100;
+}
+
+body:not(.rs-sidebar-open) .rs-sidebar {
+  transform: translateX(100%);
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.rs-sidebar__header {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  justify-content: space-between;
+  padding: 18px 20px 12px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-#rs-float .rs-collapse-btn:focus { outline: 4px solid rgba(0,140,255,.35); outline-offset: 0; }
-#rs-float .rs-collapse-btn:hover { background: #000; color: #f3efe4; }
 
-#rs-float .rs-collapse-btn svg { width: 18px; height: 18px; display: block; }
-
-/* Hide legacy EXPAND/COLLAPSE button so we don't duplicate controls */
-#rs-collapse { display: none !important; }
-
-/* Collapsed: hide body-only regions, keep header visible */
-#rs-float.rs-collapsed .rs-float__body,
-#rs-float.rs-collapsed .rs-float__content,
-#rs-float.rs-collapsed .rs-float__list,
-#rs-float.rs-collapsed .rs-float__filters,
-#rs-float.rs-collapsed .rs-float__footer,
-#rs-float.rs-collapsed .rs-layer-toggles,
-#rs-float.rs-collapsed .rs-historic-slider,
-#rs-float.rs-collapsed .rs-layer-sliders,
-#rs-float.rs-collapsed .rs-float__actions { display: none !important; }
-
-#rs-float.rs-collapsed { height: auto !important; min-height: 0 !important; }
-
-/* Flip chevrons when expanded vs collapsed */
-#rs-float .rs-collapse-icon { transition: transform .15s ease; }
-#rs-float:not(.rs-collapsed) .rs-collapse-icon { transform: rotate(180deg); }
-
-</style>
-<style>
-
-/* === RS-FLOAT: place search under header, hide on collapse === */
-#rs-float .rs-float__search { 
-  padding: 8px 14px 6px 14px; 
-  border-top: 1px solid rgba(255,255,255,.08);
-  border-bottom: 1px solid rgba(0,0,0,.25);
+.rs-sidebar__header .rs-logo {
+  width: min(180px, 40vw);
+  height: auto;
 }
-#rs-float .rs-float__search input,
-#rs-float .rs-float__search .rs-search input,
-#rs-float .rs-float__search .rs-searchbar input {
+
+.rs-sidebar__close {
+  flex: 0 0 auto;
+}
+
+.rs-sidebar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px 20px 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rs-layer-panel {
+  padding: 18px 20px 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.rs-layer-panel .rs-footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rs-maplayers-header {
+  font: 700 16px/1 var(--font-ui, 'LeagueGothic', system-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f3efe4;
+}
+
+.rs-historic-slider,
+.rs-layer-slider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.rs-layer-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rs-hist-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  color: #f3efe4;
+}
+
+.rs-hist-label .rs-label:first-child {
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.rs-hist-label .rs-label:last-child {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.rs-sidebar__list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 8px 20px;
+}
+
+.rs-sidebar__list-header .rs-float__title {
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+#rs-float .rs-search-wrap {
+  padding: 0 20px 14px 20px;
+}
+
+#rs-float .rs-search-wrap input,
+#rs-float .rs-search-wrap .rs-search input,
+#rs-float .rs-search-wrap .rs-searchbar input {
   width: 100%;
   font-size: 15px;
 }
-/* Hide search and footer when collapsed */
-#rs-float.rs-collapsed .rs-float__search,
-#rs-float.rs-collapsed .rs-search,
-#rs-float.rs-collapsed .rs-search-wrap,
-#rs-float.rs-collapsed .rs-searchbar,
-#rs-float.rs-collapsed .rs-search-container,
-#rs-float.rs-collapsed .rs-float__footer,
-#rs-float.rs-collapsed .rs-footer,
-#rs-float.rs-collapsed footer,
-#rs-float.rs-collapsed #rs-footer { 
-  display: none !important; 
+
+#rs-float .rs-float__list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0 12px 18px 12px;
+}
+
+@media (max-width: 720px) {
+  body.rs-sidebar-open {
+    --rs-sidebar-width: 100vw;
+  }
+
+  .rs-sidebar-toggle {
+    right: 18px;
+  }
 }
 
 </style>
@@ -7088,26 +7174,28 @@ html.booting #rs-float {
 <button class="rs-btn" style="font-size:20px; padding:14px 18px;">Start Exploring</button>
 </div>
 </div>
-<div class="rs-toolbar">
+<button aria-controls="rs-float" aria-expanded="true" class="rs-sidebar-toggle rs-btn" id="rs-toggle-list" type="button">
+Hide Sidebar
+</button>
+<section aria-hidden="false" class="rs-float rs-sidebar rs-sidebar--open" id="rs-float">
+<header class="rs-sidebar__header">
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
-<div aria-label="Info and Help" class="rs-toolbar-infohelp">
+<button aria-label="Hide sidebar" class="rs-btn rs-sidebar__close" id="rs-sidebar-close" type="button">Close</button>
+</header>
+<div aria-label="Map tools" class="rs-sidebar__actions" role="group">
 <button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
 <button aria-label="Tips" class="rs-btn rs-tips-btn-toolbar" title="Guided tour" type="button">Tips</button>
 <button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
-<button aria-controls="rs-float" aria-expanded="true" aria-pressed="false" class="rs-btn" id="rs-toggle-list" type="button">Dock Sidebar</button>
-</div>
 <div class="rs-layer-panel rs-footer-bar" id="rs-footer-bar">
 <div class="rs-footer-inner">
-<div class="rs-footer-inner">
-<div class="rs-maplayers-header">MAP LAYERS</div>
-<!-- Historic opacity segmented bar -->
-<div class="rs-historic-slider" style="display:flex; align-items:center; gap:14px; margin-right:auto;; padding-top: 16px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
-<span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
+<div class="rs-maplayers-header">Map Layers</div>
+<div class="rs-historic-slider">
+<div class="rs-hist-label">
+<span class="rs-label">Cleveland</span>
+<span class="rs-label">1927–1937</span>
 </div>
 <div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:100%"></div>
@@ -7118,13 +7206,12 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-sliders" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-<!-- Street segmented bar -->
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
+<div class="rs-layer-sliders">
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
+<span class="rs-label">Satellite</span>
 </div>
-<div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
+<div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="sat" data-val="100" id="rs-sat-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:100%"></div>
 <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
 <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
@@ -7133,11 +7220,11 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
+<span class="rs-label">Street</span>
 </div>
-<div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
+<div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-layer="street" data-val="0" id="rs-street-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:0%"></div>
 <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
 <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
@@ -7149,16 +7236,10 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
+<div class="rs-sidebar__list-header">
+<span class="rs-float__title">Theatres</span>
+<span class="rs-chip" id="rs-count">0</span>
 </div>
-<section class="rs-float" id="rs-float">
-<header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
-<div><span class="rs-float__title">Theatres</span>
-<span class="rs-chip" id="rs-count">0</span></div>
-<div class="rs-float__actions">
-<button class="rs-btn" id="rs-collapse" title="Collapse list">Collapse</button>
-<div id="rs-close" title="Hide list"></div>
-</div>
-</header>
 <div class="rs-search-wrap" role="search">
 <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
 <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
@@ -7594,11 +7675,57 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   if (e.tile) e.tile.style.display = 'none';
 }); });
 
-  // Floating list toggle/collapse/close
+  // Sidebar toggle handling
   var floatEl = document.getElementById('rs-float');
-  document.getElementById('rs-toggle-list'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = !floatEl.hidden; });
-  document.getElementById('rs-close'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = true; });
-  document.getElementById('rs-collapse'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ var list = document.getElementById('rs-list'); list.style.display = (list.style.display==='none' ? '' : 'none'); });
+  var toggleBtn = document.getElementById('rs-toggle-list');
+  var closeBtn = document.getElementById('rs-sidebar-close');
+  var storageKey = 'rs-sidebar-open-state';
+
+  function sidebarOpen(){ return document.body.classList.contains('rs-sidebar-open'); }
+
+  function setSidebar(open){
+    if (!floatEl) return;
+    document.body.classList.toggle('rs-sidebar-open', open);
+    floatEl.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (toggleBtn){
+      var label = open ? 'Hide Sidebar' : 'Show Sidebar';
+      toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggleBtn.setAttribute('aria-label', label);
+      toggleBtn.setAttribute('title', label);
+      toggleBtn.textContent = label;
+    }
+    if (closeBtn){
+      closeBtn.setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+    try {
+      if (window.map && typeof window.map.invalidateSize === 'function'){
+        setTimeout(function(){ window.map.invalidateSize(); }, 320);
+      }
+    } catch(_){}
+    try { localStorage.setItem(storageKey, open ? '1' : '0'); } catch(_){}
+  }
+
+  if (floatEl){
+    var initialOpen = true;
+    try {
+      var saved = localStorage.getItem(storageKey);
+      if (saved === '0') initialOpen = false;
+    } catch(_){}
+    setSidebar(initialOpen);
+  }
+
+  if (toggleBtn){
+    toggleBtn.addEventListener('click', function(){ setSidebar(!sidebarOpen()); });
+  }
+
+  if (closeBtn){
+    closeBtn.addEventListener('click', function(){ setSidebar(false); });
+  }
+
+  try {
+    window.RS_SET_SIDEBAR = setSidebar;
+    window.RS_IS_SIDEBAR_OPEN = sidebarOpen;
+  } catch(_){}
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
@@ -7691,7 +7818,9 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 
   // Drag support for header
   (function enableDrag(){
-    var drag = document.getElementById('rs-float-drag'); var host = document.getElementById('rs-float');
+    var drag = document.getElementById('rs-float-drag');
+    var host = document.getElementById('rs-float');
+    if (!drag || !host) return;
     var startX=0, startY=0, ox=0, oy=0, dragging=false;
     drag.addEventListener('mousedown', function(e){ dragging=true; startX=e.clientX; startY=e.clientY; var r=host.getBoundingClientRect(); ox=r.left; oy=r.top; document.body.style.userSelect='none'; });
     document.addEventListener('mousemove', function(e){ if(!dragging) return; var dx=e.clientX-startX, dy=e.clientY-startY; host.style.right=''; host.style.top=(oy+dy)+'px'; host.style.left=(ox+dx)+'px'; });
@@ -12709,132 +12838,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <script>console.info('%cStage 1 canonical overrides active','background:#3fc4ff;color:#000;padding:2px 6px;font-weight:900');</script>
 <script>console.info('%cStage 2 CSS consolidation active','background:#00ff9c;color:#000;padding:2px 6px;font-weight:900');</script>
 <script>console.info('%cStage 3 HTML trim active','background:#ffd166;color:#000;padding:2px 6px;font-weight:900');</script>
-<script id="rs-sidebar-toggle-script">
-(function(){
-  var STORAGE_KEY = 'rs-sidebar-state';
-  var BODY_CLASS = 'rs-sidebar-open';
 
-  function init(){
-    var floatPanel = document.getElementById('rs-float');
-    var toggleBtn = document.getElementById('rs-toggle-list');
-    if (!floatPanel || !toggleBtn) return;
-
-    function persist(){
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          docked: floatPanel.classList.contains('rs-sidebar'),
-          hidden: floatPanel.classList.contains('rs-sidebar-hidden')
-        }));
-      } catch(_) {}
-    }
-
-    function updateUI(){
-      var docked = floatPanel.classList.contains('rs-sidebar');
-      var hidden = floatPanel.classList.contains('rs-sidebar-hidden');
-      var label = 'Dock Sidebar';
-
-      if (!docked){
-        toggleBtn.setAttribute('aria-pressed', 'false');
-        toggleBtn.setAttribute('aria-expanded', 'true');
-        floatPanel.removeAttribute('aria-hidden');
-        label = 'Dock Sidebar';
-      } else if (hidden){
-        toggleBtn.setAttribute('aria-pressed', 'false');
-        toggleBtn.setAttribute('aria-expanded', 'false');
-        floatPanel.setAttribute('aria-hidden', 'true');
-        label = 'Show Sidebar';
-      } else {
-        toggleBtn.setAttribute('aria-pressed', 'true');
-        toggleBtn.setAttribute('aria-expanded', 'true');
-        floatPanel.setAttribute('aria-hidden', 'false');
-        label = 'Hide Sidebar';
-      }
-
-      var titleText = label;
-      if (docked){
-        titleText += ' (Alt+Click to undock)';
-      }
-
-      toggleBtn.textContent = label;
-      toggleBtn.setAttribute('title', titleText);
-      floatPanel.hidden = false;
-      document.body.classList.toggle(BODY_CLASS, docked && !hidden);
-      persist();
-    }
-
-    function dockSidebar(){
-      floatPanel.classList.add('rs-sidebar');
-      floatPanel.classList.remove('rs-sidebar-hidden');
-      floatPanel.hidden = false;
-      floatPanel.style.left = '';
-      floatPanel.style.top = '';
-      floatPanel.classList.remove('rs-floating');
-      try { sessionStorage.removeItem('rs-float-pos'); } catch(_) {}
-    }
-
-    function hideSidebar(){
-      floatPanel.classList.add('rs-sidebar');
-      floatPanel.classList.add('rs-sidebar-hidden');
-      floatPanel.hidden = false;
-    }
-
-    function undockSidebar(){
-      floatPanel.classList.remove('rs-sidebar');
-      floatPanel.classList.remove('rs-sidebar-hidden');
-      floatPanel.removeAttribute('aria-hidden');
-      document.body.classList.remove(BODY_CLASS);
-    }
-
-    toggleBtn.addEventListener('click', function(ev){
-      // Alt-click restores the original floating panel behavior
-      if (ev.altKey){
-        undockSidebar();
-        updateUI();
-        return;
-      }
-
-      var docked = floatPanel.classList.contains('rs-sidebar');
-      var hidden = floatPanel.classList.contains('rs-sidebar-hidden');
-
-      if (!docked){
-        dockSidebar();
-      } else if (hidden){
-        floatPanel.classList.remove('rs-sidebar-hidden');
-      } else {
-        hideSidebar();
-      }
-
-      updateUI();
-    });
-
-    var closeBtn = document.getElementById('rs-close');
-    if (closeBtn){
-      closeBtn.addEventListener('click', function(ev){
-        if (!floatPanel.classList.contains('rs-sidebar')) return;
-        ev.preventDefault();
-        hideSidebar();
-        updateUI();
-      });
-    }
-
-    try {
-      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-      if (saved && saved.docked){
-        dockSidebar();
-        if (saved.hidden) floatPanel.classList.add('rs-sidebar-hidden');
-      }
-    } catch(_) {}
-
-    updateUI();
-  }
-
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', init, { once: true });
-  } else {
-    init();
-  }
-})();
-</script>
 <!-- STAGE 4: unified JS (idempotent) -->
 <script id="stage4-unified-js">
 (function(){
