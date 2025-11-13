@@ -1548,9 +1548,111 @@ body:not(.rs-sidebar-open) #map {
 .rs-toolbar-infohelp {
 
   display:flex;
-  gap:8px;
-  margin-top:8px;
+  flex-direction:column;
+  align-items:stretch;
+  gap:16px;
+  margin-top:0;
+  width:min(320px, 92vw);
+  padding:18px 20px;
+  border-radius:20px;
+  background:linear-gradient(160deg, rgba(18,17,15,0.94), rgba(32,29,23,0.82));
+  border:1px solid rgba(255,255,255,0.12);
+  box-shadow:0 22px 48px rgba(0,0,0,0.45);
+  backdrop-filter:blur(6px);
+}
+
+.rs-toolbar__section {
+
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.rs-toolbar__heading {
+
+  font:600 12px/1 var(--font-ui, system-ui);
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:rgba(243,239,228,0.65);
+}
+
+.rs-toolbar__group {
+
+  display:flex;
   flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+}
+
+.rs-toolbar__group--stack {
+
+  width:100%;
+}
+
+.rs-toolbar__group--stack .rs-btn {
+
+  width:100%;
+  justify-content:center;
+}
+
+.rs-toolbar-infohelp .rs-btn--full {
+
+  width:100%;
+  justify-content:center;
+}
+
+.rs-toolbar-infohelp .rs-btn {
+
+  background:rgba(243,239,228,0.92);
+  color:#1b1510;
+  border:1px solid rgba(19,18,15,0.45);
+  border-radius:999px;
+  padding:10px 18px;
+  text-transform:uppercase;
+  letter-spacing:0.12em;
+  font-weight:700;
+  font-size:12px;
+  line-height:1.2;
+  box-shadow:0 8px 20px rgba(0,0,0,0.35);
+  transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+}
+
+.rs-toolbar-infohelp .rs-btn:hover {
+
+  transform:translateY(-1px);
+  box-shadow:0 14px 28px rgba(0,0,0,0.4);
+}
+
+.rs-toolbar-infohelp .rs-btn:focus-visible {
+
+  outline:2px solid var(--fever-cyan);
+  outline-offset:2px;
+}
+
+.rs-toolbar-infohelp .rs-btn--ghost {
+
+  background:rgba(243,239,228,0.08);
+  color:#f6f2e8;
+  border-color:rgba(243,239,228,0.24);
+  box-shadow:inset 0 0 0 1px rgba(243,239,228,0.08);
+}
+
+.rs-toolbar-infohelp .rs-btn--ghost:hover {
+
+  background:rgba(243,239,228,0.18);
+}
+
+.rs-toolbar-infohelp .rs-btn--accent {
+
+  background:linear-gradient(135deg, var(--fever-cyan), #7fffe3);
+  color:#03202c;
+  border-color:rgba(0,0,0,0.2);
+  box-shadow:0 14px 30px rgba(0,215,255,0.35);
+}
+
+.rs-toolbar-infohelp .rs-btn--accent:hover {
+
+  filter:brightness(1.05);
 }
 
 
@@ -2653,6 +2755,12 @@ html.tv #rs-list .rs-movie {
 #rs-toggle-list {
 
   margin-left: auto;
+}
+
+.rs-toolbar-infohelp #rs-toggle-list {
+
+  margin-left: 0;
+  width: 100%;
 }
 
 .rs-sidebar-toggle {
@@ -7047,14 +7155,24 @@ html.booting #rs-float {
 <div class="rs-toolbar">
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
 <div aria-label="Map controls" class="rs-toolbar-infohelp">
-<button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
-<button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-toolbar" type="button">Tips</button>
+<div aria-label="Guides" class="rs-toolbar__section" role="group">
+<span class="rs-toolbar__heading">Guides</span>
+<div class="rs-toolbar__group">
+<button class="rs-btn rs-btn--ghost" id="rs-info-btn" title="About this map" type="button">Info</button>
+<button class="rs-btn rs-btn--ghost" id="rs-help-btn" title="How to explore" type="button">Help</button>
+<button aria-label="Tips" class="rs-btn rs-btn--ghost rs-tips-btn-toolbar" type="button">Tips</button>
+</div>
+</div>
+<div aria-label="Map actions" class="rs-toolbar__section" role="group">
+<span class="rs-toolbar__heading">Map Actions</span>
+<div class="rs-toolbar__group">
 <button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
-<div id="rs-toggle-list">
-<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
+<div class="rs-toolbar__group rs-toolbar__group--stack" id="rs-toggle-list">
+<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-btn--accent rs-btn--full rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
+</div>
+</div>
 </div>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
