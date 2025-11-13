@@ -491,12 +491,12 @@ body:not(.rs-sidebar-open) #map {
   .rs-toolbar {
 
   position:fixed;
-  top:16px;
-  left:16px;
+  bottom:24px;
+  left:24px;
   z-index:10010;
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:14px;
   align-items:flex-start;
   pointer-events:none;
 }
@@ -1548,98 +1548,31 @@ body:not(.rs-sidebar-open) #map {
 .rs-toolbar__actions {
 
   display:flex;
-  width:100%;
-}
-
-.rs-toolbar__actions .rs-sidebar-toggle {
-
-  width:100%;
-}
-
-.rs-sidebar-toggle {
-
-  font:700 18px/1 'LeagueGothic', var(--font-ui, system-ui);
-  letter-spacing:0.08em;
-  text-transform:uppercase;
-  padding:14px 24px;
-  background:#f3efe4;
-  color:#070707;
-  border:3px solid #070707;
-  border-radius:0;
-  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
-  transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
-}
-
-.rs-sidebar-toggle:hover {
-
-  background:#ffffff;
-  transform:translate(-2px,-2px);
-  box-shadow:8px 8px 0 rgba(0,0,0,0.9);
-}
-
-.rs-sidebar-toggle:active {
-
-  transform:translate(0,0);
-  box-shadow:3px 3px 0 rgba(0,0,0,0.75);
-}
-
-.rs-sidebar-toggle:focus-visible {
-
-  outline:2px solid var(--fever-cyan);
-  outline-offset:4px;
-}
-
-.rs-rail {
-
-  position:fixed;
-  top:clamp(120px, 16vh, 220px);
-  right:16px;
-  z-index:10012;
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-  pointer-events:none;
-  transition:right 0.3s ease;
-}
-
-.rs-rail > * {
-
-  pointer-events:auto;
-}
-
-body.rs-sidebar-open .rs-rail {
-
-  right:calc(min(var(--rs-float-max-width, 420px), 92vw) + 4px);
-}
-
-.rs-rail__section {
-
-  display:flex;
-  flex-direction:column;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-start;
   gap:12px;
-  min-width:172px;
   padding:16px 18px;
   background:rgba(0,0,0,0.88);
   border:3px solid #f3efe4;
   border-radius:0;
   box-shadow:8px 8px 0 rgba(0,0,0,0.85);
+  max-width:calc(100vw - 48px);
 }
 
-.rs-rail__heading {
+.rs-toolbar__actions > * {
 
-  font:700 14px/1 'LeagueGothic', var(--font-ui, system-ui);
-  letter-spacing:0.16em;
-  text-transform:uppercase;
-  color:#f3efe4;
-  padding-bottom:4px;
-  border-bottom:2px solid #f3efe4;
+  pointer-events:auto;
 }
 
-.rs-rail__btn {
+.rs-toolbar__btn,
+.rs-sidebar-toggle {
 
-  display:block;
-  width:100%;
-  padding:10px 12px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:12px 18px;
   font:700 16px/1.1 'BookmanOld', var(--font-ui, system-ui);
   text-transform:uppercase;
   letter-spacing:0.08em;
@@ -1648,54 +1581,44 @@ body.rs-sidebar-open .rs-rail {
   border:2px solid #080808;
   border-radius:0;
   box-shadow:4px 4px 0 rgba(0,0,0,0.8);
-  text-align:left;
-  cursor:pointer;
-  transition:transform 0.12s ease, box-shadow 0.12s ease, background-color 0.2s ease;
+  transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
 }
 
-.rs-rail__btn:hover {
+.rs-toolbar__btn:hover,
+.rs-sidebar-toggle:hover {
 
   background:#ffffff;
   transform:translate(-2px,-2px);
   box-shadow:6px 6px 0 rgba(0,0,0,0.85);
 }
 
-.rs-rail__btn:active {
+.rs-toolbar__btn:active,
+.rs-sidebar-toggle:active {
 
   transform:translate(0,0);
-  box-shadow:3px 3px 0 rgba(0,0,0,0.7);
+  box-shadow:3px 3px 0 rgba(0,0,0,0.75);
 }
 
-.rs-rail__btn:focus-visible {
+.rs-toolbar__btn:focus-visible,
+.rs-sidebar-toggle:focus-visible {
 
   outline:2px solid var(--fever-cyan);
-  outline-offset:3px;
+  outline-offset:4px;
 }
 
+.rs-toolbar__btn--accent {
 
-
-@media (max-width: 720px) {
-
-  .rs-rail {
-
-    top:auto;
-    bottom:24px;
-    gap:14px;
-  }
-
-  .rs-rail__section {
-
-    min-width:150px;
-    padding:14px 16px;
-  }
-
-  body.rs-sidebar-open .rs-rail {
-
-    right:calc(min(var(--rs-float-max-width, 420px), 92vw) + 10px);
-  }
+  font:700 18px/1 'LeagueGothic', var(--font-ui, system-ui);
+  letter-spacing:0.12em;
+  padding:14px 24px;
+  border-width:3px;
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
 }
 
+.rs-toolbar__btn--accent:hover {
 
+  box-shadow:8px 8px 0 rgba(0,0,0,0.9);
+}
 
 #rs-infohelp-modal {
 
@@ -5923,12 +5846,10 @@ html.booting #rs-float {
 /* === RS Patch: Strict toolbar-only Tips === */
 .rs-tips-btn-toolbar, .rs-tips-btn-global { display: none !important; }
 .rs-toolbar .rs-tips-btn-toolbar,
-.rs-toolbar .rs-tips-btn-global,
-.rs-rail .rs-tips-btn-toolbar,
-.rs-rail .rs-tips-btn-global { display: inline-flex !important; }
+.rs-toolbar .rs-tips-btn-global { display: inline-flex !important; }
 /* Extra guard for any accidental insertion */
-:not(.rs-toolbar):not(.rs-rail) > .rs-tips-btn-toolbar,
-:not(.rs-toolbar):not(.rs-rail) .rs-tips-btn-toolbar { display: none !important; }
+:not(.rs-toolbar) > .rs-tips-btn-toolbar,
+:not(.rs-toolbar) .rs-tips-btn-toolbar { display: none !important; }
 
 
 /* === RS-FLOAT: header-only collapse support (brutalist) === */
@@ -7184,21 +7105,13 @@ html.booting #rs-float {
 </div>
 <div class="rs-toolbar">
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
-<div class="rs-toolbar__actions">
-<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-btn--accent rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
-</div>
-</div>
-<div aria-label="Guides and map actions" class="rs-rail" role="group">
-<div aria-labelledby="rs-rail-guides" class="rs-rail__section" role="group">
-<span class="rs-rail__heading" id="rs-rail-guides">Guides</span>
-<button class="rs-rail__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
-<button class="rs-rail__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
-<button aria-label="Tips" class="rs-rail__btn rs-tips-btn-toolbar" type="button">Tips</button>
-</div>
-<div aria-labelledby="rs-rail-map" class="rs-rail__section" role="group">
-<span class="rs-rail__heading" id="rs-rail-map">Map</span>
-<button class="rs-rail__btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
-<button class="rs-rail__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
+<div aria-label="Map controls" class="rs-toolbar__actions" role="group">
+<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-toolbar__btn rs-toolbar__btn--accent rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
+<button aria-label="Tips" class="rs-btn rs-toolbar__btn rs-tips-btn-toolbar" type="button">Tips</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
@@ -12014,7 +11927,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function ensureTipsButton(){
-    const toolbarBtn = document.querySelector('.rs-toolbar .rs-tips-btn-toolbar, .rs-rail .rs-tips-btn-toolbar');
+    const toolbarBtn = document.querySelector('.rs-toolbar .rs-tips-btn-toolbar');
     if (toolbarBtn) {
       wireTipsButton(toolbarBtn);
       return;
@@ -12055,7 +11968,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   function ensureToolbarTips(){
     document.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
       if (btn && btn.parentElement) {
-        var inToolbar = btn.closest ? btn.closest('.rs-toolbar, .rs-rail') : null;
+        var inToolbar = btn.closest ? btn.closest('.rs-toolbar') : null;
         if (!inToolbar) {
           btn.parentElement.removeChild(btn);
         }
@@ -12124,7 +12037,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
       root.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
         if (!btn) return;
         var inFloat = btn.closest ? btn.closest('#rs-float') : null;
-        var inToolbar = btn.closest ? btn.closest('.rs-toolbar, .rs-rail') : null;
+        var inToolbar = btn.closest ? btn.closest('.rs-toolbar') : null;
         if (!inFloat && !inToolbar) {
           btn.remove();
         }
@@ -12134,7 +12047,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     if (toolbar) scopedRemoval(toolbar);
 
     document.querySelectorAll('button, [role="button"], .rs-btn').forEach(btn => {
-      if (btn.closest && (btn.closest('#rs-float') || btn.closest('.rs-toolbar, .rs-rail'))) return;
+      if (btn.closest && (btn.closest('#rs-float') || btn.closest('.rs-toolbar'))) return;
       const label = (btn.getAttribute('aria-label')||'').trim();
       const title = (btn.getAttribute('title')||'').trim();
       const text = (btn.textContent||'').trim();
@@ -12626,7 +12539,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
       if (el && !(el.classList && el.classList.contains('rs-tips-btn-float'))){
-        if (el.closest && el.closest('.rs-toolbar, .rs-rail')) continue;
+        if (el.closest && el.closest('.rs-toolbar')) continue;
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12637,7 +12550,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var tips = scope.querySelectorAll('.rs-tips-btn-global, .rs-tips-btn-toolbar');
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
-      if (!(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar, .rs-rail')))){
+      if (!(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))){
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12656,7 +12569,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var candidates = scope.querySelectorAll('button, [role="button"], .btn, .chip, .pill, .badge, .tag, .rs-btn');
     for (var i=0;i<candidates.length;i++){
       var el = candidates[i];
-      if (rsLooksLikeTips(el) && !(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar, .rs-rail')))){
+      if (rsLooksLikeTips(el) && !(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))){
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
