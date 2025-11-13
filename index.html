@@ -1550,6 +1550,7 @@ body:not(.rs-sidebar-open) #map {
   display:flex;
   gap:8px;
   margin-top:8px;
+  flex-wrap:wrap;
 }
 
 
@@ -7045,9 +7046,11 @@ html.booting #rs-float {
 </div>
 <div class="rs-toolbar">
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
-<div aria-label="Info and Help" class="rs-toolbar-infohelp">
+<div aria-label="Map controls" class="rs-toolbar-infohelp">
 <button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
+<button aria-label="Tips" class="rs-btn rs-tips-btn-toolbar" type="button">Tips</button>
+<button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
 <div id="rs-toggle-list">
@@ -7116,11 +7119,9 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
-<button class="rs-btn" id="rs-reset" title="Reset map view">Reset Map</button>
 </div>
 </div>
-</div>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-float" type="button">Tips</button></aside>
+</aside>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -11803,13 +11804,22 @@ document.addEventListener('DOMContentLoaded', function() {
   window.RS_TIPS_START = () => showStep(0);
 
   // Hook a visible "Tips" button in the float header if no HELP button is wired
+  function wireTipsButton(btn){
+    if (!btn || btn.dataset.rsTipsWired) return;
+    btn.addEventListener('click', () => window.RS_TIPS_START());
+    btn.dataset.rsTipsWired = 'true';
+  }
+
   function ensureTipsButton(){
+    const toolbarBtn = document.querySelector('.rs-toolbar .rs-tips-btn-toolbar');
+    if (toolbarBtn) {
+      wireTipsButton(toolbarBtn);
+      return;
+    }
+
     const floatBtn = document.querySelector('#rs-float .rs-tips-btn-float');
     if (floatBtn) {
-      if (!floatBtn.dataset.rsTipsWired) {
-        floatBtn.addEventListener('click', () => window.RS_TIPS_START());
-        floatBtn.dataset.rsTipsWired = 'true';
-      }
+      wireTipsButton(floatBtn);
       const stray = document.querySelector('#rs-float .rs-tips-btn');
       if (stray && stray !== floatBtn) {
         stray.remove();
@@ -11822,7 +11832,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btn = document.createElement('button');
     btn.className = 'rs-tips-btn';
     btn.textContent = 'Tips';
-    btn.addEventListener('click', () => window.RS_TIPS_START());
+    wireTipsButton(btn);
     hdr.appendChild(btn);
   }
   ensureTipsButton();
@@ -11842,7 +11852,10 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   function ensureToolbarTips(){
     document.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
       if (btn && btn.parentElement) {
-        btn.parentElement.removeChild(btn);
+        var inToolbar = btn.closest ? btn.closest('.rs-toolbar') : null;
+        if (!inToolbar) {
+          btn.parentElement.removeChild(btn);
+        }
       }
     });
   }
@@ -11906,7 +11919,10 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     const scopedRemoval = (root) => {
       if (!root) return;
       root.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
-        if (btn && !btn.closest('#rs-float')) {
+        if (!btn) return;
+        var inFloat = btn.closest ? btn.closest('#rs-float') : null;
+        var inToolbar = btn.closest ? btn.closest('.rs-toolbar') : null;
+        if (!inFloat && !inToolbar) {
           btn.remove();
         }
       });
@@ -11915,7 +11931,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     if (toolbar) scopedRemoval(toolbar);
 
     document.querySelectorAll('button, [role="button"], .rs-btn').forEach(btn => {
-      if (btn.closest && btn.closest('#rs-float')) return;
+      if (btn.closest && (btn.closest('#rs-float') || btn.closest('.rs-toolbar'))) return;
       const label = (btn.getAttribute('aria-label')||'').trim();
       const title = (btn.getAttribute('title')||'').trim();
       const text = (btn.textContent||'').trim();
@@ -12407,6 +12423,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
       if (el && !(el.classList && el.classList.contains('rs-tips-btn-float'))){
+        if (el.closest && el.closest('.rs-toolbar')) continue;
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12417,7 +12434,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var tips = scope.querySelectorAll('.rs-tips-btn-global, .rs-tips-btn-toolbar');
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
-      if (!(el.closest && el.closest('#rs-float'))){
+      if (!(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))){
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12436,7 +12453,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var candidates = scope.querySelectorAll('button, [role="button"], .btn, .chip, .pill, .badge, .tag, .rs-btn');
     for (var i=0;i<candidates.length;i++){
       var el = candidates[i];
-      if (rsLooksLikeTips(el) && !(el.closest && el.closest('#rs-float'))){
+      if (rsLooksLikeTips(el) && !(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))){
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
