@@ -7632,6 +7632,50 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     if (!list) return features;
     features = getFeatures();
     list.innerHTML = features.map(function(f,i){ return liHTML((f && f.properties) || {}, i); }).join('');
+    Array.prototype.forEach.call(list.querySelectorAll('.rs-li'), function(node, idx){
+      var feature = features[idx];
+      if (!feature) return;
+      var p = feature.properties || {};
+      var statusCode = Number(p.map_status);
+      var statusText = isNaN(statusCode) ? (p.Status || '') : statusLabel(statusCode);
+      var seatsNum = Number(p.Seats);
+      var screensNum = Number(p.Screens);
+      var seatsRounded = Math.round(seatsNum);
+      var screensRounded = Math.round(screensNum);
+      var seatsText = (!isNaN(seatsNum) && seatsNum > 0) ? (seatsRounded + ' seats') : '';
+      var screensText = (!isNaN(screensNum) && screensNum > 0) ? ((screensRounded === 1 ? '1 screen' : screensRounded + ' screens')) : '';
+      function setData(key, value){
+        if (value === undefined || value === null || value === '') {
+          try { delete node.dataset[key]; } catch(_) { node.removeAttribute('data-' + key.replace(/[A-Z]/g, function(ch){ return '-' + ch.toLowerCase(); })); }
+        } else {
+          node.dataset[key] = String(value);
+        }
+      }
+      setData('prevnames', p.Previous_Names);
+      setData('notes', p.Description);
+      setData('description', p.Description);
+      setData('firms', p.Firms);
+      setData('operator', p.Operated_By);
+      setData('architects', p.Architects);
+      setData('status', p.Status || statusText);
+      setData('statusLabel', statusText);
+      setData('seats', seatsText);
+      setData('screens', screensText);
+      setData('searchIndex', [
+        p.Theatre,
+        p.Address,
+        p.Movie,
+        p.Previous_Names,
+        p.Description,
+        p.Firms,
+        p.Operated_By,
+        p.Architects,
+        p.Status,
+        statusText,
+        seatsText,
+        screensText
+      ].filter(Boolean).join(' '));
+    });
     var countEl = document.getElementById('rs-count');
     if (countEl) countEl.textContent = features.length;
     return features;
@@ -8435,8 +8479,23 @@ function zoomHere(lat, lon) {
     var title = li.querySelector('h4')?.textContent || "";
     var addr  = li.querySelector('.rs-addr')?.textContent || "";
     var movie = li.querySelector('.rs-movie')?.textContent || "";
-    var extra = (li.getAttribute('data-prevnames')||"") + " " + (li.getAttribute('data-notes')||"");
-    return norm([title, addr, movie, extra].join(' '));
+    var data = li.dataset || {};
+    var extraParts = [
+      data.searchIndex,
+      data.prevnames,
+      data.description,
+      data.notes,
+      data.firms,
+      data.operator,
+      data.architects,
+      data.status,
+      data.statusLabel,
+      data.seats,
+      data.screens,
+      li.getAttribute('data-prevnames') || "",
+      li.getAttribute('data-notes') || ""
+    ];
+    return norm([title, addr, movie].concat(extraParts).filter(Boolean).join(' '));
   }
 
   function matchesAllTokens(index, tokens){
