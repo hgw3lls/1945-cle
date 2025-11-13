@@ -495,9 +495,7 @@ body:not(.rs-sidebar-open) #map {
   left:24px;
   z-index:10010;
   display:flex;
-  flex-direction:column;
-  gap:14px;
-  align-items:flex-start;
+  align-items:flex-end;
   pointer-events:none;
 }
 
@@ -510,12 +508,24 @@ body:not(.rs-sidebar-open) #map {
 
 
 
-.rs-logo {
+.rs-logo-corner {
+
+  position:fixed;
+  top:24px;
+  left:24px;
+  z-index:10010;
+  pointer-events:none;
+}
+
+
+
+.rs-logo-corner .rs-logo {
 
   width:220px;
-  max-width:35vw;
-  filter:drop-shadow(0 6px 16px rgba(0,0,0,.4));
+  max-width:34vw;
+  filter:drop-shadow(0 6px 16px rgba(0,0,0,.45));
   user-select:none;
+  pointer-events:none;
 }
 
 
@@ -1584,6 +1594,12 @@ body:not(.rs-sidebar-open) #map {
   transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
 }
 
+.rs-toolbar__actions .rs-toolbar__btn {
+
+  min-width:140px;
+  justify-content:center;
+}
+
 .rs-toolbar__btn:hover,
 .rs-sidebar-toggle:hover {
 
@@ -1613,6 +1629,49 @@ body:not(.rs-sidebar-open) #map {
   padding:14px 24px;
   border-width:3px;
   box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+}
+
+.rs-sidebar-toggle-wrap {
+
+  position:fixed;
+  top:120px;
+  right:0;
+  z-index:10010;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+  pointer-events:none;
+  transition:transform 0.3s ease;
+}
+
+body.rs-sidebar-open .rs-sidebar-toggle-wrap {
+
+  transform:translateX(calc(-1 * min(var(--rs-float-max-width, 420px), 92vw)));
+}
+
+.rs-sidebar-toggle-wrap > * {
+
+  pointer-events:auto;
+}
+
+.rs-sidebar-toggle {
+
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  padding:18px 14px;
+  letter-spacing:0.18em;
+  min-height:140px;
+  min-width:0;
+  width:auto;
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+  white-space:normal;
+}
+
+.rs-sidebar-toggle:hover {
+
+  transform:translate(-2px,-2px);
+  box-shadow:8px 8px 0 rgba(0,0,0,0.9);
 }
 
 .rs-toolbar__btn--accent:hover {
@@ -7103,16 +7162,20 @@ html.booting #rs-float {
 <button class="rs-btn" style="font-size:20px; padding:14px 18px;">Start Exploring</button>
 </div>
 </div>
+<div class="rs-logo-corner">
+  <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
+</div>
 <div class="rs-toolbar">
-<img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
 <div aria-label="Map controls" class="rs-toolbar__actions" role="group">
-<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-toolbar__btn rs-toolbar__btn--accent rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
 <button aria-label="Tips" class="rs-btn rs-toolbar__btn rs-tips-btn-toolbar" type="button">Tips</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
+</div>
+<div class="rs-sidebar-toggle-wrap">
+  <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
 <header class="rs-float__header" id="rs-sidebar-header">
@@ -7611,8 +7674,23 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   // Sidebar toggle/collapse/close
   var floatEl = document.getElementById('rs-float');
   var toggleBtn = document.getElementById('rs-sidebar-toggle');
+  var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
   var closeBtn = document.getElementById('rs-close');
   var listEl = document.getElementById('rs-list');
+
+  function positionSidebarToggle(){
+    if (!toggleWrap) toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
+    if (!toggleWrap) return;
+    var zoom = document.querySelector('.leaflet-control-zoom');
+    if (!zoom){
+      toggleWrap.style.top = '120px';
+      return;
+    }
+    var rect = zoom.getBoundingClientRect();
+    if (!rect || typeof rect.bottom !== 'number'){ return; }
+    var offset = Math.max(12, rect.bottom + 12);
+    toggleWrap.style.top = offset + 'px';
+  }
 
   function setSidebarHidden(hidden){
     if (!floatEl) return;
@@ -7648,6 +7726,14 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
       toggleSidebar();
     });
   }
+
+  positionSidebarToggle();
+  window.addEventListener('resize', positionSidebarToggle);
+  if (map && typeof map.on === 'function'){
+    map.on('zoomend', positionSidebarToggle);
+    map.on('moveend', positionSidebarToggle);
+  }
+  setTimeout(positionSidebarToggle, 400);
 
   if (closeBtn){
     closeBtn.addEventListener('click', function(){
