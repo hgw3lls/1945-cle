@@ -8617,71 +8617,289 @@ function zoomHere(lat, lon) {
     return norm(q).split(' ').filter(Boolean);
   }
 
-  function liIndex(li){
-    // Combine key fields for matching
-    var title = li.querySelector('h4')?.textContent || "";
-    var addr  = li.querySelector('.rs-addr')?.textContent || "";
-    var movie = li.querySelector('.rs-movie')?.textContent || "";
-    var data = li.dataset || {};
-    var extraParts = [
-      data.searchIndex,
-      data.prevnames,
-      data.description,
-      data.notes,
-      data.firms,
-      data.operator,
-      data.architects,
-      data.status,
-      data.statusLabel,
-      data.seats,
-      data.screens,
-      li.getAttribute('data-prevnames') || "",
-      li.getAttribute('data-notes') || ""
-    ];
-    return norm([title, addr, movie].concat(extraParts).filter(Boolean).join(' '));
+  function words(str){
+    var n = norm(str);
+    return n ? n.split(' ').filter(Boolean) : [];
   }
 
-  function matchesAllTokens(index, tokens){
-    if (tokens.length === 0) return true;
-    // simple fuzzy: each token must be a substring; allow initialism matching
-    for (var i=0;i<tokens.length;i++){
-      var t = tokens[i];
-      if (!t) continue;
-      if (index.indexOf(t) !== -1) continue;
-      // initialism / letters-in-order check (loose)
-      var re = new RegExp(t.split('').map(ch => ch.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')).join('.*?'));
-      if (!re.test(index)) return false;
+  function uniqueWords(arr){
+    var seen = Object.create(null);
+    var out = [];
+    for (var i=0;i<arr.length;i++){
+      var word = arr[i];
+      if (!word || seen[word]) continue;
+      seen[word] = true;
+      out.push(word);
     }
+    return out;
+  }
+
+  function extractCity(address){
+    if (!address) return '';
+    var cityMatch = address.match(/,\s*([^,]+?),\s*(?:oh|ohio)\b/i);
+    var city = cityMatch ? cityMatch[1] : '';
+    if (!city){
+      var parts = address.split(',');
+      if (parts.length >= 2) city = parts[1];
+    }
+    city = (city || '').replace(/\b(?:oh|ohio)\b.*$/i, '').replace(/\d+$/g, '').trim();
+    return city;
+  }
+
+  function seatsText(value){
+    var num = Number(value);
+    if (!isNaN(num) && num > 0){
+      var rounded = Math.round(num);
+      return rounded + ' seats';
+    }
+    return '';
+  }
+
+  function screensText(value){
+    var num = Number(value);
+    if (!isNaN(num) && num > 0){
+      var rounded = Math.round(num);
+      return rounded === 1 ? '1 screen' : rounded + ' screens';
+    }
+    return '';
+  }
+
+  function buildRecord(parts){
+    var metaParts = Array.isArray(parts.metaParts) ? parts.metaParts.filter(Boolean) : [];
+    var name = parts.name || '';
+    var address = parts.address || '';
+    var movie = parts.movie || '';
+    var status = parts.status || '';
+    var city = parts.city || extractCity(address) || '';
+    var combined = [name, address, movie, city, status].concat(metaParts).filter(Boolean).join(' ');
+
+    function uniqFrom(str){ return uniqueWords(words(str)); }
+
+    var record = {
+      idx: typeof parts.idx === 'number' ? parts.idx : -1,
+      source: parts,
+      strings: {
+        name: norm(name),
+        address: norm(address),
+        movie: norm(movie),
+        city: norm(city),
+        status: norm(status),
+        meta: norm(metaParts.join(' ')),
+        combined: norm(combined)
+      }
+    };
+
+    record.words = {
+      name: uniqFrom(name),
+      address: uniqFrom(address),
+      movie: uniqFrom(movie),
+      city: uniqFrom(city),
+      status: uniqFrom(status),
+      meta: uniqueWords(metaParts.reduce(function(acc, part){ return acc.concat(words(part)); }, []))
+    };
+    record.words.all = uniqueWords([].concat(
+      record.words.name,
+      record.words.address,
+      record.words.movie,
+      record.words.city,
+      record.words.status,
+      record.words.meta
+    ));
+    record.strings.meta = norm(metaParts.join(' '));
+    return record;
+  }
+
+  function recordFromProperties(props, idx){
+    props = props || {};
+    var status = props.Status || '';
+    if (!status && typeof statusLabel === 'function'){
+      var code = Number(props.map_status);
+      if (!isNaN(code)) status = statusLabel(code) || '';
+    }
+    var meta = [
+      props.Previous_Names,
+      props.Description,
+      props.Firms,
+      props.Operated_By,
+      props.Architects,
+      seatsText(props.Seats),
+      screensText(props.Screens)
+    ];
+    return buildRecord({
+      idx: typeof idx === 'number' ? idx : -1,
+      name: props.Theatre || '',
+      address: props.Address || '',
+      movie: props.Movie || '',
+      status: status,
+      metaParts: meta
+    });
+  }
+
+  function recordFromListItem(li){
+    if (!li) return null;
+    if (li.__rs_record) return li.__rs_record;
+    var dataset = li.dataset || {};
+    var idx = Number(li.getAttribute('data-idx'));
+    if (isNaN(idx)) idx = -1;
+    var name = (li.querySelector('h4') || { textContent: '' }).textContent || '';
+    var address = (li.querySelector('.rs-addr') || { textContent: '' }).textContent || '';
+    var movie = (li.querySelector('.rs-movie') || { textContent: '' }).textContent || '';
+    var meta = [
+      dataset.prevnames,
+      dataset.description,
+      dataset.notes,
+      dataset.firms,
+      dataset.operator,
+      dataset.architects,
+      dataset.status,
+      dataset.statusLabel,
+      dataset.seats,
+      dataset.screens,
+      dataset.searchIndex,
+      li.getAttribute('data-prevnames') || '',
+      li.getAttribute('data-notes') || ''
+    ];
+    var record = buildRecord({
+      idx: idx,
+      name: name,
+      address: address,
+      movie: movie,
+      status: dataset.statusLabel || dataset.status || '',
+      metaParts: meta
+    });
+    li.__rs_record = record;
+    return record;
+  }
+
+  function matchFromWords(wordsArr, token, options){
+    if (!wordsArr || !wordsArr.length) return 0;
+    var exactScore = options && options.exact || 0;
+    var prefixScore = options && options.prefix || 0;
+    var substringScore = options && options.substring || 0;
+    var minPrefix = options && options.minPrefixLength || 1;
+    var minSubstring = options && options.minSubstringLength || 3;
+    var best = 0;
+    for (var i=0;i<wordsArr.length;i++){
+      var word = wordsArr[i];
+      if (!word) continue;
+      if (exactScore && word === token){
+        return exactScore;
+      }
+      if (prefixScore && token.length >= minPrefix && word.indexOf(token) === 0){
+        best = Math.max(best, prefixScore);
+      } else if (substringScore && token.length >= minSubstring && word.indexOf(token) !== -1){
+        best = Math.max(best, substringScore);
+      }
+    }
+    return best;
+  }
+
+  function evaluateToken(record, token){
+    if (!token) return null;
+    var bestScore = 0;
+    var strong = false;
+
+    function consider(score, isStrong){
+      if (score > bestScore){
+        bestScore = score;
+        strong = !!isStrong;
+      } else if (score === bestScore && isStrong){
+        strong = true;
+      }
+    }
+
+    var score;
+    score = matchFromWords(record.words.name, token, { exact: 120, prefix: 100, substring: 80, minSubstringLength: 4 });
+    if (score){ consider(score, true); }
+
+    score = matchFromWords(record.words.address, token, { exact: 90, prefix: 70, substring: 60 });
+    if (score){ consider(score, true); }
+
+    score = matchFromWords(record.words.city, token, { exact: 90, prefix: 70 });
+    if (score){ consider(score, true); }
+
+    score = matchFromWords(record.words.movie, token, { exact: 65, prefix: 45, substring: 35, minSubstringLength: 4 });
+    if (score){ consider(score, true); }
+
+    score = matchFromWords(record.words.status, token, { exact: 30, prefix: 20 });
+    if (score){ consider(score, false); }
+
+    var allowMetaSubstring = token.length >= 4;
+    score = matchFromWords(record.words.meta, token, {
+      exact: allowMetaSubstring ? 28 : 0,
+      prefix: allowMetaSubstring ? 22 : 0,
+      substring: allowMetaSubstring ? 14 : 0,
+      minSubstringLength: 4
+    });
+    if (score){ consider(score, false); }
+
+    if (!bestScore && token.length >= 4 && record.strings.combined.indexOf(token) !== -1){
+      bestScore = 6;
+    }
+
+    if (!bestScore) return null;
+    return { score: bestScore, strong: strong };
+  }
+
+  function matchesAllTokens(record, tokens){
+    if (!tokens || tokens.length === 0){
+      record.__rs_score = 0;
+      return true;
+    }
+    var total = 0;
+    var strongMatches = 0;
+    for (var i=0;i<tokens.length;i++){
+      var res = evaluateToken(record, tokens[i]);
+      if (!res) return false;
+      total += res.score;
+      if (res.strong) strongMatches++;
+    }
+    if (tokens.length && strongMatches === 0) return false;
+    record.__rs_score = total + (strongMatches * 5);
     return true;
   }
 
+  function searchRecords(records, query){
+    var tokens = Array.isArray(query) ? query.slice() : tokenize(query);
+    var results = [];
+    for (var i=0;i<records.length;i++){
+      var rec = records[i];
+      if (matchesAllTokens(rec, tokens)){
+        results.push({ record: rec, score: rec.__rs_score || 0 });
+      }
+    }
+    results.sort(function(a,b){ return b.score - a.score; });
+    return results;
+  }
+
   function debounce(fn, ms){
-    var h=null; return function(){ clearTimeout(h); var args=arguments, self=this; h=setTimeout(function(){ fn.apply(self,args); }, ms||120); };
+    var h=null; return function(){ clearTimeout(h); var args=arguments, self=this; h=setTimeout(function(){ fn.apply(self,args);
+ }, ms||120); };
   }
 
   function applyFilter(){
+    if (typeof document === 'undefined') return;
     try{
       var q = document.getElementById('rs-search');
       var list = document.getElementById('rs-list');
       if (!q || !list) return;
       var tokens = tokenize(q.value);
-      var any = 0, total = 0;
+      var any = 0;
 
-      // build (or reuse) cached index for each li
       var items = list.querySelectorAll('.rs-li');
       for (var i=0;i<items.length;i++){
-        var li = items[i]; total++;
-        if (!li.__rs_index) li.__rs_index = liIndex(li);
-        var ok = matchesAllTokens(li.__rs_index, tokens);
+        var li = items[i];
+        var record = recordFromListItem(li);
+        var ok = matchesAllTokens(record, tokens);
         li.style.display = ok ? '' : 'none';
         if (ok) any++;
       }
-      // update count chip if present
       var chip = document.getElementById('rs-count'); if (chip){ chip.textContent = any.toString(); }
     }catch(e){ /* silent */ }
   }
 
   function hookSearch(){
+    if (typeof document === 'undefined') return;
     var q = document.getElementById('rs-search');
     var clearBtn = document.getElementById('rs-search-clear');
     if (!q) return;
@@ -8691,17 +8909,34 @@ function zoomHere(lat, lon) {
         q.value=''; q.focus(); applyFilter();
       });
     }
-    // run once after list mounts
     setTimeout(applyFilter, 50);
   }
 
-  // Run after DOM ready
+  var engine = {
+    normalize: norm,
+    tokenize: tokenize,
+    buildRecord: buildRecord,
+    recordFromProperties: recordFromProperties,
+    recordFromListItem: recordFromListItem,
+    evaluateToken: evaluateToken,
+    matchesAllTokens: matchesAllTokens,
+    searchRecords: searchRecords,
+    extractCity: extractCity
+  };
+
+  if (typeof window !== 'undefined'){
+    window.RS = window.RS || {};
+    window.RS.searchEngine = Object.assign({}, window.RS.searchEngine || {}, engine);
+  }
+
+  if (typeof document === 'undefined') return;
   if (document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', hookSearch);
   }else{
     hookSearch();
   }
 })();
+
 // === END: Better fuzzy search (list filtering) ===
 
 // === BEGIN: Missing image checker (logs to console) ===
