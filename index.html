@@ -496,7 +496,7 @@ body:not(.rs-sidebar-open) #map {
   z-index:10010;
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:18px;
   align-items:flex-start;
   pointer-events:none;
 }
@@ -1544,115 +1544,155 @@ body:not(.rs-sidebar-open) #map {
 
 /* === END: Neon-blue selected state for layer toggles === */
 
-/* === BEGIN: Info/Help toolbar + modal === */
-.rs-toolbar-infohelp {
+/* === BEGIN: Map toolbar + modal === */
+.rs-toolbar__actions {
 
   display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  gap:16px;
-  margin-top:0;
-  width:min(320px, 92vw);
-  padding:18px 20px;
-  border-radius:20px;
-  background:linear-gradient(160deg, rgba(18,17,15,0.94), rgba(32,29,23,0.82));
-  border:1px solid rgba(255,255,255,0.12);
-  box-shadow:0 22px 48px rgba(0,0,0,0.45);
-  backdrop-filter:blur(6px);
+  width:100%;
 }
 
-.rs-toolbar__section {
+.rs-toolbar__actions .rs-sidebar-toggle {
+
+  width:100%;
+}
+
+.rs-sidebar-toggle {
+
+  font:700 18px/1 'LeagueGothic', var(--font-ui, system-ui);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:14px 24px;
+  background:#f3efe4;
+  color:#070707;
+  border:3px solid #070707;
+  border-radius:0;
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+  transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+}
+
+.rs-sidebar-toggle:hover {
+
+  background:#ffffff;
+  transform:translate(-2px,-2px);
+  box-shadow:8px 8px 0 rgba(0,0,0,0.9);
+}
+
+.rs-sidebar-toggle:active {
+
+  transform:translate(0,0);
+  box-shadow:3px 3px 0 rgba(0,0,0,0.75);
+}
+
+.rs-sidebar-toggle:focus-visible {
+
+  outline:2px solid var(--fever-cyan);
+  outline-offset:4px;
+}
+
+.rs-rail {
+
+  position:fixed;
+  top:clamp(120px, 16vh, 220px);
+  right:16px;
+  z-index:10012;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  pointer-events:none;
+  transition:right 0.3s ease;
+}
+
+.rs-rail > * {
+
+  pointer-events:auto;
+}
+
+body.rs-sidebar-open .rs-rail {
+
+  right:calc(min(var(--rs-float-max-width, 420px), 92vw) + 4px);
+}
+
+.rs-rail__section {
 
   display:flex;
   flex-direction:column;
   gap:12px;
+  min-width:172px;
+  padding:16px 18px;
+  background:rgba(0,0,0,0.88);
+  border:3px solid #f3efe4;
+  border-radius:0;
+  box-shadow:8px 8px 0 rgba(0,0,0,0.85);
 }
 
-.rs-toolbar__heading {
+.rs-rail__heading {
 
-  font:600 12px/1 var(--font-ui, system-ui);
-  letter-spacing:0.22em;
+  font:700 14px/1 'LeagueGothic', var(--font-ui, system-ui);
+  letter-spacing:0.16em;
   text-transform:uppercase;
-  color:rgba(243,239,228,0.65);
+  color:#f3efe4;
+  padding-bottom:4px;
+  border-bottom:2px solid #f3efe4;
 }
 
-.rs-toolbar__group {
+.rs-rail__btn {
 
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:10px;
-}
-
-.rs-toolbar__group--stack {
-
+  display:block;
   width:100%;
-}
-
-.rs-toolbar__group--stack .rs-btn {
-
-  width:100%;
-  justify-content:center;
-}
-
-.rs-toolbar-infohelp .rs-btn--full {
-
-  width:100%;
-  justify-content:center;
-}
-
-.rs-toolbar-infohelp .rs-btn {
-
-  background:rgba(243,239,228,0.92);
-  color:#1b1510;
-  border:1px solid rgba(19,18,15,0.45);
-  border-radius:999px;
-  padding:10px 18px;
+  padding:10px 12px;
+  font:700 16px/1.1 'BookmanOld', var(--font-ui, system-ui);
   text-transform:uppercase;
-  letter-spacing:0.12em;
-  font-weight:700;
-  font-size:12px;
-  line-height:1.2;
-  box-shadow:0 8px 20px rgba(0,0,0,0.35);
-  transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+  letter-spacing:0.08em;
+  background:#f3efe4;
+  color:#080808;
+  border:2px solid #080808;
+  border-radius:0;
+  box-shadow:4px 4px 0 rgba(0,0,0,0.8);
+  text-align:left;
+  cursor:pointer;
+  transition:transform 0.12s ease, box-shadow 0.12s ease, background-color 0.2s ease;
 }
 
-.rs-toolbar-infohelp .rs-btn:hover {
+.rs-rail__btn:hover {
 
-  transform:translateY(-1px);
-  box-shadow:0 14px 28px rgba(0,0,0,0.4);
+  background:#ffffff;
+  transform:translate(-2px,-2px);
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
 }
 
-.rs-toolbar-infohelp .rs-btn:focus-visible {
+.rs-rail__btn:active {
+
+  transform:translate(0,0);
+  box-shadow:3px 3px 0 rgba(0,0,0,0.7);
+}
+
+.rs-rail__btn:focus-visible {
 
   outline:2px solid var(--fever-cyan);
-  outline-offset:2px;
+  outline-offset:3px;
 }
 
-.rs-toolbar-infohelp .rs-btn--ghost {
 
-  background:rgba(243,239,228,0.08);
-  color:#f6f2e8;
-  border-color:rgba(243,239,228,0.24);
-  box-shadow:inset 0 0 0 1px rgba(243,239,228,0.08);
-}
 
-.rs-toolbar-infohelp .rs-btn--ghost:hover {
+@media (max-width: 720px) {
 
-  background:rgba(243,239,228,0.18);
-}
+  .rs-rail {
 
-.rs-toolbar-infohelp .rs-btn--accent {
+    top:auto;
+    bottom:24px;
+    gap:14px;
+  }
 
-  background:linear-gradient(135deg, var(--fever-cyan), #7fffe3);
-  color:#03202c;
-  border-color:rgba(0,0,0,0.2);
-  box-shadow:0 14px 30px rgba(0,215,255,0.35);
-}
+  .rs-rail__section {
 
-.rs-toolbar-infohelp .rs-btn--accent:hover {
+    min-width:150px;
+    padding:14px 16px;
+  }
 
-  filter:brightness(1.05);
+  body.rs-sidebar-open .rs-rail {
+
+    right:calc(min(var(--rs-float-max-width, 420px), 92vw) + 10px);
+  }
 }
 
 
@@ -1728,7 +1768,7 @@ body:not(.rs-sidebar-open) #map {
 
 
 
-/* === END: Info/Help toolbar + modal === */
+/* === END: Map toolbar + modal === */
 
 /* === BEGIN: Title Readability Upgrade === */
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
@@ -2752,22 +2792,9 @@ html.tv #rs-list .rs-movie {
   border-top: 1px solid rgba(255,255,255,0.08);
 }
 
-#rs-toggle-list {
-
-  margin-left: auto;
-}
-
-.rs-toolbar-infohelp #rs-toggle-list {
-
-  margin-left: 0;
-  width: 100%;
-}
-
 .rs-sidebar-toggle {
 
   white-space: nowrap;
-    font-size: 18px;
-    padding: 10px 16px;
 }
 
 .rs-sidebar-close {
@@ -5895,10 +5922,13 @@ html.booting #rs-float {
 
 /* === RS Patch: Strict toolbar-only Tips === */
 .rs-tips-btn-toolbar, .rs-tips-btn-global { display: none !important; }
-.rs-toolbar .rs-tips-btn-toolbar, .rs-toolbar .rs-tips-btn-global { display: inline-flex !important; }
+.rs-toolbar .rs-tips-btn-toolbar,
+.rs-toolbar .rs-tips-btn-global,
+.rs-rail .rs-tips-btn-toolbar,
+.rs-rail .rs-tips-btn-global { display: inline-flex !important; }
 /* Extra guard for any accidental insertion */
-:not(.rs-toolbar) > .rs-tips-btn-toolbar,
-:not(.rs-toolbar) .rs-tips-btn-toolbar { display: none !important; }
+:not(.rs-toolbar):not(.rs-rail) > .rs-tips-btn-toolbar,
+:not(.rs-toolbar):not(.rs-rail) .rs-tips-btn-toolbar { display: none !important; }
 
 
 /* === RS-FLOAT: header-only collapse support (brutalist) === */
@@ -7154,25 +7184,21 @@ html.booting #rs-float {
 </div>
 <div class="rs-toolbar">
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
-<div aria-label="Map controls" class="rs-toolbar-infohelp">
-<div aria-label="Guides" class="rs-toolbar__section" role="group">
-<span class="rs-toolbar__heading">Guides</span>
-<div class="rs-toolbar__group">
-<button class="rs-btn rs-btn--ghost" id="rs-info-btn" title="About this map" type="button">Info</button>
-<button class="rs-btn rs-btn--ghost" id="rs-help-btn" title="How to explore" type="button">Help</button>
-<button aria-label="Tips" class="rs-btn rs-btn--ghost rs-tips-btn-toolbar" type="button">Tips</button>
+<div class="rs-toolbar__actions">
+<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-btn--accent rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
 </div>
 </div>
-<div aria-label="Map actions" class="rs-toolbar__section" role="group">
-<span class="rs-toolbar__heading">Map Actions</span>
-<div class="rs-toolbar__group">
-<button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
-<button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
+<div aria-label="Guides and map actions" class="rs-rail" role="group">
+<div aria-labelledby="rs-rail-guides" class="rs-rail__section" role="group">
+<span class="rs-rail__heading" id="rs-rail-guides">Guides</span>
+<button class="rs-rail__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
+<button class="rs-rail__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
+<button aria-label="Tips" class="rs-rail__btn rs-tips-btn-toolbar" type="button">Tips</button>
 </div>
-<div class="rs-toolbar__group rs-toolbar__group--stack" id="rs-toggle-list">
-<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-btn--accent rs-btn--full rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
-</div>
-</div>
+<div aria-labelledby="rs-rail-map" class="rs-rail__section" role="group">
+<span class="rs-rail__heading" id="rs-rail-map">Map</span>
+<button class="rs-rail__btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
+<button class="rs-rail__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
@@ -11988,7 +12014,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function ensureTipsButton(){
-    const toolbarBtn = document.querySelector('.rs-toolbar .rs-tips-btn-toolbar');
+    const toolbarBtn = document.querySelector('.rs-toolbar .rs-tips-btn-toolbar, .rs-rail .rs-tips-btn-toolbar');
     if (toolbarBtn) {
       wireTipsButton(toolbarBtn);
       return;
@@ -12029,7 +12055,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   function ensureToolbarTips(){
     document.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
       if (btn && btn.parentElement) {
-        var inToolbar = btn.closest ? btn.closest('.rs-toolbar') : null;
+        var inToolbar = btn.closest ? btn.closest('.rs-toolbar, .rs-rail') : null;
         if (!inToolbar) {
           btn.parentElement.removeChild(btn);
         }
@@ -12098,7 +12124,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
       root.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
         if (!btn) return;
         var inFloat = btn.closest ? btn.closest('#rs-float') : null;
-        var inToolbar = btn.closest ? btn.closest('.rs-toolbar') : null;
+        var inToolbar = btn.closest ? btn.closest('.rs-toolbar, .rs-rail') : null;
         if (!inFloat && !inToolbar) {
           btn.remove();
         }
@@ -12108,7 +12134,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     if (toolbar) scopedRemoval(toolbar);
 
     document.querySelectorAll('button, [role="button"], .rs-btn').forEach(btn => {
-      if (btn.closest && (btn.closest('#rs-float') || btn.closest('.rs-toolbar'))) return;
+      if (btn.closest && (btn.closest('#rs-float') || btn.closest('.rs-toolbar, .rs-rail'))) return;
       const label = (btn.getAttribute('aria-label')||'').trim();
       const title = (btn.getAttribute('title')||'').trim();
       const text = (btn.textContent||'').trim();
@@ -12600,7 +12626,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
       if (el && !(el.classList && el.classList.contains('rs-tips-btn-float'))){
-        if (el.closest && el.closest('.rs-toolbar')) continue;
+        if (el.closest && el.closest('.rs-toolbar, .rs-rail')) continue;
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12611,7 +12637,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var tips = scope.querySelectorAll('.rs-tips-btn-global, .rs-tips-btn-toolbar');
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
-      if (!(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))){
+      if (!(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar, .rs-rail')))){
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12630,7 +12656,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var candidates = scope.querySelectorAll('button, [role="button"], .btn, .chip, .pill, .badge, .tag, .rs-btn');
     for (var i=0;i<candidates.length;i++){
       var el = candidates[i];
-      if (rsLooksLikeTips(el) && !(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))){
+      if (rsLooksLikeTips(el) && !(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar, .rs-rail')))){
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
