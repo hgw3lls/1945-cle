@@ -7309,118 +7309,13 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     maxBoundsViscosity: 1.0,
     worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
   });
+  map.fitBounds(BOUNDS, {padding:[20,20]});
 
   // Expose globally for kiosk scripts
   try { window.map = map; } catch(_) {}
-  var RS = window.RS = window.RS || {};
-  try { RS.bounds = BOUNDS; } catch(_) {}
 
-  function getViewportSize(){
-    try {
-      var size = map.getSize();
-      if (size && typeof size.x === 'number' && typeof size.y === 'number') {
-        if (size.x > 0 && size.y > 0) return size;
-      }
-    } catch (_) {}
-    var w = (typeof window !== 'undefined' && window.innerWidth) ? window.innerWidth : 1280;
-    var h = (typeof window !== 'undefined' && window.innerHeight) ? window.innerHeight : 720;
-    return { x: w, y: h };
-  }
-
-  function computeHomeMargins(){
-    var size = getViewportSize();
-    var width = Math.max(size.x || 0, 480);
-    var height = Math.max(size.y || 0, 360);
-    var base = Math.max(24, Math.round(Math.min(width, height) * 0.04));
-    return {
-      left: Math.max(base, Math.round(width * 0.06)),
-      right: Math.max(base, Math.round(width * 0.18)),
-      top: Math.max(Math.round(height * 0.06), Math.round(base * 0.75)),
-      bottom: Math.max(base, Math.round(height * 0.20))
-    };
-  }
-
-  function biasBoundsToSouthWest(margins, animate){
-    try {
-      var size = map.getSize();
-      if (!size || !size.x || !size.y) return;
-      var sw = map.latLngToContainerPoint(BOUNDS.getSouthWest());
-      var ne = map.latLngToContainerPoint(BOUNDS.getNorthEast());
-      if (!sw || !ne) return;
-      var targetSwX = margins.left;
-      var targetSwY = size.y - margins.bottom;
-      var dx = targetSwX - sw.x;
-      var dy = targetSwY - sw.y;
-      var maxRight = size.x - margins.right;
-      if (ne.x + dx > maxRight) {
-        dx = maxRight - ne.x;
-      }
-      var minTop = margins.top;
-      if (ne.y + dy < minTop) {
-        dy = minTop - ne.y;
-      }
-      if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-        map.panBy([dx, dy], {
-          animate: animate,
-          duration: animate ? 0.6 : 0,
-          easeLinearity: 0.2,
-          noMoveStart: !animate
-        });
-      }
-    } catch (e) {
-      console.warn('RS.homeView bias error', e);
-    }
-  }
-
-  function applyHomeView(options){
-    try {
-      var opts = options || {};
-      var animate = !!opts.animate;
-      var margins = computeHomeMargins();
-      var fitOpts = {
-        paddingTopLeft: [margins.left, margins.top],
-        paddingBottomRight: [margins.right, margins.bottom]
-      };
-      if (!animate) {
-        fitOpts.animate = false;
-      } else if (typeof opts.duration === 'number') {
-        fitOpts.duration = opts.duration;
-      }
-      var finished = false;
-      var finalize = function(){
-        if (finished) return;
-        finished = true;
-        biasBoundsToSouthWest(margins, animate);
-      };
-      var performFit = function(){
-        try {
-          map.fitBounds(BOUNDS, fitOpts);
-        } catch (err) {
-          console.warn('RS.homeView fitBounds error', err);
-        }
-        map.once('moveend', finalize);
-        var fallbackDelay = animate ? 700 : 0;
-        setTimeout(finalize, fallbackDelay);
-      };
-      if (map._loaded) {
-        performFit();
-      } else {
-        map.once('load', performFit);
-      }
-      return true;
-    } catch (e) {
-      console.warn('RS.homeView error', e);
-    }
-    return false;
-  }
-
-  RS.homeView = function(opts){
-    return applyHomeView(opts || {});
-  };
-
-  map.whenReady(function(){
-    applyHomeView({ animate: false });
-  });
+  // Adjust center lower and left over dense cluster
+  map.setView([41.507, -81.638129], 13);
 
   var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
   var isLocalOnlineMode = tileMode === 'local_online';
@@ -7760,21 +7655,13 @@ function rsRestoreLayers(state){
   }).addTo(map);
 
   // Reset button -> fit to bounds
-    document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){
-      if (window.RS && typeof window.RS.homeView === 'function') {
-        window.RS.homeView({ animate: true });
-      } else {
-        map.fitBounds(BOUNDS, {padding:[20,20]});
-      }
-    });
+  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ map.fitBounds(BOUNDS, {padding:[20,20]});
 
   // Expose globally for kiosk scripts
   try { window.map = map; } catch(_) {}
 
-    // Adjust center lower and left over dense cluster
-    if (window.RS && typeof window.RS.homeView === 'function') {
-      window.RS.homeView({ animate: false });
-    }
+  // Adjust center lower and left over dense cluster
+  map.setView([41.507, -81.638129], 13);
 
 // Make unloaded / missing tiles appear black
 document.getElementById('map').style.backgroundColor = '#000';
@@ -13132,12 +13019,8 @@ document.addEventListener("DOMContentLoaded", function() {
       return false;
     };
 
-    RS.recenter = function(options){
+    RS.recenter = function(){
       try{
-        var animate = !options || options.animate !== false;
-        if (typeof RS.homeView === 'function' && RS.homeView({ animate: animate })){
-          return;
-        }
         if (typeof window.fitToGeoJSON === 'function'){ window.fitToGeoJSON(); return; }
         if (typeof window.fitToMarkers === 'function'){ window.fitToMarkers(); return; }
         if (RS.fitMarkerLayerBounds()) return;
