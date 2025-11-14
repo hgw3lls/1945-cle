@@ -7044,7 +7044,7 @@ html.booting #rs-float {
 <div aria-label="Map controls" class="rs-toolbar-infohelp">
 <button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
-<button aria-label="Open tutorial" class="rs-btn rs-tips-btn-toolbar" id="rs-tutorial-btn" title="View tutorial" type="button">Tutorial</button>
+<button aria-label="Open tutorial" class="rs-btn rs-tips-btn-toolbar" id="rs-tutorial-btn" title="View tutorial" type="button">Tips</button>
 <button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
@@ -7185,12 +7185,20 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
   });
   map.fitBounds(BOUNDS, {padding:[20,20]});
 
-  var HOME_CENTER = BOUNDS.getSouthWest();
+  // Anchor the home view on the south-west edge of the theatre data rather than
+  // the extreme map bounds so the venues stay in frame while still appearing in
+  // the bottom-left corner at the widest zoom.
+  var HOME_CENTER = L.latLng(41.3996794, -81.8371223);
   var HOME_ZOOM = (typeof map.getMinZoom === 'function') ? map.getMinZoom() : map.getZoom();
 
   function applyHomeView(options){
     var opts = Object.assign({ animate: false }, options || {});
-    try { map.setView(HOME_CENTER, HOME_ZOOM, opts); } catch(_) {}
+    try {
+      map.setView(HOME_CENTER, HOME_ZOOM, opts);
+      if (typeof map.panInsideBounds === 'function') {
+        map.panInsideBounds(BOUNDS, { animate: false });
+      }
+    } catch(_) {}
   }
 
   applyHomeView();
