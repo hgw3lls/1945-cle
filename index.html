@@ -994,11 +994,9 @@ body.rs-fullscreen-active .rs-logo {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   }
-    .rs-dt
+   .rs-dt
 */
-}
-    .rs-dt {
+.rs-dt {
 
   font-weight: 700;
   font-family: var(--font-ui);
@@ -1019,14 +1017,8 @@ body.rs-fullscreen-active .rs-logo {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   }
-  
-
-.rs-chip-status
+   .rs-chip-status
 */
-}
-  
-
 .rs-chip-status {
 
   font-weight: 900;
@@ -2210,10 +2202,8 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   }
-.rs-two-images img
+   .rs-two-images img (legacy refinement)
 */
-}
 .rs-two-images img {
 
   max-width:calc(50% - 5px);
@@ -7572,7 +7562,7 @@ document.getElementById('map').style.backgroundColor = '#000';
 // Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
 if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
   if (e.tile) e.tile.style.display = 'none';
-}); });
+});
 
   // Floating list toggle/collapse/close
     var floatEl = document.getElementById('rs-float');
