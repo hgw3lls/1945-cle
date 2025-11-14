@@ -7185,11 +7185,24 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
   });
   map.fitBounds(BOUNDS, {padding:[20,20]});
 
-  // Expose globally for kiosk scripts
-  try { window.map = map; } catch(_) {}
+  var HOME_CENTER = BOUNDS.getSouthWest();
+  var HOME_ZOOM = (typeof map.getMinZoom === 'function') ? map.getMinZoom() : map.getZoom();
 
-  // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
+  function applyHomeView(options){
+    var opts = Object.assign({ animate: false }, options || {});
+    try { map.setView(HOME_CENTER, HOME_ZOOM, opts); } catch(_) {}
+  }
+
+  applyHomeView();
+
+  // Expose globally for kiosk scripts
+  try {
+    window.map = map;
+    window.RS_HOME_VIEW = { center: [HOME_CENTER.lat, HOME_CENTER.lng], zoom: HOME_ZOOM };
+  } catch(_) {}
+
+  window.RS = window.RS || {};
+  window.RS.applyHomeView = applyHomeView;
 
   var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
   var isLocalOnlineMode = tileMode === 'local_online';
@@ -7528,14 +7541,19 @@ function rsRestoreLayers(state){
     }
   }).addTo(map);
 
-  // Reset button -> fit to bounds
-  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ map.fitBounds(BOUNDS, {padding:[20,20]});
+  // Reset button -> home view fallback
+  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ applyHomeView(); });
 
   // Expose globally for kiosk scripts
-  try { window.map = map; } catch(_) {}
+  try {
+    window.map = map;
+    if (!window.RS_HOME_VIEW) {
+      window.RS_HOME_VIEW = { center: [HOME_CENTER.lat, HOME_CENTER.lng], zoom: HOME_ZOOM };
+    }
+  } catch(_) {}
 
-  // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
+  // Ensure the map starts from the shared home position
+  applyHomeView();
 
 // Make unloaded / missing tiles appear black
 document.getElementById('map').style.backgroundColor = '#000';
@@ -9229,9 +9247,14 @@ try {
     if (!attract) return;
     attract.style.display = 'flex';
     try {
-      if (window.map && window.map.fitBounds) {
-        const WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
-        window.map.fitBounds([[SOUTH, WEST],[NORTH, EAST]], {padding:[20,20]});
+      if (window.RS && typeof window.RS.applyHomeView === 'function') {
+        window.RS.applyHomeView({ animate: false });
+      } else if (window.map && typeof window.map.setView === 'function') {
+        var home = window.RS_HOME_VIEW;
+        if (home && home.center) {
+          var homeZoom = (typeof home.zoom === 'number') ? home.zoom : (typeof window.map.getMinZoom === 'function' ? window.map.getMinZoom() : window.map.getZoom());
+          window.map.setView(home.center, homeZoom, { animate: false });
+        }
       }
     } catch(_){}
   }
@@ -9318,10 +9341,15 @@ try {
       const histSlider = document.getElementById("rs-hist-op");
       if (histSlider){ histSlider.value = "100"; histSlider.dispatchEvent(new Event("input")); }
 
-      // Return to city view
-      if (window.map && map.fitBounds) {
-        const WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
-        map.fitBounds([[SOUTH, WEST],[NORTH, EAST]], {padding:[20,20]});
+      // Return to home view
+      if (window.RS && typeof window.RS.applyHomeView === 'function') {
+        window.RS.applyHomeView({ animate: false });
+      } else if (window.map && typeof map.setView === 'function') {
+        const home = window.RS_HOME_VIEW;
+        if (home && home.center) {
+          const homeZoom = (typeof home.zoom === 'number') ? home.zoom : (typeof map.getMinZoom === 'function' ? map.getMinZoom() : map.getZoom());
+          map.setView(home.center, homeZoom, { animate: false });
+        }
       }
     } catch(_) {}
   });
@@ -12724,6 +12752,13 @@ document.addEventListener("DOMContentLoaded", function() {
         if (typeof window.fitToGeoJSON === 'function'){ window.fitToGeoJSON(); return; }
         if (typeof window.fitToMarkers === 'function'){ window.fitToMarkers(); return; }
         if (RS.fitMarkerLayerBounds()) return;
+        if (typeof RS.applyHomeView === 'function'){ RS.applyHomeView({ animate: false }); return; }
+        var hv = window.RS_HOME_VIEW;
+        if (hv && hv.center && window.map && typeof window.map.setView === 'function'){
+          var z = (typeof hv.zoom === 'number') ? hv.zoom : (typeof window.map.getMinZoom === 'function' ? window.map.getMinZoom() : window.map.getZoom());
+          window.map.setView(hv.center, z, { animate: false });
+          return;
+        }
         console.warn('RS.recenter: no fitting function/layer found.');
       }catch(e){ console.warn('RS.recenter error', e); }
     };
