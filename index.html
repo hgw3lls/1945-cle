@@ -473,19 +473,29 @@ html,body {
   inset:0;
 }
 
+body.rs-sidebar-open #map {
+
+  right: min(var(--rs-float-max-width, 420px), 92vw);
+    transition: right 0.3s ease;
+}
+
+body:not(.rs-sidebar-open) #map {
+
+  right: 0;
+    transition: right 0.3s ease;
+}
+
 
 
 /* Toolbar */
   .rs-toolbar {
 
   position:fixed;
-  top:16px;
-  left:16px;
+  bottom:24px;
+  left:24px;
   z-index:10010;
   display:flex;
-  flex-direction:column;
-  gap:10px;
-  align-items:flex-start;
+  align-items:flex-end;
   pointer-events:none;
 }
 
@@ -498,29 +508,42 @@ html,body {
 
 
 
-.rs-logo {
+.rs-logo-corner {
 
-  width:220px;
-  max-width:35vw;
-  filter:drop-shadow(0 6px 16px rgba(0,0,0,.4));
-  user-select:none;
+  position:fixed;
+  top:24px;
+  left:24px;
+  z-index:10010;
+  pointer-events:none;
 }
 
 
 
-/* Draggable list panel */
+.rs-logo-corner .rs-logo {
+
+  width:220px;
+  max-width:34vw;
+  filter:drop-shadow(0 6px 16px rgba(0,0,0,.45));
+  user-select:none;
+  pointer-events:none;
+}
+
+
+
+/* Sidebar list panel */
   .rs-float {
 
   position:fixed;
-  right:16px;
-  top:16px;
-  width:min(380px,88vw);
-  max-height:70vh;
-  display:grid;
-  grid-template-rows:auto 1fr auto;
+  top:0;
+  right:0;
+  bottom:0;
+  width:min(var(--rs-float-max-width, 420px), 92vw);
+  max-width:92vw;
+  display:flex;
+  flex-direction:column;
   background:var(--panel-bg);
-  border:2px solid var(--panel-border);
-  border-radius:12px;
+  border-left:2px solid var(--panel-border);
+  border-radius:0;
   overflow:hidden;
   z-index:10011;
 }
@@ -550,6 +573,7 @@ html,body {
 
 .rs-float__list {
 
+  flex:1 1 auto;
   overflow:auto;
   padding:8px;
 }
@@ -1530,15 +1554,130 @@ html,body {
 
 /* === END: Neon-blue selected state for layer toggles === */
 
-/* === BEGIN: Info/Help toolbar + modal === */
-.rs-toolbar-infohelp {
+/* === BEGIN: Map toolbar + modal === */
+.rs-toolbar__actions {
 
   display:flex;
-  gap:8px;
-  margin-top:8px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-start;
+  gap:12px;
+  padding:16px 18px;
+  background:rgba(0,0,0,0.88);
+  border:3px solid #f3efe4;
+  border-radius:0;
+  box-shadow:8px 8px 0 rgba(0,0,0,0.85);
+  max-width:calc(100vw - 48px);
 }
 
+.rs-toolbar__actions > * {
 
+  pointer-events:auto;
+}
+
+.rs-toolbar__btn,
+.rs-sidebar-toggle {
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:12px 18px;
+  font:700 16px/1.1 'BookmanOld', var(--font-ui, system-ui);
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  background:#f3efe4;
+  color:#080808;
+  border:2px solid #080808;
+  border-radius:0;
+  box-shadow:4px 4px 0 rgba(0,0,0,0.8);
+  transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+}
+
+.rs-toolbar__actions .rs-toolbar__btn {
+
+  min-width:140px;
+  justify-content:center;
+}
+
+.rs-toolbar__btn:hover,
+.rs-sidebar-toggle:hover {
+
+  background:#ffffff;
+  transform:translate(-2px,-2px);
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+}
+
+.rs-toolbar__btn:active,
+.rs-sidebar-toggle:active {
+
+  transform:translate(0,0);
+  box-shadow:3px 3px 0 rgba(0,0,0,0.75);
+}
+
+.rs-toolbar__btn:focus-visible,
+.rs-sidebar-toggle:focus-visible {
+
+  outline:2px solid var(--fever-cyan);
+  outline-offset:4px;
+}
+
+.rs-toolbar__btn--accent {
+
+  font:700 18px/1 'LeagueGothic', var(--font-ui, system-ui);
+  letter-spacing:0.12em;
+  padding:14px 24px;
+  border-width:3px;
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+}
+
+.rs-sidebar-toggle-wrap {
+
+  position:fixed;
+  top:120px;
+  right:0;
+  z-index:10010;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+  pointer-events:none;
+  transition:transform 0.3s ease;
+}
+
+body.rs-sidebar-open .rs-sidebar-toggle-wrap {
+
+  transform:translateX(calc(-1 * min(var(--rs-float-max-width, 420px), 92vw)));
+}
+
+.rs-sidebar-toggle-wrap > * {
+
+  pointer-events:auto;
+}
+
+.rs-sidebar-toggle {
+
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  padding:18px 14px;
+  letter-spacing:0.18em;
+  min-height:140px;
+  min-width:0;
+  width:auto;
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+  white-space:normal;
+}
+
+.rs-sidebar-toggle:hover {
+
+  transform:translate(-2px,-2px);
+  box-shadow:8px 8px 0 rgba(0,0,0,0.9);
+}
+
+.rs-toolbar__btn--accent:hover {
+
+  box-shadow:8px 8px 0 rgba(0,0,0,0.9);
+}
 
 #rs-infohelp-modal {
 
@@ -1611,7 +1750,7 @@ html,body {
 
 
 
-/* === END: Info/Help toolbar + modal === */
+/* === END: Map toolbar + modal === */
 
 /* === BEGIN: Title Readability Upgrade === */
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
@@ -2574,27 +2713,75 @@ html.tv #rs-list .rs-movie {
 
 
 
-/* === FLOAT PANEL — FIXED + DYNAMIC WIDTH CONTROL (injected) === */
+/* === FLOAT PANEL — CONVERTED TO RIGHT SIDEBAR === */
 #rs-float {
 
   position: fixed;
-    right: 16px;
-    top: 16px;
-    display: grid;
-    grid-template-rows: auto 1fr auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
     background: var(--panel-bg, rgba(10,10,10,0.92));
-    border: 2px solid var(--panel-border, #1b1b1b);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    overflow: hidden;                /* keep children inside */
+    border-left: 2px solid var(--panel-border, #1b1b1b);
+    border-right: none;
+    border-top: none;
+    border-bottom: none;
+    border-radius: 0;
+    box-shadow: -6px 0 24px rgba(0,0,0,0.35);
     z-index: 10011;
     min-width: var(--rs-float-min-width, 320px);
-    max-width: var(--rs-float-max-width, 92vw);
-    width: var(--rs-float-width, auto);
-    max-height: var(--rs-float-max-height, 72vh);
+    max-width: min(var(--rs-float-max-width, 420px), 92vw);
+    width: min(var(--rs-float-max-width, 420px), 92vw);
+    height: 100%;
+    min-height: 100vh;
     box-sizing: border-box;
-    transition: none !important; /* instant resize */
-    will-change: left, top;
+    transition: transform 0.3s ease;
+    will-change: transform;
+    overflow: hidden;
+}
+
+.rs-float--sidebar {
+
+  background: var(--panel-bg, rgba(10,10,10,0.96));
+}
+
+#rs-float.is-hidden {
+
+  transform: translateX(100%);
+    pointer-events: none;
+}
+
+#rs-float.is-hidden * {
+
+  pointer-events: none;
+}
+
+#rs-float .rs-float__header,
+#rs-float .rs-search-wrap,
+#rs-footer-bar {
+
+  flex: 0 0 auto;
+}
+
+#rs-float .rs-float__header {
+
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+#rs-footer-bar {
+
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.rs-sidebar-toggle {
+
+  white-space: nowrap;
+}
+
+.rs-sidebar-close {
+
+  padding: 8px 12px;
 }
 
 
@@ -2616,8 +2803,9 @@ html.tv #rs-list .rs-movie {
 /* Make only the list scroll */
 #rs-list {
 
-  overflow-y: auto;
-    max-height: calc(var(--rs-float-max-height, 72vh) - 160px);
+  flex: 1 1 auto;
+    overflow-y: auto;
+    max-height: none;
 }
 
 
@@ -2704,26 +2892,6 @@ html.tv #rs-list .rs-movie {
     color: #000;
     border: 2px solid #000;
     cursor: pointer;
-}
-
-
-
-/* === Draggable Float (header as handle) === */
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-float.rs-dragging
-*/
-#rs-float.rs-dragging {
-
-  opacity: 0.98;
-}
-
-
-
-#rs-float-drag {
-
-  cursor: move;
 }
 
 
@@ -5736,7 +5904,8 @@ html.booting #rs-float {
 
 /* === RS Patch: Strict toolbar-only Tips === */
 .rs-tips-btn-toolbar, .rs-tips-btn-global { display: none !important; }
-.rs-toolbar .rs-tips-btn-toolbar, .rs-toolbar .rs-tips-btn-global { display: inline-flex !important; }
+.rs-toolbar .rs-tips-btn-toolbar,
+.rs-toolbar .rs-tips-btn-global { display: inline-flex !important; }
 /* Extra guard for any accidental insertion */
 :not(.rs-toolbar) > .rs-tips-btn-toolbar,
 :not(.rs-toolbar) .rs-tips-btn-toolbar { display: none !important; }
@@ -6993,22 +7162,27 @@ html.booting #rs-float {
 <button class="rs-btn" style="font-size:20px; padding:14px 18px;">Start Exploring</button>
 </div>
 </div>
+<div class="rs-logo-corner">
+  <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
+</div>
 <div class="rs-toolbar">
-<img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
-<div aria-label="Info and Help" class="rs-toolbar-infohelp">
-<button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
-<button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
-<button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
+<div aria-label="Map controls" class="rs-toolbar__actions" role="group">
+<button class="rs-btn rs-toolbar__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
+<button aria-label="Tips" class="rs-btn rs-toolbar__btn rs-tips-btn-toolbar" type="button">Tips</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
-<div id="rs-toggle-list"> </div>
 </div>
-<section class="rs-float" id="rs-float">
-<header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
+<div class="rs-sidebar-toggle-wrap">
+  <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
+</div>
+<aside class="rs-float rs-float--sidebar" id="rs-float">
+<header class="rs-float__header" id="rs-sidebar-header">
 <div><span class="rs-float__title">Theatres</span>
 <span class="rs-chip" id="rs-count">0</span></div>
 <div class="rs-float__actions">
-<button class="rs-btn" id="rs-collapse" title="Collapse list">Collapse</button>
-<div id="rs-close" title="Hide list"></div>
+<button class="rs-btn rs-sidebar-close" id="rs-close" title="Hide list" type="button">Close</button>
 </div>
 </header>
 <div class="rs-search-wrap" role="search">
@@ -7065,11 +7239,9 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
-<button class="rs-btn" id="rs-reset" title="Reset map view">Reset Map</button>
 </div>
 </div>
-</div>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-float" type="button">Tips</button></section>
+</aside>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -7499,11 +7671,85 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   if (e.tile) e.tile.style.display = 'none';
 }); });
 
-  // Floating list toggle/collapse/close
+  // Sidebar toggle/collapse/close
   var floatEl = document.getElementById('rs-float');
-  document.getElementById('rs-toggle-list'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = !floatEl.hidden; });
-  document.getElementById('rs-close'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = true; });
-  document.getElementById('rs-collapse'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ var list = document.getElementById('rs-list'); list.style.display = (list.style.display==='none' ? '' : 'none'); });
+  var toggleBtn = document.getElementById('rs-sidebar-toggle');
+  var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
+  var closeBtn = document.getElementById('rs-close');
+  var listEl = document.getElementById('rs-list');
+
+  function positionSidebarToggle(){
+    if (!toggleWrap) toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
+    if (!toggleWrap) return;
+    var zoom = document.querySelector('.leaflet-control-zoom');
+    if (!zoom){
+      toggleWrap.style.top = '120px';
+      return;
+    }
+    var rect = zoom.getBoundingClientRect();
+    if (!rect || typeof rect.bottom !== 'number'){ return; }
+    var offset = Math.max(12, rect.bottom + 12);
+    toggleWrap.style.top = offset + 'px';
+  }
+
+  function setSidebarHidden(hidden){
+    if (!floatEl) return;
+    floatEl.classList.toggle('is-hidden', hidden);
+    if (hidden){
+      floatEl.setAttribute('aria-hidden', 'true');
+    } else {
+      floatEl.removeAttribute('aria-hidden');
+    }
+    if (toggleBtn){
+      toggleBtn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+      var openLabel = toggleBtn.getAttribute('data-label-open') || 'Hide Theatres';
+      var closedLabel = toggleBtn.getAttribute('data-label-closed') || 'Show Theatres';
+      toggleBtn.textContent = hidden ? closedLabel : openLabel;
+    }
+    if (document.body){
+      document.body.classList.toggle('rs-sidebar-open', !hidden);
+    }
+  }
+
+  function toggleSidebar(){
+    if (!floatEl) return;
+    var isHidden = floatEl.classList.contains('is-hidden');
+    var nextHidden = !isHidden;
+    setSidebarHidden(nextHidden);
+    if (!nextHidden && closeBtn){
+      closeBtn.focus();
+    }
+  }
+
+  if (toggleBtn){
+    toggleBtn.addEventListener('click', function(){
+      toggleSidebar();
+    });
+  }
+
+  positionSidebarToggle();
+  window.addEventListener('resize', positionSidebarToggle);
+  if (map && typeof map.on === 'function'){
+    map.on('zoomend', positionSidebarToggle);
+    map.on('moveend', positionSidebarToggle);
+  }
+  setTimeout(positionSidebarToggle, 400);
+
+  if (closeBtn){
+    closeBtn.addEventListener('click', function(){
+      setSidebarHidden(true);
+      if (toggleBtn) toggleBtn.focus();
+    });
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && floatEl && !floatEl.classList.contains('is-hidden')){
+      setSidebarHidden(true);
+      if (toggleBtn) toggleBtn.focus();
+    }
+  });
+
+  setSidebarHidden(false);
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
@@ -7529,6 +7775,50 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     if (!list) return features;
     features = getFeatures();
     list.innerHTML = features.map(function(f,i){ return liHTML((f && f.properties) || {}, i); }).join('');
+    Array.prototype.forEach.call(list.querySelectorAll('.rs-li'), function(node, idx){
+      var feature = features[idx];
+      if (!feature) return;
+      var p = feature.properties || {};
+      var statusCode = Number(p.map_status);
+      var statusText = isNaN(statusCode) ? (p.Status || '') : statusLabel(statusCode);
+      var seatsNum = Number(p.Seats);
+      var screensNum = Number(p.Screens);
+      var seatsRounded = Math.round(seatsNum);
+      var screensRounded = Math.round(screensNum);
+      var seatsText = (!isNaN(seatsNum) && seatsNum > 0) ? (seatsRounded + ' seats') : '';
+      var screensText = (!isNaN(screensNum) && screensNum > 0) ? ((screensRounded === 1 ? '1 screen' : screensRounded + ' screens')) : '';
+      function setData(key, value){
+        if (value === undefined || value === null || value === '') {
+          try { delete node.dataset[key]; } catch(_) { node.removeAttribute('data-' + key.replace(/[A-Z]/g, function(ch){ return '-' + ch.toLowerCase(); })); }
+        } else {
+          node.dataset[key] = String(value);
+        }
+      }
+      setData('prevnames', p.Previous_Names);
+      setData('notes', p.Description);
+      setData('description', p.Description);
+      setData('firms', p.Firms);
+      setData('operator', p.Operated_By);
+      setData('architects', p.Architects);
+      setData('status', p.Status || statusText);
+      setData('statusLabel', statusText);
+      setData('seats', seatsText);
+      setData('screens', screensText);
+      setData('searchIndex', [
+        p.Theatre,
+        p.Address,
+        p.Movie,
+        p.Previous_Names,
+        p.Description,
+        p.Firms,
+        p.Operated_By,
+        p.Architects,
+        p.Status,
+        statusText,
+        seatsText,
+        screensText
+      ].filter(Boolean).join(' '));
+    });
     var countEl = document.getElementById('rs-count');
     if (countEl) countEl.textContent = features.length;
     return features;
@@ -7594,14 +7884,6 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     applyFilters();
   });
 
-  // Drag support for header
-  (function enableDrag(){
-    var drag = document.getElementById('rs-float-drag'); var host = document.getElementById('rs-float');
-    var startX=0, startY=0, ox=0, oy=0, dragging=false;
-    drag.addEventListener('mousedown', function(e){ dragging=true; startX=e.clientX; startY=e.clientY; var r=host.getBoundingClientRect(); ox=r.left; oy=r.top; document.body.style.userSelect='none'; });
-    document.addEventListener('mousemove', function(e){ if(!dragging) return; var dx=e.clientX-startX, dy=e.clientY-startY; host.style.right=''; host.style.top=(oy+dy)+'px'; host.style.left=(ox+dx)+'px'; });
-    document.addEventListener('mouseup', function(){ dragging=false; document.body.style.userSelect=''; });
-  })();
 })();
 
 // Zoom Here helper (ensures visible zoom-in even if already at target)
@@ -8340,8 +8622,23 @@ function zoomHere(lat, lon) {
     var title = li.querySelector('h4')?.textContent || "";
     var addr  = li.querySelector('.rs-addr')?.textContent || "";
     var movie = li.querySelector('.rs-movie')?.textContent || "";
-    var extra = (li.getAttribute('data-prevnames')||"") + " " + (li.getAttribute('data-notes')||"");
-    return norm([title, addr, movie, extra].join(' '));
+    var data = li.dataset || {};
+    var extraParts = [
+      data.searchIndex,
+      data.prevnames,
+      data.description,
+      data.notes,
+      data.firms,
+      data.operator,
+      data.architects,
+      data.status,
+      data.statusLabel,
+      data.seats,
+      data.screens,
+      li.getAttribute('data-prevnames') || "",
+      li.getAttribute('data-notes') || ""
+    ];
+    return norm([title, addr, movie].concat(extraParts).filter(Boolean).join(' '));
   }
 
   function matchesAllTokens(index, tokens){
@@ -9425,116 +9722,6 @@ try {
   }, true);
 })();
 </script>
-<script>
-// === DYNAMIC FLOAT WIDTH OBSERVER (injected) ===
-(function(){
-  var float = document.getElementById('rs-float');
-  if (!float) return;
-  function measure() {
-    try {
-      // Compute widest child within the float
-      var children = Array.prototype.slice.call(float.children || []);
-      var widestChild = 0;
-      for (var i = 0; i < children.length; i++) {
-        var el = children[i];
-        if (!el) continue;
-        var w = el.scrollWidth || 0;
-        if (w > widestChild) widestChild = w;
-      }
-      var limit = Math.min(window.innerWidth * 0.92, Math.max(320, widestChild + 12));
-      float.style.width = limit + 'px';
-    } catch(e) {}
-  }
-  // Observe the float itself + window resize
-  var ro;
-  try {
-    ro = new ResizeObserver(measure);
-    ro.observe(float);
-  } catch(_) {}
-  window.addEventListener('resize', measure, { passive: true });
-  // Initial measurement after styles apply
-  if (document.readyState === 'complete') {
-    setTimeout(measure, 0);
-  } else {
-    window.addEventListener('load', function(){ setTimeout(measure, 0); }, { once: true });
-  }
-})();
-</script>
-<script>
-// === Float Dragging (header is the handle) ===
-(function(){
-  var float = document.getElementById('rs-float');
-  var handle = document.getElementById('rs-float-drag');
-  if(!float || !handle) return;
-
-  // Ensure we start from pixel-based positioning (not 'right')
-  function ensurePixelPosition(){
-    var rect = float.getBoundingClientRect();
-    float.style.position = 'fixed';
-    float.style.left = rect.left + 'px';
-    float.style.top  = rect.top  + 'px';
-    float.style.right = 'auto';
-  }
-
-  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
-
-  var startX=0, startY=0, startLeft=0, startTop=0, dragging=false;
-
-  function onPointerDown(e){
-    if (e.button !== undefined && e.button !== 0) return; // left mouse only
-    var p = ('touches' in e) ? e.touches[0] : e;
-    ensurePixelPosition();
-    var rect = float.getBoundingClientRect();
-    startX = p.clientX;
-    startY = p.clientY;
-    startLeft = rect.left;
-    startTop  = rect.top;
-    dragging = true;
-    float.classList.add('rs-dragging');
-    window.addEventListener('pointermove', onPointerMove, {passive:false});
-    window.addEventListener('pointerup', onPointerUp, {once:true});
-    window.addEventListener('touchmove', onPointerMove, {passive:false});
-    window.addEventListener('touchend', onPointerUp, {once:true});
-    e.preventDefault();
-  }
-
-  function onPointerMove(e){
-    if(!dragging) return;
-    var p = ('touches' in e) ? e.touches[0] : e;
-    var dx = p.clientX - startX;
-    var dy = p.clientY - startY;
-    var w = float.offsetWidth;
-    var h = float.offsetHeight;
-    var newLeft = clamp(startLeft + dx, 8, window.innerWidth - w - 8);
-    var newTop  = clamp(startTop  + dy, 8, window.innerHeight - h - 8);
-    float.style.left = Math.round(newLeft) + 'px';
-    float.style.top  = Math.round(newTop) + 'px';
-    e.preventDefault();
-  }
-
-  function onPointerUp(){
-    dragging = false;
-    float.classList.remove('rs-dragging');
-    window.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('touchmove', onPointerMove);
-  }
-
-  // Use pointer events for broad support
-  handle.addEventListener('pointerdown', onPointerDown);
-  handle.addEventListener('touchstart', onPointerDown, {passive:false});
-
-  // Keep it on-screen on resize/orientation changes
-  window.addEventListener('resize', function(){
-    try{
-      var rect = float.getBoundingClientRect();
-      var w = float.offsetWidth, h = float.offsetHeight;
-      var left = clamp(rect.left, 8, window.innerWidth - w - 8);
-      var top  = clamp(rect.top,  8, window.innerHeight - h - 8);
-      float.style.left = left + 'px';
-      float.style.top  = top  + 'px';
-      float.style.right = 'auto';
-    }catch(_){}
-  });
 })();
 </script>
 <script>
@@ -11819,13 +12006,22 @@ document.addEventListener('DOMContentLoaded', function() {
   window.RS_TIPS_START = () => showStep(0);
 
   // Hook a visible "Tips" button in the float header if no HELP button is wired
+  function wireTipsButton(btn){
+    if (!btn || btn.dataset.rsTipsWired) return;
+    btn.addEventListener('click', () => window.RS_TIPS_START());
+    btn.dataset.rsTipsWired = 'true';
+  }
+
   function ensureTipsButton(){
+    const toolbarBtn = document.querySelector('.rs-toolbar .rs-tips-btn-toolbar');
+    if (toolbarBtn) {
+      wireTipsButton(toolbarBtn);
+      return;
+    }
+
     const floatBtn = document.querySelector('#rs-float .rs-tips-btn-float');
     if (floatBtn) {
-      if (!floatBtn.dataset.rsTipsWired) {
-        floatBtn.addEventListener('click', () => window.RS_TIPS_START());
-        floatBtn.dataset.rsTipsWired = 'true';
-      }
+      wireTipsButton(floatBtn);
       const stray = document.querySelector('#rs-float .rs-tips-btn');
       if (stray && stray !== floatBtn) {
         stray.remove();
@@ -11838,7 +12034,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btn = document.createElement('button');
     btn.className = 'rs-tips-btn';
     btn.textContent = 'Tips';
-    btn.addEventListener('click', () => window.RS_TIPS_START());
+    wireTipsButton(btn);
     hdr.appendChild(btn);
   }
   ensureTipsButton();
@@ -11858,7 +12054,10 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
   function ensureToolbarTips(){
     document.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
       if (btn && btn.parentElement) {
-        btn.parentElement.removeChild(btn);
+        var inToolbar = btn.closest ? btn.closest('.rs-toolbar') : null;
+        if (!inToolbar) {
+          btn.parentElement.removeChild(btn);
+        }
       }
     });
   }
@@ -11922,7 +12121,10 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     const scopedRemoval = (root) => {
       if (!root) return;
       root.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
-        if (btn && !btn.closest('#rs-float')) {
+        if (!btn) return;
+        var inFloat = btn.closest ? btn.closest('#rs-float') : null;
+        var inToolbar = btn.closest ? btn.closest('.rs-toolbar') : null;
+        if (!inFloat && !inToolbar) {
           btn.remove();
         }
       });
@@ -11931,7 +12133,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     if (toolbar) scopedRemoval(toolbar);
 
     document.querySelectorAll('button, [role="button"], .rs-btn').forEach(btn => {
-      if (btn.closest && btn.closest('#rs-float')) return;
+      if (btn.closest && (btn.closest('#rs-float') || btn.closest('.rs-toolbar'))) return;
       const label = (btn.getAttribute('aria-label')||'').trim();
       const title = (btn.getAttribute('title')||'').trim();
       const text = (btn.textContent||'').trim();
@@ -12423,6 +12625,7 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
       if (el && !(el.classList && el.classList.contains('rs-tips-btn-float'))){
+        if (el.closest && el.closest('.rs-toolbar')) continue;
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12433,7 +12636,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var tips = scope.querySelectorAll('.rs-tips-btn-global, .rs-tips-btn-toolbar');
     for (var i=0;i<tips.length;i++){
       var el = tips[i];
-      if (!(el.closest && el.closest('#rs-float'))){
+      if (!(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))){
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12452,7 +12655,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var candidates = scope.querySelectorAll('button, [role="button"], .btn, .chip, .pill, .badge, .tag, .rs-btn');
     for (var i=0;i<candidates.length;i++){
       var el = candidates[i];
-      if (rsLooksLikeTips(el) && !(el.closest && el.closest('#rs-float'))){
+      if (rsLooksLikeTips(el) && !(el.closest && (el.closest('#rs-float') || el.closest('.rs-toolbar')))){
         if (el.parentNode) el.parentNode.removeChild(el);
       }
     }
@@ -12489,82 +12692,6 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 })();
 </script>
-
-<script id="rs-headeronly-script">
-(function(){
-  var float = document.getElementById('rs-float');
-  var btn   = document.getElementById('rs-collapse');
-  if(!float || !btn) return;
-
-  function setHeaderOnly(on){
-    if(on){
-      float.classList.add('rs-header-only');
-      btn.setAttribute('data-state','0');
-      // keep label accessible; text can remain "COLLAPSE"/"EXPAND"
-      btn.setAttribute('aria-label','Expand theatre list');
-      btn.textContent = 'EXPAND';
-    }else{
-      float.classList.remove('rs-header-only');
-      btn.setAttribute('data-state','1');
-      btn.setAttribute('aria-label','Collapse theatre list');
-      btn.textContent = 'COLLAPSE';
-      if (window.RS && typeof window.RS.ensureListPopulated === 'function') {
-        window.RS.ensureListPopulated();
-      }
-    }
-  }
-
-  // Initialize from data-state (1=expanded, 0=header-only)
-  try{
-    var expanded = (btn.getAttribute('data-state') !== '0');
-    setHeaderOnly(!expanded);
-  }catch(e){/* no-op */}
-
-  if(!btn._boundHeaderOnly){
-    btn._boundHeaderOnly = true;
-    btn.addEventListener('click', function(ev){
-      ev.preventDefault();
-      var isCollapsed = float.classList.contains('rs-header-only');
-      setHeaderOnly(!isCollapsed);
-      ev.stopPropagation();
-    }, false);
-  }
-})();
-</script>
-
-<script id="rs-float-collapse-init-v2">
-(function(){
-  if (window.__RS_FLOAT_COLLAPSE_V2__) return; window.__RS_FLOAT_COLLAPSE_V2__ = true;
-  function iconSVG(){
-    return '<svg class="rs-collapse-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="1" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter" stroke-linecap="square"/><path d="M6 5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter" stroke-linecap="square"/></svg>';
-  }
-  function init(){
-    var float = document.getElementById('rs-float') || document.querySelector('.rs-float');
-    if(!float) return;
-    var header = float.querySelector('.rs-float__head, .rs-float__header, .rs-float-header');
-    if(!header) return;
-    if(header.querySelector('.rs-collapse-btn')) return; // already present
-
-    var btn = document.createElement('button');
-    btn.className = 'rs-collapse-btn';
-    btn.type = 'button';
-    btn.setAttribute('aria-label','Collapse/Expand');
-    btn.innerHTML = iconSVG();
-    header.appendChild(btn);
-
-    btn.addEventListener('click', function(ev){
-      ev.stopPropagation();
-      var wasCollapsed = float.classList.contains('rs-collapsed');
-      float.classList.toggle('rs-collapsed');
-      if (wasCollapsed && window.RS && typeof window.RS.ensureListPopulated === 'function') {
-        window.RS.ensureListPopulated();
-      }
-    });
-  }
-  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', init, {once:true}); } else { init(); }
-})();
-</script>
-
 
 <script id="rs-float-search-relocator">
 (function(){
