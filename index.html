@@ -1653,6 +1653,161 @@ body.rs-fullscreen-active .rs-logo {
 
 /* === END: Info/Help toolbar + modal === */
 
+/* === BEGIN: Map Layers modal === */
+.rs-maplayers-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 10025;
+}
+
+.rs-maplayers-modal[aria-hidden="false"] {
+  display: block;
+}
+
+.rs-maplayers-modal .backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.rs-maplayers-modal .panel {
+  position: absolute;
+  left: 18px;
+  bottom: calc(18px + 56px);
+  width: min(420px, 92vw);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: rgba(10, 10, 10, 0.96);
+  color: #f3efe4;
+  border: 2px solid #000;
+  border-radius: 14px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
+  padding: 18px 20px 22px;
+}
+
+.rs-maplayers-modal .panel:focus {
+  outline: 3px solid rgba(243, 239, 228, 0.4);
+  outline-offset: 4px;
+}
+
+.rs-maplayers-modal .close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #f3efe4;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 4px;
+  font: 700 12px/1 var(--font-ui, system-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.rs-maplayers-modal .rs-maplayers-title {
+  font: 900 20px/1.2 var(--font-display, 'League Gothic', sans-serif);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+.rs-maplayers-modal .rs-footer-bar {
+  padding: 0;
+  background: transparent;
+}
+
+.rs-maplayers-modal .rs-footer-inner {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rs-maplayers-modal .rs-maplayers-header {
+  font: 700 12px/1 var(--font-ui, system-ui);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 2px solid rgba(243, 239, 228, 0.65);
+  border-radius: 999px;
+  padding: 8px 12px;
+  align-self: flex-start;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.rs-maplayers-modal .rs-maplayers-header:focus,
+.rs-maplayers-modal .rs-maplayers-header:hover {
+  outline: none;
+  background: #f3efe4;
+  color: #000;
+}
+
+.rs-maplayers-modal .rs-layer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rs-maplayers-modal .rs-historic-slider,
+.rs-maplayers-modal .rs-layer-slider {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.rs-maplayers-modal .rs-hist-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  text-transform: uppercase;
+  font: 600 12px/1.15 var(--font-ui, system-ui);
+  letter-spacing: 0.05em;
+  color: #f3efe4;
+}
+
+.rs-maplayers-modal .rs-hist-label .rs-label:first-child {
+  font-size: 14px;
+}
+
+.rs-maplayers-modal .rs-hist-label .rs-label:last-child {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.rs-maplayers-modal .rs-hist-bar {
+  width: 100%;
+  max-width: 100%;
+}
+
+.rs-maplayers-modal .rs-layer-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rs-maplayers-modal .rs-hist-step:focus {
+  outline: 3px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 1px;
+}
+
+@media (max-width: 720px) {
+  .rs-maplayers-modal .panel {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 12vh;
+    width: min(480px, 94vw);
+  }
+}
+
+body.rs-fullscreen-active #rs-maplayers-modal {
+  display: none !important;
+}
+/* === END: Map Layers modal === */
+
 /* === BEGIN: Title Readability Upgrade === */
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
    .rs-float h2,
@@ -7129,34 +7284,24 @@ html.booting #rs-float {
 <button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
 <button aria-label="Open tutorial" class="rs-btn rs-tips-btn-toolbar" id="rs-tutorial-btn" title="View tutorial" type="button">Tips</button>
+<button aria-expanded="false" aria-haspopup="dialog" class="rs-btn" id="rs-maplayers-btn" title="Adjust map layers" type="button">Map Layers</button>
 <button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
 </div>
-<section class="rs-float rs-float--drawer" id="rs-float" aria-hidden="false">
-<header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
-<div><span class="rs-float__title">Theatres</span>
-<span class="rs-chip" id="rs-count">0</span></div>
-<div class="rs-float__actions">
-<button class="rs-btn" id="rs-collapse" title="Collapse list">Collapse</button>
-<div id="rs-close" title="Hide list"></div>
-</div>
-</header>
-<div class="rs-search-wrap" role="search">
-<input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
-<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
-</div>
-<div class="rs-float__list" id="rs-list" role="list"></div>
-<div class="rs-footer-bar" id="rs-footer-bar">
-<div class="rs-footer-inner">
-<!-- Historic opacity slider (Stage 1) -->
-<div class="rs-footer-inner">
-<div class="rs-maplayers-header">MAP LAYERS</div>
-<!-- Historic opacity segmented bar -->
-<div class="rs-historic-slider" style="display:flex; align-items:center; gap:14px; margin-right:auto;; padding-top: 16px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
-<span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
+<div aria-hidden="true" class="rs-maplayers-modal" id="rs-maplayers-modal">
+<div class="backdrop" data-rs-maplayers-close="true"></div>
+<div aria-labelledby="rs-maplayers-title" aria-modal="true" class="panel" role="dialog" tabindex="-1">
+<button class="close rs-btn" data-rs-maplayers-close="true" type="button">Close</button>
+<h3 class="rs-maplayers-title" id="rs-maplayers-title">Map Layers</h3>
+<div class="rs-footer-bar" id="rs-footer-bar" data-rs-maplayers-host="modal">
+<div class="rs-footer-inner rs-layer-section">
+<div class="rs-maplayers-header" role="button" tabindex="0">MAP LAYERS</div>
+<div class="rs-layer-content">
+<div class="rs-historic-slider">
+<div class="rs-hist-label">
+<span class="rs-label">Cleveland</span>
+<span class="rs-label">1927–1937</span>
 </div>
 <div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:100%"></div>
@@ -7167,11 +7312,10 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-sliders" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-<!-- Street segmented bar -->
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
+<div class="rs-layer-sliders">
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
+<span class="rs-label">Satellite</span>
 </div>
 <div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:100%"></div>
@@ -7182,9 +7326,9 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
+<span class="rs-label">Street</span>
 </div>
 <div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:0%"></div>
@@ -7198,7 +7342,22 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
-</div></section>
+</div>
+</div>
+<section class="rs-float rs-float--drawer" id="rs-float" aria-hidden="false">
+<header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
+<div><span class="rs-float__title">Theatres</span>
+<span class="rs-chip" id="rs-count">0</span></div>
+<div class="rs-float__actions">
+<div id="rs-close" title="Hide list"></div>
+</div>
+</header>
+<div class="rs-search-wrap" role="search">
+<input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
+<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+</div>
+<div class="rs-float__list" id="rs-list" role="list"></div>
+</section>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -10186,9 +10345,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const section = header ? header.closest('.rs-footer-inner') : null;
   if (header && section) {
     section.classList.add('rs-layer-section');
-    header.addEventListener('click', function() {
-      section.classList.toggle('collapsed');
-    });
+    if (!section.closest('#rs-maplayers-modal')) {
+      header.addEventListener('click', function() {
+        section.classList.toggle('collapsed');
+      });
+    }
   }
 });
 </script>
@@ -11617,6 +11778,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const floatPanel = document.getElementById('rs-float');
   const footer = document.getElementById('rs-footer-bar');
   if (!floatPanel || !footer) return;
+  if (footer.dataset && footer.dataset.rsMaplayersHost === 'modal') return;
   if (footer.parentElement !== floatPanel) {
     floatPanel.appendChild(footer); // move to panel root, last child
   }
@@ -12804,6 +12966,7 @@ document.addEventListener("DOMContentLoaded", function() {
   function init(){
     var float = document.getElementById('rs-float') || document.querySelector('.rs-float');
     if(!float) return;
+    if (float.classList && float.classList.contains('rs-float--drawer')) return;
     var header = float.querySelector('.rs-float__head, .rs-float__header, .rs-float-header');
     if(!header) return;
     if(header.querySelector('.rs-collapse-btn')) return; // already present
@@ -13029,6 +13192,102 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     })();
 
+    (function bindMapLayersModal(){
+      const btn = RS.qs('#rs-maplayers-btn');
+      const modal = RS.qs('#rs-maplayers-modal');
+      if (!btn || !modal || btn.__rsBound) return;
+      btn.__rsBound = true;
+
+      const panel = modal.querySelector('.panel');
+      const closers = modal.querySelectorAll('[data-rs-maplayers-close]');
+      let lastFocused = null;
+
+      const getFocusables = () => {
+        return Array.prototype.slice.call(modal.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )).filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
+      };
+
+      const focusPanel = () => {
+        const target = panel || modal.querySelector('.rs-maplayers-header');
+        if (target && typeof target.focus === 'function') {
+          target.focus();
+        }
+      };
+
+      const setOpen = (open) => {
+        const isOpen = !!open;
+        modal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        modal.classList.toggle('rs-maplayers-modal--open', isOpen);
+        document.body.classList.toggle('rs-maplayers-open', isOpen);
+        if (isOpen) {
+          lastFocused = document.activeElement;
+          window.requestAnimationFrame(focusPanel);
+        } else if (lastFocused && typeof lastFocused.focus === 'function') {
+          window.requestAnimationFrame(() => {
+            try { lastFocused.focus(); } catch(_) {}
+          });
+        }
+      };
+
+      const openModal = () => setOpen(true);
+      const closeModal = () => setOpen(false);
+
+      RS.on(btn, 'click', function(ev){
+        ev.preventDefault();
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        if (expanded) {
+          closeModal();
+        } else {
+          openModal();
+        }
+      });
+
+      closers.forEach(el => {
+        RS.on(el, 'click', function(ev){
+          ev.preventDefault();
+          closeModal();
+        });
+      });
+
+      RS.on(modal, 'click', function(ev){
+        if (modal.getAttribute('aria-hidden') === 'true') return;
+        const target = ev.target;
+        if (target && target.dataset && target.dataset.rsMaplayersClose) {
+          ev.preventDefault();
+          closeModal();
+        }
+      });
+
+      RS.on(modal, 'keydown', function(ev){
+        if (modal.getAttribute('aria-hidden') === 'true') return;
+        if (ev.key === 'Tab' || ev.key === 'Tabulation') {
+          const focusables = getFocusables();
+          if (!focusables.length) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          const active = document.activeElement;
+          if (ev.shiftKey) {
+            if (active === first || !modal.contains(active)) {
+              ev.preventDefault();
+              last.focus();
+            }
+          } else {
+            if (active === last) {
+              ev.preventDefault();
+              first.focus();
+            }
+          }
+        } else if (ev.key === 'Escape' || ev.key === 'Esc') {
+          ev.preventDefault();
+          closeModal();
+        }
+      });
+
+      window.RS_closeMapLayersModal = closeModal;
+    })();
+
     // ---------- fullscreen toggle ----------
     (function bindFullscreen(){
       const btn = RS.qs('#rs-fullscreen-btn');
@@ -13046,6 +13305,9 @@ document.addEventListener("DOMContentLoaded", function() {
         btn.textContent = text;
         btn.setAttribute('aria-label', label);
         btn.title = label.charAt(0).toUpperCase() + label.slice(1);
+        if (on && typeof window.RS_closeMapLayersModal === 'function') {
+          try { window.RS_closeMapLayersModal(); } catch (_) {}
+        }
       };
 
       RS.on(btn, 'click', function(ev){
@@ -13061,14 +13323,37 @@ document.addEventListener("DOMContentLoaded", function() {
     // ---------- MAP LAYERS header toggle ----------
     (function bindLayersHeader(){
       const header = RS.qs('.rs-maplayers-header');
-      const sliders = RS.qs('.rs-layer-sliders') || RS.qs('#rs-layer-sliders') || RS.qs('.rs-historic-slider')?.parentElement;
-      if (!header || header.__rsBound || !sliders) return;
+      if (!header || header.__rsBound) return;
+      const scope = header.closest('.rs-maplayers-modal') || header.closest('#rs-float') || document;
+      const content = scope.querySelector('.rs-layer-content') || scope.querySelector('.rs-layer-sliders');
+      if (!content) return;
       header.__rsBound = true;
-      // start expanded; toggle on click
-      RS.on(header, 'click', function(){
-        const hidden = sliders.style.display === 'none';
-        sliders.style.display = hidden ? '' : 'none';
-        header.classList.toggle('collapsed', !hidden);
+
+      if (!content.id) {
+        content.id = 'rs-layer-content-' + Math.random().toString(36).slice(2, 8);
+      }
+      header.setAttribute('aria-controls', content.id);
+
+      const setExpanded = (expanded) => {
+        const open = expanded !== false;
+        content.style.display = open ? '' : 'none';
+        header.classList.toggle('collapsed', !open);
+        header.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+
+      setExpanded(true);
+
+      const toggle = () => {
+        const isOpen = header.getAttribute('aria-expanded') !== 'false';
+        setExpanded(!isOpen);
+      };
+
+      RS.on(header, 'click', toggle);
+      RS.on(header, 'keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.code === 'Space') {
+          ev.preventDefault();
+          toggle();
+        }
       });
     })();
 
