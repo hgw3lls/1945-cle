@@ -533,7 +533,6 @@ html,body {
 
 
 body.rs-fullscreen-active .rs-toolbar-infohelp,
-body.rs-fullscreen-active #rs-toggle-list,
 body.rs-fullscreen-active #rs-float,
 body.rs-fullscreen-active .rs-float,
 body.rs-fullscreen-active #rs-footer-bar,
@@ -541,6 +540,10 @@ body.rs-fullscreen-active .rs-footer-bar,
 body.rs-fullscreen-active #rs-attract {
 
   display:none !important;
+}
+
+body.rs-fullscreen-active .rs-drawer-toggle-control {
+  display: none !important;
 }
 
 
@@ -5858,6 +5861,97 @@ html.booting #rs-float {
   transform: rotate(180deg);
 }
 
+.rs-float.rs-float--drawer {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  width: min(420px, 92vw) !important;
+  max-width: min(420px, 92vw) !important;
+  min-width: min(320px, 92vw) !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column;
+  transform: translateX(0);
+  transition: transform .3s ease, opacity .3s ease, box-shadow .3s ease;
+  box-shadow: -24px 0 48px rgba(0, 0, 0, 0.45);
+  z-index: 10020 !important;
+  will-change: transform;
+}
+
+.rs-float.rs-float--drawer .rs-float__list,
+.rs-float.rs-float--drawer #rs-list {
+  flex: 1 1 auto;
+  max-height: none !important;
+  overflow-y: auto;
+}
+
+.rs-float.rs-float--drawer .rs-footer-bar {
+  position: static !important;
+}
+
+.rs-float.rs-float--drawer.rs-float--hidden {
+  transform: translateX(calc(100% + 24px));
+  opacity: 0;
+  visibility: hidden;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.rs-float.rs-float--drawer:not(.rs-float--hidden) {
+  opacity: 1;
+  visibility: visible;
+}
+
+.rs-float.rs-float--drawer .rs-float__header,
+.rs-float.rs-float--drawer .rs-search-wrap,
+.rs-float.rs-float--drawer .rs-footer-bar {
+  width: 100%;
+}
+
+.rs-float.rs-float--drawer .rs-float__header {
+  flex-shrink: 0;
+}
+
+.rs-float.rs-float--drawer .rs-footer-bar {
+  flex-shrink: 0;
+}
+
+.rs-drawer-toggle-control {
+  margin-top: 6px;
+}
+
+.rs-drawer-toggle-control .rs-drawer-toggle-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  font: 700 12px/1.2 var(--font-ui, system-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.82);
+  color: #f3efe4;
+  border: 2px solid #000;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.rs-drawer-toggle-control .rs-drawer-toggle-btn:hover,
+.rs-drawer-toggle-control .rs-drawer-toggle-btn:focus {
+  background: #f3efe4;
+  color: #000;
+}
+
+.rs-drawer-toggle-control .rs-drawer-toggle-btn:focus {
+  outline: 3px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 2px;
+}
+
 </style>
 <style id="rs-fontrestore">
 /* --- THEATRE TITLE + MODAL TITLE FONT RESTORE --- */
@@ -7038,9 +7132,8 @@ html.booting #rs-float {
 <button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
-<div id="rs-toggle-list"> </div>
 </div>
-<section class="rs-float" id="rs-float">
+<section class="rs-float rs-float--drawer" id="rs-float" aria-hidden="false">
 <header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
 <div><span class="rs-float__title">Theatres</span>
 <span class="rs-chip" id="rs-count">0</span></div>
@@ -7229,6 +7322,76 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   if (e.tile) e.tile.style.display = 'none';
 });
   L.control.zoom({ position: 'topright' }).addTo(map);
+
+  var floatPanel = document.getElementById('rs-float');
+  var drawerToggleButtons = [];
+
+  function updateDrawerToggleButtons(hidden) {
+    drawerToggleButtons = drawerToggleButtons.filter(function(btn){ return !!btn; });
+    drawerToggleButtons.forEach(function(btn){
+      var show = btn.dataset.labelHidden || 'Show Theatres';
+      var hide = btn.dataset.labelVisible || 'Hide Theatres';
+      btn.textContent = hidden ? show : hide;
+      btn.setAttribute('title', hidden ? 'Show theatre list' : 'Hide theatre list');
+      btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+    });
+  }
+
+  function setDrawerHidden(hidden) {
+    if (!floatPanel) return;
+    floatPanel.classList.toggle('rs-float--hidden', hidden);
+    floatPanel.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+    updateDrawerToggleButtons(hidden);
+  }
+
+  function toggleDrawer(forceHidden) {
+    if (!floatPanel) return;
+    var hidden = (typeof forceHidden === 'boolean') ? forceHidden : !floatPanel.classList.contains('rs-float--hidden');
+    setDrawerHidden(hidden);
+  }
+
+  function registerDrawerToggle(btn) {
+    if (!btn) return;
+    if (drawerToggleButtons.indexOf(btn) === -1) drawerToggleButtons.push(btn);
+    if (!btn.dataset.labelVisible) btn.dataset.labelVisible = 'Hide Theatres';
+    if (!btn.dataset.labelHidden) btn.dataset.labelHidden = 'Show Theatres';
+    btn.setAttribute('aria-controls', 'rs-float');
+    updateDrawerToggleButtons(floatPanel ? floatPanel.classList.contains('rs-float--hidden') : false);
+  }
+
+  if (floatPanel) {
+    floatPanel.classList.add('rs-float--drawer');
+    floatPanel.hidden = false;
+    setDrawerHidden(false);
+    try { window.RS_toggleTheatresDrawer = toggleDrawer; } catch(_) {}
+  }
+
+  if (floatPanel) {
+    var DrawerToggleControl = L.Control.extend({
+      options: { position: 'topright' },
+      onAdd: function(){
+        var container = L.DomUtil.create('div', 'leaflet-control rs-drawer-toggle-control');
+        var btn = L.DomUtil.create('button', 'rs-drawer-toggle-btn', container);
+        btn.type = 'button';
+        btn.id = 'rs-drawer-toggle';
+        btn.dataset.labelVisible = 'Hide Theatres';
+        btn.dataset.labelHidden = 'Show Theatres';
+        btn.textContent = btn.dataset.labelVisible;
+        btn.title = 'Hide theatre list';
+        btn.setAttribute('aria-controls', 'rs-float');
+        btn.setAttribute('aria-expanded', 'true');
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+        btn.addEventListener('click', function(ev){
+          ev.preventDefault();
+          toggleDrawer();
+        });
+        registerDrawerToggle(btn);
+        return container;
+      }
+    });
+    map.addControl(new DrawerToggleControl());
+  }
 
   // Offline tiles
   var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:200}).addTo(map);
@@ -7565,14 +7728,10 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 });
 
   // Floating list toggle/collapse/close
-    var floatEl = document.getElementById('rs-float');
-    rsSafeOn(document.getElementById('rs-toggle-list'), 'click', function(){
-      if (!floatEl) floatEl = document.getElementById('rs-float');
-      if (floatEl) floatEl.hidden = !floatEl.hidden;
-    });
-    rsSafeOn(document.getElementById('rs-close'), 'click', function(){
-      if (!floatEl) floatEl = document.getElementById('rs-float');
-      if (floatEl) floatEl.hidden = true;
+    var floatEl = floatPanel || document.getElementById('rs-float');
+    rsSafeOn(document.getElementById('rs-close'), 'click', function(e){
+      if (e && e.preventDefault) e.preventDefault();
+      toggleDrawer(true);
     });
     rsSafeOn(document.getElementById('rs-collapse'), 'click', function(){
       var list = document.getElementById('rs-list');
@@ -8273,6 +8432,7 @@ function zoomHere(lat, lon) {
   // Find float container
   var floatEl = document.querySelector('.rs-float') || document.getElementById('rs-float');
   if (!floatEl) return;
+  if (floatEl.classList && floatEl.classList.contains('rs-float--drawer')) return;
 
   // Use title bar as handle when available
   var handle = floatEl.querySelector('.rs-float__title') || floatEl;
