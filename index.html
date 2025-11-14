@@ -7041,9 +7041,11 @@ html.booting #rs-float {
 <div class="rs-toolbar">
 <button aria-pressed="false" aria-label="Toggle fullscreen" class="rs-btn rs-fullscreen-btn" id="rs-fullscreen-btn" title="Enter fullscreen" type="button">Fullscreen</button>
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
-<div aria-label="Info and Help" class="rs-toolbar-infohelp">
+<div aria-label="Map controls" class="rs-toolbar-infohelp">
 <button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
+<button aria-label="Open tutorial" class="rs-btn rs-tips-btn-toolbar" id="rs-tutorial-btn" title="View tutorial" type="button">Tutorial</button>
+<button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
 <div id="rs-toggle-list"> </div>
@@ -7111,11 +7113,9 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
-<button class="rs-btn" id="rs-reset" title="Reset map view">Reset Map</button>
 </div>
 </div>
-</div>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-float" type="button">Tips</button></section>
+</div></section>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -11864,7 +11864,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Public start function
   window.RS_TIPS_START = () => showStep(0);
 
-  // Hook a visible "Tips" button in the float header if no HELP button is wired
+  // Hook a visible Tutorial button (legacy "Tips") in the float header if no HELP button is wired
   function ensureTipsButton(){
     const floatBtn = document.querySelector('#rs-float .rs-tips-btn-float');
     if (floatBtn) {
@@ -11878,12 +11878,21 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       return;
     }
+    const toolbarBtn = document.getElementById('rs-tutorial-btn') || document.querySelector('.rs-toolbar .rs-tips-btn-toolbar');
+    if (toolbarBtn) {
+      if (!toolbarBtn.dataset.rsTipsWired) {
+        toolbarBtn.addEventListener('click', () => window.RS_TIPS_START());
+        toolbarBtn.dataset.rsTipsWired = 'true';
+      }
+      return;
+    }
     if (document.querySelector('#rs-float .rs-tips-btn')) return;
     const hdr = document.querySelector('#rs-float .rs-float__header') || document.querySelector('#rs-float');
     if (!hdr) return;
     const btn = document.createElement('button');
     btn.className = 'rs-tips-btn';
-    btn.textContent = 'Tips';
+    btn.textContent = 'Tutorial';
+    btn.setAttribute('aria-label', 'Open tutorial');
     btn.addEventListener('click', () => window.RS_TIPS_START());
     hdr.appendChild(btn);
   }
@@ -11900,11 +11909,18 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
 </script>
 <script>
 (function(){
-  // Enhance existing RS_TIPS_START but keep Tips button scoped to the float
+  // Ensure any toolbar tutorial button stays wired to RS_TIPS_START
   function ensureToolbarTips(){
     document.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
-      if (btn && btn.parentElement) {
-        btn.parentElement.removeChild(btn);
+      if (!btn.textContent.trim()) {
+        btn.textContent = 'Tutorial';
+      }
+      if (!btn.getAttribute('aria-label')) {
+        btn.setAttribute('aria-label', 'Open tutorial');
+      }
+      if (!btn.dataset.rsTipsWired) {
+        btn.addEventListener('click', () => window.RS_TIPS_START && window.RS_TIPS_START());
+        btn.dataset.rsTipsWired = 'true';
       }
     });
   }
