@@ -479,13 +479,15 @@ html,body {
   .rs-toolbar {
 
   position:fixed;
-  top:16px;
   left:16px;
+  bottom:16px;
+  top:auto;
   z-index:10010;
   display:flex;
-  flex-direction:column;
-  gap:10px;
-  align-items:flex-start;
+  flex-direction:row;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  gap:12px;
   pointer-events:none;
 }
 
@@ -498,12 +500,57 @@ html,body {
 
 
 
+.rs-fullscreen-btn {
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:10px 14px;
+  font-size:14px;
+  letter-spacing:0.6px;
+  text-transform:uppercase;
+  min-width:120px;
+  line-height:1.1;
+}
+
+
+
 .rs-logo {
 
+  position:fixed;
+  top:16px;
+  left:16px;
+  z-index:10009;
   width:220px;
   max-width:35vw;
   filter:drop-shadow(0 6px 16px rgba(0,0,0,.4));
   user-select:none;
+  pointer-events:none;
+  transition:opacity .3s ease;
+}
+
+
+
+body.rs-fullscreen-active .rs-toolbar-infohelp,
+body.rs-fullscreen-active #rs-float,
+body.rs-fullscreen-active .rs-float,
+body.rs-fullscreen-active #rs-footer-bar,
+body.rs-fullscreen-active .rs-footer-bar,
+body.rs-fullscreen-active #rs-attract {
+
+  display:none !important;
+}
+
+body.rs-fullscreen-active .rs-drawer-toggle-control {
+  display: none !important;
+}
+
+
+
+body.rs-fullscreen-active .rs-logo {
+
+  opacity:0.35;
 }
 
 
@@ -950,11 +997,9 @@ html,body {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   }
-    .rs-dt
+   .rs-dt
 */
-}
-    .rs-dt {
+.rs-dt {
 
   font-weight: 700;
   font-family: var(--font-ui);
@@ -975,14 +1020,8 @@ html,body {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   }
-  
-
-.rs-chip-status
+   .rs-chip-status
 */
-}
-  
-
 .rs-chip-status {
 
   font-weight: 900;
@@ -1535,7 +1574,8 @@ html,body {
 
   display:flex;
   gap:8px;
-  margin-top:8px;
+  align-items:center;
+  margin-top:0;
 }
 
 
@@ -1612,6 +1652,161 @@ html,body {
 
 
 /* === END: Info/Help toolbar + modal === */
+
+/* === BEGIN: Map Layers modal === */
+.rs-maplayers-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 10025;
+}
+
+.rs-maplayers-modal[aria-hidden="false"] {
+  display: block;
+}
+
+.rs-maplayers-modal .backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.rs-maplayers-modal .panel {
+  position: absolute;
+  left: 18px;
+  bottom: calc(18px + 56px);
+  width: min(420px, 92vw);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: rgba(10, 10, 10, 0.96);
+  color: #f3efe4;
+  border: 2px solid #000;
+  border-radius: 14px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65);
+  padding: 18px 20px 22px;
+}
+
+.rs-maplayers-modal .panel:focus {
+  outline: 3px solid rgba(243, 239, 228, 0.4);
+  outline-offset: 4px;
+}
+
+.rs-maplayers-modal .close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #f3efe4;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 4px;
+  font: 700 12px/1 var(--font-ui, system-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.rs-maplayers-modal .rs-maplayers-title {
+  font: 900 20px/1.2 var(--font-display, 'League Gothic', sans-serif);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+}
+
+.rs-maplayers-modal .rs-footer-bar {
+  padding: 0;
+  background: transparent;
+}
+
+.rs-maplayers-modal .rs-footer-inner {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rs-maplayers-modal .rs-maplayers-header {
+  font: 700 12px/1 var(--font-ui, system-ui);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 2px solid rgba(243, 239, 228, 0.65);
+  border-radius: 999px;
+  padding: 8px 12px;
+  align-self: flex-start;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.rs-maplayers-modal .rs-maplayers-header:focus,
+.rs-maplayers-modal .rs-maplayers-header:hover {
+  outline: none;
+  background: #f3efe4;
+  color: #000;
+}
+
+.rs-maplayers-modal .rs-layer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rs-maplayers-modal .rs-historic-slider,
+.rs-maplayers-modal .rs-layer-slider {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.rs-maplayers-modal .rs-hist-label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  text-transform: uppercase;
+  font: 600 12px/1.15 var(--font-ui, system-ui);
+  letter-spacing: 0.05em;
+  color: #f3efe4;
+}
+
+.rs-maplayers-modal .rs-hist-label .rs-label:first-child {
+  font-size: 14px;
+}
+
+.rs-maplayers-modal .rs-hist-label .rs-label:last-child {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.rs-maplayers-modal .rs-hist-bar {
+  width: 100%;
+  max-width: 100%;
+}
+
+.rs-maplayers-modal .rs-layer-sliders {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rs-maplayers-modal .rs-hist-step:focus {
+  outline: 3px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 1px;
+}
+
+@media (max-width: 720px) {
+  .rs-maplayers-modal .panel {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 12vh;
+    width: min(480px, 94vw);
+  }
+}
+
+body.rs-fullscreen-active #rs-maplayers-modal {
+  display: none !important;
+}
+/* === END: Map Layers modal === */
 
 /* === BEGIN: Title Readability Upgrade === */
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
@@ -2165,10 +2360,8 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   }
-.rs-two-images img
+   .rs-two-images img (legacy refinement)
 */
-}
 .rs-two-images img {
 
   max-width:calc(50% - 5px);
@@ -5823,6 +6016,97 @@ html.booting #rs-float {
   transform: rotate(180deg);
 }
 
+.rs-float.rs-float--drawer {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  width: min(420px, 92vw) !important;
+  max-width: min(420px, 92vw) !important;
+  min-width: min(320px, 92vw) !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  flex-direction: column;
+  transform: translateX(0);
+  transition: transform .3s ease, opacity .3s ease, box-shadow .3s ease;
+  box-shadow: -24px 0 48px rgba(0, 0, 0, 0.45);
+  z-index: 10020 !important;
+  will-change: transform;
+}
+
+.rs-float.rs-float--drawer .rs-float__list,
+.rs-float.rs-float--drawer #rs-list {
+  flex: 1 1 auto;
+  max-height: none !important;
+  overflow-y: auto;
+}
+
+.rs-float.rs-float--drawer .rs-footer-bar {
+  position: static !important;
+}
+
+.rs-float.rs-float--drawer.rs-float--hidden {
+  transform: translateX(calc(100% + 24px));
+  opacity: 0;
+  visibility: hidden;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.rs-float.rs-float--drawer:not(.rs-float--hidden) {
+  opacity: 1;
+  visibility: visible;
+}
+
+.rs-float.rs-float--drawer .rs-float__header,
+.rs-float.rs-float--drawer .rs-search-wrap,
+.rs-float.rs-float--drawer .rs-footer-bar {
+  width: 100%;
+}
+
+.rs-float.rs-float--drawer .rs-float__header {
+  flex-shrink: 0;
+}
+
+.rs-float.rs-float--drawer .rs-footer-bar {
+  flex-shrink: 0;
+}
+
+.rs-drawer-toggle-control {
+  margin-top: 6px;
+}
+
+.rs-drawer-toggle-control .rs-drawer-toggle-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  font: 700 12px/1.2 var(--font-ui, system-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.82);
+  color: #f3efe4;
+  border: 2px solid #000;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.rs-drawer-toggle-control .rs-drawer-toggle-btn:hover,
+.rs-drawer-toggle-control .rs-drawer-toggle-btn:focus {
+  background: #f3efe4;
+  color: #000;
+}
+
+.rs-drawer-toggle-control .rs-drawer-toggle-btn:focus {
+  outline: 3px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 2px;
+}
+
 </style>
 <style id="rs-fontrestore">
 /* --- THEATRE TITLE + MODAL TITLE FONT RESTORE --- */
@@ -6994,38 +7278,30 @@ html.booting #rs-float {
 </div>
 </div>
 <div class="rs-toolbar">
+<button aria-pressed="false" aria-label="Toggle fullscreen" class="rs-btn rs-fullscreen-btn" id="rs-fullscreen-btn" title="Enter fullscreen" type="button">Fullscreen</button>
 <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
-<div aria-label="Info and Help" class="rs-toolbar-infohelp">
+<div aria-label="Map controls" class="rs-toolbar-infohelp">
 <button class="rs-btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
+<button aria-label="Open tutorial" class="rs-btn rs-tips-btn-toolbar" id="rs-tutorial-btn" title="View tutorial" type="button">Tips</button>
+<button aria-expanded="false" aria-haspopup="dialog" class="rs-btn" id="rs-maplayers-btn" title="Adjust map layers" type="button">Map Layers</button>
+<button class="rs-btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 </div>
-<div id="rs-toggle-list"> </div>
 </div>
-<section class="rs-float" id="rs-float">
-<header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
-<div><span class="rs-float__title">Theatres</span>
-<span class="rs-chip" id="rs-count">0</span></div>
-<div class="rs-float__actions">
-<button class="rs-btn" id="rs-collapse" title="Collapse list">Collapse</button>
-<div id="rs-close" title="Hide list"></div>
-</div>
-</header>
-<div class="rs-search-wrap" role="search">
-<input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
-<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
-</div>
-<div class="rs-float__list" id="rs-list" role="list"></div>
-<div class="rs-footer-bar" id="rs-footer-bar">
-<div class="rs-footer-inner">
-<!-- Historic opacity slider (Stage 1) -->
-<div class="rs-footer-inner">
-<div class="rs-maplayers-header">MAP LAYERS</div>
-<!-- Historic opacity segmented bar -->
-<div class="rs-historic-slider" style="display:flex; align-items:center; gap:14px; margin-right:auto;; padding-top: 16px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
-<span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
+<div aria-hidden="true" class="rs-maplayers-modal" id="rs-maplayers-modal">
+<div class="backdrop" data-rs-maplayers-close="true"></div>
+<div aria-labelledby="rs-maplayers-title" aria-modal="true" class="panel" role="dialog" tabindex="-1">
+<button class="close rs-btn" data-rs-maplayers-close="true" type="button">Close</button>
+<h3 class="rs-maplayers-title" id="rs-maplayers-title">Map Layers</h3>
+<div class="rs-footer-bar" id="rs-footer-bar" data-rs-maplayers-host="modal">
+<div class="rs-footer-inner rs-layer-section">
+<div class="rs-maplayers-header" role="button" tabindex="0">MAP LAYERS</div>
+<div class="rs-layer-content">
+<div class="rs-historic-slider">
+<div class="rs-hist-label">
+<span class="rs-label">Cleveland</span>
+<span class="rs-label">1927–1937</span>
 </div>
 <div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:100%"></div>
@@ -7036,11 +7312,10 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-sliders" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-<!-- Street segmented bar -->
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
+<div class="rs-layer-sliders">
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
+<span class="rs-label">Satellite</span>
 </div>
 <div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:100%"></div>
@@ -7051,9 +7326,9 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
+<span class="rs-label">Street</span>
 </div>
 <div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
 <div class="rs-hist-bar-fill" style="width:0%"></div>
@@ -7065,11 +7340,24 @@ html.booting #rs-float {
 </div>
 </div>
 </div>
-<button class="rs-btn" id="rs-reset" title="Reset map view">Reset Map</button>
 </div>
 </div>
 </div>
-<button aria-label="Tips" class="rs-btn rs-tips-btn-float" type="button">Tips</button></section>
+</div>
+<section class="rs-float rs-float--drawer" id="rs-float" aria-hidden="false">
+<header aria-label="Drag to move" class="rs-float__header" id="rs-float-drag">
+<div><span class="rs-float__title">Theatres</span>
+<span class="rs-chip" id="rs-count">0</span></div>
+<div class="rs-float__actions">
+<div id="rs-close" title="Hide list"></div>
+</div>
+</header>
+<div class="rs-search-wrap" role="search">
+<input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
+<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+</div>
+<div class="rs-float__list" id="rs-list" role="list"></div>
+</section>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -7139,11 +7427,32 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
   });
   map.fitBounds(BOUNDS, {padding:[20,20]});
 
-  // Expose globally for kiosk scripts
-  try { window.map = map; } catch(_) {}
+  // Anchor the home view on the south-west edge of the theatre data rather than
+  // the extreme map bounds so the venues stay in frame while still appearing in
+  // the bottom-left corner at the widest zoom.
+  var HOME_CENTER = L.latLng(41.3996794, -81.8371223);
+  var HOME_ZOOM = (typeof map.getMinZoom === 'function') ? map.getMinZoom() : map.getZoom();
 
-  // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
+  function applyHomeView(options){
+    var opts = Object.assign({ animate: false }, options || {});
+    try {
+      map.setView(HOME_CENTER, HOME_ZOOM, opts);
+      if (typeof map.panInsideBounds === 'function') {
+        map.panInsideBounds(BOUNDS, { animate: false });
+      }
+    } catch(_) {}
+  }
+
+  applyHomeView();
+
+  // Expose globally for kiosk scripts
+  try {
+    window.map = map;
+    window.RS_HOME_VIEW = { center: [HOME_CENTER.lat, HOME_CENTER.lng], zoom: HOME_ZOOM };
+  } catch(_) {}
+
+  window.RS = window.RS || {};
+  window.RS.applyHomeView = applyHomeView;
 
   var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
   var isLocalOnlineMode = tileMode === 'local_online';
@@ -7172,6 +7481,76 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   if (e.tile) e.tile.style.display = 'none';
 });
   L.control.zoom({ position: 'topright' }).addTo(map);
+
+  var floatPanel = document.getElementById('rs-float');
+  var drawerToggleButtons = [];
+
+  function updateDrawerToggleButtons(hidden) {
+    drawerToggleButtons = drawerToggleButtons.filter(function(btn){ return !!btn; });
+    drawerToggleButtons.forEach(function(btn){
+      var show = btn.dataset.labelHidden || 'Show Theatres';
+      var hide = btn.dataset.labelVisible || 'Hide Theatres';
+      btn.textContent = hidden ? show : hide;
+      btn.setAttribute('title', hidden ? 'Show theatre list' : 'Hide theatre list');
+      btn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+    });
+  }
+
+  function setDrawerHidden(hidden) {
+    if (!floatPanel) return;
+    floatPanel.classList.toggle('rs-float--hidden', hidden);
+    floatPanel.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+    updateDrawerToggleButtons(hidden);
+  }
+
+  function toggleDrawer(forceHidden) {
+    if (!floatPanel) return;
+    var hidden = (typeof forceHidden === 'boolean') ? forceHidden : !floatPanel.classList.contains('rs-float--hidden');
+    setDrawerHidden(hidden);
+  }
+
+  function registerDrawerToggle(btn) {
+    if (!btn) return;
+    if (drawerToggleButtons.indexOf(btn) === -1) drawerToggleButtons.push(btn);
+    if (!btn.dataset.labelVisible) btn.dataset.labelVisible = 'Hide Theatres';
+    if (!btn.dataset.labelHidden) btn.dataset.labelHidden = 'Show Theatres';
+    btn.setAttribute('aria-controls', 'rs-float');
+    updateDrawerToggleButtons(floatPanel ? floatPanel.classList.contains('rs-float--hidden') : false);
+  }
+
+  if (floatPanel) {
+    floatPanel.classList.add('rs-float--drawer');
+    floatPanel.hidden = false;
+    setDrawerHidden(false);
+    try { window.RS_toggleTheatresDrawer = toggleDrawer; } catch(_) {}
+  }
+
+  if (floatPanel) {
+    var DrawerToggleControl = L.Control.extend({
+      options: { position: 'topright' },
+      onAdd: function(){
+        var container = L.DomUtil.create('div', 'leaflet-control rs-drawer-toggle-control');
+        var btn = L.DomUtil.create('button', 'rs-drawer-toggle-btn', container);
+        btn.type = 'button';
+        btn.id = 'rs-drawer-toggle';
+        btn.dataset.labelVisible = 'Hide Theatres';
+        btn.dataset.labelHidden = 'Show Theatres';
+        btn.textContent = btn.dataset.labelVisible;
+        btn.title = 'Hide theatre list';
+        btn.setAttribute('aria-controls', 'rs-float');
+        btn.setAttribute('aria-expanded', 'true');
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+        btn.addEventListener('click', function(ev){
+          ev.preventDefault();
+          toggleDrawer();
+        });
+        registerDrawerToggle(btn);
+        return container;
+      }
+    });
+    map.addControl(new DrawerToggleControl());
+  }
 
   // Offline tiles
   var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:200}).addTo(map);
@@ -7317,7 +7696,7 @@ function rsRestoreLayers(state){
       return null;
     }
     function setPressed(btn, on){ if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
-    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return False; } }
+    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return false; } }
 
     function syncButtons(){
       var g = gm(); if (!g) return;
@@ -7482,14 +7861,22 @@ function rsRestoreLayers(state){
     }
   }).addTo(map);
 
-  // Reset button -> fit to bounds
-  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ map.fitBounds(BOUNDS, {padding:[20,20]});
+    // Reset button -> home view fallback
+    rsSafeOn(document.getElementById('rs-reset'), 'click', function(){
+      try { map.closePopup(); } catch(_) {}
+      applyHomeView({ animate: true });
+    });
 
   // Expose globally for kiosk scripts
-  try { window.map = map; } catch(_) {}
+  try {
+    window.map = map;
+    if (!window.RS_HOME_VIEW) {
+      window.RS_HOME_VIEW = { center: [HOME_CENTER.lat, HOME_CENTER.lng], zoom: HOME_ZOOM };
+    }
+  } catch(_) {}
 
-  // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
+  // Ensure the map starts from the shared home position
+  applyHomeView();
 
 // Make unloaded / missing tiles appear black
 document.getElementById('map').style.backgroundColor = '#000';
@@ -7497,13 +7884,19 @@ document.getElementById('map').style.backgroundColor = '#000';
 // Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
 if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
   if (e.tile) e.tile.style.display = 'none';
-}); });
+});
 
   // Floating list toggle/collapse/close
-  var floatEl = document.getElementById('rs-float');
-  document.getElementById('rs-toggle-list'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = !floatEl.hidden; });
-  document.getElementById('rs-close'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ floatEl.hidden = true; });
-  document.getElementById('rs-collapse'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ var list = document.getElementById('rs-list'); list.style.display = (list.style.display==='none' ? '' : 'none'); });
+    var floatEl = floatPanel || document.getElementById('rs-float');
+    rsSafeOn(document.getElementById('rs-close'), 'click', function(e){
+      if (e && e.preventDefault) e.preventDefault();
+      toggleDrawer(true);
+    });
+    rsSafeOn(document.getElementById('rs-collapse'), 'click', function(){
+      var list = document.getElementById('rs-list');
+      if (!list) return;
+      list.style.display = (list.style.display === 'none' ? '' : 'none');
+    });
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
@@ -7586,13 +7979,15 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
       applyFilters();
     });
   });
-  document.querySelector('.rs-footer-all'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){
-    document.querySelectorAll('.rs-footer-sq').forEach(function(btn){
-      btn.setAttribute('aria-pressed','true'); btn.classList.remove('is-off');
-      var code = Number(btn.getAttribute('data-status-code')); activeStatuses[code] = true;
+    rsSafeOn(document.querySelector('.rs-footer-all'), 'click', function(){
+      document.querySelectorAll('.rs-footer-sq').forEach(function(btn){
+        btn.setAttribute('aria-pressed','true');
+        btn.classList.remove('is-off');
+        var code = Number(btn.getAttribute('data-status-code'));
+        activeStatuses[code] = true;
+      });
+      applyFilters();
     });
-    applyFilters();
-  });
 
   // Drag support for header
   (function enableDrag(){
@@ -8196,6 +8591,7 @@ function zoomHere(lat, lon) {
   // Find float container
   var floatEl = document.querySelector('.rs-float') || document.getElementById('rs-float');
   if (!floatEl) return;
+  if (floatEl.classList && floatEl.classList.contains('rs-float--drawer')) return;
 
   // Use title bar as handle when available
   var handle = floatEl.querySelector('.rs-float__title') || floatEl;
@@ -9183,9 +9579,14 @@ try {
     if (!attract) return;
     attract.style.display = 'flex';
     try {
-      if (window.map && window.map.fitBounds) {
-        const WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
-        window.map.fitBounds([[SOUTH, WEST],[NORTH, EAST]], {padding:[20,20]});
+      if (window.RS && typeof window.RS.applyHomeView === 'function') {
+        window.RS.applyHomeView({ animate: false });
+      } else if (window.map && typeof window.map.setView === 'function') {
+        var home = window.RS_HOME_VIEW;
+        if (home && home.center) {
+          var homeZoom = (typeof home.zoom === 'number') ? home.zoom : (typeof window.map.getMinZoom === 'function' ? window.map.getMinZoom() : window.map.getZoom());
+          window.map.setView(home.center, homeZoom, { animate: false });
+        }
       }
     } catch(_){}
   }
@@ -9272,10 +9673,15 @@ try {
       const histSlider = document.getElementById("rs-hist-op");
       if (histSlider){ histSlider.value = "100"; histSlider.dispatchEvent(new Event("input")); }
 
-      // Return to city view
-      if (window.map && map.fitBounds) {
-        const WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
-        map.fitBounds([[SOUTH, WEST],[NORTH, EAST]], {padding:[20,20]});
+      // Return to home view
+      if (window.RS && typeof window.RS.applyHomeView === 'function') {
+        window.RS.applyHomeView({ animate: false });
+      } else if (window.map && typeof map.setView === 'function') {
+        const home = window.RS_HOME_VIEW;
+        if (home && home.center) {
+          const homeZoom = (typeof home.zoom === 'number') ? home.zoom : (typeof map.getMinZoom === 'function' ? map.getMinZoom() : map.getZoom());
+          map.setView(home.center, homeZoom, { animate: false });
+        }
       }
     } catch(_) {}
   });
@@ -9689,7 +10095,7 @@ try {
   else window.addEventListener('load', initAll, { once: true });
 
   var m = gm();
-  if (m){
+  if (m && typeof m.on === 'function'){
     m.on('layeradd', enforceOrder);
     m.on('layerremove', enforceOrder);
   }
@@ -9939,9 +10345,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const section = header ? header.closest('.rs-footer-inner') : null;
   if (header && section) {
     section.classList.add('rs-layer-section');
-    header.addEventListener('click', function() {
-      section.classList.toggle('collapsed');
-    });
+    if (!section.closest('#rs-maplayers-modal')) {
+      header.addEventListener('click', function() {
+        section.classList.toggle('collapsed');
+      });
+    }
   }
 });
 </script>
@@ -11370,6 +11778,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const floatPanel = document.getElementById('rs-float');
   const footer = document.getElementById('rs-footer-bar');
   if (!floatPanel || !footer) return;
+  if (footer.dataset && footer.dataset.rsMaplayersHost === 'modal') return;
   if (footer.parentElement !== floatPanel) {
     floatPanel.appendChild(footer); // move to panel root, last child
   }
@@ -11818,7 +12227,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Public start function
   window.RS_TIPS_START = () => showStep(0);
 
-  // Hook a visible "Tips" button in the float header if no HELP button is wired
+  // Hook a visible Tutorial button (legacy "Tips") in the float header if no HELP button is wired
   function ensureTipsButton(){
     const floatBtn = document.querySelector('#rs-float .rs-tips-btn-float');
     if (floatBtn) {
@@ -11832,12 +12241,21 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       return;
     }
+    const toolbarBtn = document.getElementById('rs-tutorial-btn') || document.querySelector('.rs-toolbar .rs-tips-btn-toolbar');
+    if (toolbarBtn) {
+      if (!toolbarBtn.dataset.rsTipsWired) {
+        toolbarBtn.addEventListener('click', () => window.RS_TIPS_START());
+        toolbarBtn.dataset.rsTipsWired = 'true';
+      }
+      return;
+    }
     if (document.querySelector('#rs-float .rs-tips-btn')) return;
     const hdr = document.querySelector('#rs-float .rs-float__header') || document.querySelector('#rs-float');
     if (!hdr) return;
     const btn = document.createElement('button');
     btn.className = 'rs-tips-btn';
-    btn.textContent = 'Tips';
+    btn.textContent = 'Tutorial';
+    btn.setAttribute('aria-label', 'Open tutorial');
     btn.addEventListener('click', () => window.RS_TIPS_START());
     hdr.appendChild(btn);
   }
@@ -11854,11 +12272,18 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
 </script>
 <script>
 (function(){
-  // Enhance existing RS_TIPS_START but keep Tips button scoped to the float
+  // Ensure any toolbar tutorial button stays wired to RS_TIPS_START
   function ensureToolbarTips(){
     document.querySelectorAll('.rs-tips-btn-toolbar, .rs-tips-btn-global').forEach(btn => {
-      if (btn && btn.parentElement) {
-        btn.parentElement.removeChild(btn);
+      if (!btn.textContent.trim()) {
+        btn.textContent = 'Tutorial';
+      }
+      if (!btn.getAttribute('aria-label')) {
+        btn.setAttribute('aria-label', 'Open tutorial');
+      }
+      if (!btn.dataset.rsTipsWired) {
+        btn.addEventListener('click', () => window.RS_TIPS_START && window.RS_TIPS_START());
+        btn.dataset.rsTipsWired = 'true';
       }
     });
   }
@@ -12091,7 +12516,7 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     else if (a==='back') back();
     else if (a==='skip') end();
   });
-  ov.querySelector('#rsmini-dim'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', end);
+  rsSafeOn(ov.querySelector('#rsmini-dim'), 'click', end);
   addEventListener('resize', ()=>{ if (!on) return; const el = document.querySelector(steps[i].sel); if (el) place(el); });
 
   // Public API
@@ -12541,6 +12966,7 @@ document.addEventListener("DOMContentLoaded", function() {
   function init(){
     var float = document.getElementById('rs-float') || document.querySelector('.rs-float');
     if(!float) return;
+    if (float.classList && float.classList.contains('rs-float--drawer')) return;
     var header = float.querySelector('.rs-float__head, .rs-float__header, .rs-float-header');
     if(!header) return;
     if(header.querySelector('.rs-collapse-btn')) return; // already present
@@ -12662,6 +13088,13 @@ document.addEventListener("DOMContentLoaded", function() {
         if (typeof window.fitToGeoJSON === 'function'){ window.fitToGeoJSON(); return; }
         if (typeof window.fitToMarkers === 'function'){ window.fitToMarkers(); return; }
         if (RS.fitMarkerLayerBounds()) return;
+        if (typeof RS.applyHomeView === 'function'){ RS.applyHomeView({ animate: false }); return; }
+        var hv = window.RS_HOME_VIEW;
+        if (hv && hv.center && window.map && typeof window.map.setView === 'function'){
+          var z = (typeof hv.zoom === 'number') ? hv.zoom : (typeof window.map.getMinZoom === 'function' ? window.map.getMinZoom() : window.map.getZoom());
+          window.map.setView(hv.center, z, { animate: false });
+          return;
+        }
         console.warn('RS.recenter: no fitting function/layer found.');
       }catch(e){ console.warn('RS.recenter error', e); }
     };
@@ -12759,17 +13192,168 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     })();
 
+    (function bindMapLayersModal(){
+      const btn = RS.qs('#rs-maplayers-btn');
+      const modal = RS.qs('#rs-maplayers-modal');
+      if (!btn || !modal || btn.__rsBound) return;
+      btn.__rsBound = true;
+
+      const panel = modal.querySelector('.panel');
+      const closers = modal.querySelectorAll('[data-rs-maplayers-close]');
+      let lastFocused = null;
+
+      const getFocusables = () => {
+        return Array.prototype.slice.call(modal.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )).filter(el => !el.hasAttribute('disabled') && el.getAttribute('aria-hidden') !== 'true');
+      };
+
+      const focusPanel = () => {
+        const target = panel || modal.querySelector('.rs-maplayers-header');
+        if (target && typeof target.focus === 'function') {
+          target.focus();
+        }
+      };
+
+      const setOpen = (open) => {
+        const isOpen = !!open;
+        modal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+        btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        modal.classList.toggle('rs-maplayers-modal--open', isOpen);
+        document.body.classList.toggle('rs-maplayers-open', isOpen);
+        if (isOpen) {
+          lastFocused = document.activeElement;
+          window.requestAnimationFrame(focusPanel);
+        } else if (lastFocused && typeof lastFocused.focus === 'function') {
+          window.requestAnimationFrame(() => {
+            try { lastFocused.focus(); } catch(_) {}
+          });
+        }
+      };
+
+      const openModal = () => setOpen(true);
+      const closeModal = () => setOpen(false);
+
+      RS.on(btn, 'click', function(ev){
+        ev.preventDefault();
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        if (expanded) {
+          closeModal();
+        } else {
+          openModal();
+        }
+      });
+
+      closers.forEach(el => {
+        RS.on(el, 'click', function(ev){
+          ev.preventDefault();
+          closeModal();
+        });
+      });
+
+      RS.on(modal, 'click', function(ev){
+        if (modal.getAttribute('aria-hidden') === 'true') return;
+        const target = ev.target;
+        if (target && target.dataset && target.dataset.rsMaplayersClose) {
+          ev.preventDefault();
+          closeModal();
+        }
+      });
+
+      RS.on(modal, 'keydown', function(ev){
+        if (modal.getAttribute('aria-hidden') === 'true') return;
+        if (ev.key === 'Tab' || ev.key === 'Tabulation') {
+          const focusables = getFocusables();
+          if (!focusables.length) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          const active = document.activeElement;
+          if (ev.shiftKey) {
+            if (active === first || !modal.contains(active)) {
+              ev.preventDefault();
+              last.focus();
+            }
+          } else {
+            if (active === last) {
+              ev.preventDefault();
+              first.focus();
+            }
+          }
+        } else if (ev.key === 'Escape' || ev.key === 'Esc') {
+          ev.preventDefault();
+          closeModal();
+        }
+      });
+
+      window.RS_closeMapLayersModal = closeModal;
+    })();
+
+    // ---------- fullscreen toggle ----------
+    (function bindFullscreen(){
+      const btn = RS.qs('#rs-fullscreen-btn');
+      if (!btn || btn.__rsBound) return;
+      btn.__rsBound = true;
+
+      const body = document.body;
+
+      const applyState = (active) => {
+        const on = !!active;
+        body.classList.toggle('rs-fullscreen-active', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        const label = on ? 'Exit fullscreen' : 'Enter fullscreen';
+        const text = on ? 'Exit Fullscreen' : 'Fullscreen';
+        btn.textContent = text;
+        btn.setAttribute('aria-label', label);
+        btn.title = label.charAt(0).toUpperCase() + label.slice(1);
+        if (on && typeof window.RS_closeMapLayersModal === 'function') {
+          try { window.RS_closeMapLayersModal(); } catch (_) {}
+        }
+      };
+
+      RS.on(btn, 'click', function(ev){
+        ev.preventDefault();
+        const active = body.classList.contains('rs-fullscreen-active');
+        applyState(!active);
+      });
+
+      // Ensure initial label matches default state
+      applyState(body.classList.contains('rs-fullscreen-active'));
+    })();
+
     // ---------- MAP LAYERS header toggle ----------
     (function bindLayersHeader(){
       const header = RS.qs('.rs-maplayers-header');
-      const sliders = RS.qs('.rs-layer-sliders') || RS.qs('#rs-layer-sliders') || RS.qs('.rs-historic-slider')?.parentElement;
-      if (!header || header.__rsBound || !sliders) return;
+      if (!header || header.__rsBound) return;
+      const scope = header.closest('.rs-maplayers-modal') || header.closest('#rs-float') || document;
+      const content = scope.querySelector('.rs-layer-content') || scope.querySelector('.rs-layer-sliders');
+      if (!content) return;
       header.__rsBound = true;
-      // start expanded; toggle on click
-      RS.on(header, 'click', function(){
-        const hidden = sliders.style.display === 'none';
-        sliders.style.display = hidden ? '' : 'none';
-        header.classList.toggle('collapsed', !hidden);
+
+      if (!content.id) {
+        content.id = 'rs-layer-content-' + Math.random().toString(36).slice(2, 8);
+      }
+      header.setAttribute('aria-controls', content.id);
+
+      const setExpanded = (expanded) => {
+        const open = expanded !== false;
+        content.style.display = open ? '' : 'none';
+        header.classList.toggle('collapsed', !open);
+        header.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+
+      setExpanded(true);
+
+      const toggle = () => {
+        const isOpen = header.getAttribute('aria-expanded') !== 'false';
+        setExpanded(!isOpen);
+      };
+
+      RS.on(header, 'click', toggle);
+      RS.on(header, 'keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.code === 'Space') {
+          ev.preventDefault();
+          toggle();
+        }
       });
     })();
 
