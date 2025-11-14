@@ -12807,26 +12807,8 @@ document.addEventListener("DOMContentLoaded", function() {
       btn.__rsBound = true;
 
       const body = document.body;
-      const doc = document;
-      const root = doc.documentElement;
 
-      const requestNative = () => {
-        const fn = root.requestFullscreen || root.webkitRequestFullscreen || root.mozRequestFullScreen || root.msRequestFullscreen;
-        if (!fn) return null;
-        try { return fn.call(root); }
-        catch(_) { return null; }
-      };
-
-      const exitNative = () => {
-        const fn = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
-        if (!fn) return null;
-        try { return fn.call(doc); }
-        catch(_) { return null; }
-      };
-
-      const fullscreenElement = () => doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement || null;
-
-      const setState = (active) => {
+      const applyState = (active) => {
         const on = !!active;
         body.classList.toggle('rs-fullscreen-active', on);
         btn.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -12837,38 +12819,14 @@ document.addEventListener("DOMContentLoaded", function() {
         btn.title = label.charAt(0).toUpperCase() + label.slice(1);
       };
 
-      const enter = () => {
-        setState(true);
-        const res = requestNative();
-        if (res && typeof res.catch === 'function') {
-          res.catch(()=>{});
-        }
-      };
-
-      const exit = () => {
-        setState(false);
-        const res = exitNative();
-        if (res && typeof res.catch === 'function') {
-          res.catch(()=>{});
-        }
-      };
-
       RS.on(btn, 'click', function(ev){
         ev.preventDefault();
         const active = body.classList.contains('rs-fullscreen-active');
-        if (active) exit();
-        else enter();
-      });
-
-      ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange'].forEach(function(evt){
-        RS.on(document, evt, function(){
-          const active = !!fullscreenElement();
-          setState(active);
-        });
+        applyState(!active);
       });
 
       // Ensure initial label matches default state
-      setState(body.classList.contains('rs-fullscreen-active'));
+      applyState(body.classList.contains('rs-fullscreen-active'));
     })();
 
     // ---------- MAP LAYERS header toggle ----------
