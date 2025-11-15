@@ -1788,7 +1788,7 @@ body.rs-fullscreen-mode .rs-logo-corner .rs-logo {
   position:fixed;
   top:120px;
   right:0;
-  z-index:9000;
+  z-index:4000;
   display:flex;
   flex-direction:column;
   align-items:flex-end;
@@ -7861,12 +7861,13 @@ function rsRestoreLayers(state){
     }
   }).addTo(map);
 
-  // Ensure default toolbar buttons resolve and Info button returns to the home view
+  // Ensure default toolbar buttons resolve and Info button returns to the shared home view
   if (typeof window.rsFindHelpButton === 'function') {
     window.rsFindHelpButton();
   }
-  var infoButton = typeof window.rsFindInfoButton === 'function' ? window.rsFindInfoButton() : null;
-  if (infoButton) {
+  var infoButton = (typeof window.rsFindInfoButton === 'function') ? window.rsFindInfoButton() : null;
+  if (infoButton && !infoButton.__rsHomeBound) {
+    infoButton.__rsHomeBound = true;
     infoButton.addEventListener('click', function(){
       try {
         if (typeof window.rsGoHome === 'function') {
@@ -7880,11 +7881,6 @@ function rsRestoreLayers(state){
 
   // Expose globally for kiosk scripts
   try { window.map = map; } catch(_) {}
-
-  // Adjust center lower and left over dense cluster
-  if (typeof window.rsGoHome === 'function') {
-    window.rsGoHome({ animate: false });
-  }
 
 // Make unloaded / missing tiles appear black
 document.getElementById('map').style.backgroundColor = '#000';
