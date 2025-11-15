@@ -7584,10 +7584,8 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     maxBoundsViscosity: 1.0,
     worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
   });
-  var HOME_CENTER = BOUNDS.getSouthWest();
-  var HOME_ZOOM = map.getBoundsZoom(BOUNDS, true);
-  if (!isFinite(HOME_ZOOM)) { HOME_ZOOM = 13; }
-  HOME_ZOOM = Math.max(map.getMinZoom(), Math.min(HOME_ZOOM, map.getMaxZoom()));
+  var HOME_CENTER = L.latLng(41.463182, -81.589138);
+  var HOME_ZOOM = Math.max(map.getMinZoom(), Math.min(12, map.getMaxZoom()));
 
   function goHome(options){
     var animate = options && options.animate === true;
@@ -7945,22 +7943,12 @@ function rsRestoreLayers(state){
     }
   }).addTo(map);
 
-  // Ensure default toolbar buttons resolve and Info button returns to the shared home view
+  // Ensure default toolbar buttons resolve without forcing a map recenter
   if (typeof window.rsFindHelpButton === 'function') {
     window.rsFindHelpButton();
   }
-  var infoButton = (typeof window.rsFindInfoButton === 'function') ? window.rsFindInfoButton() : null;
-  if (infoButton && !infoButton.__rsHomeBound) {
-    infoButton.__rsHomeBound = true;
-    infoButton.addEventListener('click', function(){
-      try {
-        if (typeof window.rsGoHome === 'function') {
-          window.rsGoHome({ animate: true });
-        } else if (map && typeof map.fitBounds === 'function') {
-          map.fitBounds(BOUNDS, { padding:[20,20] });
-        }
-      } catch (_) {}
-    });
+  if (typeof window.rsFindInfoButton === 'function') {
+    window.rsFindInfoButton();
   }
 
   // Expose globally for kiosk scripts
