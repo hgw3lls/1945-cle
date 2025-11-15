@@ -585,6 +585,7 @@ body.rs-fullscreen-mode #map {
   backface-visibility:hidden;
   display:block;
   transform:rotateY(0deg);
+  animation:rs-logo-face-front 120s ease-in-out infinite;
 }
 
 
@@ -592,6 +593,7 @@ body.rs-fullscreen-mode #map {
 .rs-logo-face--back {
 
   transform:rotateY(180deg);
+  animation:rs-logo-face-back 120s ease-in-out infinite;
 }
 
 
@@ -623,12 +625,63 @@ body.rs-fullscreen-mode #map {
 
 
 
+@keyframes rs-logo-face-front {
+
+  0%,
+  45% {
+
+    opacity:1;
+  }
+
+  50%,
+  95% {
+
+    opacity:0;
+  }
+
+  100% {
+
+    opacity:1;
+  }
+}
+
+
+
+@keyframes rs-logo-face-back {
+
+  0%,
+  45% {
+
+    opacity:0;
+  }
+
+  50%,
+  95% {
+
+    opacity:1;
+  }
+
+  100% {
+
+    opacity:0;
+  }
+}
+
+
+
 @media (prefers-reduced-motion: reduce) {
 
   .rs-logo-corner .rs-logo {
 
     animation:none;
     transform:none;
+  }
+
+
+
+  .rs-logo-face {
+
+    animation:none;
   }
 }
 
