@@ -7957,12 +7957,18 @@ function rsRestoreLayers(state){
 
   // Cluster group to keep overlapping theatres accessible
   var markerCluster = (typeof L.markerClusterGroup === 'function') ? L.markerClusterGroup({
-    spiderfyOnEveryZoom: false,
+    spiderfyOnEveryZoom: true,
     spiderfyOnMaxZoom: true,
+    zoomToBoundsOnClick: false,
     showCoverageOnHover: false,
     removeOutsideVisibleBounds: true,
-    disableClusteringAtZoom: 17,
-    maxClusterRadius: 52
+    disableClusteringAtZoom: 20,
+    spiderfyDistanceMultiplier: 1.2,
+    maxClusterRadius: function(zoom){
+      if (zoom >= 16) return 28;      // only cluster when markers truly overlap at close zooms
+      if (zoom >= 14) return 20;
+      return 14;
+    }
   }) : null;
   if (markerCluster) {
     markerCluster.addTo(map);
@@ -7999,6 +8005,15 @@ function rsRestoreLayers(state){
 
   if (markerCluster) {
     markerCluster.addLayer(markerLayer);
+    markerCluster.on('clusterclick', function(ev){
+      var cluster = ev && ev.layer;
+      if (cluster && typeof cluster.spiderfy === 'function') {
+        cluster.spiderfy();
+      }
+    });
+    markerCluster.on('spiderfy', function(){
+      try { map.closePopup(); } catch(_) {}
+    });
   } else {
     markerLayer.addTo(map);
   }
@@ -8258,6 +8273,9 @@ function rsRestoreLayers(state){
         if (on){ l.addTo(map); } else { map.removeLayer(l); }
       }
     });
+    if (markerCluster && typeof markerCluster.refreshClusters === 'function') {
+      markerCluster.refreshClusters();
+    }
   }
   function syncList(){
     if (typeof applyListFilter === 'function') {
