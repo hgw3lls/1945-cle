@@ -7153,6 +7153,27 @@ html.booting #rs-float {
 }
 
 </style>
+<style>
+/* === Map layer slider label alignment === */
+#rs-float .rs-historic-slider,
+#rs-float .rs-layer-slider {
+  grid-template-columns: minmax(0, 120px) 1fr !important;
+  align-items: center !important;
+}
+
+#rs-float .rs-hist-label {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  line-height: 1 !important;
+}
+
+#rs-float .rs-hist-label .rs-label {
+  display: block !important;
+}
+</style>
 </head>
 <body>
 <!-- Boot overlay -->
@@ -7218,8 +7239,8 @@ html.booting #rs-float {
 <div class="rs-footer-inner">
 <div class="rs-maplayers-header">MAP LAYERS</div>
 <!-- Historic opacity segmented bar -->
-<div class="rs-historic-slider" style="display:flex; align-items:center; gap:14px; margin-right:auto;; padding-top: 16px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
+<div class="rs-historic-slider">
+<div class="rs-hist-label">
 <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
 <span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
 </div>
@@ -7232,10 +7253,10 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-sliders" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+<div class="rs-layer-sliders">
 <!-- Street segmented bar -->
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
 <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
 </div>
 <div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
@@ -7247,8 +7268,8 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
 <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
 </div>
 <div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
