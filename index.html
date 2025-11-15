@@ -8557,8 +8557,9 @@ function rsRestoreLayers(state){
   }
 
   function syncList(){
-    if (typeof applyListFilter === 'function') {
-      try { applyListFilter(); } catch(_) {}
+    var listFilterFn = (typeof window !== 'undefined' && typeof window.applyListFilter === 'function') ? window.applyListFilter : null;
+    if (listFilterFn) {
+      try { listFilterFn(); } catch(_) {}
     }
   }
 
@@ -8733,6 +8734,10 @@ function zoomHere(lat, lon) {
     }catch(e){ /* swallow */ }
   }
 
+  if (typeof window !== 'undefined') {
+    window.applyListFilter = applyListFilter;
+  }
+
   function hookStatusDropdown(){
     var wrap = document.getElementById('rs-status-filter-wrap');
     var select = document.getElementById('rs-status-select');
@@ -8821,9 +8826,12 @@ function zoomHere(lat, lon) {
       return 'default';
     }
   };
-  if (typeof applyListFilter === 'function'){
-    try{ applyListFilter(); }catch(_){}
-  }
+  (function(){
+    var listFilterFn = (typeof window !== 'undefined' && typeof window.applyListFilter === 'function') ? window.applyListFilter : null;
+    if (listFilterFn){
+      try{ listFilterFn(); }catch(_){}
+    }
+  })();
 })();
 /* === END: Robust list-filter status detection === */
 
@@ -9001,7 +9009,7 @@ function zoomHere(lat, lon) {
     return li.style.display !== 'none' || !li.hasAttribute('data-rs-status-filtered');
   }
   // Wrap the existing applyListFilter (if present) to mark items we hid by status
-  var prevApply = (typeof applyListFilter === 'function') ? applyListFilter : null;
+  var prevApply = (typeof window !== 'undefined' && typeof window.applyListFilter === 'function') ? window.applyListFilter : null;
   window.applyListFilter = function(){
     if (prevApply) prevApply();
     // Mark items hidden by status so search composes on top
