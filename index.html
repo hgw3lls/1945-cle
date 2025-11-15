@@ -1788,7 +1788,7 @@ body.rs-fullscreen-mode .rs-logo-corner .rs-logo {
   position:fixed;
   top:120px;
   right:0;
-  z-index:10010;
+  z-index:4000;
   display:flex;
   flex-direction:column;
   align-items:flex-end;
@@ -6860,36 +6860,50 @@ html.booting #rs-float {
 #rs-list .rs-li p.rs-addr { margin: 0 !important; padding: 0 !important; }
 </style>
 <style>
-/* === Status chip in top-right of the card title band === */
+/* === Theatre title band uses status color instead of chip === */
 #rs-list .rs-li { position: relative; }
-#rs-list .rs-li .rs-titleband { position: relative; padding-right: 110px; }
-
-#rs-list .rs-li .rs-statuschip,
-#rs-list .rs-li [class*="rs-statuschip"] {
-  position: absolute !important;
-  top: 8px;
-  right: 10px;
-  z-index: 3;
-  display: inline-flex !important;
+#rs-list .rs-li .rs-titleband {
+  position: relative;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 4px 10px !important;
-  font-size: 12px !important;
-  font-weight: 700;
-  line-height: 1.2;
-  border-radius: 4px;
-  white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #1a1a1a;
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.25);
 }
 
-/* Slight color normalization (optional—keeps your tones) */
-.rs-statuschip-open { background:#47a775; color:#fff; }
-.rs-statuschip-closed { background:#d65252; color:#fff; }
-.rs-statuschip-repurposed { background:#f0c247; color:#222; }
-.rs-statuschip-demolished { background:#7f8790; color:#fff; }
+#rs-list .rs-li .rs-titleband h4 {
+  margin: 0;
+  flex: 1 1 auto;
+}
 
-/* Ensure the inline meta row (address) no longer reserves space for the chip */
-#rs-list .rs-li .rs-meta-line { gap: 10px; }
+#rs-list .rs-li[data-map-status="1"] .rs-titleband { background:#19a974; color:#fff; }
+#rs-list .rs-li[data-map-status="0"] .rs-titleband { background:#d65252; color:#fff; }
+#rs-list .rs-li[data-map-status="2"] .rs-titleband { background:#f0c247; color:#221b00; }
+#rs-list .rs-li[data-map-status="3"] .rs-titleband { background:#7f8790; color:#fff; }
+
+#rs-list .rs-li[data-map-status="2"] .rs-titleband h4 { color:#221b00; }
+#rs-list .rs-li[data-map-status="1"] .rs-titleband h4,
+#rs-list .rs-li[data-map-status="0"] .rs-titleband h4,
+#rs-list .rs-li[data-map-status="3"] .rs-titleband h4 { color:#fff; }
+
+#rs-list .rs-li .rs-titleband .rs-status-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Ensure inline meta row follows new band spacing */
+#rs-list .rs-li .rs-meta-line { gap: 10px; margin-top: 8px !important; }
 </style>
 <style>
 /* === Guided Tips / Coach Marks ========================================== */
@@ -7295,10 +7309,61 @@ html.booting #rs-float {
 #rs-float.rs-collapsed .rs-float__footer,
 #rs-float.rs-collapsed .rs-footer,
 #rs-float.rs-collapsed footer,
-#rs-float.rs-collapsed #rs-footer { 
-  display: none !important; 
+#rs-float.rs-collapsed #rs-footer {
+  display: none !important;
 }
 
+</style>
+<style>
+/* === Status filter chips under search === */
+#rs-status-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 14px 0 14px;
+  margin-bottom: 6px;
+}
+
+#rs-status-filter-bar .rs-footer-sq {
+  width: auto;
+  min-width: 0;
+  height: auto;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(0,0,0,0.35);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+  cursor: pointer;
+}
+
+#rs-status-filter-bar .rs-footer-sq:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+#rs-status-filter-bar .rs-footer-sq.is-off,
+#rs-status-filter-bar .rs-footer-sq[aria-pressed="false"] {
+  filter: grayscale(0.4) brightness(0.8);
+  opacity: 0.65;
+  box-shadow: none;
+}
+
+#rs-status-filter-bar .rs-footer-sq--2 { color: #221b00; }
+#rs-status-filter-bar .rs-footer-sq--0,
+#rs-status-filter-bar .rs-footer-sq--1,
+#rs-status-filter-bar .rs-footer-sq--3 { color: #fff; }
+
+#rs-status-filter-bar:empty { display: none; padding-top: 0; }
+
+html.tv #rs-status-filter-bar { gap: 12px; padding: 10px 18px 0 18px; margin-bottom: 10px; }
+html.tv #rs-status-filter-bar .rs-footer-sq { font-size: 18px; padding: 10px 20px; }
 </style>
 <style>
 /* === Map layer slider label alignment === */
@@ -7377,8 +7442,14 @@ html.booting #rs-float {
 </div>
 </header>
 <div class="rs-search-wrap" role="search">
-<input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
-<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+  <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
+  <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+</div>
+<div aria-label="Filter theatres by status" class="rs-status-filter-bar" id="rs-status-filter-bar" role="group">
+  <button aria-pressed="true" class="rs-footer-sq rs-footer-sq--1 rs-status-filter" data-status-code="1" type="button">Open</button>
+  <button aria-pressed="true" class="rs-footer-sq rs-footer-sq--0 rs-status-filter" data-status-code="0" type="button">Closed</button>
+  <button aria-pressed="true" class="rs-footer-sq rs-footer-sq--2 rs-status-filter" data-status-code="2" type="button">Repurposed</button>
+  <button aria-pressed="true" class="rs-footer-sq rs-footer-sq--3 rs-status-filter" data-status-code="3" type="button">Demolished</button>
 </div>
 <div class="rs-float__list" id="rs-list" role="list"></div>
 <div class="rs-footer-bar" id="rs-footer-bar">
@@ -7861,22 +7932,34 @@ function rsRestoreLayers(state){
     }
   }).addTo(map);
 
-  // Reset button -> fit to bounds
-  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ map.fitBounds(BOUNDS, {padding:[20,20]});
+  // Ensure default toolbar buttons resolve and Info button returns to the shared home view
+  if (typeof window.rsFindHelpButton === 'function') {
+    window.rsFindHelpButton();
+  }
+  var infoButton = (typeof window.rsFindInfoButton === 'function') ? window.rsFindInfoButton() : null;
+  if (infoButton && !infoButton.__rsHomeBound) {
+    infoButton.__rsHomeBound = true;
+    infoButton.addEventListener('click', function(){
+      try {
+        if (typeof window.rsGoHome === 'function') {
+          window.rsGoHome({ animate: true });
+        } else if (map && typeof map.fitBounds === 'function') {
+          map.fitBounds(BOUNDS, { padding:[20,20] });
+        }
+      } catch (_) {}
+    });
+  }
 
   // Expose globally for kiosk scripts
   try { window.map = map; } catch(_) {}
 
-  // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
+  // Make unloaded / missing tiles appear black
+  document.getElementById('map').style.backgroundColor = '#000';
 
-// Make unloaded / missing tiles appear black
-document.getElementById('map').style.backgroundColor = '#000';
-
-// Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
-if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
-  if (e.tile) e.tile.style.display = 'none';
-}); });
+  // Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
+  if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
+    if (e.tile) e.tile.style.display = 'none';
+  });
 
   // Sidebar toggle/collapse/close
   var floatEl = document.getElementById('rs-float');
@@ -7967,20 +8050,33 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
-  var features = (window.THEATRES && window.THEATRES.features) || [];
+  function resolveTheatreCollection(){
+    if (typeof THEATRES !== 'undefined' && THEATRES && Array.isArray(THEATRES.features)) {
+      return THEATRES.features;
+    }
+    if (typeof window !== 'undefined' && window.THEATRES && Array.isArray(window.THEATRES.features)) {
+      return window.THEATRES.features;
+    }
+    return [];
+  }
+  var features = resolveTheatreCollection();
   function liHTML(p, idx){
-    var badge = '<span class="rs-chip-status" style="margin-left:6px;">'+statusLabel(Number(p.map_status))+'</span>';
+    var statusCode = Number(p.map_status);
+    var hasStatus = !isNaN(statusCode);
+    var statusText = hasStatus ? statusLabel(statusCode) : (p.Status || '');
     var movie = p.Movie ? ('<p class="rs-movie"><strong>Now Showing:</strong> '+String(p.Movie)+'</p>') : '';
-    return '<div class="rs-li" data-idx="'+idx+'">'
-      + '<h4>'+ (p.Theatre||'') +'</h4>' + badge
+    var statusAttr = hasStatus ? ' data-map-status="'+statusCode+'"' : '';
+    var srLabel = statusText ? '<span class="rs-status-sr">'+statusText+' status</span>' : '';
+    var titleAttr = statusText ? ' title="'+statusText+'" data-status-label="'+statusText+'"' : '';
+    return '<div class="rs-li" data-idx="'+idx+'"'+statusAttr+'>'
+      + '<div class="rs-titleband"'+titleAttr+'><h4>'+ (p.Theatre||'') +'</h4>'+srLabel+'</div>'
       + '<p class="rs-addr">'+ (p.Address||'') +'</p>'
       + movie
       + '</div>';
   }
 
   function getFeatures(){
-    var data = (window.THEATRES && window.THEATRES.features) || [];
-    return Array.isArray(data) ? data : [];
+    return resolveTheatreCollection();
   }
 
   function populateList(){
@@ -7988,6 +8084,9 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     var list = listRoot;
     if (!list) return features;
     features = getFeatures();
+    if (typeof window !== 'undefined' && !window.THEATRES && typeof THEATRES !== 'undefined') {
+      try { window.THEATRES = THEATRES; } catch(_) {}
+    }
     list.innerHTML = features.map(function(f,i){ return liHTML((f && f.properties) || {}, i); }).join('');
     Array.prototype.forEach.call(list.querySelectorAll('.rs-li'), function(node, idx){
       var feature = features[idx];
@@ -7995,6 +8094,11 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
       var p = feature.properties || {};
       var statusCode = Number(p.map_status);
       var statusText = isNaN(statusCode) ? (p.Status || '') : statusLabel(statusCode);
+      if (!isNaN(statusCode)) {
+        node.setAttribute('data-map-status', String(statusCode));
+      } else {
+        node.removeAttribute('data-map-status');
+      }
       var seatsNum = Number(p.Seats);
       var screensNum = Number(p.Screens);
       var seatsRounded = Math.round(seatsNum);
@@ -8016,6 +8120,7 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
       setData('architects', p.Architects);
       setData('status', p.Status || statusText);
       setData('statusLabel', statusText);
+      setData('mapStatus', isNaN(statusCode) ? '' : statusCode);
       setData('seats', seatsText);
       setData('screens', screensText);
       setData('searchIndex', [
@@ -12847,6 +12952,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if (typeof window.fitToGeoJSON === 'function'){ window.fitToGeoJSON(); return; }
         if (typeof window.fitToMarkers === 'function'){ window.fitToMarkers(); return; }
         if (RS.fitMarkerLayerBounds()) return;
+        if (typeof window.rsGoHome === 'function') {
+          window.rsGoHome({ animate: true });
+          return;
+        }
         console.warn('RS.recenter: no fitting function/layer found.');
       }catch(e){ console.warn('RS.recenter error', e); }
     };
