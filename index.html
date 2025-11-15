@@ -7258,6 +7258,7 @@ html.booting #rs-float {
 <button class="rs-btn rs-toolbar__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
 <button aria-label="Tips" class="rs-btn rs-toolbar__btn rs-tips-btn-toolbar" type="button">Tips</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Reset to the home view" type="button">Reset Map</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 <button aria-pressed="false" aria-label="Enter fullscreen mode" class="rs-btn rs-toolbar__btn rs-toolbar__btn--fullscreen" id="rs-fullscreen-btn" title="Enter fullscreen mode" type="button">Fullscreen</button>
 </div>
@@ -7396,12 +7397,22 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     maxBoundsViscosity: 1.0,
     worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
   });
-  var HOME_PADDING = [20, 20];
-  function goHome(padding){
-    var pad = (Array.isArray(padding) && padding.length === 2) ? padding : HOME_PADDING;
-    try { map.fitBounds(BOUNDS, { padding: pad }); } catch(_) {}
+  var HOME_CENTER = BOUNDS.getSouthWest();
+  var HOME_ZOOM = map.getBoundsZoom(BOUNDS, true);
+  if (!isFinite(HOME_ZOOM)) { HOME_ZOOM = 13; }
+  HOME_ZOOM = Math.max(map.getMinZoom(), Math.min(HOME_ZOOM, map.getMaxZoom()));
+
+  function goHome(options){
+    var animate = options && options.animate === true;
+    try {
+      if (map && typeof map.closePopup === 'function') { map.closePopup(); }
+      map.setView(HOME_CENTER, HOME_ZOOM, { animate: animate });
+      if (typeof map.panInsideBounds === 'function') {
+        map.panInsideBounds(BOUNDS, { animate: animate });
+      }
+    } catch(_) {}
   }
-  goHome();
+  goHome({ animate: false });
 
   // Expose globally for kiosk scripts
   try {
@@ -7409,10 +7420,6 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     window.rsGoHome = goHome;
   } catch(_) {}
 
-  var infoBtn = (typeof window.rsFindInfoButton === 'function') ? window.rsFindInfoButton() : document.getElementById('rs-info-btn');
-  if (infoBtn) {
-    infoBtn.addEventListener('click', function(){ goHome(); });
-  }
 
   var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
   var isLocalOnlineMode = tileMode === 'local_online';
@@ -12812,6 +12819,12 @@ document.addEventListener("DOMContentLoaded", function() {
       btn.__rsBound = true;
       RS.on(btn, 'click', function(ev){
         ev.preventDefault();
+        if (typeof window.rsGoHome === 'function') {
+          try {
+            window.rsGoHome();
+            return;
+          } catch(_) {}
+        }
         RS.recenter();
       });
     })();
