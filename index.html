@@ -11614,7 +11614,10 @@ document.addEventListener('DOMContentLoaded', function() {
     render();
     root.setAttribute('aria-hidden','false');
     // focus for keyboard
-    btnNext.focus({preventScroll:true});
+    const focusTarget = btnNext || btnClose;
+    if (focusTarget && typeof focusTarget.focus === 'function') {
+      focusTarget.focus({preventScroll:true});
+    }
     document.addEventListener('keydown', onKey);
   }
   function closeGallery(){
