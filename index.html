@@ -7409,18 +7409,22 @@ html.booting #rs-float {
 <style>
 /* === Touch-friendly status filter buttons under search === */
 #rs-status-filter-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  width: 100%;
   padding: 0;
   margin: 0;
-  width: 100%;
 }
 
 .rs-status-filter-touchbar {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.rs-status-filter-grid {
+  flex: 1 1 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 
 .rs-status-filter-btn {
@@ -7432,7 +7436,8 @@ html.booting #rs-float {
   background: #f3efe4;
   color: #000;
   padding: 10px 8px;
-  min-height: 44px;
+  min-height: 64px;
+  aspect-ratio: 1 / 1;
   text-transform: uppercase;
   font-family: var(--font-ui, 'StandingRoomOnly NF', system-ui);
   font-weight: 900;
@@ -7446,6 +7451,19 @@ html.booting #rs-float {
   cursor: pointer;
   touch-action: manipulation;
   transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.18s ease;
+}
+
+.rs-status-filter-btn--showall {
+  aspect-ratio: auto;
+  min-height: 100%;
+  flex: 0 0 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  letter-spacing: 1px;
+  font-size: 11px;
+  padding: 14px 6px;
 }
 
 .rs-status-filter-btn:not(.is-active) {
@@ -7465,9 +7483,11 @@ html.booting #rs-float {
   outline-offset: 3px;
 }
 
+
 .rs-status-filter-btn[data-status="all"] {
   background: #f3efe4;
   color: #000;
+  border-style: dashed;
 }
 
 .rs-status-filter-btn[data-status="1"] {
@@ -7504,20 +7524,27 @@ html.booting #rs-float {
 }
 
 html.tv #rs-status-filter-wrap {
-  padding: 0;
   margin-bottom: 0;
 }
 
 html.tv .rs-status-filter-touchbar {
-  gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: clamp(10px, 2vw, 16px);
+}
+
+html.tv .rs-status-filter-grid {
+  gap: clamp(10px, 2vw, 18px);
 }
 
 html.tv .rs-status-filter-btn {
-  min-height: clamp(54px, 7vw, 78px);
-  font-size: clamp(13px, 1.6vw, 17px);
-  letter-spacing: 0.6px;
-  padding: 14px 12px;
+  min-height: clamp(70px, 8vw, 110px);
+  font-size: clamp(14px, 1.8vw, 18px);
+  letter-spacing: 0.8px;
+  padding: clamp(12px, 1.4vw, 18px);
+}
+
+html.tv .rs-status-filter-btn--showall {
+  flex-basis: clamp(80px, 8vw, 110px);
+  font-size: clamp(13px, 1.5vw, 16px);
 }
 </style>
 <style>
@@ -7598,11 +7625,13 @@ html.tv .rs-status-filter-btn {
         <div class="rs-filter-panel__section">
           <div class="rs-status-filter-select" id="rs-status-filter-wrap">
             <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
-              <button type="button" class="rs-status-filter-btn is-active" data-status="all" aria-pressed="true">All Statuses</button>
-              <button type="button" class="rs-status-filter-btn" data-status="1" aria-pressed="false">Open</button>
-              <button type="button" class="rs-status-filter-btn" data-status="0" aria-pressed="false">Closed</button>
-              <button type="button" class="rs-status-filter-btn" data-status="2" aria-pressed="false">Repurposed</button>
-              <button type="button" class="rs-status-filter-btn" data-status="3" aria-pressed="false">Demolished</button>
+              <div class="rs-status-filter-grid">
+                <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
+                <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
+                <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
+                <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
+              </div>
+              <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
             </div>
             <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
               <option value="all">All Statuses</option>
@@ -8442,82 +8471,81 @@ function rsRestoreLayers(state){
   });
 
   // Footer legend filters
-  var statusSelect = document.getElementById('rs-status-select');
   var statusWrap = document.getElementById('rs-status-filter-wrap');
-  var statusButtons = statusWrap ? Array.prototype.slice.call(statusWrap.querySelectorAll('.rs-status-filter-btn')) : [];
+  var statusSelect = document.getElementById('rs-status-select');
+  var statusButtons = statusWrap ? Array.prototype.slice.call(statusWrap.querySelectorAll('.rs-status-filter-grid .rs-status-filter-btn[data-status]')) : [];
+  var showAllButton = statusWrap ? statusWrap.querySelector('.rs-status-filter-btn[data-status="all"]') : null;
+  var STATUS_CODES = ['1', '0', '2', '3'];
+  var activeStatuses = new Set(STATUS_CODES);
 
   function normalizedStatus(code){
-    if (code === undefined || code === null || code === '' || code === 'all') { return 'all'; }
-    return String(code);
+    if (code === 0 || code === '0') return '0';
+    if (code === 2 || code === '2') return '2';
+    if (code === 3 || code === '3') return '3';
+    if (code === 1 || code === '1') return '1';
+    return null;
   }
 
-  function updateStatusButtons(code){
+  function isDefaultState(){
+    return STATUS_CODES.every(function(code){ return activeStatuses.has(code); });
+  }
+
+  function persistWrapState(){
     if (!statusWrap) return;
-    var active = normalizedStatus(code);
-    statusWrap.setAttribute('data-active-status', active);
+    var codes = Array.from(activeStatuses).sort();
+    statusWrap.setAttribute('data-active-codes', codes.join(','));
+    statusWrap.setAttribute('data-default-state', isDefaultState() ? '1' : '0');
+  }
+
+  function refreshStatusButtons(){
     statusButtons.forEach(function(btn){
-      var btnCode = normalizedStatus(btn.getAttribute('data-status'));
-      var isActive = (btnCode === active);
-      btn.classList.toggle('is-active', isActive);
-      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      var code = normalizedStatus(btn.getAttribute('data-status'));
+      var isOn = code ? activeStatuses.has(code) : false;
+      btn.classList.toggle('is-active', isOn);
+      btn.setAttribute('aria-pressed', isOn ? 'true' : 'false');
     });
-  }
-
-  function resolveActiveStatus(){
-    if (statusWrap && statusWrap.getAttribute('data-active-status')) {
-      return normalizedStatus(statusWrap.getAttribute('data-active-status'));
+    if (showAllButton){
+      var def = isDefaultState();
+      showAllButton.classList.toggle('is-active', def);
+      showAllButton.setAttribute('aria-pressed', def ? 'true' : 'false');
     }
-    if (!statusSelect) return 'all';
-    return normalizedStatus(statusSelect.value);
   }
 
-  function dispatchStatusChange(){
+  function syncHiddenSelect(){
     if (!statusSelect) return;
+    if (isDefaultState()) {
+      statusSelect.value = 'all';
+      return;
+    }
+    statusSelect.value = Array.from(activeStatuses).join(',');
+  }
+
+  function emitStatusChange(){
+    if (!statusWrap || typeof CustomEvent !== 'function') return;
     try {
-      statusSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    } catch (err) {
-      if (document.createEvent) {
-        var evt = document.createEvent('HTMLEvents');
-        evt.initEvent('change', true, false);
-        statusSelect.dispatchEvent(evt);
-      }
-    }
+      statusWrap.dispatchEvent(new CustomEvent('rs-status-change', {
+        bubbles: true,
+        detail: {
+          statuses: Array.from(activeStatuses),
+          defaultState: isDefaultState()
+        }
+      }));
+    } catch (_) {}
   }
 
-  function setStatusFilter(code, triggerChange){
-    var target = normalizedStatus(code);
-    if (statusSelect && statusSelect.value !== target) {
-      statusSelect.value = target;
-      if (triggerChange) {
-        dispatchStatusChange();
-      }
-    } else if (triggerChange) {
-      if (statusSelect) {
-        dispatchStatusChange();
-      } else if (statusWrap && typeof CustomEvent === 'function') {
-        statusWrap.dispatchEvent(new CustomEvent('rs-status-change', { bubbles: true, detail: { value: target } }));
-      }
-    }
-    updateStatusButtons(target);
-  }
-
-  if (statusButtons.length){
-    statusButtons.forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var code = btn.getAttribute('data-status');
-        if (normalizedStatus(code) === resolveActiveStatus()) return;
-        setStatusFilter(code, true);
-      });
-    });
+  function shouldShow(code){
+    if (code == null || code === 'null' || code === 'undefined') return true;
+    if (isDefaultState()) return true;
+    return activeStatuses.has(code);
   }
 
   function applyFilters(){
-    var active = resolveActiveStatus();
+    if (typeof markerLayer === 'undefined' || !markerLayer || typeof markerLayer.eachLayer !== 'function') return;
     markerLayer.eachLayer(function(l){
       var p = (l.feature && l.feature.properties) || {};
       var raw = p.map_status;
       var code = (raw === 0) ? '0' : (raw == null ? null : String(raw));
-      var on = (active === 'all') || (code == null) || (code === active);
+      var on = shouldShow(code);
       if (on) {
         if (!map.hasLayer(l)) {
           l.addTo(map);
@@ -8534,43 +8562,81 @@ function rsRestoreLayers(state){
     }
   }
 
-  if (statusSelect){
-    statusSelect.addEventListener('change', function(){
-      updateStatusButtons(resolveActiveStatus());
+  function refreshUI(opts){
+    persistWrapState();
+    refreshStatusButtons();
+    syncHiddenSelect();
+    if (!opts || !opts.skipFilter) {
       applyFilters();
       syncList();
-    });
-  } else if (statusWrap && typeof CustomEvent === 'function') {
-    statusWrap.addEventListener('rs-status-change', function(){
-      applyFilters();
-      syncList();
+    }
+    if (!opts || opts.broadcast !== false) {
+      emitStatusChange();
+    }
+  }
+
+  function setActiveStatuses(next, opts){
+    var nextSet;
+    if (!next || next === 'all') {
+      nextSet = new Set(STATUS_CODES);
+    } else if (Array.isArray(next)) {
+      nextSet = new Set(next.map(normalizedStatus).filter(Boolean));
+    } else if (typeof next === 'string') {
+      nextSet = new Set(next.split(/[\s,]+/).map(normalizedStatus).filter(Boolean));
+    } else {
+      nextSet = new Set(STATUS_CODES);
+    }
+
+    if (!nextSet.size) {
+      nextSet = new Set(STATUS_CODES);
+    }
+
+    activeStatuses = nextSet;
+    refreshUI({ skipFilter: opts && opts.skipFilter, broadcast: opts && opts.broadcast });
+  }
+
+  function toggleStatus(code){
+    var norm = normalizedStatus(code);
+    if (!norm) return;
+    var nextSet = new Set(activeStatuses);
+    if (isDefaultState()) {
+      nextSet = new Set([norm]);
+    } else if (nextSet.has(norm)) {
+      if (nextSet.size === 1) { return; }
+      nextSet.delete(norm);
+    } else {
+      nextSet.add(norm);
+    }
+    activeStatuses = nextSet;
+    refreshUI();
+  }
+
+  if (statusButtons.length){
+    statusButtons.forEach(function(btn){
+      btn.addEventListener('click', function(){ toggleStatus(btn.getAttribute('data-status')); });
     });
   }
 
-  updateStatusButtons(resolveActiveStatus());
+  if (showAllButton){
+    showAllButton.addEventListener('click', function(){ setActiveStatuses('all'); });
+  }
 
   if (typeof window !== 'undefined') {
     window.rsStatusFilterUI = {
-      set: function(code, triggerChange){
-        setStatusFilter(code, triggerChange !== false);
-      },
-      sync: function(){
-        updateStatusButtons(resolveActiveStatus());
-      },
-      get: function(){
-        return resolveActiveStatus();
-      }
+      set: function(value, opts){ setActiveStatuses(value, opts); },
+      reset: function(){ setActiveStatuses('all'); },
+      get: function(){ return Array.from(activeStatuses); },
+      isDefault: isDefaultState,
+      sync: function(){ refreshUI({ skipFilter: true, broadcast: false }); }
     };
   }
 
   var infoBtn = (typeof window.rsFindInfoButton === 'function') ? window.rsFindInfoButton() : null;
   if (infoBtn){
-    infoBtn.addEventListener('click', function(){
-      setStatusFilter('all', true);
-    });
+    infoBtn.addEventListener('click', function(){ setActiveStatuses('all'); });
   }
 
-  applyFilters();
+  refreshUI({ broadcast: false });
 
 })();
 
@@ -8600,16 +8666,39 @@ function zoomHere(lat, lon) {
 <script>
 /* === BEGIN: Status dropdown also filters the list === */
 (function(){
+  var ALL_CODES = ['0','1','2','3'];
+
+  function cleanCodes(list){
+    var set = new Set();
+    list.forEach(function(code){
+      var c = (code === 0) ? '0' : (code == null ? null : String(code).trim());
+      if (!c) return;
+      if (ALL_CODES.indexOf(c) === -1) return;
+      set.add(c);
+    });
+    return set;
+  }
+
   function getEnabledStatuses(){
+    var wrap = document.getElementById('rs-status-filter-wrap');
+    if (wrap){
+      var attr = wrap.getAttribute('data-active-codes') || '';
+      var parts = attr.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      if (!parts.length || parts.length >= ALL_CODES.length) {
+        return new Set(ALL_CODES);
+      }
+      return cleanCodes(parts);
+    }
+
     var select = document.getElementById('rs-status-select');
     if (!select) {
-      return new Set(['0','1','2','3']);
+      return new Set(ALL_CODES);
     }
     var val = select.value;
     if (!val || val === 'all') {
-      return new Set(['0','1','2','3']);
+      return new Set(ALL_CODES);
     }
-    return new Set([String(val)]);
+    return cleanCodes(String(val).split(','));
   }
 
   function liStatusCode(li){
@@ -8645,11 +8734,15 @@ function zoomHere(lat, lon) {
   }
 
   function hookStatusDropdown(){
+    var wrap = document.getElementById('rs-status-filter-wrap');
     var select = document.getElementById('rs-status-select');
-    if (!select) return;
-    select.addEventListener('change', function(){
-      setTimeout(applyListFilter, 0);
-    });
+    var rerun = function(){ setTimeout(applyListFilter, 0); };
+    if (wrap && typeof wrap.addEventListener === 'function') {
+      wrap.addEventListener('rs-status-change', rerun);
+    }
+    if (select) {
+      select.addEventListener('change', rerun);
+    }
   }
 
   // Run once DOM is ready; also re-run when list content changes
@@ -8957,11 +9050,13 @@ function zoomHere(lat, lon) {
         applySearchFilter();
       });
     }
+    var statusWrap = document.getElementById('rs-status-filter-wrap');
     var statusSelect = document.getElementById('rs-status-select');
-    if (statusSelect){
-      statusSelect.addEventListener('change', function(){
-        setTimeout(applySearchFilter, 0);
-      });
+    var triggerSearch = function(){ setTimeout(applySearchFilter, 0); };
+    if (statusWrap && typeof statusWrap.addEventListener === 'function'){
+      statusWrap.addEventListener('rs-status-change', triggerSearch);
+    } else if (statusSelect){
+      statusSelect.addEventListener('change', triggerSearch);
     }
   }
 
