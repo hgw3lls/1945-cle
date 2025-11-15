@@ -608,6 +608,22 @@ body.rs-fullscreen-mode #map {
   gap:6px;
 }
 
+.rs-float__reset-btn {
+
+  font-size:12px;
+  padding:6px 12px;
+  line-height:1;
+  min-height:32px;
+  letter-spacing:0.08em;
+  white-space:nowrap;
+}
+
+.rs-float__reset-btn:focus-visible {
+
+  outline:2px solid #f3efe4;
+  outline-offset:2px;
+}
+
 
 
 .rs-float__list {
@@ -7668,6 +7684,7 @@ html.tv .rs-status-filter-btn--showall {
 <div><span class="rs-float__title">Theatres</span></div>
 <div class="rs-float__actions">
 <span aria-live="polite" class="rs-chip rs-count-badge" id="rs-count">0</span>
+<button class="rs-btn rs-float__reset-btn" id="rs-list-reset-btn" title="Reset search and filters" type="button">Reset</button>
 </div>
 </header>
 <div class="rs-search-wrap" role="search">
@@ -8680,6 +8697,85 @@ function zoomHere(lat, lon) {
   }
 }
 
+</script>
+<script>
+(function(){
+  function trigger(el, type){
+    if (!el || !type) return;
+    var evt;
+    try {
+      evt = new Event(type, { bubbles: true });
+    } catch (_) {
+      evt = document.createEvent('Event');
+      evt.initEvent(type, true, true);
+    }
+    el.dispatchEvent(evt);
+  }
+
+  function resetStatusButtons(){
+    var ui = (typeof window !== 'undefined') ? window.rsStatusFilterUI : null;
+    if (ui && typeof ui.reset === 'function') {
+      ui.reset();
+      return;
+    }
+    var select = document.getElementById('rs-status-select');
+    if (select) {
+      select.value = 'all';
+      trigger(select, 'change');
+    }
+  }
+
+  function resetSearchField(){
+    var input = document.getElementById('rs-search');
+    if (!input) return;
+    if (input.value) {
+      input.value = '';
+    }
+    trigger(input, 'input');
+  }
+
+  function closeFiltersPanel(){
+    if (window.rsFiltersPanel && typeof window.rsFiltersPanel.close === 'function') {
+      window.rsFiltersPanel.close();
+    } else if (typeof window.rsSetFiltersOpen === 'function') {
+      window.rsSetFiltersOpen(false);
+    }
+  }
+
+  function applyListSync(){
+    if (typeof window.applyListFilter === 'function') {
+      try { window.applyListFilter(); } catch(_) {}
+    }
+  }
+
+  function resetFilters(opts){
+    try { resetStatusButtons(); } catch(_) {}
+    try { resetSearchField(); } catch(_) {}
+    try { closeFiltersPanel(); } catch(_) {}
+    applyListSync();
+  }
+
+  window.rsResetFilters = function(opts){
+    resetFilters(opts || {});
+  };
+
+  function bindSidebarReset(){
+    var btn = document.getElementById('rs-list-reset-btn');
+    if (!btn || btn.__rsResetBound) return;
+    btn.__rsResetBound = true;
+    btn.addEventListener('click', function(){
+      if (typeof window.rsResetFilters === 'function') {
+        window.rsResetFilters({ source: 'sidebar-button' });
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindSidebarReset);
+  } else {
+    bindSidebarReset();
+  }
+})();
 </script>
 <script>
 /* === BEGIN: Status dropdown also filters the list === */
@@ -10230,8 +10326,12 @@ try {
   btn.addEventListener('click', () => {
     try {
       if (window.map && map.closePopup) { map.closePopup(); }
-      const search = document.getElementById('rs-search');
-      if (search) { search.value = ''; search.dispatchEvent(new Event('input')); }
+      if (typeof window.rsResetFilters === 'function') {
+        window.rsResetFilters({ source: 'mapReset' });
+      } else {
+        const search = document.getElementById('rs-search');
+        if (search) { search.value = ''; search.dispatchEvent(new Event('input')); }
+      }
 
       // Turn off all overlay toggles
       document.querySelectorAll('.rs-layer-btn[aria-pressed="true"]').forEach(b => b.click());
@@ -13524,6 +13624,11 @@ document.addEventListener("DOMContentLoaded", function() {
       btn.__rsBound = true;
       RS.on(btn, 'click', function(ev){
         ev.preventDefault();
+        try {
+          if (typeof window.rsResetFilters === 'function') {
+            window.rsResetFilters({ source: 'mapReset' });
+          }
+        } catch(_) {}
         if (typeof window.rsGoHome === 'function') {
           try {
             window.rsGoHome();
@@ -13635,6 +13740,11 @@ document.addEventListener("DOMContentLoaded", function() {
         btn.__rsBound = true;
         btn.addEventListener('click', function(e){
           e.preventDefault();
+          try {
+            if (typeof window.rsResetFilters === 'function') {
+              window.rsResetFilters({ source: 'mapReset' });
+            }
+          } catch(_) {}
           if (typeof window.RS==='object' && typeof RS.recenter==='function'){ RS.recenter(); }
           else if (typeof window.fitToGeoJSON==='function'){ window.fitToGeoJSON(); }
           else if (typeof window.fitToMarkers==='function'){ window.fitToMarkers(); }
