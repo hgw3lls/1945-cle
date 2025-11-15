@@ -334,7 +334,7 @@
 
 
 /* Keep Reset aligned but allow it to wrap to next line cleanly */
-#rs-reset {
+#rs-footer-bar #rs-reset {
 
   flex: 0 0 auto;
 }
@@ -1622,7 +1622,8 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn,
-.rs-sidebar-toggle {
+.rs-sidebar-toggle,
+.rs-filter-toggle {
 
   display:inline-flex;
   align-items:center;
@@ -1650,7 +1651,8 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn:hover,
-.rs-sidebar-toggle:hover {
+.rs-sidebar-toggle:hover,
+.rs-filter-toggle:hover {
 
   background:#ffffff;
   transform:translate(-2px,-2px);
@@ -1658,14 +1660,16 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn:active,
-.rs-sidebar-toggle:active {
+.rs-sidebar-toggle:active,
+.rs-filter-toggle:active {
 
   transform:translate(0,0);
   box-shadow:3px 3px 0 rgba(0,0,0,0.75);
 }
 
 .rs-toolbar__btn:focus-visible,
-.rs-sidebar-toggle:focus-visible {
+.rs-sidebar-toggle:focus-visible,
+.rs-filter-toggle:focus-visible {
 
   outline:2px solid var(--fever-cyan);
   outline-offset:4px;
@@ -1788,7 +1792,7 @@ body.rs-fullscreen-mode .rs-logo-corner .rs-logo {
   position:fixed;
   top:120px;
   right:0;
-  z-index:10010;
+  z-index:4000;
   display:flex;
   flex-direction:column;
   align-items:flex-end;
@@ -1829,6 +1833,132 @@ body.rs-sidebar-open .rs-sidebar-toggle-wrap {
 .rs-toolbar__btn--accent:hover {
 
   box-shadow:8px 8px 0 rgba(0,0,0,0.9);
+}
+
+
+.rs-filter-toggle-shell {
+
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+  width:100%;
+  overflow:visible;
+}
+
+.rs-filter-toggle {
+
+  writing-mode:horizontal-tb;
+  text-orientation:mixed;
+  padding:12px 18px;
+  letter-spacing:0.12em;
+  min-height:48px;
+  min-width:160px;
+  margin-top:0;
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+}
+
+.rs-filter-toggle[aria-expanded="true"] {
+
+  background:#080808;
+  color:#f3efe4;
+}
+
+.rs-filter-panel {
+
+  position:absolute;
+  bottom:calc(100% + 14px);
+  right:0;
+  width:min(320px, 90vw);
+  max-height:min(320px, 70vh);
+  background:rgba(8, 8, 8, 0.97);
+  border:3px solid #f3efe4;
+  box-shadow:8px 8px 0 rgba(0,0,0,0.85);
+  padding:18px 18px 14px;
+  color:#f3efe4;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  transform:translateY(6px) scale(0.95);
+  opacity:0;
+  pointer-events:none;
+  transition:transform 0.22s ease, opacity 0.22s ease;
+  border-radius:12px;
+  z-index:4100;
+}
+
+.rs-filter-panel::after {
+
+  content:"";
+  position:absolute;
+  bottom:-12px;
+  right:26px;
+  width:16px;
+  height:16px;
+  background:rgba(8, 8, 8, 0.97);
+  border-left:3px solid #f3efe4;
+  border-bottom:3px solid #f3efe4;
+  transform:rotate(45deg);
+}
+
+.rs-filter-panel[aria-hidden="true"] {
+
+  visibility:hidden;
+}
+
+body.rs-filters-open .rs-filter-panel {
+
+  opacity:1;
+  pointer-events:auto;
+  transform:translateY(0) scale(1);
+  visibility:visible;
+}
+
+.rs-filter-panel__header {
+
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.rs-filter-panel__title {
+
+  font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  margin:0;
+}
+
+.rs-filter-panel__body {
+
+  overflow-y:auto;
+  padding-right:2px;
+  max-height:calc(70vh - 80px);
+}
+
+.rs-filter-panel__section {
+
+  margin-bottom:20px;
+}
+
+.rs-filter-panel__section:last-child {
+
+  margin-bottom:0;
+}
+
+html.tv .rs-filter-panel {
+
+  width:min(360px, 50vw);
+  max-height:40vh;
+}
+
+html.tv .rs-filter-panel__title {
+
+  font-size:24px;
 }
 
 #rs-infohelp-modal {
@@ -3402,37 +3532,6 @@ html.tv #rs-list .rs-movie {
 
 
 
-/* Align Reset Map to bottom-right of float panel */
-#rs-reset {
-
-  display: block;
-    margin-left: auto;
-    margin-right: 12px;
-    margin-top: 10px;
-    padding: 10px 14px;
-    background: #f3efe4;
-    color: #000;
-    border: 2px solid #000;
-    text-transform: uppercase;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: none;
-    border-radius: 0;
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-reset:hover
-*/
-#rs-reset:hover {
-
-  background: #000;
-    color: #f3efe4;
-}
-
-
-
 /* === MAP LAYERS header style === */
 .rs-maplayers-header {
 
@@ -4307,7 +4406,7 @@ html.tv #rs-list .rs-movie {
 
 
 
-#rs-reset {
+.rs-footer-inner #rs-reset {
 
   margin-top: 6px;
     margin-right: 8px;
@@ -6436,7 +6535,7 @@ html.booting #rs-float {
   margin: 0 !important;
 }
 /* Neutralize older rule that shoved Reset to the right with extra margin */
-#rs-reset {
+#rs-footer-bar #rs-reset {
   margin-right: 0 !important;
 }
 </style>
@@ -6524,7 +6623,7 @@ html.booting #rs-float {
   width: 100% !important;
 }
 
-#rs-reset {
+#rs-footer-bar #rs-reset {
   padding: 10px 14px !important;
   font-size: 14px !important;
   margin: 0 !important;
@@ -6860,36 +6959,49 @@ html.booting #rs-float {
 #rs-list .rs-li p.rs-addr { margin: 0 !important; padding: 0 !important; }
 </style>
 <style>
-/* === Status chip in top-right of the card title band === */
+/* === Theatre title band uses status color instead of chip === */
 #rs-list .rs-li { position: relative; }
-#rs-list .rs-li .rs-titleband { position: relative; padding-right: 110px; }
-
-#rs-list .rs-li .rs-statuschip,
-#rs-list .rs-li [class*="rs-statuschip"] {
-  position: absolute !important;
-  top: 8px;
-  right: 10px;
-  z-index: 3;
-  display: inline-flex !important;
+#rs-list .rs-li .rs-titleband {
+  position: relative;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 4px 10px !important;
-  font-size: 12px !important;
-  font-weight: 700;
-  line-height: 1.2;
-  border-radius: 4px;
-  white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  gap: 12px;
+  padding: 10px 0;
 }
 
-/* Slight color normalization (optional—keeps your tones) */
-.rs-statuschip-open { background:#47a775; color:#fff; }
-.rs-statuschip-closed { background:#d65252; color:#fff; }
-.rs-statuschip-repurposed { background:#f0c247; color:#222; }
-.rs-statuschip-demolished { background:#7f8790; color:#fff; }
+#rs-list .rs-li .rs-titleband h4 {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  max-width: 100%;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+  line-height: 1.1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.25);
+}
 
-/* Ensure the inline meta row (address) no longer reserves space for the chip */
-#rs-list .rs-li .rs-meta-line { gap: 10px; }
+#rs-list .rs-li[data-map-status="1"] .rs-titleband h4 { background:#19a974; color:#fff; }
+#rs-list .rs-li[data-map-status="0"] .rs-titleband h4 { background:#d65252; color:#fff; }
+#rs-list .rs-li[data-map-status="2"] .rs-titleband h4 { background:#f0c247; color:#fff; }
+#rs-list .rs-li[data-map-status="3"] .rs-titleband h4 { background:#7f8790; color:#fff; }
+
+#rs-list .rs-li .rs-titleband .rs-status-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Ensure inline meta row follows new band spacing */
+#rs-list .rs-li .rs-meta-line { gap: 10px; margin-top: 8px !important; }
 </style>
 <style>
 /* === Guided Tips / Coach Marks ========================================== */
@@ -6932,19 +7044,6 @@ html.booting #rs-float {
 #rs-float .rs-tips-btn:active { transform: translateY(1px); }
 </style>
 <style>
-/* === Toolbar Tips button (next to INFO/HELP) ============================ */
-.rs-tips-btn-toolbar {
-  display:inline-flex; align-items:center; justify-content:center;
-  background:#fff; color:#111; border:2px solid #111; border-radius:6px;
-  padding:10px 14px; font-weight:800; letter-spacing:.02em; cursor:pointer;
-  box-shadow:0 1px 2px rgba(0,0,0,.25);
-  transition:transform .06s ease;
-}
-.rs-tips-btn-toolbar:active { transform: translateY(1px); }
-.rs-tips-btn-toolbar.dark {
-  background:#eae5d8; border-color:#000; color:#000;
-}
-
 /* Ensure coach overlay always on top of ALL UI */
 .rs-coach-overlay { z-index: 999999 !important; }
 .rs-coach-highlight { z-index: 999999 !important; }
@@ -7295,10 +7394,123 @@ html.booting #rs-float {
 #rs-float.rs-collapsed .rs-float__footer,
 #rs-float.rs-collapsed .rs-footer,
 #rs-float.rs-collapsed footer,
-#rs-float.rs-collapsed #rs-footer { 
-  display: none !important; 
+#rs-float.rs-collapsed #rs-footer {
+  display: none !important;
 }
 
+<style>
+/* === Touch-friendly status filter buttons under search === */
+#rs-status-filter-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.rs-status-filter-touchbar {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.rs-status-filter-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+  border: 2px solid #000;
+  box-shadow: 0 5px 0 #000;
+  background: #f3efe4;
+  color: #000;
+  padding: 10px 8px;
+  min-height: 44px;
+  text-transform: uppercase;
+  font-family: var(--font-ui, 'StandingRoomOnly NF', system-ui);
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.05;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.18s ease;
+}
+
+.rs-status-filter-btn:not(.is-active) {
+  filter: saturate(80%) brightness(0.92);
+  box-shadow: 0 2px 0 #000;
+  transform: translateY(1px);
+}
+
+.rs-status-filter-btn.is-active {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 0 #000;
+  filter: none;
+}
+
+.rs-status-filter-btn:focus-visible {
+  outline: 2px solid #f3efe4;
+  outline-offset: 3px;
+}
+
+.rs-status-filter-btn[data-status="all"] {
+  background: #f3efe4;
+  color: #000;
+}
+
+.rs-status-filter-btn[data-status="1"] {
+  background: #19a974;
+  color: #fff;
+}
+
+.rs-status-filter-btn[data-status="0"] {
+  background: #e03131;
+  color: #fff;
+}
+
+.rs-status-filter-btn[data-status="2"] {
+  background: #fcc419;
+  color: #111;
+}
+
+.rs-status-filter-btn[data-status="3"] {
+  background: #495057;
+  color: #fff;
+}
+
+.rs-status-filter-dropdown {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+
+html.tv #rs-status-filter-wrap {
+  padding: 0;
+  margin-bottom: 0;
+}
+
+html.tv .rs-status-filter-touchbar {
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+html.tv .rs-status-filter-btn {
+  min-height: clamp(54px, 7vw, 78px);
+  font-size: clamp(13px, 1.6vw, 17px);
+  letter-spacing: 0.6px;
+  padding: 14px 12px;
+}
 </style>
 <style>
 /* === Map layer slider label alignment === */
@@ -7368,6 +7580,34 @@ html.booting #rs-float {
 </div>
 <div class="rs-sidebar-toggle-wrap">
   <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
+  <div class="rs-filter-toggle-shell">
+    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Filters" data-label-open="Filters" id="rs-filter-toggle" type="button">Filters</button>
+    <aside aria-hidden="true" aria-label="Map filters" class="rs-filter-panel" id="rs-filter-panel">
+      <div class="rs-filter-panel__header">
+        <p class="rs-filter-panel__title">Filters</p>
+      </div>
+      <div class="rs-filter-panel__body">
+        <div class="rs-filter-panel__section">
+          <div class="rs-status-filter-select" id="rs-status-filter-wrap">
+            <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
+              <button type="button" class="rs-status-filter-btn is-active" data-status="all" aria-pressed="true">All Statuses</button>
+              <button type="button" class="rs-status-filter-btn" data-status="1" aria-pressed="false">Open</button>
+              <button type="button" class="rs-status-filter-btn" data-status="0" aria-pressed="false">Closed</button>
+              <button type="button" class="rs-status-filter-btn" data-status="2" aria-pressed="false">Repurposed</button>
+              <button type="button" class="rs-status-filter-btn" data-status="3" aria-pressed="false">Demolished</button>
+            </div>
+            <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
+              <option value="all">All Statuses</option>
+              <option value="1">Open</option>
+              <option value="0">Closed</option>
+              <option value="2">Repurposed</option>
+              <option value="3">Demolished</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
 <header class="rs-float__header" id="rs-sidebar-header">
@@ -7377,8 +7617,8 @@ html.booting #rs-float {
 </div>
 </header>
 <div class="rs-search-wrap" role="search">
-<input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
-<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+  <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
+  <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
 </div>
 <div class="rs-float__list" id="rs-list" role="list"></div>
 <div class="rs-footer-bar" id="rs-footer-bar">
@@ -7500,10 +7740,8 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     maxBoundsViscosity: 1.0,
     worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
   });
-  var HOME_CENTER = BOUNDS.getSouthWest();
-  var HOME_ZOOM = map.getBoundsZoom(BOUNDS, true);
-  if (!isFinite(HOME_ZOOM)) { HOME_ZOOM = 13; }
-  HOME_ZOOM = Math.max(map.getMinZoom(), Math.min(HOME_ZOOM, map.getMaxZoom()));
+  var HOME_CENTER = L.latLng(41.463182, -81.589138);
+  var HOME_ZOOM = Math.max(map.getMinZoom(), Math.min(12, map.getMaxZoom()));
 
   function goHome(options){
     var animate = options && options.animate === true;
@@ -7846,8 +8084,19 @@ function rsRestoreLayers(state){
   // Layer of theatre points
   var markerLayer = L.geoJSON(THEATRES, {
     pointToLayer: function(f, latlng){
-      var p = f.properties||{}; var col = colorForStatus(p.map_status);
-      return L.circleMarker(latlng, {radius:7, color: col, fillColor: col, fillOpacity: 0.9, weight:1.5});
+      var p   = f.properties || {};
+      var col = colorForStatus(p.map_status);
+
+      // Brutalist, high-contrast circle markers
+      return L.circleMarker(latlng, {
+        radius: 10,
+        color: '#000000',
+        weight: 3,
+        fillColor: col,
+        fillOpacity: 1,
+        opacity: 1,
+        pane: 'markerPane'
+      });
     },
     onEachFeature: function(f, layer){
       var p = f.properties||{};
@@ -7861,29 +8110,89 @@ function rsRestoreLayers(state){
     }
   }).addTo(map);
 
-  // Reset button -> fit to bounds
-  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ map.fitBounds(BOUNDS, {padding:[20,20]});
+  try { window.markerLayer = markerLayer; } catch(_) {}
+
+  // Ensure default toolbar buttons resolve without forcing a map recenter
+  if (typeof window.rsFindHelpButton === 'function') {
+    window.rsFindHelpButton();
+  }
+  if (typeof window.rsFindInfoButton === 'function') {
+    window.rsFindInfoButton();
+  }
 
   // Expose globally for kiosk scripts
   try { window.map = map; } catch(_) {}
 
-  // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
+  // Make unloaded / missing tiles appear black
+  document.getElementById('map').style.backgroundColor = '#000';
 
-// Make unloaded / missing tiles appear black
-document.getElementById('map').style.backgroundColor = '#000';
-
-// Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
-if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
-  if (e.tile) e.tile.style.display = 'none';
-}); });
+  // Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
+  if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
+    if (e.tile) e.tile.style.display = 'none';
+  });
 
   // Sidebar toggle/collapse/close
   var floatEl = document.getElementById('rs-float');
   var toggleBtn = document.getElementById('rs-sidebar-toggle');
   var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
+  var filterToggle = document.getElementById('rs-filter-toggle');
+  var filterPanel = document.getElementById('rs-filter-panel');
+  var filterShell = document.querySelector('.rs-filter-toggle-shell');
   var closeBtn = document.getElementById('rs-close');
   var listEl = document.getElementById('rs-list');
+
+  function setFiltersOpen(open){
+    var body = document.body;
+    if (body){
+      body.classList.toggle('rs-filters-open', !!open);
+    }
+    if (filterPanel){
+      filterPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (typeof filterPanel.toggleAttribute === 'function'){
+        filterPanel.toggleAttribute('inert', !open);
+      } else if (!open) {
+        filterPanel.setAttribute('inert', '');
+      } else {
+        filterPanel.removeAttribute('inert');
+      }
+    }
+    if (filterToggle){
+      filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var openLabel = filterToggle.getAttribute('data-label-open') || 'Filters';
+      var closeLabel = filterToggle.getAttribute('data-label-close') || 'Close Filters';
+      filterToggle.textContent = open ? closeLabel : openLabel;
+    }
+  }
+
+  if (typeof window !== 'undefined'){
+    window.rsSetFiltersOpen = setFiltersOpen;
+    window.rsFiltersPanel = {
+      open: function(){ setFiltersOpen(true); },
+      close: function(){ setFiltersOpen(false); },
+      toggle: function(){
+        var body = document.body;
+        var isOpen = body ? body.classList.contains('rs-filters-open') : false;
+        setFiltersOpen(!isOpen);
+      }
+    };
+  }
+
+  if (filterToggle){
+    setFiltersOpen(false);
+    filterToggle.addEventListener('click', function(){
+      var body = document.body;
+      var isOpen = body ? body.classList.contains('rs-filters-open') : false;
+      setFiltersOpen(!isOpen);
+    });
+  }
+
+  document.addEventListener('click', function(evt){
+    var body = document.body;
+    if (!body || !body.classList.contains('rs-filters-open')) return;
+    var target = evt.target;
+    if (filterShell && filterShell.contains(target)) return;
+    setFiltersOpen(false);
+  });
 
   function positionSidebarToggle(){
     if (!toggleWrap) toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
@@ -7957,9 +8266,21 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   }
 
   document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape' && floatEl && !floatEl.classList.contains('is-hidden')){
-      setSidebarHidden(true);
-      if (toggleBtn) toggleBtn.focus();
+    if (e.key === 'Escape'){
+      var handled = false;
+      var body = document.body;
+      var filtersOpen = body && body.classList.contains('rs-filters-open');
+      if (filtersOpen){
+        setFiltersOpen(false);
+        if (filterToggle){
+          filterToggle.focus();
+        }
+        handled = true;
+      }
+      if (!handled && floatEl && !floatEl.classList.contains('is-hidden')){
+        setSidebarHidden(true);
+        if (toggleBtn) toggleBtn.focus();
+      }
     }
   });
 
@@ -7967,20 +8288,33 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
-  var features = (window.THEATRES && window.THEATRES.features) || [];
+  function resolveTheatreCollection(){
+    if (typeof THEATRES !== 'undefined' && THEATRES && Array.isArray(THEATRES.features)) {
+      return THEATRES.features;
+    }
+    if (typeof window !== 'undefined' && window.THEATRES && Array.isArray(window.THEATRES.features)) {
+      return window.THEATRES.features;
+    }
+    return [];
+  }
+  var features = resolveTheatreCollection();
   function liHTML(p, idx){
-    var badge = '<span class="rs-chip-status" style="margin-left:6px;">'+statusLabel(Number(p.map_status))+'</span>';
+    var statusCode = Number(p.map_status);
+    var hasStatus = !isNaN(statusCode);
+    var statusText = hasStatus ? statusLabel(statusCode) : (p.Status || '');
     var movie = p.Movie ? ('<p class="rs-movie"><strong>Now Showing:</strong> '+String(p.Movie)+'</p>') : '';
-    return '<div class="rs-li" data-idx="'+idx+'">'
-      + '<h4>'+ (p.Theatre||'') +'</h4>' + badge
+    var statusAttr = hasStatus ? ' data-map-status="'+statusCode+'"' : '';
+    var srLabel = statusText ? '<span class="rs-status-sr">'+statusText+' status</span>' : '';
+    var titleAttr = statusText ? ' title="'+statusText+'" data-status-label="'+statusText+'"' : '';
+    return '<div class="rs-li" data-idx="'+idx+'"'+statusAttr+'>'
+      + '<div class="rs-titleband"'+titleAttr+'><h4>'+ (p.Theatre||'') +'</h4>'+srLabel+'</div>'
       + '<p class="rs-addr">'+ (p.Address||'') +'</p>'
       + movie
       + '</div>';
   }
 
   function getFeatures(){
-    var data = (window.THEATRES && window.THEATRES.features) || [];
-    return Array.isArray(data) ? data : [];
+    return resolveTheatreCollection();
   }
 
   function populateList(){
@@ -7988,6 +8322,9 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     var list = listRoot;
     if (!list) return features;
     features = getFeatures();
+    if (typeof window !== 'undefined' && !window.THEATRES && typeof THEATRES !== 'undefined') {
+      try { window.THEATRES = THEATRES; } catch(_) {}
+    }
     list.innerHTML = features.map(function(f,i){ return liHTML((f && f.properties) || {}, i); }).join('');
     Array.prototype.forEach.call(list.querySelectorAll('.rs-li'), function(node, idx){
       var feature = features[idx];
@@ -7995,6 +8332,11 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
       var p = feature.properties || {};
       var statusCode = Number(p.map_status);
       var statusText = isNaN(statusCode) ? (p.Status || '') : statusLabel(statusCode);
+      if (!isNaN(statusCode)) {
+        node.setAttribute('data-map-status', String(statusCode));
+      } else {
+        node.removeAttribute('data-map-status');
+      }
       var seatsNum = Number(p.Seats);
       var screensNum = Number(p.Screens);
       var seatsRounded = Math.round(seatsNum);
@@ -8016,6 +8358,7 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
       setData('architects', p.Architects);
       setData('status', p.Status || statusText);
       setData('statusLabel', statusText);
+      setData('mapStatus', isNaN(statusCode) ? '' : statusCode);
       setData('seats', seatsText);
       setData('screens', screensText);
       setData('searchIndex', [
@@ -8061,42 +8404,164 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     var item = e.target.closest('.rs-li'); if (!item) return;
     var idx = Number(item.getAttribute('data-idx'));
     var layer = idxToLayer[idx]; if (!layer) return;
-    var latlng = layer.getLatLng();
-    var z = Math.max(map.getZoom(), 16);
-    var px = map.project(latlng, z);
-    var offsetY = Math.round(map.getSize().y * -0.20);
-    var target = L.point(px.x, px.y + offsetY);
-    map.flyTo(map.unproject(target, z), z, { duration: 0.6 });
-    setTimeout(function(){ layer.openPopup(); }, 650);
+
+    var focus = (typeof window !== 'undefined' && typeof window.rsFlyFocus === 'function') ? window.rsFlyFocus : null;
+
+    if (focus) {
+      focus(layer);
+    } else {
+      var latlng = (layer && typeof layer.getLatLng === 'function') ? layer.getLatLng() : null;
+      if (!latlng) return;
+      var z = Math.max(map.getZoom(), 16);
+      var px = map.project(latlng, z);
+      var offsetY = Math.round(map.getSize().y * -0.20);
+      var target = L.point(px.x, px.y + offsetY);
+      map.flyTo(map.unproject(target, z), z, { duration: 0.6 });
+    }
+
+    var open = function(){
+      try { layer.openPopup(); } catch(_) {}
+    };
+    if (window.map && typeof map.once === 'function') {
+      map.once('moveend', function(){ setTimeout(open, 60); });
+    } else {
+      setTimeout(open, 650);
+    }
+
     Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-li'), function(n){ n.classList.remove('active'); });
     item.classList.add('active');
   });
 
   // Footer legend filters
-  var activeStatuses = {1:true, 0:true, 2:true, 3:true};
-  function applyFilters(){
-    markerLayer.eachLayer(function(l){
-      var p = (l.feature && l.feature.properties) || {}; var on = !!activeStatuses[Number(p.map_status)];
-      if (on){ l.addTo(map); } else { map.removeLayer(l); }
+  var statusSelect = document.getElementById('rs-status-select');
+  var statusWrap = document.getElementById('rs-status-filter-wrap');
+  var statusButtons = statusWrap ? Array.prototype.slice.call(statusWrap.querySelectorAll('.rs-status-filter-btn')) : [];
+
+  function normalizedStatus(code){
+    if (code === undefined || code === null || code === '' || code === 'all') { return 'all'; }
+    return String(code);
+  }
+
+  function updateStatusButtons(code){
+    if (!statusWrap) return;
+    var active = normalizedStatus(code);
+    statusWrap.setAttribute('data-active-status', active);
+    statusButtons.forEach(function(btn){
+      var btnCode = normalizedStatus(btn.getAttribute('data-status'));
+      var isActive = (btnCode === active);
+      btn.classList.toggle('is-active', isActive);
+      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });
   }
-  document.querySelectorAll('.rs-footer-sq').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var code = Number(btn.getAttribute('data-status-code'));
-      var pressed = btn.getAttribute('aria-pressed') !== 'true';
-      btn.setAttribute('aria-pressed', String(pressed));
-      btn.classList.toggle('is-off', !pressed);
-      activeStatuses[code] = pressed;
+
+  function resolveActiveStatus(){
+    if (statusWrap && statusWrap.getAttribute('data-active-status')) {
+      return normalizedStatus(statusWrap.getAttribute('data-active-status'));
+    }
+    if (!statusSelect) return 'all';
+    return normalizedStatus(statusSelect.value);
+  }
+
+  function dispatchStatusChange(){
+    if (!statusSelect) return;
+    try {
+      statusSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (err) {
+      if (document.createEvent) {
+        var evt = document.createEvent('HTMLEvents');
+        evt.initEvent('change', true, false);
+        statusSelect.dispatchEvent(evt);
+      }
+    }
+  }
+
+  function setStatusFilter(code, triggerChange){
+    var target = normalizedStatus(code);
+    if (statusSelect && statusSelect.value !== target) {
+      statusSelect.value = target;
+      if (triggerChange) {
+        dispatchStatusChange();
+      }
+    } else if (triggerChange) {
+      if (statusSelect) {
+        dispatchStatusChange();
+      } else if (statusWrap && typeof CustomEvent === 'function') {
+        statusWrap.dispatchEvent(new CustomEvent('rs-status-change', { bubbles: true, detail: { value: target } }));
+      }
+    }
+    updateStatusButtons(target);
+  }
+
+  if (statusButtons.length){
+    statusButtons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var code = btn.getAttribute('data-status');
+        if (normalizedStatus(code) === resolveActiveStatus()) return;
+        setStatusFilter(code, true);
+      });
+    });
+  }
+
+  function applyFilters(){
+    var active = resolveActiveStatus();
+    markerLayer.eachLayer(function(l){
+      var p = (l.feature && l.feature.properties) || {};
+      var raw = p.map_status;
+      var code = (raw === 0) ? '0' : (raw == null ? null : String(raw));
+      var on = (active === 'all') || (code == null) || (code === active);
+      if (on) {
+        if (!map.hasLayer(l)) {
+          l.addTo(map);
+        }
+      } else if (map.hasLayer(l)) {
+        map.removeLayer(l);
+      }
+    });
+  }
+
+  function syncList(){
+    if (typeof applyListFilter === 'function') {
+      try { applyListFilter(); } catch(_) {}
+    }
+  }
+
+  if (statusSelect){
+    statusSelect.addEventListener('change', function(){
+      updateStatusButtons(resolveActiveStatus());
       applyFilters();
+      syncList();
     });
-  });
-  document.querySelector('.rs-footer-all'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){
-    document.querySelectorAll('.rs-footer-sq').forEach(function(btn){
-      btn.setAttribute('aria-pressed','true'); btn.classList.remove('is-off');
-      var code = Number(btn.getAttribute('data-status-code')); activeStatuses[code] = true;
+  } else if (statusWrap && typeof CustomEvent === 'function') {
+    statusWrap.addEventListener('rs-status-change', function(){
+      applyFilters();
+      syncList();
     });
-    applyFilters();
-  });
+  }
+
+  updateStatusButtons(resolveActiveStatus());
+
+  if (typeof window !== 'undefined') {
+    window.rsStatusFilterUI = {
+      set: function(code, triggerChange){
+        setStatusFilter(code, triggerChange !== false);
+      },
+      sync: function(){
+        updateStatusButtons(resolveActiveStatus());
+      },
+      get: function(){
+        return resolveActiveStatus();
+      }
+    };
+  }
+
+  var infoBtn = (typeof window.rsFindInfoButton === 'function') ? window.rsFindInfoButton() : null;
+  if (infoBtn){
+    infoBtn.addEventListener('click', function(){
+      setStatusFilter('all', true);
+    });
+  }
+
+  applyFilters();
 
 })();
 
@@ -8124,27 +8589,18 @@ function zoomHere(lat, lon) {
 
 </script>
 <script>
-/* === BEGIN: Footer status squares also filter the list === */
+/* === BEGIN: Status dropdown also filters the list === */
 (function(){
   function getEnabledStatuses(){
-    // Footer squares are buttons with data-status-code and aria-pressed or class is-off
-    var btns = document.querySelectorAll('.rs-footer-sq[data-status-code]');
-    var enabled = new Set();
-    btns.forEach(function(b){
-      var code = String(b.getAttribute('data-status-code')||'').trim();
-      // Treat "off" as disabled; prefer aria-pressed if present, else class flag.
-      var pressed = b.getAttribute('aria-pressed');
-      var isOn = true;
-      if (pressed !== null) {
-        isOn = (pressed === 'true');
-      } else if (b.classList.contains('is-off')) {
-        isOn = false;
-      }
-      if (code !== '' && isOn) enabled.add(code);
-    });
-    // If none explicitly enabled, interpret as "all on" to avoid blank state
-    if (enabled.size === 0) return new Set(['0','1','2','3']);
-    return enabled;
+    var select = document.getElementById('rs-status-select');
+    if (!select) {
+      return new Set(['0','1','2','3']);
+    }
+    var val = select.value;
+    if (!val || val === 'all') {
+      return new Set(['0','1','2','3']);
+    }
+    return new Set([String(val)]);
   }
 
   function liStatusCode(li){
@@ -8179,22 +8635,19 @@ function zoomHere(lat, lon) {
     }catch(e){ /* swallow */ }
   }
 
-  function hookFooter(){
-    // When user clicks a footer square or SHOW ALL, also filter the list
-    document.addEventListener('click', function(e){
-      var sq = e.target.closest('.rs-footer-sq');
-      var all = e.target.closest('.rs-footer-all');
-      if (!sq && !all) return;
-      // Defer to allow any existing map toggle code to run first
+  function hookStatusDropdown(){
+    var select = document.getElementById('rs-status-select');
+    if (!select) return;
+    select.addEventListener('change', function(){
       setTimeout(applyListFilter, 0);
-    }, true);
+    });
   }
 
   // Run once DOM is ready; also re-run when list content changes
   if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ hookFooter(); applyListFilter(); });
+    document.addEventListener('DOMContentLoaded', function(){ hookStatusDropdown(); applyListFilter(); });
   } else {
-    hookFooter(); applyListFilter();
+    hookStatusDropdown(); applyListFilter();
   }
 
   // If your app re-renders the list dynamically, keep it in sync:
@@ -8206,7 +8659,7 @@ function zoomHere(lat, lon) {
     }
   }catch(_){}
 })();
-/* === END: Footer status squares also filter the list === */
+/* === END: Status dropdown also filters the list === */
 
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
@@ -8495,12 +8948,12 @@ function zoomHere(lat, lon) {
         applySearchFilter();
       });
     }
-    // Re-apply after footer square clicks
-    document.addEventListener('click', function(e){
-      var sq = e.target.closest('.rs-footer-sq');
-      var all = e.target.closest('.rs-footer-all');
-      if (sq || all){ setTimeout(applySearchFilter, 0); }
-    }, true);
+    var statusSelect = document.getElementById('rs-status-select');
+    if (statusSelect){
+      statusSelect.addEventListener('change', function(){
+        setTimeout(applySearchFilter, 0);
+      });
+    }
   }
 
   if (document.readyState === 'loading'){
@@ -8993,7 +9446,13 @@ function zoomHere(lat, lon) {
       try{
         var pop = ev && ev.popup; if (!pop) return;
         var root = pop.getElement && pop.getElement(); if (!root) return;
-        var ll = pop.getLatLng ? pop.getLatLng() : (ev.layer && ev.layer.getLatLng && ev.layer.getLatLng());
+        var ll = null;
+        if (ev.layer && typeof ev.layer.getLatLng === 'function') {
+          ll = ev.layer.getLatLng();
+        }
+        if (!ll && pop && typeof pop.getLatLng === 'function') {
+          ll = pop.getLatLng();
+        }
         var lat = ll && ll.lat, lng = ll && ll.lng;
         var el = findMatch(root, lat, lng);
         clearActive(); if (el) activate(el);
@@ -9109,7 +9568,7 @@ function zoomHere(lat, lon) {
           if (chosen){
             l.__rsListEl = chosen;
             // write lat/lng if missing
-            var ll = (l.getLatLng && l.getLatLng()) || null;
+            var ll = (l && typeof l.getLatLng === 'function') ? l.getLatLng() : null;
             if (ll){
               if (!chosen.getAttribute('data-lat')) chosen.setAttribute('data-lat', String(ll.lat));
               if (!chosen.getAttribute('data-lng')) chosen.setAttribute('data-lng', String(ll.lng));
@@ -9566,7 +10025,9 @@ try {
     if (!attract) return;
     attract.style.display = 'flex';
     try {
-      if (window.map && window.map.fitBounds) {
+      if (typeof window.rsGoHome === 'function') {
+        window.rsGoHome({ animate: false });
+      } else if (window.map && window.map.fitBounds) {
         const WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
         window.map.fitBounds([[SOUTH, WEST],[NORTH, EAST]], {padding:[20,20]});
       }
@@ -10643,8 +11104,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function flyFocus(layer) {
     if (!(typeof map !== 'undefined' && map)) return;
-    if (!layer || typeof layer.getLatLng !== 'function') return;
-    var ll = layer.getLatLng();
+    if (!layer) return;
+    var ll = (layer && typeof layer.getLatLng === 'function') ? layer.getLatLng() : null;
+    if (!ll) return;
     map.flyTo(ll, 19, { animate: true, duration: 0.8, easeLinearity: 0.25, noMoveStart: false });
     var once = function() {
       map.off('moveend', once);
@@ -10655,6 +11117,10 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     if (window.map && typeof window.map.on === "function") map.on('moveend', once);
     setTimeout(once, 1200);
+  }
+
+  if (typeof window !== 'undefined') {
+    try { window.rsFlyFocus = flyFocus; } catch(_) {}
   }
 
   function zoomToExact(e) {
@@ -11384,7 +11850,10 @@ document.addEventListener('DOMContentLoaded', function() {
     render();
     root.setAttribute('aria-hidden','false');
     // focus for keyboard
-    btnNext.focus({preventScroll:true});
+    const focusTarget = btnNext || btnClose;
+    if (focusTarget && typeof focusTarget.focus === 'function') {
+      focusTarget.focus({preventScroll:true});
+    }
     document.addEventListener('keydown', onKey);
   }
   function closeGallery(){
@@ -12824,7 +13293,7 @@ document.addEventListener("DOMContentLoaded", function() {
           let minLat=  90, minLng=  180, maxLat= -90, maxLng= -180;
           markerLayer.eachLayer(function(l){
             try{
-              const ll = l.getLatLng ? l.getLatLng() : null;
+              const ll = (l && typeof l.getLatLng === 'function') ? l.getLatLng() : null;
               if (!ll) return;
               if (ll.lat < minLat) minLat = ll.lat;
               if (ll.lat > maxLat) maxLat = ll.lat;
@@ -12847,6 +13316,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if (typeof window.fitToGeoJSON === 'function'){ window.fitToGeoJSON(); return; }
         if (typeof window.fitToMarkers === 'function'){ window.fitToMarkers(); return; }
         if (RS.fitMarkerLayerBounds()) return;
+        if (typeof window.rsGoHome === 'function') {
+          window.rsGoHome({ animate: true });
+          return;
+        }
         console.warn('RS.recenter: no fitting function/layer found.');
       }catch(e){ console.warn('RS.recenter error', e); }
     };
@@ -12998,7 +13471,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var minLat=90,minLng=180,maxLat=-90,maxLng=-180, any=false;
       markerLayer.eachLayer(function(l){
         try{
-          var ll = l && l.getLatLng ? l.getLatLng() : null;
+          var ll = (l && typeof l.getLatLng === 'function') ? l.getLatLng() : null;
           if(!ll) return;
           any=true;
           if (ll.lat<minLat) minLat=ll.lat;
