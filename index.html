@@ -1689,7 +1689,12 @@ body.rs-fullscreen-mode .rs-toolbar__btn--fullscreen[aria-pressed="true"] {
 body.rs-fullscreen-mode .rs-sidebar-toggle-wrap,
 body.rs-fullscreen-mode #rs-float {
 
-  display:none;
+  display:none !important;
+}
+
+.rs-hidden-for-fullscreen {
+
+  display:none !important;
 }
 
 body.rs-fullscreen-mode .rs-logo-corner .rs-logo {
@@ -7248,7 +7253,6 @@ html.booting #rs-float {
 <button class="rs-btn rs-toolbar__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
 <button aria-label="Tips" class="rs-btn rs-toolbar__btn rs-tips-btn-toolbar" type="button">Tips</button>
-<button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
 <button aria-pressed="false" aria-label="Enter fullscreen mode" class="rs-btn rs-toolbar__btn rs-toolbar__btn--fullscreen" id="rs-fullscreen-btn" title="Enter fullscreen mode" type="button">Fullscreen</button>
 </div>
@@ -9545,8 +9549,38 @@ try {
 (function toolbarFullscreen(){
   const body = document.body;
   const btn = document.getElementById('rs-fullscreen-btn');
+  const sidebar = document.getElementById('rs-float');
+  const toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
   const CLASS = 'rs-fullscreen-mode';
   if (!body || !btn) return;
+
+  function applyInert(el, state){
+    if (!el) return;
+    try {
+      if ('inert' in el) {
+        el.inert = !!state;
+      } else if (state) {
+        el.setAttribute('inert', '');
+      } else {
+        el.removeAttribute('inert');
+      }
+    } catch (_) {
+      if (state) { el.setAttribute('inert', ''); }
+      else { el.removeAttribute('inert'); }
+    }
+  }
+
+  function setHidden(el, hidden){
+    if (!el) return;
+    if (hidden) {
+      el.classList.add('rs-hidden-for-fullscreen');
+      el.setAttribute('aria-hidden', 'true');
+    } else {
+      el.classList.remove('rs-hidden-for-fullscreen');
+      el.removeAttribute('aria-hidden');
+    }
+    applyInert(el, hidden);
+  }
 
   function isActive(){ return body.classList.contains(CLASS); }
   function update(active){
@@ -9556,6 +9590,8 @@ try {
     btn.setAttribute('aria-label', label);
     btn.setAttribute('title', label);
     btn.textContent = active ? 'Exit Fullscreen' : 'Fullscreen';
+    setHidden(sidebar, active);
+    setHidden(toggleWrap, active);
   }
 
   btn.addEventListener('click', function(){ update(!isActive()); });
