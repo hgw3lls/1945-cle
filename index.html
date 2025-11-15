@@ -6866,29 +6866,28 @@ html.booting #rs-float {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: #1a1a1a;
-  color: #fff;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.25);
+  padding: 10px 0;
 }
 
 #rs-list .rs-li .rs-titleband h4 {
   margin: 0;
-  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  max-width: 100%;
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #fff;
+  line-height: 1.1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 6px rgba(0,0,0,0.25);
 }
 
-#rs-list .rs-li[data-map-status="1"] .rs-titleband { background:#19a974; color:#fff; }
-#rs-list .rs-li[data-map-status="0"] .rs-titleband { background:#d65252; color:#fff; }
-#rs-list .rs-li[data-map-status="2"] .rs-titleband { background:#f0c247; color:#221b00; }
-#rs-list .rs-li[data-map-status="3"] .rs-titleband { background:#7f8790; color:#fff; }
-
-#rs-list .rs-li[data-map-status="2"] .rs-titleband h4 { color:#221b00; }
-#rs-list .rs-li[data-map-status="1"] .rs-titleband h4,
-#rs-list .rs-li[data-map-status="0"] .rs-titleband h4,
-#rs-list .rs-li[data-map-status="3"] .rs-titleband h4 { color:#fff; }
+#rs-list .rs-li[data-map-status="1"] .rs-titleband h4 { background:#19a974; color:#fff; }
+#rs-list .rs-li[data-map-status="0"] .rs-titleband h4 { background:#d65252; color:#fff; }
+#rs-list .rs-li[data-map-status="2"] .rs-titleband h4 { background:#f0c247; color:#fff; }
+#rs-list .rs-li[data-map-status="3"] .rs-titleband h4 { background:#7f8790; color:#fff; }
 
 #rs-list .rs-li .rs-titleband .rs-status-sr {
   position: absolute;
@@ -7317,19 +7316,19 @@ html.booting #rs-float {
 <style>
 /* === Status filter chips under search === */
 #rs-status-filter-bar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   padding: 6px 14px 0 14px;
   margin-bottom: 6px;
 }
 
 #rs-status-filter-bar .rs-footer-sq {
-  width: auto;
   min-width: 0;
-  height: auto;
-  padding: 6px 14px;
-  border-radius: 999px;
+  width: 100%;
+  height: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -7341,6 +7340,7 @@ html.booting #rs-float {
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
   transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 #rs-status-filter-bar .rs-footer-sq:hover {
@@ -7355,15 +7355,24 @@ html.booting #rs-float {
   box-shadow: none;
 }
 
-#rs-status-filter-bar .rs-footer-sq--2 { color: #221b00; }
 #rs-status-filter-bar .rs-footer-sq--0,
 #rs-status-filter-bar .rs-footer-sq--1,
-#rs-status-filter-bar .rs-footer-sq--3 { color: #fff; }
+#rs-status-filter-bar .rs-footer-sq--2,
+#rs-status-filter-bar .rs-footer-sq--3 {
+  color: #fff;
+}
 
 #rs-status-filter-bar:empty { display: none; padding-top: 0; }
 
-html.tv #rs-status-filter-bar { gap: 12px; padding: 10px 18px 0 18px; margin-bottom: 10px; }
-html.tv #rs-status-filter-bar .rs-footer-sq { font-size: 18px; padding: 10px 20px; }
+html.tv #rs-status-filter-bar {
+  gap: 12px;
+  padding: 10px 18px 0 18px;
+  margin-bottom: 10px;
+}
+html.tv #rs-status-filter-bar .rs-footer-sq {
+  font-size: 18px;
+  padding: 10px 16px;
+}
 </style>
 <style>
 /* === Map layer slider label alignment === */
@@ -8185,6 +8194,12 @@ function rsRestoreLayers(state){
       if (on){ l.addTo(map); } else { map.removeLayer(l); }
     });
   }
+  function syncList(){
+    if (typeof applyListFilter === 'function') {
+      try { applyListFilter(); } catch(_) {}
+    }
+  }
+
   document.querySelectorAll('.rs-footer-sq').forEach(function(btn){
     btn.addEventListener('click', function(){
       var code = Number(btn.getAttribute('data-status-code'));
@@ -8193,6 +8208,7 @@ function rsRestoreLayers(state){
       btn.classList.toggle('is-off', !pressed);
       activeStatuses[code] = pressed;
       applyFilters();
+      syncList();
     });
   });
   document.querySelector('.rs-footer-all'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){
@@ -8201,6 +8217,7 @@ function rsRestoreLayers(state){
       var code = Number(btn.getAttribute('data-status-code')); activeStatuses[code] = true;
     });
     applyFilters();
+    syncList();
   });
 
 })();
