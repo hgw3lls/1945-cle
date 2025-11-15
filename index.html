@@ -1660,6 +1660,65 @@ body.rs-fullscreen-mode #map {
   outline-offset:4px;
 }
 
+/* === MATCH LEAFLET ZOOM CONTROL TO TOOLBAR STYLE === */
+.leaflet-control-zoom {
+
+  border:none;
+  box-shadow:none;
+  background:transparent;
+}
+
+.leaflet-control-zoom a {
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:60px;
+  height:54px;
+  margin:0;
+  margin-bottom:12px;
+  font:700 26px/1 'BookmanOld', var(--font-ui, system-ui);
+  color:#080808;
+  text-decoration:none;
+  background:#f3efe4;
+  border:2px solid #080808;
+  border-radius:0;
+  box-shadow:4px 4px 0 rgba(0,0,0,0.8);
+  transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+}
+
+.leaflet-control-zoom a:last-child {
+
+  margin-bottom:0;
+}
+
+.leaflet-control-zoom a:hover:not(.leaflet-disabled) {
+
+  background:#ffffff;
+  transform:translate(-2px,-2px);
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+}
+
+.leaflet-control-zoom a:active:not(.leaflet-disabled) {
+
+  transform:translate(0,0);
+  box-shadow:3px 3px 0 rgba(0,0,0,0.75);
+}
+
+.leaflet-control-zoom a:focus-visible {
+
+  outline:2px solid var(--fever-cyan);
+  outline-offset:4px;
+}
+
+.leaflet-control-zoom a.leaflet-disabled {
+
+  opacity:0.45;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:3px 3px 0 rgba(0,0,0,0.6);
+}
+
 .rs-toolbar__btn--accent {
 
   font:700 18px/1 'LeagueGothic', var(--font-ui, system-ui);
