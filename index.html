@@ -2877,19 +2877,18 @@ html.tv #rs-list .rs-movie {
 
 
 
-#rs-search-clear {
+.rs-search-count {
 
-  height: 36px;
-    aspect-ratio: 1 / 1;
-    display: flex;
+  display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 900;
-    border-radius: 0;
-    background: #f3efe4;
-    color: #000;
-    border: 2px solid #000;
-    cursor: pointer;
+    height: 36px;
+    flex: 0 0 auto;
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 
@@ -3962,11 +3961,11 @@ html.tv #rs-list .rs-movie {
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
    #rs-float.is-collapsed .rs-search-wrap,
 #rs-float.is-collapsed #rs-search,
-#rs-float.is-collapsed #rs-search-clear
+#rs-float.is-collapsed .rs-search-count
 */
 #rs-float.is-collapsed .rs-search-wrap,
 #rs-float.is-collapsed #rs-search,
-#rs-float.is-collapsed #rs-search-clear {
+#rs-float.is-collapsed .rs-search-count {
 
   display: none !important;
 }
@@ -7177,15 +7176,14 @@ html.booting #rs-float {
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
 <header class="rs-float__header" id="rs-sidebar-header">
-<div><span class="rs-float__title">Theatres</span>
-<span class="rs-chip" id="rs-count">0</span></div>
+<div><span class="rs-float__title">Theatres</span></div>
 <div class="rs-float__actions">
 <button class="rs-btn rs-sidebar-close" id="rs-close" title="Hide list" type="button">Close</button>
 </div>
 </header>
 <div class="rs-search-wrap" role="search">
 <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
-<button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+<span aria-live="polite" class="rs-chip rs-search-count" id="rs-count">0</span>
 </div>
 <div class="rs-float__list" id="rs-list" role="list"></div>
 <div class="rs-footer-bar" id="rs-footer-bar">
@@ -8263,20 +8261,12 @@ function zoomHere(lat, lon) {
 
   function hookSearch(){
     var qEl = document.getElementById('rs-search');
-    var clr = document.getElementById('rs-search-clear');
     if (qEl){
       qEl.addEventListener('input', function(){
         applySearchFilter();
       }, {passive:true});
       qEl.addEventListener('keydown', function(e){
         if (e.key === 'Escape'){ qEl.value=''; applySearchFilter(); }
-      });
-    }
-    if (clr){
-      clr.addEventListener('click', function(){
-        var qEl2 = document.getElementById('rs-search');
-        if (qEl2){ qEl2.value=''; }
-        applySearchFilter();
       });
     }
     // Re-apply after footer square clicks
@@ -8681,14 +8671,8 @@ function zoomHere(lat, lon) {
 
   function hookSearch(){
     var q = document.getElementById('rs-search');
-    var clearBtn = document.getElementById('rs-search-clear');
     if (!q) return;
     q.addEventListener('input', debounce(applyFilter, 80));
-    if (clearBtn){
-      clearBtn.addEventListener('click', function(){
-        q.value=''; q.focus(); applyFilter();
-      });
-    }
     // run once after list mounts
     setTimeout(applyFilter, 50);
   }
