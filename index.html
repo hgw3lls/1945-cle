@@ -1622,7 +1622,8 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn,
-.rs-sidebar-toggle {
+.rs-sidebar-toggle,
+.rs-filter-toggle {
 
   display:inline-flex;
   align-items:center;
@@ -1650,7 +1651,8 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn:hover,
-.rs-sidebar-toggle:hover {
+.rs-sidebar-toggle:hover,
+.rs-filter-toggle:hover {
 
   background:#ffffff;
   transform:translate(-2px,-2px);
@@ -1658,14 +1660,16 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn:active,
-.rs-sidebar-toggle:active {
+.rs-sidebar-toggle:active,
+.rs-filter-toggle:active {
 
   transform:translate(0,0);
   box-shadow:3px 3px 0 rgba(0,0,0,0.75);
 }
 
 .rs-toolbar__btn:focus-visible,
-.rs-sidebar-toggle:focus-visible {
+.rs-sidebar-toggle:focus-visible,
+.rs-filter-toggle:focus-visible {
 
   outline:2px solid var(--fever-cyan);
   outline-offset:4px;
@@ -1829,6 +1833,126 @@ body.rs-sidebar-open .rs-sidebar-toggle-wrap {
 .rs-toolbar__btn--accent:hover {
 
   box-shadow:8px 8px 0 rgba(0,0,0,0.9);
+}
+
+.rs-filter-toggle-shell {
+
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  width:100%;
+  overflow:visible;
+}
+
+.rs-filter-toggle {
+
+  writing-mode:horizontal-tb;
+  text-orientation:mixed;
+  padding:12px 18px;
+  letter-spacing:0.12em;
+  min-height:48px;
+  min-width:160px;
+  margin-top:8px;
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+}
+
+.rs-filter-toggle[aria-expanded="true"] {
+
+  background:#080808;
+  color:#f3efe4;
+}
+
+.rs-filter-panel {
+
+  position:absolute;
+  top:0;
+  right:calc(100% + 18px);
+  width:min(360px, calc(100vw - 90px));
+  max-height:min(540px, 80vh);
+  background:rgba(8, 8, 8, 0.94);
+  border:3px solid #f3efe4;
+  box-shadow:8px 8px 0 rgba(0,0,0,0.85);
+  padding:20px;
+  color:#f3efe4;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  transform:translateX(18px) scale(0.98);
+  opacity:0;
+  pointer-events:none;
+  transition:transform 0.25s ease, opacity 0.25s ease;
+  z-index:4100;
+}
+
+.rs-filter-panel[aria-hidden="true"] {
+
+  visibility:hidden;
+}
+
+body.rs-filters-open .rs-filter-panel {
+
+  opacity:1;
+  pointer-events:auto;
+  transform:translateX(0) scale(1);
+  visibility:visible;
+}
+
+.rs-filter-panel__header {
+
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.rs-filter-panel__title {
+
+  font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  margin:0;
+}
+
+.rs-filter-panel__body {
+
+  overflow-y:auto;
+  padding-right:4px;
+  max-height:calc(80vh - 120px);
+}
+
+.rs-filter-panel__section {
+
+  margin-bottom:20px;
+}
+
+.rs-filter-panel__section:last-child {
+
+  margin-bottom:0;
+}
+
+.rs-filter-panel__section-label {
+
+  font-family:var(--font-ui, system-ui, sans-serif);
+  font-weight:900;
+  font-size:14px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  margin:0 0 10px;
+  color:#f3efe4;
+}
+
+html.tv .rs-filter-panel {
+
+  width:min(520px, 60vw);
+  max-height:70vh;
+}
+
+html.tv .rs-filter-panel__title {
+
+  font-size:32px;
 }
 
 #rs-infohelp-modal {
@@ -7274,8 +7398,9 @@ html.booting #rs-float {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 0 14px;
-  margin: 0 0 16px;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
 .rs-status-filter-label {
@@ -7375,8 +7500,8 @@ html.booting #rs-float {
 }
 
 html.tv #rs-status-filter-wrap {
-  padding: 0 18px;
-  margin-bottom: 24px;
+  padding: 0;
+  margin-bottom: 0;
 }
 
 html.tv .rs-status-filter-touchbar {
@@ -7459,6 +7584,36 @@ html.tv .rs-status-filter-btn {
 </div>
 <div class="rs-sidebar-toggle-wrap">
   <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
+  <div class="rs-filter-toggle-shell">
+    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Filters" data-label-open="Filters" id="rs-filter-toggle" type="button">Filters</button>
+    <aside aria-hidden="true" aria-label="Map filters" class="rs-filter-panel" id="rs-filter-panel">
+      <div class="rs-filter-panel__header">
+        <p class="rs-filter-panel__title">Filters</p>
+      </div>
+      <div class="rs-filter-panel__body">
+        <div class="rs-filter-panel__section">
+          <p class="rs-filter-panel__section-label">Status</p>
+          <div class="rs-status-filter-select" id="rs-status-filter-wrap">
+            <span class="rs-status-filter-label" id="rs-status-filter-label">Theatre Status</span>
+            <div aria-labelledby="rs-status-filter-label" class="rs-status-filter-touchbar" role="group">
+              <button type="button" class="rs-status-filter-btn is-active" data-status="all" aria-pressed="true">All Statuses</button>
+              <button type="button" class="rs-status-filter-btn" data-status="1" aria-pressed="false">Open</button>
+              <button type="button" class="rs-status-filter-btn" data-status="0" aria-pressed="false">Closed</button>
+              <button type="button" class="rs-status-filter-btn" data-status="2" aria-pressed="false">Repurposed</button>
+              <button type="button" class="rs-status-filter-btn" data-status="3" aria-pressed="false">Demolished</button>
+            </div>
+            <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
+              <option value="all">All Statuses</option>
+              <option value="1">Open</option>
+              <option value="0">Closed</option>
+              <option value="2">Repurposed</option>
+              <option value="3">Demolished</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
 <header class="rs-float__header" id="rs-sidebar-header">
@@ -7470,23 +7625,6 @@ html.tv .rs-status-filter-btn {
 <div class="rs-search-wrap" role="search">
   <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
   <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
-</div>
-<div class="rs-status-filter-select" id="rs-status-filter-wrap">
-  <span class="rs-status-filter-label" id="rs-status-filter-label">Theatre Status</span>
-  <div aria-labelledby="rs-status-filter-label" class="rs-status-filter-touchbar" role="group">
-    <button type="button" class="rs-status-filter-btn is-active" data-status="all" aria-pressed="true">All Statuses</button>
-    <button type="button" class="rs-status-filter-btn" data-status="1" aria-pressed="false">Open</button>
-    <button type="button" class="rs-status-filter-btn" data-status="0" aria-pressed="false">Closed</button>
-    <button type="button" class="rs-status-filter-btn" data-status="2" aria-pressed="false">Repurposed</button>
-    <button type="button" class="rs-status-filter-btn" data-status="3" aria-pressed="false">Demolished</button>
-  </div>
-  <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
-    <option value="all">All Statuses</option>
-    <option value="1">Open</option>
-    <option value="0">Closed</option>
-    <option value="2">Repurposed</option>
-    <option value="3">Demolished</option>
-  </select>
 </div>
 <div class="rs-float__list" id="rs-list" role="list"></div>
 <div class="rs-footer-bar" id="rs-footer-bar">
@@ -8003,8 +8141,64 @@ function rsRestoreLayers(state){
   var floatEl = document.getElementById('rs-float');
   var toggleBtn = document.getElementById('rs-sidebar-toggle');
   var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
+  var filterToggle = document.getElementById('rs-filter-toggle');
+  var filterPanel = document.getElementById('rs-filter-panel');
+  var filterShell = document.querySelector('.rs-filter-toggle-shell');
   var closeBtn = document.getElementById('rs-close');
   var listEl = document.getElementById('rs-list');
+
+  function setFiltersOpen(open){
+    var body = document.body;
+    if (body){
+      body.classList.toggle('rs-filters-open', !!open);
+    }
+    if (filterPanel){
+      filterPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (typeof filterPanel.toggleAttribute === 'function'){
+        filterPanel.toggleAttribute('inert', !open);
+      } else if (!open) {
+        filterPanel.setAttribute('inert', '');
+      } else {
+        filterPanel.removeAttribute('inert');
+      }
+    }
+    if (filterToggle){
+      filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var openLabel = filterToggle.getAttribute('data-label-open') || 'Filters';
+      var closeLabel = filterToggle.getAttribute('data-label-close') || 'Close Filters';
+      filterToggle.textContent = open ? closeLabel : openLabel;
+    }
+  }
+
+  if (typeof window !== 'undefined'){
+    window.rsSetFiltersOpen = setFiltersOpen;
+    window.rsFiltersPanel = {
+      open: function(){ setFiltersOpen(true); },
+      close: function(){ setFiltersOpen(false); },
+      toggle: function(){
+        var body = document.body;
+        var isOpen = body ? body.classList.contains('rs-filters-open') : false;
+        setFiltersOpen(!isOpen);
+      }
+    };
+  }
+
+  if (filterToggle){
+    setFiltersOpen(false);
+    filterToggle.addEventListener('click', function(){
+      var body = document.body;
+      var isOpen = body ? body.classList.contains('rs-filters-open') : false;
+      setFiltersOpen(!isOpen);
+    });
+  }
+
+  document.addEventListener('click', function(evt){
+    var body = document.body;
+    if (!body || !body.classList.contains('rs-filters-open')) return;
+    var target = evt.target;
+    if (filterShell && filterShell.contains(target)) return;
+    setFiltersOpen(false);
+  });
 
   function positionSidebarToggle(){
     if (!toggleWrap) toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
@@ -8078,9 +8272,21 @@ function rsRestoreLayers(state){
   }
 
   document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape' && floatEl && !floatEl.classList.contains('is-hidden')){
-      setSidebarHidden(true);
-      if (toggleBtn) toggleBtn.focus();
+    if (e.key === 'Escape'){
+      var handled = false;
+      var body = document.body;
+      var filtersOpen = body && body.classList.contains('rs-filters-open');
+      if (filtersOpen){
+        setFiltersOpen(false);
+        if (filterToggle){
+          filterToggle.focus();
+        }
+        handled = true;
+      }
+      if (!handled && floatEl && !floatEl.classList.contains('is-hidden')){
+        setSidebarHidden(true);
+        if (toggleBtn) toggleBtn.focus();
+      }
     }
   });
 
