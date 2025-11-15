@@ -1974,6 +1974,30 @@ body.rs-filters-open .rs-filter-panel {
   margin-bottom:0;
 }
 
+.rs-filter-panel__hint {
+
+  margin:0 0 12px;
+  font-family:var(--font-body, 'BookmanOld', Georgia, serif);
+  font-size:14px;
+  line-height:1.35;
+  color:#d8d2c4;
+}
+
+.rs-filter-panel__content {
+
+  margin-bottom:18px;
+}
+
+.rs-filter-panel [data-panel] {
+
+  display:none;
+}
+
+.rs-filter-panel [data-panel].is-active {
+
+  display:block;
+}
+
 .rs-filter-accordion {
 
   border:3px solid #000;
@@ -7841,83 +7865,71 @@ html.tv .rs-status-filter-btn--showall {
 <div class="rs-sidebar-toggle-wrap">
   <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
   <div class="rs-filter-toggle-shell">
-    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Filters" data-label-open="Filters" id="rs-filter-toggle" type="button">Filters</button>
-    <aside aria-hidden="true" aria-label="Map filters" class="rs-filter-panel" id="rs-filter-panel">
-      <div class="rs-filter-panel__header">
-        <p class="rs-filter-panel__title">Filters</p>
-      </div>
+    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Status" data-label-open="Status" data-target="status" id="rs-status-toggle" type="button">Status</button>
+    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Map Layers" data-label-open="Map Layers" data-target="layers" id="rs-layers-toggle" type="button">Map Layers</button>
+    <aside aria-hidden="true" aria-label="Status filters" class="rs-filter-panel" data-mode="status" id="rs-filter-panel">
       <div class="rs-filter-panel__body">
-        <div class="rs-filter-panel__section rs-filter-accordion" data-acc-section="status">
-          <button class="rs-accordion__trigger" type="button" aria-expanded="false" aria-controls="rs-acc-status">
-            <span>Status</span>
-            <span aria-hidden="true" class="rs-accordion__chevron"></span>
-          </button>
-          <div class="rs-accordion__content" id="rs-acc-status" aria-hidden="true">
-            <div class="rs-status-filter-select" id="rs-status-filter-wrap">
-              <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
-                <div class="rs-status-filter-grid">
-                  <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
-                  <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
-                  <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
-                  <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
-                </div>
-                <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
+        <p class="rs-filter-panel__hint" data-panel="status">Tap a status to show those theatres.</p>
+        <div class="rs-filter-panel__content" data-panel="status">
+          <div class="rs-status-filter-select" id="rs-status-filter-wrap">
+            <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
+              <div class="rs-status-filter-grid">
+                <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
+                <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
+                <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
+                <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
               </div>
-              <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
-                <option value="all">All Statuses</option>
-                <option value="1">Open</option>
-                <option value="0">Closed</option>
-                <option value="2">Repurposed</option>
-                <option value="3">Demolished</option>
-              </select>
+              <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
             </div>
+            <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
+              <option value="all">All Statuses</option>
+              <option value="1">Open</option>
+              <option value="0">Closed</option>
+              <option value="2">Repurposed</option>
+              <option value="3">Demolished</option>
+            </select>
           </div>
         </div>
-        <div class="rs-filter-panel__section rs-filter-accordion" data-acc-section="layers">
-          <button class="rs-accordion__trigger rs-maplayers-header" type="button" aria-expanded="false" aria-controls="rs-acc-layers">
-            <span>Map Layers</span>
-            <span aria-hidden="true" class="rs-accordion__chevron"></span>
-          </button>
-          <div class="rs-accordion__content rs-layer-stack" id="rs-acc-layers" aria-hidden="true">
-            <div class="rs-layer-row">
-              <div class="rs-layer-row__label">
-                <span class="rs-label">Cleveland</span>
-                <span class="rs-label rs-label--sub">1927–1937</span>
-              </div>
-              <div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
-                <div class="rs-hist-bar-fill" style="width:100%"></div>
-                <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-                <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-                <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-                <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-                <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-              </div>
+        <p class="rs-filter-panel__hint" data-panel="layers">Compare the overlays or dim them to see the base map.</p>
+        <div class="rs-filter-panel__content rs-layer-stack" data-panel="layers">
+          <div class="rs-layer-row">
+            <div class="rs-layer-row__label">
+              <span class="rs-label">Cleveland</span>
+              <span class="rs-label rs-label--sub">1927–1937</span>
             </div>
-            <div class="rs-layer-row">
-              <div class="rs-layer-row__label">
-                <span class="rs-label">Satellite</span>
-              </div>
-              <div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
-                <div class="rs-hist-bar-fill" style="width:100%"></div>
-                <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-                <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-                <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-                <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-                <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-              </div>
+            <div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
+              <div class="rs-hist-bar-fill" style="width:100%"></div>
+              <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+              <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+              <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+              <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+              <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
             </div>
-            <div class="rs-layer-row">
-              <div class="rs-layer-row__label">
-                <span class="rs-label">Street</span>
-              </div>
-              <div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
-                <div class="rs-hist-bar-fill" style="width:0%"></div>
-                <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-                <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-                <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-                <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-                <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-              </div>
+          </div>
+          <div class="rs-layer-row">
+            <div class="rs-layer-row__label">
+              <span class="rs-label">Satellite</span>
+            </div>
+            <div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar"data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
+              <div class="rs-hist-bar-fill" style="width:100%"></div>
+              <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+              <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+              <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+              <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+              <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
+            </div>
+          </div>
+          <div class="rs-layer-row">
+            <div class="rs-layer-row__label">
+              <span class="rs-label">Street</span>
+            </div>
+            <div aria-label="Street map opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="osm" id="rs-osm-bar" role="slider" tabindex="0">
+              <div class="rs-hist-bar-fill" style="width:100%"></div>
+              <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+              <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+              <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+              <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+              <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
             </div>
           </div>
         </div>
@@ -7925,20 +7937,6 @@ html.tv .rs-status-filter-btn--showall {
     </aside>
   </div>
 </div>
-<aside class="rs-float rs-float--sidebar" id="rs-float">
-<header class="rs-float__header" id="rs-sidebar-header">
-<div><span class="rs-float__title">Theatres</span></div>
-<div class="rs-float__actions">
-<span aria-live="polite" class="rs-chip rs-count-badge" id="rs-count">0</span>
-<button class="rs-btn rs-float__reset-btn" id="rs-list-reset-btn" title="Reset search and filters" type="button">Reset</button>
-</div>
-</header>
-<div class="rs-search-wrap" role="search">
-  <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
-  <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
-</div>
-<div class="rs-float__list" id="rs-list" role="list"></div>
-</aside>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
 <div class="backdrop"></div>
@@ -8401,59 +8399,48 @@ function rsRestoreLayers(state){
   var floatEl = document.getElementById('rs-float');
   var toggleBtn = document.getElementById('rs-sidebar-toggle');
   var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
-  var filterToggle = document.getElementById('rs-filter-toggle');
+  var filterToggles = Array.prototype.slice.call(document.querySelectorAll('.rs-filter-toggle'));
   var filterPanel = document.getElementById('rs-filter-panel');
   var filterShell = document.querySelector('.rs-filter-toggle-shell');
   var closeBtn = document.getElementById('rs-close');
   var listEl = document.getElementById('rs-list');
-  var filterAccordions = [];
+  var activeFilterMode = (filterPanel && filterPanel.dataset.mode) || 'status';
 
-  function setAccordionState(section, expanded){
-    if (!section) return;
-    var trigger = section.querySelector('.rs-accordion__trigger');
-    var content = section.querySelector('.rs-accordion__content');
-    section.classList.toggle('is-collapsed', !expanded);
-    section.classList.toggle('collapsed', !expanded);
-    if (trigger) trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-    if (content) {
-      content.classList.toggle('collapsed', !expanded);
-      content.setAttribute('aria-hidden', expanded ? 'false' : 'true');
-      if (expanded && content.classList.contains('rs-layer-content')) {
-        void content.offsetWidth;
-        content.style.transform = 'translateZ(0)';
-        requestAnimationFrame(function(){ content.style.transform = ''; });
-      }
-    }
+  function isFiltersOpen(){
+    var body = document.body;
+    return !!(body && body.classList.contains('rs-filters-open'));
   }
 
-  function collapseAllAccordions(){
-    filterAccordions.forEach(function(section){ setAccordionState(section, false); });
-  }
-
-  function bindFilterAccordions(){
-    filterAccordions = Array.prototype.slice.call(document.querySelectorAll('.rs-filter-accordion'));
-    filterAccordions.forEach(function(section){
-      var trigger = section.querySelector('.rs-accordion__trigger');
-      if (!trigger || trigger.dataset.rsAccordionBound) return;
-      trigger.dataset.rsAccordionBound = '1';
-      trigger.dataset.rsLayersBound = '1';
-      trigger.addEventListener('click', function(){
-        var isCollapsed = section.classList.contains('is-collapsed');
-        setAccordionState(section, isCollapsed);
+  function setFilterMode(mode, opts){
+    activeFilterMode = mode || activeFilterMode || 'status';
+    var isOpen = (opts && typeof opts.isOpen === 'boolean') ? opts.isOpen : isFiltersOpen();
+    if (filterPanel){
+      filterPanel.dataset.mode = activeFilterMode;
+      var label = activeFilterMode === 'layers' ? 'Map layers' : 'Theatre status filters';
+      filterPanel.setAttribute('aria-label', label);
+      var panels = filterPanel.querySelectorAll('[data-panel]');
+      panels.forEach(function(node){
+        var isMatch = node.getAttribute('data-panel') === activeFilterMode;
+        node.classList.toggle('is-active', isMatch);
+        node.setAttribute('aria-hidden', isMatch ? 'false' : 'true');
       });
-      setAccordionState(section, false);
+    }
+    filterToggles.forEach(function(btn){
+      var target = (btn.dataset && btn.dataset.target) || 'status';
+      var matches = target === activeFilterMode;
+      btn.classList.toggle('is-active', matches);
+      btn.setAttribute('aria-expanded', (isOpen && matches) ? 'true' : 'false');
+      var openLabel = btn.getAttribute('data-label-open') || btn.textContent || '';
+      var closeLabel = btn.getAttribute('data-label-close') || ('Close ' + openLabel);
+      btn.textContent = (isOpen && matches) ? closeLabel : openLabel;
     });
   }
 
-  bindFilterAccordions();
-
-  function setFiltersOpen(open){
+  function setFiltersOpen(open, mode){
+    if (mode) setFilterMode(mode, { isOpen: open });
     var body = document.body;
     if (body){
       body.classList.toggle('rs-filters-open', !!open);
-    }
-    if (open) {
-      collapseAllAccordions();
     }
     if (filterPanel){
       filterPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
@@ -8465,33 +8452,31 @@ function rsRestoreLayers(state){
         filterPanel.removeAttribute('inert');
       }
     }
-    if (filterToggle){
-      filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      var openLabel = filterToggle.getAttribute('data-label-open') || 'Filters';
-      var closeLabel = filterToggle.getAttribute('data-label-close') || 'Close Filters';
-      filterToggle.textContent = open ? closeLabel : openLabel;
-    }
+    setFilterMode(activeFilterMode, { isOpen: !!open });
   }
 
   if (typeof window !== 'undefined'){
-    window.rsSetFiltersOpen = setFiltersOpen;
+    window.rsSetFiltersOpen = function(open, mode){ setFiltersOpen(open, mode); };
     window.rsFiltersPanel = {
-      open: function(){ setFiltersOpen(true); },
+      open: function(mode){ setFiltersOpen(true, mode); },
       close: function(){ setFiltersOpen(false); },
-      toggle: function(){
-        var body = document.body;
-        var isOpen = body ? body.classList.contains('rs-filters-open') : false;
-        setFiltersOpen(!isOpen);
+      toggle: function(mode){
+        var isOpen = isFiltersOpen();
+        var nextMode = mode || activeFilterMode;
+        setFiltersOpen(!(isOpen && nextMode === activeFilterMode), nextMode);
       }
     };
   }
 
-  if (filterToggle){
-    setFiltersOpen(false);
-    filterToggle.addEventListener('click', function(){
-      var body = document.body;
-      var isOpen = body ? body.classList.contains('rs-filters-open') : false;
-      setFiltersOpen(!isOpen);
+  if (filterToggles.length){
+    setFiltersOpen(false, activeFilterMode);
+    filterToggles.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var mode = (btn.dataset && btn.dataset.target) || 'status';
+        var isOpen = isFiltersOpen();
+        var isSameMode = activeFilterMode === mode;
+        setFiltersOpen(!(isOpen && isSameMode), mode);
+      });
     });
   }
 
@@ -8582,8 +8567,17 @@ function rsRestoreLayers(state){
       var filtersOpen = body && body.classList.contains('rs-filters-open');
       if (filtersOpen){
         setFiltersOpen(false);
-        if (filterToggle){
-          filterToggle.focus();
+        if (filterToggles.length){
+          var activeBtn = null;
+          for (var i=0; i<filterToggles.length; i++){
+            var candidate = filterToggles[i];
+            if (candidate && candidate.dataset && candidate.dataset.target === activeFilterMode) {
+              activeBtn = candidate;
+              break;
+            }
+          }
+          if (!activeBtn) activeBtn = filterToggles[0];
+          if (activeBtn && typeof activeBtn.focus === 'function') activeBtn.focus();
         }
         handled = true;
       }
