@@ -7974,6 +7974,52 @@ function rsRestoreLayers(state){
     markerCluster.addTo(map);
   }
 
+  function rememberExactLatLng(layer, latlng) {
+    if (!layer || !latlng) return;
+    try {
+      var exact = (typeof latlng.clone === 'function') ? latlng.clone() : L.latLng(latlng.lat, latlng.lng);
+      if (exact && typeof exact.lat === 'number' && typeof exact.lng === 'number') {
+        layer._rsExactLatLng = exact;
+      }
+    } catch (_) {
+      try {
+        layer._rsExactLatLng = L.latLng(latlng.lat, latlng.lng);
+      } catch (_) {}
+    }
+  }
+
+  function getExactLatLng(layer) {
+    if (!layer) return null;
+    var pre = layer._preSpiderfyLatlng;
+    if (pre && typeof pre.lat === 'number' && typeof pre.lng === 'number') {
+      return pre;
+    }
+    var stored = layer._rsExactLatLng || layer.__rsExactLatLng || layer._rsHomeLatLng;
+    if (stored && typeof stored.lat === 'number' && typeof stored.lng === 'number') {
+      return stored;
+    }
+    if (typeof layer.getLatLng === 'function') {
+      var ll = layer.getLatLng();
+      if (ll && typeof ll.lat === 'number' && typeof ll.lng === 'number') {
+        try {
+          layer._rsExactLatLng = (typeof ll.clone === 'function') ? ll.clone() : L.latLng(ll.lat, ll.lng);
+        } catch (_) {
+          layer._rsExactLatLng = ll;
+        }
+        return layer._rsExactLatLng || ll;
+      }
+    }
+    var geom = layer.feature && layer.feature.geometry;
+    if (geom && geom.type === 'Point' && Array.isArray(geom.coordinates) && geom.coordinates.length >= 2) {
+      try { return L.latLng(geom.coordinates[1], geom.coordinates[0]); } catch (_) {}
+    }
+    return null;
+  }
+
+  if (typeof window !== 'undefined') {
+    try { window.rsGetExactLatLng = getExactLatLng; } catch (_) {}
+  }
+
   // Layer of theatre points
   var markerLayer = L.geoJSON(THEATRES, {
     pointToLayer: function(f, latlng){
@@ -7981,7 +8027,7 @@ function rsRestoreLayers(state){
       var col = colorForStatus(p.map_status);
 
       // Brutalist, high-contrast circle markers
-      return L.circleMarker(latlng, {
+      var marker = L.circleMarker(latlng, {
         radius: 10,
         color: '#000000',
         weight: 3,
@@ -7990,9 +8036,17 @@ function rsRestoreLayers(state){
         opacity: 1,
         pane: 'markerPane'
       });
+      rememberExactLatLng(marker, latlng);
+      return marker;
     },
     onEachFeature: function(f, layer){
       var p = f.properties||{};
+      if (!layer._rsExactLatLng) {
+        try {
+          var ll = (typeof layer.getLatLng === 'function') ? layer.getLatLng() : null;
+          if (ll) rememberExactLatLng(layer, ll);
+        } catch (_) {}
+      }
       layer.bindPopup(buildPopupHTML(p), { maxWidth: 360 });
       layer.on('popupopen', function(ev){
         var node = ev.popup.getElement();
@@ -8247,7 +8301,8 @@ function rsRestoreLayers(state){
     var item = e.target.closest('.rs-li'); if (!item) return;
     var idx = Number(item.getAttribute('data-idx'));
     var layer = idxToLayer[idx]; if (!layer) return;
-    var latlng = layer.getLatLng();
+    var latlng = (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') ? window.rsGetExactLatLng(layer) : (layer.getLatLng ? layer.getLatLng() : null);
+    if (!latlng) return;
     var z = Math.max(map.getZoom(), 16);
     var px = map.project(latlng, z);
     var offsetY = Math.round(map.getSize().y * -0.20);
@@ -9198,7 +9253,18 @@ function zoomHere(lat, lon) {
       try{
         var pop = ev && ev.popup; if (!pop) return;
         var root = pop.getElement && pop.getElement(); if (!root) return;
-        var ll = pop.getLatLng ? pop.getLatLng() : (ev.layer && ev.layer.getLatLng && ev.layer.getLatLng());
+        var ll = null;
+        if (ev.layer) {
+          if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
+            ll = window.rsGetExactLatLng(ev.layer);
+          }
+          if (!ll && ev.layer.getLatLng) {
+            ll = ev.layer.getLatLng();
+          }
+        }
+        if (!ll && pop && typeof pop.getLatLng === 'function') {
+          ll = pop.getLatLng();
+        }
         var lat = ll && ll.lat, lng = ll && ll.lng;
         var el = findMatch(root, lat, lng);
         clearActive(); if (el) activate(el);
@@ -9314,7 +9380,13 @@ function zoomHere(lat, lon) {
           if (chosen){
             l.__rsListEl = chosen;
             // write lat/lng if missing
-            var ll = (l.getLatLng && l.getLatLng()) || null;
+            var ll = null;
+            if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
+              ll = window.rsGetExactLatLng(l);
+            }
+            if (!ll && l.getLatLng) {
+              ll = l.getLatLng();
+            }
             if (ll){
               if (!chosen.getAttribute('data-lat')) chosen.setAttribute('data-lat', String(ll.lat));
               if (!chosen.getAttribute('data-lng')) chosen.setAttribute('data-lng', String(ll.lng));
@@ -10850,8 +10922,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function flyFocus(layer) {
     if (!(typeof map !== 'undefined' && map)) return;
-    if (!layer || typeof layer.getLatLng !== 'function') return;
-    var ll = layer.getLatLng();
+    if (!layer) return;
+    var ll = null;
+    if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
+      ll = window.rsGetExactLatLng(layer);
+    }
+    if (!ll && typeof layer.getLatLng === 'function') {
+      ll = layer.getLatLng();
+    }
+    if (!ll) return;
     map.flyTo(ll, 19, { animate: true, duration: 0.8, easeLinearity: 0.25, noMoveStart: false });
     var once = function() {
       map.off('moveend', once);
@@ -13031,7 +13110,13 @@ document.addEventListener("DOMContentLoaded", function() {
           let minLat=  90, minLng=  180, maxLat= -90, maxLng= -180;
           markerLayer.eachLayer(function(l){
             try{
-              const ll = l.getLatLng ? l.getLatLng() : null;
+              let ll = null;
+              if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
+                ll = window.rsGetExactLatLng(l);
+              }
+              if (!ll && l.getLatLng) {
+                ll = l.getLatLng();
+              }
               if (!ll) return;
               if (ll.lat < minLat) minLat = ll.lat;
               if (ll.lat > maxLat) maxLat = ll.lat;
@@ -13209,7 +13294,13 @@ document.addEventListener("DOMContentLoaded", function() {
       var minLat=90,minLng=180,maxLat=-90,maxLng=-180, any=false;
       markerLayer.eachLayer(function(l){
         try{
-          var ll = l && l.getLatLng ? l.getLatLng() : null;
+          var ll = null;
+          if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
+            ll = window.rsGetExactLatLng(l);
+          }
+          if (!ll && l && l.getLatLng) {
+            ll = l.getLatLng();
+          }
           if(!ll) return;
           any=true;
           if (ll.lat<minLat) minLat=ll.lat;
