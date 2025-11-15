@@ -7543,6 +7543,25 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     }
   }
 
+  var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
+  var isLocalOnlineMode = tileMode === 'local_online';
+  var onlineTiles = window.RS_ONLINE_TILES || {};
+
+  if (isLocalOnlineMode && document && document.body && document.body.dataset) {
+    document.body.dataset.rsMode = 'local-online';
+  }
+
+  function createOnlineLayer(key, extraOpts) {
+    try {
+      var info = onlineTiles[key] || {};
+      if (!info.url) return null;
+      var opts = Object.assign({}, info.opts || {}, extraOpts || {});
+      return L.tileLayer(info.url, opts);
+    } catch (_) {
+      return null;
+    }
+  }
+
 // Make unloaded / missing tiles appear black
 document.getElementById('map').style.backgroundColor = '#000';
 
