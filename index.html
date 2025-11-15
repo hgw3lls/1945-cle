@@ -6659,6 +6659,8 @@ html.booting #rs-float {
 <style>
 /* === Robust collapse/expand for MAP LAYERS (prevents post-toggle overflow) === */
 /* Keep layout rules scoped to the expanded state so reflow recalculates widths */
+.rs-filter-panel .rs-layer-section:not(.collapsed) .rs-historic-slider,
+.rs-filter-panel .rs-layer-section:not(.collapsed) .rs-layer-slider,
 #rs-float .rs-layer-section:not(.collapsed) .rs-historic-slider,
 #rs-float .rs-layer-section:not(.collapsed) .rs-layer-slider {
   display: grid !important;
@@ -6672,16 +6674,21 @@ html.booting #rs-float {
   box-sizing: border-box !important;
 }
 
+.rs-filter-panel .rs-layer-section.collapsed .rs-historic-slider,
+.rs-filter-panel .rs-layer-section.collapsed .rs-layer-slider,
 #rs-float .rs-layer-section.collapsed .rs-historic-slider,
 #rs-float .rs-layer-section.collapsed .rs-layer-slider {
   display: none !important; /* fully remove from flow; avoids half widths */
 }
 
+.rs-filter-panel .rs-layer-section,
 #rs-float .rs-layer-section {
   width: 100% !important;
   will-change: max-height !important;
 }
 
+.rs-filter-panel .rs-layer-section .rs-hist-label,
+.rs-filter-panel .rs-layer-section .rs-layer-label,
 #rs-float .rs-layer-section .rs-hist-label,
 #rs-float .rs-layer-section .rs-layer-label {
   max-width: 120px !important;
@@ -6690,6 +6697,8 @@ html.booting #rs-float {
   text-overflow: clip !important;
 }
 
+.rs-filter-panel .rs-layer-section .rs-hist-bar,
+.rs-filter-panel .rs-layer-section .rs-layer-bar,
 #rs-float .rs-layer-section .rs-hist-bar,
 #rs-float .rs-layer-section .rs-layer-bar {
   width: 100% !important;
@@ -6699,12 +6708,14 @@ html.booting #rs-float {
 }
 
 /* Smooth but safe collapse animation */
+.rs-filter-panel .rs-layer-section.collapsed,
 #rs-float .rs-layer-section.collapsed {
   max-height: 0 !important;
   opacity: 0;
   overflow: hidden !important;
   transition: max-height 220ms ease, opacity 160ms ease !important;
 }
+.rs-filter-panel .rs-layer-section:not(.collapsed),
 #rs-float .rs-layer-section:not(.collapsed) {
   max-height: 500px !important;   /* plenty of headroom */
   opacity: 1;
@@ -6714,12 +6725,14 @@ html.booting #rs-float {
 </style>
 <style>
 /* === Collapse only the MAP LAYERS content; keep footer visible === */
+.rs-filter-panel .rs-layer-content.collapsed,
 #rs-float .rs-layer-content.collapsed {
   max-height: 0 !important;
   opacity: 0;
   overflow: hidden !important;
   transition: max-height 220ms ease, opacity 160ms ease !important;
 }
+.rs-filter-panel .rs-layer-content:not(.collapsed),
 #rs-float .rs-layer-content:not(.collapsed) {
   max-height: 600px !important;   /* headroom */
   opacity: 1;
@@ -6727,6 +6740,8 @@ html.booting #rs-float {
 }
 
 /* Layout grid for rows (label + bar) stays the same in expanded state */
+.rs-filter-panel .rs-layer-content:not(.collapsed) .rs-historic-slider,
+.rs-filter-panel .rs-layer-content:not(.collapsed) .rs-layer-slider,
 #rs-float .rs-layer-content:not(.collapsed) .rs-historic-slider,
 #rs-float .rs-layer-content:not(.collapsed) .rs-layer-slider {
   display: grid !important;
@@ -6741,6 +6756,8 @@ html.booting #rs-float {
 }
 
 /* When collapsed, fully remove rows from flow */
+.rs-filter-panel .rs-layer-content.collapsed .rs-historic-slider,
+.rs-filter-panel .rs-layer-content.collapsed .rs-layer-slider,
 #rs-float .rs-layer-content.collapsed .rs-historic-slider,
 #rs-float .rs-layer-content.collapsed .rs-layer-slider {
   display: none !important;
@@ -6758,6 +6775,8 @@ html.booting #rs-float {
 </style>
 <style>
 /* === Footer safety: never hidden by collapse === */
+.rs-filter-panel .rs-layer-section,
+.rs-filter-panel .rs-layer-section.collapsed,
 #rs-float .rs-layer-section,
 #rs-float .rs-layer-section.collapsed {
   max-height: none !important;
@@ -6767,11 +6786,13 @@ html.booting #rs-float {
 }
 
 /* Collapse only the content wrapper */
+.rs-filter-panel .rs-layer-content.collapsed,
 #rs-float .rs-layer-content.collapsed {
   max-height: 0 !important;
   opacity: 0;
   overflow: hidden !important;
 }
+.rs-filter-panel .rs-layer-content:not(.collapsed),
 #rs-float .rs-layer-content:not(.collapsed) {
   max-height: 600px !important;
   opacity: 1;
@@ -7675,6 +7696,55 @@ html.tv .rs-status-filter-btn--showall {
             </select>
           </div>
         </div>
+        <div class="rs-filter-panel__section rs-filter-panel__section--layers">
+          <div class="rs-layer-section">
+            <div class="rs-maplayers-header">MAP LAYERS</div>
+            <div class="rs-layer-content">
+              <div class="rs-historic-slider">
+                <div class="rs-hist-label">
+                  <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
+                  <span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
+                </div>
+                <div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
+                  <div class="rs-hist-bar-fill" style="width:100%"></div>
+                  <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+                  <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+                  <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+                  <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+                  <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
+                </div>
+              </div>
+              <div class="rs-layer-sliders">
+                <div class="rs-layer-slider">
+                  <div class="rs-hist-label">
+                    <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
+                  </div>
+                  <div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
+                    <div class="rs-hist-bar-fill" style="width:100%"></div>
+                    <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+                    <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+                    <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+                    <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+                    <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
+                  </div>
+                </div>
+                <div class="rs-layer-slider">
+                  <div class="rs-hist-label">
+                    <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
+                  </div>
+                  <div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
+                    <div class="rs-hist-bar-fill" style="width:0%"></div>
+                    <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+                    <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+                    <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+                    <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+                    <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </aside>
   </div>
@@ -7692,57 +7762,6 @@ html.tv .rs-status-filter-btn--showall {
   <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
 </div>
 <div class="rs-float__list" id="rs-list" role="list"></div>
-<div class="rs-footer-bar" id="rs-footer-bar">
-<div class="rs-footer-inner">
-<!-- Historic opacity slider (Stage 1) -->
-<div class="rs-footer-inner">
-<div class="rs-maplayers-header">MAP LAYERS</div>
-<!-- Historic opacity segmented bar -->
-<div class="rs-historic-slider">
-<div class="rs-hist-label">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
-<span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
-</div>
-<div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:100%"></div>
-<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-</div>
-</div>
-<div class="rs-layer-sliders">
-<!-- Street segmented bar -->
-<div class="rs-layer-slider">
-<div class="rs-hist-label">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
-</div>
-<div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:100%"></div>
-<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-</div>
-</div>
-<div class="rs-layer-slider">
-<div class="rs-hist-label">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
-</div>
-<div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:0%"></div>
-<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-</div>
-</div>
-</div>
-</div>
-</div>
 </aside>
 <!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
 <div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
@@ -11003,14 +11022,12 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const header = document.querySelector('.rs-maplayers-header');
-  const section = header ? header.closest('.rs-footer-inner') : null;
-  if (header && section) {
-    section.classList.add('rs-layer-section');
-    header.addEventListener('click', function() {
-      section.classList.toggle('collapsed');
-    });
-  }
+  document.querySelectorAll('.rs-maplayers-header').forEach(function(header){
+    const section = header.closest('.rs-layer-section') || header.parentElement;
+    if (section) {
+      section.classList.add('rs-layer-section');
+    }
+  });
 });
 </script>
 <script>
@@ -12246,67 +12263,60 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 // === Ensure reflow after toggling MAP LAYERS ===
 (function(){
-  const sect = document.querySelector('#rs-float .rs-layer-section');
-  const header = document.querySelector('#rs-float .rs-maplayers-header');
-  if (!sect || !header) return;
+  document.querySelectorAll('.rs-layer-section').forEach(function(sect){
+    const header = sect.querySelector('.rs-maplayers-header');
+    if (!header) return;
 
-  function toggleSection(){
-    sect.classList.toggle('collapsed');
-    // After transition, trigger a layout reflow so bars recalc widths
-    const onEnd = () => {
-      // read -> write pattern to flush layout
-      void sect.offsetWidth;
-      sect.style.transform = 'translateZ(0)';
-      // remove the transform next frame
-      requestAnimationFrame(()=>{ sect.style.transform = ''; });
-      sect.removeEventListener('transitionend', onEnd);
-    };
-    sect.addEventListener('transitionend', onEnd);
-  }
+    function toggleSection(){
+      sect.classList.toggle('collapsed');
+      // After transition, trigger a layout reflow so bars recalc widths
+      const onEnd = () => {
+        // read -> write pattern to flush layout
+        void sect.offsetWidth;
+        sect.style.transform = 'translateZ(0)';
+        // remove the transform next frame
+        requestAnimationFrame(()=>{ sect.style.transform = ''; });
+        sect.removeEventListener('transitionend', onEnd);
+      };
+      sect.addEventListener('transitionend', onEnd);
+    }
 
-  // If header already has a listener elsewhere, we won't duplicate (idempotent)
-  if (!header.dataset.rsToggleBound) {
-    header.addEventListener('click', toggleSection);
-    header.dataset.rsToggleBound = '1';
-  }
+    // If header already has a listener elsewhere, we won't duplicate (idempotent)
+    if (!header.dataset.rsToggleBound) {
+      header.addEventListener('click', toggleSection);
+      header.dataset.rsToggleBound = '1';
+    }
+  });
 })();
 </script>
 <script>
 // Collapse only the sliders/content, not the footer
 (function(){
-  const panel = document.querySelector('#rs-float');
-  const sect  = panel && panel.querySelector('.rs-layer-section');
-  if (!sect) return;
-
-  // 1) Ensure a dedicated content wrapper exists and contains the slider rows
-  let content = sect.querySelector('.rs-layer-content');
-  if (!content) {
-    content = document.createElement('div');
-    content.className = 'rs-layer-content';
-    // Move slider rows into content
-    const rows = sect.querySelectorAll('.rs-historic-slider, .rs-layer-slider');
-    rows.forEach(r => content.appendChild(r));
-    // Insert content before the footer (if present), else at end
-    const footer = document.querySelector('#rs-footer-bar');
-    if (footer && footer.parentElement === panel) {
-      panel.insertBefore(content, footer);
-    } else {
+  document.querySelectorAll('.rs-layer-section').forEach(function(sect){
+    // 1) Ensure a dedicated content wrapper exists and contains the slider rows
+    let content = sect.querySelector('.rs-layer-content');
+    if (!content) {
+      content = document.createElement('div');
+      content.className = 'rs-layer-content';
+      // Move slider rows into content
+      const rows = sect.querySelectorAll('.rs-historic-slider, .rs-layer-slider');
+      rows.forEach(r => content.appendChild(r));
       sect.appendChild(content);
     }
-  }
 
-  // 2) Bind header toggle to content only
-  const header = panel.querySelector('.rs-maplayers-header');
-  if (!header) return;
-  if (!header.dataset.rsLayersBound) {
-    header.dataset.rsLayersBound = '1';
-    header.addEventListener('click', () => {
-      content.classList.toggle('collapsed');
-      // force reflow after transition
-      const onEnd = () => { void content.offsetWidth; content.removeEventListener('transitionend', onEnd); };
-      content.addEventListener('transitionend', onEnd);
-    });
-  }
+    // 2) Bind header toggle to content only
+    const header = sect.querySelector('.rs-maplayers-header');
+    if (!header) return;
+    if (!header.dataset.rsLayersBound) {
+      header.dataset.rsLayersBound = '1';
+      header.addEventListener('click', () => {
+        content.classList.toggle('collapsed');
+        // force reflow after transition
+        const onEnd = () => { void content.offsetWidth; content.removeEventListener('transitionend', onEnd); };
+        content.addEventListener('transitionend', onEnd);
+      });
+    }
+  });
 })();
 </script>
 <script>
