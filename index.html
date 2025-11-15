@@ -7269,13 +7269,13 @@ html.booting #rs-float {
 }
 
 <style>
-/* === Status filter dropdown under search === */
+/* === Touch-friendly status filter buttons under search === */
 #rs-status-filter-wrap {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
   padding: 0 14px;
-  margin: 0 0 12px;
+  margin: 0 0 16px;
 }
 
 .rs-status-filter-label {
@@ -7285,47 +7285,110 @@ html.booting #rs-float {
   letter-spacing: 1px;
   text-transform: uppercase;
   color: #f3efe4;
-  line-height: 1;
+  line-height: 1.05;
+}
+
+.rs-status-filter-touchbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.rs-status-filter-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+  border: 2px solid #000;
+  box-shadow: 0 5px 0 #000;
+  background: #f3efe4;
+  color: #000;
+  padding: 16px 12px;
+  min-height: 64px;
+  text-transform: uppercase;
+  font-family: var(--font-ui, 'StandingRoomOnly NF', system-ui);
+  font-weight: 900;
+  font-size: 15px;
+  letter-spacing: 0.6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.1;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.18s ease;
+}
+
+.rs-status-filter-btn:not(.is-active) {
+  filter: saturate(80%) brightness(0.92);
+  box-shadow: 0 2px 0 #000;
+  transform: translateY(2px);
+}
+
+.rs-status-filter-btn.is-active {
+  transform: translateY(-1px);
+  box-shadow: 0 7px 0 #000;
+  filter: none;
+}
+
+.rs-status-filter-btn:focus-visible {
+  outline: 2px solid #f3efe4;
+  outline-offset: 3px;
+}
+
+.rs-status-filter-btn[data-status="all"] {
+  background: #f3efe4;
+  color: #000;
+}
+
+.rs-status-filter-btn[data-status="1"] {
+  background: #19a974;
+  color: #fff;
+}
+
+.rs-status-filter-btn[data-status="0"] {
+  background: #e03131;
+  color: #fff;
+}
+
+.rs-status-filter-btn[data-status="2"] {
+  background: #fcc419;
+  color: #111;
+}
+
+.rs-status-filter-btn[data-status="3"] {
+  background: #495057;
+  color: #fff;
 }
 
 .rs-status-filter-dropdown {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
-  padding: 8px 42px 8px 12px;
-  border-radius: 0;
-  border: 2px solid #000;
-  background: #f3efe4;
-  color: #000;
-  font-family: 'BookmanOld', 'Bookman Old Style', Georgia, serif;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: 0.3px;
-  box-shadow: 0 3px 0 #000;
-  text-transform: uppercase;
-  cursor: pointer;
-  min-height: 42px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='12' viewBox='0 0 18 12'%3E%3Cpath fill='%23000' d='M9 12 0 0h18z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: calc(100% - 16px) 50%;
-  background-size: 18px 12px;
-}
-
-.rs-status-filter-dropdown:focus {
-  outline: 2px solid #f3efe4;
-  outline-offset: 2px;
-}
-
-html.tv .rs-status-filter-dropdown {
-  font-size: clamp(16px, 2.6vw, 20px);
-  padding: 12px 48px 12px 16px;
-  background-position: calc(100% - 20px) 50%;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
 }
 
 html.tv #rs-status-filter-wrap {
   padding: 0 18px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+html.tv .rs-status-filter-touchbar {
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+html.tv .rs-status-filter-btn {
+  min-height: clamp(72px, 10vw, 96px);
+  font-size: clamp(16px, 2.4vw, 20px);
+  letter-spacing: 0.8px;
+  padding: 18px 16px;
 }
 </style>
 <style>
@@ -7409,8 +7472,15 @@ html.tv #rs-status-filter-wrap {
   <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
 </div>
 <div class="rs-status-filter-select" id="rs-status-filter-wrap">
-  <label class="rs-status-filter-label" for="rs-status-select">Theatre Status</label>
-  <select class="rs-status-filter-dropdown" id="rs-status-select">
+  <span class="rs-status-filter-label" id="rs-status-filter-label">Theatre Status</span>
+  <div aria-labelledby="rs-status-filter-label" class="rs-status-filter-touchbar" role="group">
+    <button type="button" class="rs-status-filter-btn is-active" data-status="all" aria-pressed="true">All Statuses</button>
+    <button type="button" class="rs-status-filter-btn" data-status="1" aria-pressed="false">Open</button>
+    <button type="button" class="rs-status-filter-btn" data-status="0" aria-pressed="false">Closed</button>
+    <button type="button" class="rs-status-filter-btn" data-status="2" aria-pressed="false">Repurposed</button>
+    <button type="button" class="rs-status-filter-btn" data-status="3" aria-pressed="false">Demolished</button>
+  </div>
+  <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
     <option value="all">All Statuses</option>
     <option value="1">Open</option>
     <option value="0">Closed</option>
@@ -8164,14 +8234,72 @@ function rsRestoreLayers(state){
 
   // Footer legend filters
   var statusSelect = document.getElementById('rs-status-select');
+  var statusWrap = document.getElementById('rs-status-filter-wrap');
+  var statusButtons = statusWrap ? Array.prototype.slice.call(statusWrap.querySelectorAll('.rs-status-filter-btn')) : [];
+
+  function normalizedStatus(code){
+    if (code === undefined || code === null || code === '' || code === 'all') { return 'all'; }
+    return String(code);
+  }
+
+  function updateStatusButtons(code){
+    if (!statusWrap) return;
+    var active = normalizedStatus(code);
+    statusWrap.setAttribute('data-active-status', active);
+    statusButtons.forEach(function(btn){
+      var btnCode = normalizedStatus(btn.getAttribute('data-status'));
+      var isActive = (btnCode === active);
+      btn.classList.toggle('is-active', isActive);
+      btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
 
   function resolveActiveStatus(){
-    if (!statusSelect) return 'all';
-    var val = statusSelect.value;
-    if (val === undefined || val === null || val === '' || val === 'all') {
-      return 'all';
+    if (statusWrap && statusWrap.getAttribute('data-active-status')) {
+      return normalizedStatus(statusWrap.getAttribute('data-active-status'));
     }
-    return String(val);
+    if (!statusSelect) return 'all';
+    return normalizedStatus(statusSelect.value);
+  }
+
+  function dispatchStatusChange(){
+    if (!statusSelect) return;
+    try {
+      statusSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch (err) {
+      if (document.createEvent) {
+        var evt = document.createEvent('HTMLEvents');
+        evt.initEvent('change', true, false);
+        statusSelect.dispatchEvent(evt);
+      }
+    }
+  }
+
+  function setStatusFilter(code, triggerChange){
+    var target = normalizedStatus(code);
+    if (statusSelect && statusSelect.value !== target) {
+      statusSelect.value = target;
+      if (triggerChange) {
+        dispatchStatusChange();
+      }
+    } else if (triggerChange) {
+      if (statusSelect) {
+        dispatchStatusChange();
+      } else if (statusWrap && typeof CustomEvent === 'function') {
+        statusWrap.dispatchEvent(new CustomEvent('rs-status-change', { bubbles: true, detail: { value: target } }));
+      }
+    }
+    updateStatusButtons(target);
+  }
+
+  if (statusButtons.length){
+    statusButtons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var code = btn.getAttribute('data-status');
+        if (normalizedStatus(code) === resolveActiveStatus()) return;
+        setStatusFilter(code, true);
+      });
+    });
   }
 
   function applyFilters(){
@@ -8199,17 +8327,37 @@ function rsRestoreLayers(state){
 
   if (statusSelect){
     statusSelect.addEventListener('change', function(){
+      updateStatusButtons(resolveActiveStatus());
+      applyFilters();
+      syncList();
+    });
+  } else if (statusWrap && typeof CustomEvent === 'function') {
+    statusWrap.addEventListener('rs-status-change', function(){
       applyFilters();
       syncList();
     });
   }
 
+  updateStatusButtons(resolveActiveStatus());
+
+  if (typeof window !== 'undefined') {
+    window.rsStatusFilterUI = {
+      set: function(code, triggerChange){
+        setStatusFilter(code, triggerChange !== false);
+      },
+      sync: function(){
+        updateStatusButtons(resolveActiveStatus());
+      },
+      get: function(){
+        return resolveActiveStatus();
+      }
+    };
+  }
+
   var infoBtn = (typeof window.rsFindInfoButton === 'function') ? window.rsFindInfoButton() : null;
-  if (infoBtn && statusSelect){
+  if (infoBtn){
     infoBtn.addEventListener('click', function(){
-      statusSelect.value = 'all';
-      applyFilters();
-      syncList();
+      setStatusFilter('all', true);
     });
   }
 
