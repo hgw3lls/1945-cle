@@ -6205,9 +6205,13 @@ html.booting #rs-float {
 </style>
 <style>
 /* === Skinny & Tall Float Panel (see more theatres) === */
+:root {
+  --rs-float-min-width: clamp(280px, 26vw, 340px);
+  --rs-float-max-width: clamp(280px, 26vw, 340px);
+}
+
 #rs-float {
   /* narrower overall, but responsive */
-  width: clamp(280px, 26vw, 340px) !important;
   max-height: 90vh !important;
 }
 /* Make the internal list use the added height */
