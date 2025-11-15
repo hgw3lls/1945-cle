@@ -366,18 +366,19 @@
 :root {
 
   --panel-bg: rgba(24,24,24,0.88);
-        --panel-border: rgba(255,255,255,0.18);
-        --chip-bg: #fff;
-        --chip-text: #111;
-        --shadow: 0 10px 30px rgba(0,0,0,0.35);
-        --accent: #00c8ff;
-        --font-display: 'LeagueGothic Condensed', 'LeagueGothic', system-ui, sans-serif;
-        --font-ui: 'Advercase Demo', system-ui, sans-serif;
-        --font-body: 'BookmanOld', Georgia, serif;
-        --rs-float-min-width: 320px;
-        --rs-float-max-width: min(92vw, 420px);
-        --rs-float-max-height: 72vh;
-        --rs-float-width: auto;
+  --panel-border: rgba(255,255,255,0.18);
+  --chip-bg: #fff;
+  --chip-text: #111;
+  --shadow: 0 10px 30px rgba(0,0,0,0.35);
+  --accent: #00c8ff;
+  --font-display: 'StandingRoomOnly NF', 'LeagueGothic Condensed', 'LeagueGothic', system-ui, sans-serif;
+  --font-display-alt: 'Theater_Bold', 'Theater Bold', 'LeagueGothic', system-ui, sans-serif;
+  --font-ui: 'Advercase Demo', 'LeagueGothic', system-ui, sans-serif;
+  --font-body: 'BookmanOld', 'RialtoNF', Georgia, serif;
+  --rs-float-min-width: 320px;
+  --rs-float-max-width: min(92vw, 420px);
+  --rs-float-max-height: 72vh;
+  --rs-float-width: auto;
 }
 
 [data-rs-resolution="jaszdot-4k"] {
@@ -751,7 +752,10 @@ body.rs-fullscreen-mode #map {
 */
 .rs-pop {
 
-  font:500 13px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: var(--font-body, Georgia, serif);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
   color:#0f172a;
 }
 
@@ -1210,7 +1214,10 @@ body.rs-fullscreen-mode #map {
 .rs-btn {
 
   appearance: none; border: 1px solid #aaa; background: var(--chip-bg); color: var(--chip-text);
-        font: 600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        font-family: var(--font-ui, system-ui, sans-serif);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1;
         padding: 8px 14px; border-radius: 12px; box-shadow: var(--shadow); cursor: pointer;
 }
 
@@ -1245,6 +1252,7 @@ body.rs-fullscreen-mode #map {
   border:2px solid #222;
   letter-spacing:.02em;
   text-transform:uppercase;
+  font-family: var(--font-ui, system-ui, sans-serif);
   font-weight:800;
   padding:8px 12px;
   box-shadow:none;
@@ -1621,7 +1629,10 @@ body.rs-fullscreen-mode #map {
   justify-content:center;
   min-height:44px;
   padding:12px 18px;
-  font:700 16px/1.1 'BookmanOld', var(--font-ui, system-ui);
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.1;
   text-transform:uppercase;
   letter-spacing:0.08em;
   background:#f3efe4;
@@ -1677,7 +1688,10 @@ body.rs-fullscreen-mode #map {
   height:54px;
   margin:0;
   margin-bottom:12px;
-  font:700 26px/1 'BookmanOld', var(--font-ui, system-ui);
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
   color:#080808;
   text-decoration:none;
   background:#f3efe4;
@@ -1721,7 +1735,10 @@ body.rs-fullscreen-mode #map {
 
 .rs-toolbar__btn--accent {
 
-  font:700 18px/1 'LeagueGothic', var(--font-ui, system-ui);
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
   letter-spacing:0.12em;
   padding:14px 24px;
   border-width:3px;
@@ -3281,7 +3298,10 @@ html.tv #rs-list .rs-movie {
 */
 #rs-float .rs-li .rs-nowshowing .rs-ns-title {
 
-  font: 800 12px/1.2 system-ui, sans-serif;
+  font-family: var(--font-ui, system-ui, sans-serif);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.2;
     text-transform: uppercase;
     letter-spacing: 0.4px;
     color: #bfb8a5;
@@ -3295,7 +3315,10 @@ html.tv #rs-list .rs-movie {
 */
 #rs-float .rs-li .rs-nowshowing .rs-ns-lines {
 
-  font: 600 12px/1.25 system-ui, sans-serif;
+  font-family: var(--font-body, Georgia, serif);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
     color: #d9d3c3;
     white-space: pre-wrap;
 }
@@ -5539,7 +5562,10 @@ html.booting #rs-float {
 */
 .rs-pop {
 
-  font:500 13px/1.35 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-family: var(--font-body, Georgia, serif);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
   color:#0f172a;
 }
 
@@ -5580,7 +5606,10 @@ html.booting #rs-float {
   left:10px;
   bottom:10px;
   color:#fff;
-  font:900 28px/1 system-ui, sans-serif;
+  font-family: var(--font-display-alt, var(--font-display));
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
   text-transform:uppercase;
   letter-spacing:-0.8px;
   text-shadow:0 2px 10px rgba(0,0,0,.65);
@@ -5649,7 +5678,10 @@ html.booting #rs-float {
 */
 .rs-pop-nowshowing {
 
-  font:600 14px/1.2 system-ui, sans-serif;
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
   color:#111;
   text-align:center;
   margin:6px 0 10px 0;
@@ -5687,7 +5719,10 @@ html.booting #rs-float {
 */
 .rs-btn-more {
 
-  font:600 13px/1 system-ui, sans-serif;
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
   padding:6px 12px;
   border-radius:8px;
   background:#fff;
@@ -5757,7 +5792,10 @@ html.booting #rs-float {
 */
 .rs-details-title {
 
-  font:900 60px/1 system-ui, sans-serif;
+  font-family: var(--font-display-alt, var(--font-display));
+  font-size: 60px;
+  font-weight: 900;
+  line-height: 1;
   text-transform:uppercase;
   text-align:center;
   margin:2px 0 10px 0;
@@ -5839,7 +5877,10 @@ html.booting #rs-float {
   right:10px;
   background:rgba(0,0,0,.6);
   color:#fff;
-  font:600 12px/1 system-ui,sans-serif;
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
   letter-spacing:.3px;
   padding:4px 6px;
   border-radius:4px;
@@ -5927,7 +5968,10 @@ html.booting #rs-float {
 */
 #rs-gallery .rs-g-title {
 
-  font:900 20px/1 'StandingRoomOnly NF', system-ui;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
   text-transform:uppercase;
   color:#f3efe4;
 }
@@ -6289,14 +6333,14 @@ html.booting #rs-float {
   repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 1px, transparent 1px 100px) border-box;
   border-top:2px solid #000; border-bottom:2px solid #000;}
 #rs-gallery .rs-g-head{display:flex; align-items:center; justify-content:space-between; padding:8px 10px; background:#111; color:#f3efe4; border-bottom:2px solid #000;}
-#rs-gallery .rs-g-title{font:900 22px/1 'StandingRoomOnly NF', system-ui; text-transform:uppercase; letter-spacing:.3px;}
+#rs-gallery .rs-g-title{font-family:var(--font-display, system-ui, sans-serif); font-size:22px; font-weight:900; line-height:1; text-transform:uppercase; letter-spacing:.3px;}
 #rs-gallery .rs-g-close{background:#f3efe4; color:#000; border:2px solid #000; border-radius:0; font-weight:900; text-transform:uppercase; padding:6px 10px; cursor:pointer;}
 #rs-gallery .rs-g-stage{position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;}
 #rs-gallery .rs-g-stage img{width:100%; height:100%; object-fit:contain; border:2px solid #000; background:#fff;}
 #rs-gallery .rs-g-prev, #rs-gallery .rs-g-next{position:absolute; top:50%; transform:translateY(-50%); background:#f3efe4; color:#000; border:2px solid #000; font-weight:900; text-transform:uppercase; padding:12px 14px; cursor:pointer;}
 #rs-gallery .rs-g-prev{left:10px;} .rs-gallery .rs-g-next{right:10px;}
 #rs-gallery .rs-g-foot{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 10px; background:#111; border-top:2px solid #000;}
-#rs-gallery .rs-g-count{font:800 12px/1 system-ui; color:#f3efe4; letter-spacing:.3px; text-transform:uppercase;}
+#rs-gallery .rs-g-count{font-family:var(--font-ui, system-ui, sans-serif); font-size:12px; font-weight:800; line-height:1; color:#f3efe4; letter-spacing:.3px; text-transform:uppercase;}
 #rs-gallery .rs-g-thumbs{display:flex; gap:8px; overflow-x:auto; overflow-y:hidden; padding:8px 2px;}
 #rs-gallery .rs-g-thumbs img{height:56px; width:auto; border:2px solid #000; cursor:pointer; opacity:.85;}
 #rs-gallery .rs-g-thumbs img[aria-current="true"]{outline:3px solid #3fc4ff; opacity:1;}
@@ -7300,10 +7344,10 @@ html.booting #rs-float {
   color:#f3efe4; text-align:center; cursor:pointer;">
 <div style="max-width:min(70ch, 80vw); padding:24px;">
 <img alt="Reel Screens" src="images/reel_screens_logo.png" style="width:min(520px,60vw); filter:drop-shadow(0 8px 24px rgba(0,0,0,.6)); margin-bottom:18px;"/>
-<h1 style="font:900 56px/1 'LeagueGothic', system-ui; letter-spacing:.5px; text-transform:uppercase; margin:0 0 10px;">
+<h1 style="font-family: var(--font-display, system-ui, sans-serif); font-size:56px; font-weight:900; line-height:1; letter-spacing:.5px; text-transform:uppercase; margin:0 0 10px;">
       Cleveland • 1945
     </h1>
-<p style="font:600 20px/1.35 var(--font-ui, system-ui); opacity:.95; margin:0 0 18px;">
+<p style="font-family: var(--font-body, Georgia, serif); font-size:20px; font-weight:600; line-height:1.35; opacity:.95; margin:0 0 18px;">
       Tap anywhere to begin. Explore neighbourhood theatres, “Today at Your Theatre,” and layered historic maps.
     </p>
 <button class="rs-btn" style="font-size:20px; padding:14px 18px;">Start Exploring</button>
