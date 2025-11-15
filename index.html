@@ -8016,6 +8016,23 @@ function rsRestoreLayers(state){
     return null;
   }
 
+  function revealMarker(layer) {
+    if (!layer) return;
+    try {
+      if (markerCluster && typeof markerCluster.getVisibleParent === 'function') {
+        var parent = markerCluster.getVisibleParent(layer);
+        if (parent && parent !== layer && typeof parent.spiderfy === 'function') {
+          parent.spiderfy();
+          return;
+        }
+      }
+      var fallbackParent = layer.__parent;
+      if (fallbackParent && fallbackParent !== layer && typeof fallbackParent.spiderfy === 'function') {
+        fallbackParent.spiderfy();
+      }
+    } catch (_) {}
+  }
+
   if (typeof window !== 'undefined') {
     try { window.rsGetExactLatLng = getExactLatLng; } catch (_) {}
   }
@@ -10938,6 +10955,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var yOffset = Math.round(map.getSize().y * -0.18); // move view up 18% so point sits lower
         map.panBy([0, yOffset], { animate: false });
       } catch(_) {}
+      setTimeout(function(){ revealMarker(layer); }, 60);
     };
     if (window.map && typeof window.map.on === "function") map.on('moveend', once);
     setTimeout(once, 1200);
