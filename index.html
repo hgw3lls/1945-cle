@@ -8114,13 +8114,22 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
       applyFilters();
     });
   });
-  document.querySelector('.rs-footer-all'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){
-    document.querySelectorAll('.rs-footer-sq').forEach(function(btn){
-      btn.setAttribute('aria-pressed','true'); btn.classList.remove('is-off');
-      var code = Number(btn.getAttribute('data-status-code')); activeStatuses[code] = true;
+  var helpBtnFinder = typeof window.rsFindHelpButton === 'function' ? window.rsFindHelpButton : null;
+  if (helpBtnFinder) helpBtnFinder();
+
+  var infoBtnFinder = typeof window.rsFindInfoButton === 'function' ? window.rsFindInfoButton : null;
+  var infoBtn = infoBtnFinder ? infoBtnFinder() : null;
+  if (infoBtn) {
+    infoBtn.addEventListener('click', function(){
+      document.querySelectorAll('.rs-footer-sq').forEach(function(btn){
+        btn.setAttribute('aria-pressed', 'true');
+        btn.classList.remove('is-off');
+        var code = Number(btn.getAttribute('data-status-code'));
+        activeStatuses[code] = true;
+      });
+      applyFilters();
     });
-    applyFilters();
-  });
+  }
 
 })();
 
@@ -10091,7 +10100,7 @@ try {
   else window.addEventListener('load', initAll, { once: true });
 
   var m = gm();
-  if (m){
+  if (m && typeof m.on === 'function'){
     m.on('layeradd', enforceOrder);
     m.on('layerremove', enforceOrder);
   }
