@@ -1788,7 +1788,7 @@ body.rs-fullscreen-mode .rs-logo-corner .rs-logo {
   position:fixed;
   top:120px;
   right:0;
-  z-index:10010;
+  z-index:9000;
   display:flex;
   flex-direction:column;
   align-items:flex-end;
@@ -7861,14 +7861,30 @@ function rsRestoreLayers(state){
     }
   }).addTo(map);
 
-  // Reset button -> fit to bounds
-  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ map.fitBounds(BOUNDS, {padding:[20,20]});
+  // Ensure default toolbar buttons resolve and Info button returns to the home view
+  if (typeof window.rsFindHelpButton === 'function') {
+    window.rsFindHelpButton();
+  }
+  var infoButton = typeof window.rsFindInfoButton === 'function' ? window.rsFindInfoButton() : null;
+  if (infoButton) {
+    infoButton.addEventListener('click', function(){
+      try {
+        if (typeof window.rsGoHome === 'function') {
+          window.rsGoHome({ animate: true });
+        } else if (map && typeof map.fitBounds === 'function') {
+          map.fitBounds(BOUNDS, { padding:[20,20] });
+        }
+      } catch (_) {}
+    });
+  }
 
   // Expose globally for kiosk scripts
   try { window.map = map; } catch(_) {}
 
   // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
+  if (typeof window.rsGoHome === 'function') {
+    window.rsGoHome({ animate: false });
+  }
 
 // Make unloaded / missing tiles appear black
 document.getElementById('map').style.backgroundColor = '#000';
@@ -12847,6 +12863,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if (typeof window.fitToGeoJSON === 'function'){ window.fitToGeoJSON(); return; }
         if (typeof window.fitToMarkers === 'function'){ window.fitToMarkers(); return; }
         if (RS.fitMarkerLayerBounds()) return;
+        if (typeof window.rsGoHome === 'function') {
+          window.rsGoHome({ animate: true });
+          return;
+        }
         console.warn('RS.recenter: no fitting function/layer found.');
       }catch(e){ console.warn('RS.recenter error', e); }
     };
