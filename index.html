@@ -1974,6 +1974,73 @@ body.rs-filters-open .rs-filter-panel {
   margin-bottom:0;
 }
 
+.rs-filter-accordion {
+
+  border:3px solid #000;
+    box-shadow:-6px 6px 0 #000;
+    background:#f3efe4;
+    color:#000;
+}
+
+.rs-accordion__trigger {
+
+  width:100%;
+    padding:12px 14px;
+    background:#f3efe4;
+    color:#000;
+    text-transform:uppercase;
+    font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
+    font-weight:900;
+    letter-spacing:0.18em;
+    border:0;
+    border-bottom:3px solid #000;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    cursor:pointer;
+}
+
+.rs-accordion__trigger:hover {
+
+  background:#e5e0d2;
+}
+
+.rs-accordion__trigger:focus-visible {
+
+  outline:3px solid #000;
+  outline-offset:2px;
+}
+
+.rs-accordion__chevron {
+
+  display:inline-block;
+    width:12px;
+    height:12px;
+    border-left:3px solid #000;
+    border-bottom:3px solid #000;
+    transform:rotate(-45deg);
+    transition:transform 0.18s ease;
+}
+
+.rs-filter-accordion:not(.is-collapsed) .rs-accordion__chevron {
+
+  transform:rotate(45deg);
+}
+
+.rs-accordion__content {
+
+  background:#0c0c0c;
+    color:#f3efe4;
+    padding:14px 14px 16px;
+    border-top:3px solid #000;
+}
+
+.rs-filter-accordion.is-collapsed .rs-accordion__content {
+
+  display:none;
+}
+
 html.tv .rs-filter-panel {
 
   width:min(360px, 50vw);
@@ -7676,30 +7743,39 @@ html.tv .rs-status-filter-btn--showall {
         <p class="rs-filter-panel__title">Filters</p>
       </div>
       <div class="rs-filter-panel__body">
-        <div class="rs-filter-panel__section">
-          <div class="rs-status-filter-select" id="rs-status-filter-wrap">
-            <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
-              <div class="rs-status-filter-grid">
-                <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
+        <div class="rs-filter-panel__section rs-filter-accordion" data-acc-section="status">
+          <button class="rs-accordion__trigger" type="button" aria-expanded="false" aria-controls="rs-acc-status">
+            <span>Status</span>
+            <span aria-hidden="true" class="rs-accordion__chevron"></span>
+          </button>
+          <div class="rs-accordion__content" id="rs-acc-status" aria-hidden="true">
+            <div class="rs-status-filter-select" id="rs-status-filter-wrap">
+              <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
+                <div class="rs-status-filter-grid">
+                  <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
+                  <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
+                  <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
+                  <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
+                </div>
+                <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
               </div>
-              <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
+              <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
+                <option value="all">All Statuses</option>
+                <option value="1">Open</option>
+                <option value="0">Closed</option>
+                <option value="2">Repurposed</option>
+                <option value="3">Demolished</option>
+              </select>
             </div>
-            <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
-              <option value="all">All Statuses</option>
-              <option value="1">Open</option>
-              <option value="0">Closed</option>
-              <option value="2">Repurposed</option>
-              <option value="3">Demolished</option>
-            </select>
           </div>
         </div>
-        <div class="rs-filter-panel__section rs-filter-panel__section--layers">
+        <div class="rs-filter-panel__section rs-filter-panel__section--layers rs-filter-accordion" data-acc-section="layers">
           <div class="rs-layer-section">
-            <div class="rs-maplayers-header">MAP LAYERS</div>
-            <div class="rs-layer-content">
+            <button class="rs-accordion__trigger rs-maplayers-header" type="button" aria-expanded="false" aria-controls="rs-acc-layers">
+              <span>Map Layers</span>
+              <span aria-hidden="true" class="rs-accordion__chevron"></span>
+            </button>
+            <div class="rs-accordion__content rs-layer-content" id="rs-acc-layers" aria-hidden="true">
               <div class="rs-historic-slider">
                 <div class="rs-hist-label">
                   <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
@@ -8230,11 +8306,54 @@ function rsRestoreLayers(state){
   var filterShell = document.querySelector('.rs-filter-toggle-shell');
   var closeBtn = document.getElementById('rs-close');
   var listEl = document.getElementById('rs-list');
+  var filterAccordions = [];
+
+  function setAccordionState(section, expanded){
+    if (!section) return;
+    var trigger = section.querySelector('.rs-accordion__trigger');
+    var content = section.querySelector('.rs-accordion__content');
+    section.classList.toggle('is-collapsed', !expanded);
+    section.classList.toggle('collapsed', !expanded);
+    if (trigger) trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    if (content) {
+      content.classList.toggle('collapsed', !expanded);
+      content.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+      if (expanded && content.classList.contains('rs-layer-content')) {
+        void content.offsetWidth;
+        content.style.transform = 'translateZ(0)';
+        requestAnimationFrame(function(){ content.style.transform = ''; });
+      }
+    }
+  }
+
+  function collapseAllAccordions(){
+    filterAccordions.forEach(function(section){ setAccordionState(section, false); });
+  }
+
+  function bindFilterAccordions(){
+    filterAccordions = Array.prototype.slice.call(document.querySelectorAll('.rs-filter-accordion'));
+    filterAccordions.forEach(function(section){
+      var trigger = section.querySelector('.rs-accordion__trigger');
+      if (!trigger || trigger.dataset.rsAccordionBound) return;
+      trigger.dataset.rsAccordionBound = '1';
+      trigger.dataset.rsLayersBound = '1';
+      trigger.addEventListener('click', function(){
+        var isCollapsed = section.classList.contains('is-collapsed');
+        setAccordionState(section, isCollapsed);
+      });
+      setAccordionState(section, false);
+    });
+  }
+
+  bindFilterAccordions();
 
   function setFiltersOpen(open){
     var body = document.body;
     if (body){
       body.classList.toggle('rs-filters-open', !!open);
+    }
+    if (open) {
+      collapseAllAccordions();
     }
     if (filterPanel){
       filterPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
