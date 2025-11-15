@@ -2041,6 +2041,68 @@ body.rs-filters-open .rs-filter-panel {
   display:none;
 }
 
+.rs-layer-stack {
+
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.rs-layer-row {
+
+  display:grid;
+  grid-template-columns:140px 1fr;
+  align-items:center;
+  gap:12px;
+}
+
+.rs-layer-row__label {
+
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  text-transform:uppercase;
+  font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
+  font-weight:900;
+  letter-spacing:0.08em;
+  font-size:14px;
+}
+
+.rs-layer-row__label .rs-label {
+
+  color:#f3efe4;
+}
+
+.rs-layer-row__label .rs-label--sub {
+
+  font-size:12px;
+  opacity:0.9;
+  letter-spacing:0.06em;
+}
+
+@media (max-width: 420px) {
+
+  .rs-layer-row {
+
+    grid-template-columns:120px 1fr;
+    gap:10px;
+  }
+}
+
+html.tv .rs-layer-stack {
+
+  gap:18px;
+}
+
+html.tv .rs-layer-row {
+
+  grid-template-columns:170px 1fr;
+  gap:14px;
+}
+
+html.tv .rs-layer-row__label { font-size:16px; letter-spacing:0.1em; }
+html.tv .rs-layer-row__label .rs-label--sub { font-size:13px; }
+
 html.tv .rs-filter-panel {
 
   width:min(360px, 50vw);
@@ -7778,16 +7840,16 @@ html.tv .rs-status-filter-btn--showall {
             </div>
           </div>
         </div>
-        <div class="rs-filter-panel__section rs-filter-panel__section--layers rs-filter-accordion" data-acc-section="layers">
+        <div class="rs-filter-panel__section rs-filter-accordion" data-acc-section="layers">
           <button class="rs-accordion__trigger rs-maplayers-header" type="button" aria-expanded="false" aria-controls="rs-acc-layers">
             <span>Map Layers</span>
             <span aria-hidden="true" class="rs-accordion__chevron"></span>
           </button>
-          <div class="rs-accordion__content rs-layer-content" id="rs-acc-layers" aria-hidden="true">
-            <div class="rs-historic-slider">
-              <div class="rs-hist-label">
-                <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
-                <span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
+          <div class="rs-accordion__content rs-layer-stack" id="rs-acc-layers" aria-hidden="true">
+            <div class="rs-layer-row">
+              <div class="rs-layer-row__label">
+                <span class="rs-label">Cleveland</span>
+                <span class="rs-label rs-label--sub">1927–1937</span>
               </div>
               <div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
                 <div class="rs-hist-bar-fill" style="width:100%"></div>
@@ -7798,32 +7860,30 @@ html.tv .rs-status-filter-btn--showall {
                 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
               </div>
             </div>
-            <div class="rs-layer-sliders">
-              <div class="rs-layer-slider">
-                <div class="rs-hist-label">
-                  <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
-                </div>
-                <div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
-                  <div class="rs-hist-bar-fill" style="width:100%"></div>
-                  <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-                  <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-                  <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-                  <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-                  <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-                </div>
+            <div class="rs-layer-row">
+              <div class="rs-layer-row__label">
+                <span class="rs-label">Satellite</span>
               </div>
-              <div class="rs-layer-slider">
-                <div class="rs-hist-label">
-                  <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
-                </div>
-                <div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
-                  <div class="rs-hist-bar-fill" style="width:0%"></div>
-                  <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-                  <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-                  <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-                  <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-                  <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-                </div>
+              <div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
+                <div class="rs-hist-bar-fill" style="width:100%"></div>
+                <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+                <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+                <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+                <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+                <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
+              </div>
+            </div>
+            <div class="rs-layer-row">
+              <div class="rs-layer-row__label">
+                <span class="rs-label">Street</span>
+              </div>
+              <div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
+                <div class="rs-hist-bar-fill" style="width:0%"></div>
+                <button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+                <button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+                <button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+                <button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+                <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
               </div>
             </div>
           </div>
