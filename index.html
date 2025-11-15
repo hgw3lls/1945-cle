@@ -116,8 +116,6 @@
 })();
 </script>
 <link href="vendor/leaflet/leaflet.css" rel="stylesheet"/>
-<link href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" rel="stylesheet"/>
-<link href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" rel="stylesheet"/>
 <!-- -->
 <style id="rs-consolidated">
 /* --- Consolidated CSS (last occurrence wins) --- */
@@ -506,33 +504,6 @@ html,body {
 
   position:absolute;
   inset:0;
-}
-
-.leaflet-pane .marker-cluster {
-  background: rgba(12, 12, 12, 0.92);
-  border: 3px solid #000;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-  color: #f3efe4;
-  font-family: 'Theater_Bold', 'LeagueGothic', sans-serif;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.65);
-}
-
-.leaflet-pane .marker-cluster div {
-  background: linear-gradient(180deg, #ffdd5c 0%, #f5b400 100%);
-  border-radius: 999px;
-  border: 2px solid #000;
-  line-height: 1.2;
-  min-width: 42px;
-  min-height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.leaflet-pane .marker-cluster span {
-  color: #111;
-  font-size: 16px;
-  font-weight: 700;
 }
 
 body.rs-sidebar-open #map {
@@ -7559,7 +7530,6 @@ html.tv #rs-status-filter-bar .rs-footer-sq {
 </div>
 </div>
 <script src="vendor/leaflet/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script>
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
@@ -7955,89 +7925,6 @@ function rsRestoreLayers(state){
     modal.style.display='block'; modal.setAttribute('aria-hidden','false');
   }
 
-  // Cluster group to keep overlapping theatres accessible
-  var markerCluster = (typeof L.markerClusterGroup === 'function') ? L.markerClusterGroup({
-    spiderfyOnEveryZoom: true,
-    spiderfyOnMaxZoom: true,
-    zoomToBoundsOnClick: false,
-    showCoverageOnHover: false,
-    removeOutsideVisibleBounds: true,
-    disableClusteringAtZoom: 20,
-    spiderfyDistanceMultiplier: 1.2,
-    maxClusterRadius: function(zoom){
-      if (zoom >= 16) return 28;      // only cluster when markers truly overlap at close zooms
-      if (zoom >= 14) return 20;
-      return 14;
-    }
-  }) : null;
-  if (markerCluster) {
-    markerCluster.addTo(map);
-  }
-
-  function rememberExactLatLng(layer, latlng) {
-    if (!layer || !latlng) return;
-    try {
-      var exact = (typeof latlng.clone === 'function') ? latlng.clone() : L.latLng(latlng.lat, latlng.lng);
-      if (exact && typeof exact.lat === 'number' && typeof exact.lng === 'number') {
-        layer._rsExactLatLng = exact;
-      }
-    } catch (_) {
-      try {
-        layer._rsExactLatLng = L.latLng(latlng.lat, latlng.lng);
-      } catch (_) {}
-    }
-  }
-
-  function getExactLatLng(layer) {
-    if (!layer) return null;
-    var pre = layer._preSpiderfyLatlng;
-    if (pre && typeof pre.lat === 'number' && typeof pre.lng === 'number') {
-      return pre;
-    }
-    var stored = layer._rsExactLatLng || layer.__rsExactLatLng || layer._rsHomeLatLng;
-    if (stored && typeof stored.lat === 'number' && typeof stored.lng === 'number') {
-      return stored;
-    }
-    if (typeof layer.getLatLng === 'function') {
-      var ll = layer.getLatLng();
-      if (ll && typeof ll.lat === 'number' && typeof ll.lng === 'number') {
-        try {
-          layer._rsExactLatLng = (typeof ll.clone === 'function') ? ll.clone() : L.latLng(ll.lat, ll.lng);
-        } catch (_) {
-          layer._rsExactLatLng = ll;
-        }
-        return layer._rsExactLatLng || ll;
-      }
-    }
-    var geom = layer.feature && layer.feature.geometry;
-    if (geom && geom.type === 'Point' && Array.isArray(geom.coordinates) && geom.coordinates.length >= 2) {
-      try { return L.latLng(geom.coordinates[1], geom.coordinates[0]); } catch (_) {}
-    }
-    return null;
-  }
-
-  function revealMarker(layer) {
-    if (!layer) return;
-    try {
-      if (markerCluster && typeof markerCluster.getVisibleParent === 'function') {
-        var parent = markerCluster.getVisibleParent(layer);
-        if (parent && parent !== layer && typeof parent.spiderfy === 'function') {
-          parent.spiderfy();
-          return;
-        }
-      }
-      var fallbackParent = layer.__parent;
-      if (fallbackParent && fallbackParent !== layer && typeof fallbackParent.spiderfy === 'function') {
-        fallbackParent.spiderfy();
-      }
-    } catch (_) {}
-  }
-
-  if (typeof window !== 'undefined') {
-    try { window.rsGetExactLatLng = getExactLatLng; } catch (_) {}
-    try { window.rsRevealMarker = revealMarker; } catch (_) {}
-  }
-
   // Layer of theatre points
   var markerLayer = L.geoJSON(THEATRES, {
     pointToLayer: function(f, latlng){
@@ -8045,7 +7932,7 @@ function rsRestoreLayers(state){
       var col = colorForStatus(p.map_status);
 
       // Brutalist, high-contrast circle markers
-      var marker = L.circleMarker(latlng, {
+      return L.circleMarker(latlng, {
         radius: 10,
         color: '#000000',
         weight: 3,
@@ -8054,17 +7941,9 @@ function rsRestoreLayers(state){
         opacity: 1,
         pane: 'markerPane'
       });
-      rememberExactLatLng(marker, latlng);
-      return marker;
     },
     onEachFeature: function(f, layer){
       var p = f.properties||{};
-      if (!layer._rsExactLatLng) {
-        try {
-          var ll = (typeof layer.getLatLng === 'function') ? layer.getLatLng() : null;
-          if (ll) rememberExactLatLng(layer, ll);
-        } catch (_) {}
-      }
       layer.bindPopup(buildPopupHTML(p), { maxWidth: 360 });
       layer.on('popupopen', function(ev){
         var node = ev.popup.getElement();
@@ -8073,27 +7952,9 @@ function rsRestoreLayers(state){
         if (btn){ btn.addEventListener('click', function(){ openDetails(p); }); }
       });
     }
-  });
-
-  if (markerCluster) {
-    markerCluster.addLayer(markerLayer);
-    markerCluster.on('clusterclick', function(ev){
-      var cluster = ev && ev.layer;
-      if (cluster && typeof cluster.spiderfy === 'function') {
-        cluster.spiderfy();
-      }
-    });
-    markerCluster.on('spiderfy', function(){
-      try { map.closePopup(); } catch(_) {}
-    });
-  } else {
-    markerLayer.addTo(map);
-  }
+  }).addTo(map);
 
   try { window.markerLayer = markerLayer; } catch(_) {}
-  if (markerCluster) {
-    try { window.markerClusterGroup = markerCluster; } catch(_) {}
-  }
 
   // Ensure default toolbar buttons resolve without forcing a map recenter
   if (typeof window.rsFindHelpButton === 'function') {
@@ -8321,12 +8182,11 @@ function rsRestoreLayers(state){
     var layer = idxToLayer[idx]; if (!layer) return;
 
     var focus = (typeof window !== 'undefined' && typeof window.rsFlyFocus === 'function') ? window.rsFlyFocus : null;
-    var reveal = (typeof window !== 'undefined' && typeof window.rsRevealMarker === 'function') ? window.rsRevealMarker : null;
 
     if (focus) {
       focus(layer);
     } else {
-      var latlng = (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') ? window.rsGetExactLatLng(layer) : (layer.getLatLng ? layer.getLatLng() : null);
+      var latlng = (layer && typeof layer.getLatLng === 'function') ? layer.getLatLng() : null;
       if (!latlng) return;
       var z = Math.max(map.getZoom(), 16);
       var px = map.project(latlng, z);
@@ -8336,7 +8196,6 @@ function rsRestoreLayers(state){
     }
 
     var open = function(){
-      try { if (reveal) reveal(layer); } catch(_) {}
       try { layer.openPopup(); } catch(_) {}
     };
     if (window.map && typeof map.once === 'function') {
@@ -8353,20 +8212,16 @@ function rsRestoreLayers(state){
   var activeStatuses = {1:true, 0:true, 2:true, 3:true};
   function applyFilters(){
     markerLayer.eachLayer(function(l){
-      var p = (l.feature && l.feature.properties) || {}; var on = !!activeStatuses[Number(p.map_status)];
-      if (markerCluster){
-        if (on) {
-          markerCluster.addLayer(l);
-        } else {
-          markerCluster.removeLayer(l);
+      var p = (l.feature && l.feature.properties) || {};
+      var on = !!activeStatuses[Number(p.map_status)];
+      if (on) {
+        if (!map.hasLayer(l)) {
+          l.addTo(map);
         }
-      } else {
-        if (on){ l.addTo(map); } else { map.removeLayer(l); }
+      } else if (map.hasLayer(l)) {
+        map.removeLayer(l);
       }
     });
-    if (markerCluster && typeof markerCluster.refreshClusters === 'function') {
-      markerCluster.refreshClusters();
-    }
   }
   function syncList(){
     if (typeof applyListFilter === 'function') {
@@ -9290,13 +9145,8 @@ function zoomHere(lat, lon) {
         var pop = ev && ev.popup; if (!pop) return;
         var root = pop.getElement && pop.getElement(); if (!root) return;
         var ll = null;
-        if (ev.layer) {
-          if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
-            ll = window.rsGetExactLatLng(ev.layer);
-          }
-          if (!ll && ev.layer.getLatLng) {
-            ll = ev.layer.getLatLng();
-          }
+        if (ev.layer && typeof ev.layer.getLatLng === 'function') {
+          ll = ev.layer.getLatLng();
         }
         if (!ll && pop && typeof pop.getLatLng === 'function') {
           ll = pop.getLatLng();
@@ -9416,13 +9266,7 @@ function zoomHere(lat, lon) {
           if (chosen){
             l.__rsListEl = chosen;
             // write lat/lng if missing
-            var ll = null;
-            if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
-              ll = window.rsGetExactLatLng(l);
-            }
-            if (!ll && l.getLatLng) {
-              ll = l.getLatLng();
-            }
+            var ll = (l && typeof l.getLatLng === 'function') ? l.getLatLng() : null;
             if (ll){
               if (!chosen.getAttribute('data-lat')) chosen.setAttribute('data-lat', String(ll.lat));
               if (!chosen.getAttribute('data-lng')) chosen.setAttribute('data-lng', String(ll.lng));
@@ -10959,13 +10803,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function flyFocus(layer) {
     if (!(typeof map !== 'undefined' && map)) return;
     if (!layer) return;
-    var ll = null;
-    if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
-      ll = window.rsGetExactLatLng(layer);
-    }
-    if (!ll && typeof layer.getLatLng === 'function') {
-      ll = layer.getLatLng();
-    }
+    var ll = (layer && typeof layer.getLatLng === 'function') ? layer.getLatLng() : null;
     if (!ll) return;
     map.flyTo(ll, 19, { animate: true, duration: 0.8, easeLinearity: 0.25, noMoveStart: false });
     var once = function() {
@@ -10974,11 +10812,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var yOffset = Math.round(map.getSize().y * -0.18); // move view up 18% so point sits lower
         map.panBy([0, yOffset], { animate: false });
       } catch(_) {}
-      setTimeout(function(){
-        if (typeof window !== 'undefined' && typeof window.rsRevealMarker === 'function') {
-          window.rsRevealMarker(layer);
-        }
-      }, 60);
     };
     if (window.map && typeof window.map.on === "function") map.on('moveend', once);
     setTimeout(once, 1200);
@@ -13155,13 +12988,7 @@ document.addEventListener("DOMContentLoaded", function() {
           let minLat=  90, minLng=  180, maxLat= -90, maxLng= -180;
           markerLayer.eachLayer(function(l){
             try{
-              let ll = null;
-              if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
-                ll = window.rsGetExactLatLng(l);
-              }
-              if (!ll && l.getLatLng) {
-                ll = l.getLatLng();
-              }
+              const ll = (l && typeof l.getLatLng === 'function') ? l.getLatLng() : null;
               if (!ll) return;
               if (ll.lat < minLat) minLat = ll.lat;
               if (ll.lat > maxLat) maxLat = ll.lat;
@@ -13339,13 +13166,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var minLat=90,minLng=180,maxLat=-90,maxLng=-180, any=false;
       markerLayer.eachLayer(function(l){
         try{
-          var ll = null;
-          if (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') {
-            ll = window.rsGetExactLatLng(l);
-          }
-          if (!ll && l && l.getLatLng) {
-            ll = l.getLatLng();
-          }
+          var ll = (l && typeof l.getLatLng === 'function') ? l.getLatLng() : null;
           if(!ll) return;
           any=true;
           if (ll.lat<minLat) minLat=ll.lat;
