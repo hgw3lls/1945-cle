@@ -334,7 +334,7 @@
 
 
 /* Keep Reset aligned but allow it to wrap to next line cleanly */
-#rs-reset {
+#rs-footer-bar #rs-reset {
 
   flex: 0 0 auto;
 }
@@ -559,203 +559,12 @@ body.rs-fullscreen-mode #map {
 
 .rs-logo-corner .rs-logo {
 
-  position:relative;
   width:220px;
   max-width:34vw;
-  aspect-ratio:1 / 1;
   filter:drop-shadow(0 6px 16px rgba(0,0,0,.45));
   user-select:none;
   pointer-events:none;
   transition:opacity 0.25s ease;
-  perspective:900px;
-}
-
-
-
-.rs-logo-flip {
-
-  position:relative;
-  width:100%;
-  height:100%;
-  background:#111;
-  border-radius:18px;
-  overflow:hidden;
-  border:6px solid #0d0d0d;
-  box-shadow:inset 0 0 0 3px rgba(0,0,0,.75);
-  transform-style:preserve-3d;
-  transform-origin:center center;
-  transition:transform 0.8s ease;
-}
-
-
-
-.rs-logo-flip::before,
-.rs-logo-flip::after {
-
-  content:"";
-  position:absolute;
-  top:-24px;
-  bottom:-24px;
-  width:32px;
-  background:repeating-linear-gradient(
-    to bottom,
-    rgba(18,14,10,.85) 0 18px,
-    rgba(70,50,32,.85) 18px 38px
-  );
-  z-index:2;
-  pointer-events:none;
-  mix-blend-mode:soft-light;
-}
-
-
-
-.rs-logo-flip::before {
-
-  left:-12px;
-}
-
-
-
-.rs-logo-flip::after {
-
-  right:-12px;
-}
-
-
-
-.rs-logo-filmgrain {
-
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  z-index:3;
-  display:block;
-  background-image:url('images/noir_grain.png');
-  background-size:260px;
-  background-repeat:repeat;
-  opacity:.18;
-  mix-blend-mode:screen;
-}
-
-
-
-.rs-logo-face {
-
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#000;
-  backface-visibility:hidden;
-  -webkit-backface-visibility:hidden;
-}
-
-
-
-.rs-logo-face img {
-
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  pointer-events:none;
-}
-
-
-
-.rs-logo-face[data-role="hollywood"] {
-
-  transform:rotateY(180deg);
-}
-
-
-
-.rs-logo--ready .rs-logo-flip {
-
-  animation:rs-logo-roll 120s ease-in-out infinite;
-}
-
-
-
-.rs-logo--ready .rs-logo-filmgrain {
-
-  animation:rs-logo-flicker 1.2s steps(6) infinite;
-}
-
-
-
-.rs-logo--single .rs-logo-flip {
-
-  animation:none;
-}
-
-
-
-.rs-logo--single .rs-logo-face[data-role="hollywood"] {
-
-  display:none;
-}
-
-
-
-@keyframes rs-logo-roll {
-
-  0%,
-  44% {
-
-    transform:rotateY(0deg);
-  }
-
-  50%,
-  94% {
-
-    transform:rotateY(180deg);
-  }
-
-  100% {
-
-    transform:rotateY(360deg);
-  }
-}
-
-
-
-@keyframes rs-logo-flicker {
-
-  0%,
-  10%,
-  20%,
-  30%,
-  90%,
-  100% {
-
-    opacity:.18;
-  }
-
-  5%,
-  25%,
-  55%,
-  75% {
-
-    opacity:.35;
-  }
-
-  50% {
-
-    opacity:.5;
-  }
-}
-
-
-
-@media (prefers-reduced-motion: reduce) {
-
-  .rs-logo-flip,
-  .rs-logo-filmgrain {
-
-    animation:none !important;
-    transform:none !important;
-  }
 }
 
 
@@ -3593,37 +3402,6 @@ html.tv #rs-list .rs-movie {
 
 
 
-/* Align Reset Map to bottom-right of float panel */
-#rs-reset {
-
-  display: block;
-    margin-left: auto;
-    margin-right: 12px;
-    margin-top: 10px;
-    padding: 10px 14px;
-    background: #f3efe4;
-    color: #000;
-    border: 2px solid #000;
-    text-transform: uppercase;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: none;
-    border-radius: 0;
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   #rs-reset:hover
-*/
-#rs-reset:hover {
-
-  background: #000;
-    color: #f3efe4;
-}
-
-
-
 /* === MAP LAYERS header style === */
 .rs-maplayers-header {
 
@@ -4498,7 +4276,7 @@ html.tv #rs-list .rs-movie {
 
 
 
-#rs-reset {
+.rs-footer-inner #rs-reset {
 
   margin-top: 6px;
     margin-right: 8px;
@@ -6627,7 +6405,7 @@ html.booting #rs-float {
   margin: 0 !important;
 }
 /* Neutralize older rule that shoved Reset to the right with extra margin */
-#rs-reset {
+#rs-footer-bar #rs-reset {
   margin-right: 0 !important;
 }
 </style>
@@ -6715,7 +6493,7 @@ html.booting #rs-float {
   width: 100% !important;
 }
 
-#rs-reset {
+#rs-footer-bar #rs-reset {
   padding: 10px 14px !important;
   font-size: 14px !important;
   margin: 0 !important;
@@ -7136,19 +6914,6 @@ html.booting #rs-float {
 #rs-float .rs-tips-btn:active { transform: translateY(1px); }
 </style>
 <style>
-/* === Toolbar Tips button (next to INFO/HELP) ============================ */
-.rs-tips-btn-toolbar {
-  display:inline-flex; align-items:center; justify-content:center;
-  background:#fff; color:#111; border:2px solid #111; border-radius:6px;
-  padding:10px 14px; font-weight:800; letter-spacing:.02em; cursor:pointer;
-  box-shadow:0 1px 2px rgba(0,0,0,.25);
-  transition:transform .06s ease;
-}
-.rs-tips-btn-toolbar:active { transform: translateY(1px); }
-.rs-tips-btn-toolbar.dark {
-  background:#eae5d8; border-color:#000; color:#000;
-}
-
 /* Ensure coach overlay always on top of ALL UI */
 .rs-coach-overlay { z-index: 999999 !important; }
 .rs-coach-highlight { z-index: 999999 !important; }
@@ -7617,17 +7382,7 @@ html.tv #rs-status-filter-wrap {
 </div>
 </div>
 <div class="rs-logo-corner">
-  <div aria-label="Reel Screens Cleveland 1945 logo alternating with Hollywood OTC" class="rs-logo" role="img">
-    <div class="rs-logo-flip">
-      <div aria-hidden="true" class="rs-logo-face" data-role="reelscreens">
-        <img alt="" src="images/reel_screens_logo.png"/>
-      </div>
-      <div aria-hidden="true" class="rs-logo-face" data-role="hollywood">
-        <img alt="" src="images/hollywood_otc_logo.png"/>
-      </div>
-      <span aria-hidden="true" class="rs-logo-filmgrain"></span>
-    </div>
-  </div>
+  <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
 </div>
 <div class="rs-toolbar">
 <div aria-label="Map controls" class="rs-toolbar__actions" role="group">
@@ -13358,67 +13113,6 @@ document.addEventListener("DOMContentLoaded", function() {
 })();
 </script>
 <!-- STAGE 5 ROLLBACK SAFE: compatibility shim -->
-<script>
-(function(){
-  function ready(fn){
-    if(document.readyState === 'loading'){
-      document.addEventListener('DOMContentLoaded', fn, { once: true });
-    } else {
-      fn();
-    }
-  }
-
-  function probe(face){
-    return new Promise(function(resolve){
-      var img = face.querySelector('img');
-      var src = img ? (img.currentSrc || img.getAttribute('src')) : face.getAttribute('src');
-      if(!img || !src){
-        resolve({ face: face, ok: false, src: src });
-        return;
-      }
-
-      var test = new Image();
-      test.onload = function(){ resolve({ face: face, ok: true, src: src }); };
-      test.onerror = function(){ resolve({ face: face, ok: false, src: src }); };
-      test.src = src;
-    });
-  }
-
-  ready(function(){
-    var logo = document.querySelector('.rs-logo');
-    if(!logo) return;
-    var flip = logo.querySelector('.rs-logo-flip');
-    if(!flip) return;
-    var faces = Array.prototype.slice.call(flip.querySelectorAll('.rs-logo-face'));
-    if(!faces.length) return;
-
-    Promise.all(faces.map(probe)).then(function(results){
-      var validFaces = [];
-
-      results.forEach(function(result){
-        if(result.ok){
-          validFaces.push(result.face);
-        } else {
-          if(result.face && result.face.parentNode){
-            result.face.parentNode.removeChild(result.face);
-          }
-          if(result.src){
-            console.warn('Reel Screens logo asset missing:', result.src);
-          }
-        }
-      });
-
-      if(validFaces.length > 1){
-        logo.classList.remove('rs-logo--single');
-        logo.classList.add('rs-logo--ready');
-      } else {
-        logo.classList.remove('rs-logo--ready');
-        logo.classList.add('rs-logo--single');
-      }
-    });
-  });
-})();
-</script>
 <script id="stage5-rollback-compat">
 (function(){
   try{
