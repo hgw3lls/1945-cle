@@ -198,16 +198,48 @@
     padding-right: 10px;
 }
 
+#rs-float.rs-float--sidebar {
+
+  padding-left: 0;
+    padding-right: 0;
+}
+
+#rs-float.rs-float--sidebar > .rs-float__header,
+#rs-float.rs-float--sidebar > .rs-search-wrap,
+#rs-float.rs-float--sidebar > .rs-float__list,
+#rs-float.rs-float--sidebar > #rs-footer-bar {
+
+  padding-left: 16px;
+    padding-right: 16px;
+}
+
+#rs-float.rs-float--sidebar .rs-search-wrap {
+
+  margin-left: 0;
+    margin-right: 0;
+}
+
+#rs-float.rs-float--sidebar .rs-layer-toggles,
+#rs-float.rs-float--sidebar .rs-footer-inner {
+
+  padding-left: 0;
+    padding-right: 0;
+}
+
+#rs-float.rs-float--sidebar .rs-li {
+
+  margin-left: 0;
+    margin-right: 0;
+}
+
 
 
 /* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
    #rs-float .rs-layer-toggles,
-#rs-float .rs-footer-inner,
-#rs-float .rs-search-wrap
+#rs-float .rs-footer-inner
 */
 #rs-float .rs-layer-toggles,
-#rs-float .rs-footer-inner,
-#rs-float .rs-search-wrap {
+#rs-float .rs-footer-inner {
 
   padding-left: 10px;
     padding-right: 10px;
@@ -312,7 +344,7 @@
 /* Ensure search row doesn't push out */
 #rs-float .rs-search-wrap {
 
-  padding: 0 10px 8px;
+  padding: 0 0 8px;
     box-sizing: border-box;
 }
 
@@ -485,6 +517,11 @@ body:not(.rs-sidebar-open) #map {
     transition: right 0.3s ease;
 }
 
+body.rs-fullscreen-mode #map {
+
+  right: 0 !important;
+}
+
 
 
 /* Toolbar */
@@ -526,6 +563,7 @@ body:not(.rs-sidebar-open) #map {
   filter:drop-shadow(0 6px 16px rgba(0,0,0,.45));
   user-select:none;
   pointer-events:none;
+  transition:opacity 0.25s ease;
 }
 
 
@@ -1622,6 +1660,65 @@ body:not(.rs-sidebar-open) #map {
   outline-offset:4px;
 }
 
+/* === MATCH LEAFLET ZOOM CONTROL TO TOOLBAR STYLE === */
+.leaflet-control-zoom {
+
+  border:none;
+  box-shadow:none;
+  background:transparent;
+}
+
+.leaflet-control-zoom a {
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:60px;
+  height:54px;
+  margin:0;
+  margin-bottom:12px;
+  font:700 26px/1 'BookmanOld', var(--font-ui, system-ui);
+  color:#080808;
+  text-decoration:none;
+  background:#f3efe4;
+  border:2px solid #080808;
+  border-radius:0;
+  box-shadow:4px 4px 0 rgba(0,0,0,0.8);
+  transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+}
+
+.leaflet-control-zoom a:last-child {
+
+  margin-bottom:0;
+}
+
+.leaflet-control-zoom a:hover:not(.leaflet-disabled) {
+
+  background:#ffffff;
+  transform:translate(-2px,-2px);
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+}
+
+.leaflet-control-zoom a:active:not(.leaflet-disabled) {
+
+  transform:translate(0,0);
+  box-shadow:3px 3px 0 rgba(0,0,0,0.75);
+}
+
+.leaflet-control-zoom a:focus-visible {
+
+  outline:2px solid var(--fever-cyan);
+  outline-offset:4px;
+}
+
+.leaflet-control-zoom a.leaflet-disabled {
+
+  opacity:0.45;
+  cursor:not-allowed;
+  transform:none;
+  box-shadow:3px 3px 0 rgba(0,0,0,0.6);
+}
+
 .rs-toolbar__btn--accent {
 
   font:700 18px/1 'LeagueGothic', var(--font-ui, system-ui);
@@ -1629,6 +1726,44 @@ body:not(.rs-sidebar-open) #map {
   padding:14px 24px;
   border-width:3px;
   box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+}
+
+.rs-toolbar__btn--fullscreen[aria-pressed="true"] {
+
+  background:#080808;
+  color:#f3efe4;
+}
+
+body.rs-fullscreen-mode .rs-toolbar__actions .rs-toolbar__btn:not(.rs-toolbar__btn--fullscreen) {
+
+  display:none;
+}
+
+body.rs-fullscreen-mode .rs-toolbar__btn--fullscreen {
+
+  min-width:180px;
+}
+
+body.rs-fullscreen-mode .rs-toolbar__btn--fullscreen[aria-pressed="true"] {
+
+  background:#f3efe4;
+  color:#080808;
+}
+
+body.rs-fullscreen-mode .rs-sidebar-toggle-wrap,
+body.rs-fullscreen-mode #rs-float {
+
+  display:none !important;
+}
+
+.rs-hidden-for-fullscreen {
+
+  display:none !important;
+}
+
+body.rs-fullscreen-mode .rs-logo-corner .rs-logo {
+
+  opacity:0.2;
 }
 
 .rs-sidebar-toggle-wrap {
@@ -1887,7 +2022,7 @@ body.rs-sidebar-open .rs-sidebar-toggle-wrap {
   display: flex;
     align-items: center;
     gap: 6px;
-    margin: 0 16px 12px;  /* space from panel edges */
+    margin: 0 8px 12px;  /* space from panel edges */
 }
 
 
@@ -1986,29 +2121,17 @@ html.tv #rs-list::-webkit-scrollbar-thumb {
 
 
 
-/* === Draggable float panel fix === */
+/* === Sidebar panel is fixed in place === */
 .rs-float {
 
-  position: absolute;
-  /* allow movement */
-}
-
-
-
-/* NOTE: selector may reference dynamic/legacy nodes; verify before removing.
-   .rs-float.rs-floating
-*/
-.rs-float.rs-floating {
-
-  cursor: move;
-    user-select: none;
+  position: static;
 }
 
 
 
 .rs-float__title {
 
-  cursor: move;
+  cursor: default;
 }
 
 
@@ -2858,7 +2981,7 @@ html.tv #rs-list .rs-movie {
   display: flex;
     align-items: center;
     gap: 6px;
-    margin: 0 12px 12px;
+    margin: 0 0 12px;
 }
 
 
@@ -6185,9 +6308,13 @@ html.booting #rs-float {
 </style>
 <style>
 /* === Skinny & Tall Float Panel (see more theatres) === */
+:root {
+  --rs-float-min-width: clamp(280px, 26vw, 340px);
+  --rs-float-max-width: clamp(280px, 26vw, 340px);
+}
+
 #rs-float {
   /* narrower overall, but responsive */
-  width: clamp(280px, 26vw, 340px) !important;
   max-height: 90vh !important;
 }
 /* Make the internal list use the added height */
@@ -6860,7 +6987,6 @@ html.booting #rs-float {
 </style>
 <style id="rs-float-bottom-right-style">
 /* Scoped: position the Tips inside #rs-float at bottom-right */
-#rs-float { position: relative; }
 #rs-float .rs-tips-btn-toolbar,
 #rs-float .rs-tips-btn-global,
 #rs-float .rs-tips-btn-float {
@@ -6877,7 +7003,7 @@ html.booting #rs-float {
   overflow:hidden !important;
   height:auto !important;
   max-height:none !important;
-  /* keep the panel draggable/positioned as-is; no size jump */
+  /* keep the sidebar height steady when header-only */
 }
 /* Hide all but header */
 #rs-float.rs-header-only .rs-float__list,
@@ -7130,6 +7256,27 @@ html.booting #rs-float {
 }
 
 </style>
+<style>
+/* === Map layer slider label alignment === */
+#rs-float .rs-historic-slider,
+#rs-float .rs-layer-slider {
+  grid-template-columns: minmax(0, 120px) 1fr !important;
+  align-items: center !important;
+}
+
+#rs-float .rs-hist-label {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  line-height: 1 !important;
+}
+
+#rs-float .rs-hist-label .rs-label {
+  display: block !important;
+}
+</style>
 </head>
 <body>
 <!-- Boot overlay -->
@@ -7170,8 +7317,9 @@ html.booting #rs-float {
 <button class="rs-btn rs-toolbar__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
 <button aria-label="Tips" class="rs-btn rs-toolbar__btn rs-tips-btn-toolbar" type="button">Tips</button>
-<button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Reset to the home view" type="button">Reset Map</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
+<button aria-pressed="false" aria-label="Enter fullscreen mode" class="rs-btn rs-toolbar__btn rs-toolbar__btn--fullscreen" id="rs-fullscreen-btn" title="Enter fullscreen mode" type="button">Fullscreen</button>
 </div>
 </div>
 <div class="rs-sidebar-toggle-wrap">
@@ -7179,10 +7327,9 @@ html.booting #rs-float {
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
 <header class="rs-float__header" id="rs-sidebar-header">
-<div><span class="rs-float__title">Theatres</span>
-<span class="rs-chip" id="rs-count">0</span></div>
+<div><span class="rs-float__title">Theatres</span></div>
 <div class="rs-float__actions">
-<button class="rs-btn rs-sidebar-close" id="rs-close" title="Hide list" type="button">Close</button>
+<span aria-live="polite" class="rs-chip rs-count-badge" id="rs-count">0</span>
 </div>
 </header>
 <div class="rs-search-wrap" role="search">
@@ -7196,8 +7343,8 @@ html.booting #rs-float {
 <div class="rs-footer-inner">
 <div class="rs-maplayers-header">MAP LAYERS</div>
 <!-- Historic opacity segmented bar -->
-<div class="rs-historic-slider" style="display:flex; align-items:center; gap:14px; margin-right:auto;; padding-top: 16px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
+<div class="rs-historic-slider">
+<div class="rs-hist-label">
 <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
 <span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
 </div>
@@ -7210,10 +7357,10 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-sliders" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+<div class="rs-layer-sliders">
 <!-- Street segmented bar -->
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
 <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
 </div>
 <div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
@@ -7225,8 +7372,8 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-<div class="rs-layer-slider" style="display:flex; align-items:center; gap:14px;">
-<div class="rs-hist-label" style="display:flex; flex-direction:column; line-height:1;">
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
 <span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
 </div>
 <div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
@@ -7309,13 +7456,29 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     maxBoundsViscosity: 1.0,
     worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
   });
-  map.fitBounds(BOUNDS, {padding:[20,20]});
+  var HOME_CENTER = BOUNDS.getSouthWest();
+  var HOME_ZOOM = map.getBoundsZoom(BOUNDS, true);
+  if (!isFinite(HOME_ZOOM)) { HOME_ZOOM = 13; }
+  HOME_ZOOM = Math.max(map.getMinZoom(), Math.min(HOME_ZOOM, map.getMaxZoom()));
+
+  function goHome(options){
+    var animate = options && options.animate === true;
+    try {
+      if (map && typeof map.closePopup === 'function') { map.closePopup(); }
+      map.setView(HOME_CENTER, HOME_ZOOM, { animate: animate });
+      if (typeof map.panInsideBounds === 'function') {
+        map.panInsideBounds(BOUNDS, { animate: animate });
+      }
+    } catch(_) {}
+  }
+  goHome({ animate: false });
 
   // Expose globally for kiosk scripts
-  try { window.map = map; } catch(_) {}
+  try {
+    window.map = map;
+    window.rsGoHome = goHome;
+  } catch(_) {}
 
-  // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
 
   var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
   var isLocalOnlineMode = tileMode === 'local_online';
@@ -7709,6 +7872,13 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     if (document.body){
       document.body.classList.toggle('rs-sidebar-open', !hidden);
     }
+  }
+
+  if (typeof window !== 'undefined') {
+    window.rsSetSidebarHidden = setSidebarHidden;
+    window.rsIsSidebarHidden = function(){
+      return !floatEl || floatEl.classList.contains('is-hidden');
+    };
   }
 
   function toggleSidebar(){
@@ -8134,9 +8304,9 @@ Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call 
   <li>Click <strong>Show All</strong> to reset filters.</li>
 </ul>
 
-<h2>Floating Panel</h2>
+<h2>Sidebar</h2>
 <ul>
-  <li><strong>Tap &amp; hold</strong> the panel header to drag the floating list.</li>
+  <li>The theatre list, search, and map layers live in the fixed sidebar on the right.</li>
   <li>Click <strong>Map Layers</strong> to minimize or expand the layers list.</li>
 </ul>
 
@@ -8448,134 +8618,6 @@ function zoomHere(lat, lon) {
   } else {
     initFocus();
   }
-})();
-
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
-
-</script>
-<script>
-(function(){
-  // Find float container
-  var floatEl = document.querySelector('.rs-float') || document.getElementById('rs-float');
-  if (!floatEl) return;
-
-  // Use title bar as handle when available
-  var handle = floatEl.querySelector('.rs-float__title') || floatEl;
-
-  // Restore last position if stored
-  try{
-    var saved = sessionStorage.getItem('rs-float-pos');
-    if (saved){
-      var p = JSON.parse(saved);
-      if (typeof p.x === 'number' && typeof p.y === 'number'){
-        floatEl.style.left = p.x + 'px';
-        floatEl.style.top  = p.y + 'px';
-      }
-    }
-  }catch(_){}
-
-  // Ensure positioned element
-  var st = window.getComputedStyle(floatEl);
-  if (st.position !== 'absolute' && st.position !== 'fixed'){
-    floatEl.style.position = 'absolute';
-  }
-  // If position unset, keep current computed top/left or place at 16,16
-  if (!floatEl.style.left)  floatEl.style.left = (floatEl.offsetLeft || 16) + 'px';
-  if (!floatEl.style.top)   floatEl.style.top  = (floatEl.offsetTop  || 16) + 'px';
-
-  var startX=0, startY=0, origX=0, origY=0, dragging=false;
-
-  function clamp(val, min, max){ return Math.max(min, Math.min(max, val)); }
-  function bounds(){
-    var vw = Math.max(document.documentElement.clientWidth,  window.innerWidth || 0);
-    var vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    var rect = floatEl.getBoundingClientRect();
-    return {
-      maxX: vw - rect.width - 6,
-      maxY: vh - rect.height - 6
-    };
-  }
-  function onMove(clientX, clientY){
-    var b = bounds();
-    var nx = clamp(origX + (clientX - startX), 6, b.maxX);
-    var ny = clamp(origY + (clientY - startY), 6, b.maxY);
-    floatEl.style.left = nx + 'px';
-    floatEl.style.top  = ny + 'px';
-  }
-  function onPointerDown(e){
-    // Only left click or touch
-    if (e.type === 'mousedown' && e.button !== 0) return;
-    dragging = true;
-    floatEl.classList.add('rs-floating');
-    var rect = floatEl.getBoundingClientRect();
-    origX = rect.left + window.scrollX;
-    origY = rect.top  + window.scrollY;
-    startX = (e.touches ? e.touches[0].clientX : e.clientX);
-    startY = (e.touches ? e.touches[0].clientY : e.clientY);
-    document.addEventListener('mousemove', onMouseMove, {passive:false});
-    document.addEventListener('mouseup', onPointerUp, {passive:true});
-    document.addEventListener('touchmove', onTouchMove, {passive:false});
-    document.addEventListener('touchend', onPointerUp, {passive:true});
-    e.preventDefault();
-  }
-  function onMouseMove(e){
-    if (!dragging) return;
-    onMove(e.clientX, e.clientY);
-    e.preventDefault();
-  }
-  function onTouchMove(e){
-    if (!dragging) return;
-    var t = e.touches[0];
-    onMove(t.clientX, t.clientY);
-    e.preventDefault();
-  }
-  function onPointerUp(){
-    if (!dragging) return;
-    dragging = false;
-    floatEl.classList.remove('rs-floating');
-    // Persist
-    try{
-      var x = parseInt(floatEl.style.left,10)||0;
-      var y = parseInt(floatEl.style.top,10)||0;
-      sessionStorage.setItem('rs-float-pos', JSON.stringify({x:x, y:y}));
-    }catch(_){}
-    document.removeEventListener('mousemove', onMouseMove, {passive:false});
-    document.removeEventListener('mouseup', onPointerUp, {passive:true});
-    document.removeEventListener('touchmove', onTouchMove, {passive:false});
-    document.removeEventListener('touchend', onPointerUp, {passive:true});
-  }
-
-  handle.addEventListener('mousedown', onPointerDown);
-  handle.addEventListener('touchstart', onPointerDown, {passive:false});
-
-  // Re-clamp when viewport changes
-  window.addEventListener('resize', function(){
-    var b = bounds();
-    var x = parseInt(floatEl.style.left,10)||0;
-    var y = parseInt(floatEl.style.top,10)||0;
-    floatEl.style.left = clamp(x, 6, b.maxX) + 'px';
-    floatEl.style.top  = clamp(y, 6, b.maxY) + 'px';
-  });
 })();
 
 // Zoom Here helper (ensures visible zoom-in even if already at target)
@@ -9570,12 +9612,117 @@ try {
       if (histSlider){ histSlider.value = "100"; histSlider.dispatchEvent(new Event("input")); }
 
       // Return to city view
-      if (window.map && map.fitBounds) {
+      if (typeof window.rsGoHome === 'function') {
+        window.rsGoHome();
+      } else if (window.map && map.fitBounds) {
         const WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
         map.fitBounds([[SOUTH, WEST],[NORTH, EAST]], {padding:[20,20]});
       }
     } catch(_) {}
   });
+})();
+</script>
+<script>
+// === Toolbar fullscreen toggle ===
+(function toolbarFullscreen(){
+  const body = document.body;
+  const btn = document.getElementById('rs-fullscreen-btn');
+  const sidebar = document.getElementById('rs-float');
+  const toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
+  const CLASS = 'rs-fullscreen-mode';
+  let sidebarWasHidden = null;
+  if (!body || !btn) return;
+
+  function applyInert(el, state){
+    if (!el) return;
+    try {
+      if ('inert' in el) {
+        el.inert = !!state;
+      } else if (state) {
+        el.setAttribute('inert', '');
+      } else {
+        el.removeAttribute('inert');
+      }
+    } catch (_) {
+      if (state) { el.setAttribute('inert', ''); }
+      else { el.removeAttribute('inert'); }
+    }
+  }
+
+  function setHidden(el, hidden){
+    if (!el) return;
+    if (hidden) {
+      el.classList.add('rs-hidden-for-fullscreen');
+      el.setAttribute('aria-hidden', 'true');
+    } else {
+      el.classList.remove('rs-hidden-for-fullscreen');
+      el.removeAttribute('aria-hidden');
+    }
+    applyInert(el, hidden);
+  }
+
+  function isActive(){ return body.classList.contains(CLASS); }
+  function isSidebarHidden(){
+    try {
+      if (typeof window.rsIsSidebarHidden === 'function') {
+        return !!window.rsIsSidebarHidden();
+      }
+    } catch(_) {}
+    if (!sidebar) return true;
+    return sidebar.classList.contains('is-hidden');
+  }
+  function hideSidebar(){
+    if (typeof window.rsSetSidebarHidden === 'function') {
+      try { window.rsSetSidebarHidden(true); return; } catch(_) {}
+    }
+    if (sidebar) {
+      sidebar.classList.add('is-hidden');
+      sidebar.setAttribute('aria-hidden', 'true');
+    }
+    body.classList.remove('rs-sidebar-open');
+  }
+  function restoreSidebar(){
+    if (typeof window.rsSetSidebarHidden === 'function') {
+      try { window.rsSetSidebarHidden(false); return; } catch(_) {}
+    }
+    if (sidebar) {
+      sidebar.classList.remove('is-hidden');
+      sidebar.removeAttribute('aria-hidden');
+    }
+    body.classList.add('rs-sidebar-open');
+  }
+  function update(active){
+    if (active) {
+      if (sidebarWasHidden === null) {
+        sidebarWasHidden = isSidebarHidden();
+      }
+      if (!sidebarWasHidden) {
+        hideSidebar();
+      } else {
+        body.classList.remove('rs-sidebar-open');
+      }
+    } else {
+      if (sidebarWasHidden === false) {
+        restoreSidebar();
+      }
+      sidebarWasHidden = null;
+    }
+    body.classList.toggle(CLASS, active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    const label = active ? 'Exit fullscreen mode' : 'Enter fullscreen mode';
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('title', label);
+    btn.textContent = active ? 'Exit Fullscreen' : 'Fullscreen';
+    setHidden(sidebar, active);
+    setHidden(toggleWrap, active);
+  }
+
+  btn.addEventListener('click', function(){ update(!isActive()); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && isActive()) { update(false); }
+  });
+
+  update(isActive());
 })();
 </script>
 <script>
@@ -10561,137 +10708,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   document.addEventListener('click', blockActiveClickAt19, true);
-})();
-</script>
-<script>
-// === Drag guard: don't block clicks on search or interactive controls ===
-(function(){
-  function isInteractive(el){
-    if (!el) return false;
-    return el.closest('input, textarea, select, button, a, [contenteditable], .rs-search');
-  }
-
-  // Hardening: if your drag handle is broad, ignore pointerdown on interactive elements
-  document.addEventListener('mousedown', function(e){
-    var floatEl = document.querySelector('.rs-float, #rs-float');
-    if (!floatEl) return;
-    // If the down event happens on interactive elements inside the float, don't let drag handlers treat it as a drag
-    if (floatEl.contains(e.target) && isInteractive(e.target)){
-      // Let the control receive the event normally, but prevent any upstream drag logic bound on capture phase
-      e.stopPropagation();
-      // do not preventDefault: we want the input to get focus/click
-    }
-  }, true);
-
-  document.addEventListener('touchstart', function(e){
-    var floatEl = document.querySelector('.rs-float, #rs-float');
-    if (!floatEl) return;
-    var t = e.touches && e.touches[0];
-    var target = e.target;
-    if (floatEl.contains(target) && isInteractive(target)){
-      e.stopPropagation();
-    }
-  }, true);
-
-  // Ensure only the title bar acts as a drag handle if present
-  // If your code attached drag to the entire panel, this limits it logically.
-  document.addEventListener('pointerdown', function(e){
-    var floatEl = document.querySelector('.rs-float, #rs-float');
-    if (!floatEl) return;
-    if (!floatEl.contains(e.target)) return;
-    var hasTitle = floatEl.querySelector('.rs-float__title');
-    if (hasTitle && !e.target.closest('.rs-float__title')){
-      // Click started somewhere in the panel but not on the title: ensure no custom drag logic consumes it
-      // We only stop propagation if some upstream handler tries to start drag on the whole panel.
-      // Do not prevent default to keep clicks focusable.
-      e.stopPropagation();
-    }
-  }, true);
-})();
-</script>
-<script>
-// === DRAG FIX: Title-only drag for the float panel ===
-(function(){
-  var panel = document.querySelector('#rs-float, .rs-float');
-  if (!panel) return;
-  var handle = panel.querySelector('.rs-float__header') || panel.querySelector('.rs-float__title');
-  if (!handle) return;
-
-  // Ensure positioned element
-  var st = window.getComputedStyle(panel);
-  if (st.position !== 'fixed' && st.position !== 'absolute') {
-    panel.style.position = 'fixed';
-  }
-  if (!panel.style.left) panel.style.left = (panel.offsetLeft || 16) + 'px';
-  if (!panel.style.top) panel.style.top = (panel.offsetTop || 16) + 'px';
-
-  var startX=0, startY=0, origX=0, origY=0, dragging=false;
-
-  function clamp(val, min, max){ return Math.max(min, Math.min(max, val)); }
-  function bounds(){
-    var vw = Math.max(document.documentElement.clientWidth,  window.innerWidth || 0);
-    var vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    var rect = panel.getBoundingClientRect();
-    return {
-      maxX: vw - rect.width - 6,
-      maxY: vh - rect.height - 6
-    };
-  }
-
-  function onMove(clientX, clientY){
-    var b = bounds();
-    var nx = clamp(origX + (clientX - startX), 6, b.maxX);
-    var ny = clamp(origY + (clientY - startY), 6, b.maxY);
-    panel.style.left = nx + 'px';
-    panel.style.top  = ny + 'px';
-  }
-
-  function onPointerDown(e){
-    // Only left click or touch
-    if (e.type === 'mousedown' && e.button !== 0) return;
-    // Ignore if started on interactive control within handle (rare but safe)
-    if (e.target.closest('input, textarea, select, button, a, [contenteditable]')) return;
-
-    var rect = panel.getBoundingClientRect();
-    origX = rect.left + window.scrollX;
-    origY = rect.top  + window.scrollY;
-    startX = (e.touches ? e.touches[0].clientX : e.clientX);
-    startY = (e.touches ? e.touches[0].clientY : e.clientY);
-    dragging = true;
-
-    document.addEventListener('mousemove', onMouseMove, {passive:false});
-    document.addEventListener('mouseup', onPointerUp, {passive:true});
-    document.addEventListener('touchmove', onTouchMove, {passive:false});
-    document.addEventListener('touchend', onPointerUp, {passive:true});
-
-    // Prevent text selection & let this beat other handlers
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  function onMouseMove(e){
-    if (!dragging) return;
-    onMove(e.clientX, e.clientY);
-    e.preventDefault();
-  }
-  function onTouchMove(e){
-    if (!dragging) return;
-    var t = e.touches[0];
-    onMove(t.clientX, t.clientY);
-    e.preventDefault();
-  }
-  function onPointerUp(){
-    if (!dragging) return;
-    dragging = false;
-    document.removeEventListener('mousemove', onMouseMove, {passive:false});
-    document.removeEventListener('mouseup', onPointerUp, {passive:true});
-    document.removeEventListener('touchmove', onTouchMove, {passive:false});
-    document.removeEventListener('touchend', onPointerUp, {passive:true});
-  }
-
-  handle.style.cursor = 'move';
-  handle.addEventListener('mousedown', onPointerDown, {passive:false});
-  handle.addEventListener('touchstart', onPointerDown, {passive:false});
 })();
 </script>
 <script>
@@ -12173,8 +12189,6 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
 
   // Steps
   const steps = [
-    { key:'drag', sel:'#rs-float .rs-float__header, #rs-float .drag-handle, #rs-float .rs-float-header, #rs-float .rs-titleband',
-      title:'Drag the list', text:'Tap and hold the panel header, then drag to reposition the list.' },
     { key:'layers', sel:'.rs-maplayers-header, #rs-float .rs-maplayers-header',
       title:'Map Layers', text:'Click “Map Layers” to collapse/expand. Use sliders to fade Cleveland 1927–1937, Satellite, and Street.' },
     { key:'list', sel:'#rs-list .rs-li:first-child .rs-titleband, #rs-list .rs-li:first-child h4, #rs-list .rs-li:first-child',
@@ -12512,9 +12526,9 @@ window.RS_TIPS_PLACE = window.RS_TIPS_PLACE || function(el, overlayElems){};
     lines.push('<li>Click <strong>Show All</strong> to reset filters.</li>');
     lines.push('</ul>');
 
-    lines.push('<h2>Floating Panel</h2>');
+    lines.push('<h2>Sidebar</h2>');
     lines.push('<ul>');
-    lines.push('<li><strong>Tap & hold</strong> the panel header to drag the floating list.</li>');
+    lines.push('<li>The theatre list, search, and map layers live in the fixed sidebar on the right.</li>');
     lines.push('<li>Click <strong>Map Layers</strong> to minimize or expand the layers list.</li>');
     lines.push('</ul>');
 
@@ -12864,6 +12878,12 @@ document.addEventListener("DOMContentLoaded", function() {
       btn.__rsBound = true;
       RS.on(btn, 'click', function(ev){
         ev.preventDefault();
+        if (typeof window.rsGoHome === 'function') {
+          try {
+            window.rsGoHome();
+            return;
+          } catch(_) {}
+        }
         RS.recenter();
       });
     })();
