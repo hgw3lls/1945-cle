@@ -558,6 +558,7 @@ body:not(.rs-sidebar-open) #map {
   filter:drop-shadow(0 6px 16px rgba(0,0,0,.45));
   user-select:none;
   pointer-events:none;
+  transition:opacity 0.25s ease;
 }
 
 
@@ -1661,6 +1662,39 @@ body:not(.rs-sidebar-open) #map {
   padding:14px 24px;
   border-width:3px;
   box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+}
+
+.rs-toolbar__btn--fullscreen[aria-pressed="true"] {
+
+  background:#080808;
+  color:#f3efe4;
+}
+
+body.rs-fullscreen-mode .rs-toolbar__actions .rs-toolbar__btn:not(.rs-toolbar__btn--fullscreen) {
+
+  display:none;
+}
+
+body.rs-fullscreen-mode .rs-toolbar__btn--fullscreen {
+
+  min-width:180px;
+}
+
+body.rs-fullscreen-mode .rs-toolbar__btn--fullscreen[aria-pressed="true"] {
+
+  background:#f3efe4;
+  color:#080808;
+}
+
+body.rs-fullscreen-mode .rs-sidebar-toggle-wrap,
+body.rs-fullscreen-mode #rs-float {
+
+  display:none;
+}
+
+body.rs-fullscreen-mode .rs-logo-corner .rs-logo {
+
+  opacity:0.2;
 }
 
 .rs-sidebar-toggle-wrap {
@@ -7216,6 +7250,7 @@ html.booting #rs-float {
 <button aria-label="Tips" class="rs-btn rs-toolbar__btn rs-tips-btn-toolbar" type="button">Tips</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Reset map view" type="button">Reset Map</button>
 <button class="rs-btn rs-toolbar__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
+<button aria-pressed="false" aria-label="Enter fullscreen mode" class="rs-btn rs-toolbar__btn rs-toolbar__btn--fullscreen" id="rs-fullscreen-btn" title="Enter fullscreen mode" type="button">Fullscreen</button>
 </div>
 </div>
 <div class="rs-sidebar-toggle-wrap">
@@ -7352,13 +7387,23 @@ if (window.map && typeof window.map.on === "function") map.on('popupclose', func
     maxBoundsViscosity: 1.0,
     worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
   });
-  map.fitBounds(BOUNDS, {padding:[20,20]});
+  var HOME_PADDING = [20, 20];
+  function goHome(padding){
+    var pad = (Array.isArray(padding) && padding.length === 2) ? padding : HOME_PADDING;
+    try { map.fitBounds(BOUNDS, { padding: pad }); } catch(_) {}
+  }
+  goHome();
 
   // Expose globally for kiosk scripts
-  try { window.map = map; } catch(_) {}
+  try {
+    window.map = map;
+    window.rsGoHome = goHome;
+  } catch(_) {}
 
-  // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
+  var infoBtn = (typeof window.rsFindInfoButton === 'function') ? window.rsFindInfoButton() : document.getElementById('rs-info-btn');
+  if (infoBtn) {
+    infoBtn.addEventListener('click', function(){ goHome(); });
+  }
 
   var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
   var isLocalOnlineMode = tileMode === 'local_online';
@@ -9485,12 +9530,40 @@ try {
       if (histSlider){ histSlider.value = "100"; histSlider.dispatchEvent(new Event("input")); }
 
       // Return to city view
-      if (window.map && map.fitBounds) {
+      if (typeof window.rsGoHome === 'function') {
+        window.rsGoHome();
+      } else if (window.map && map.fitBounds) {
         const WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
         map.fitBounds([[SOUTH, WEST],[NORTH, EAST]], {padding:[20,20]});
       }
     } catch(_) {}
   });
+})();
+</script>
+<script>
+// === Toolbar fullscreen toggle ===
+(function toolbarFullscreen(){
+  const body = document.body;
+  const btn = document.getElementById('rs-fullscreen-btn');
+  const CLASS = 'rs-fullscreen-mode';
+  if (!body || !btn) return;
+
+  function isActive(){ return body.classList.contains(CLASS); }
+  function update(active){
+    body.classList.toggle(CLASS, active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    const label = active ? 'Exit fullscreen mode' : 'Enter fullscreen mode';
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('title', label);
+    btn.textContent = active ? 'Exit Fullscreen' : 'Fullscreen';
+  }
+
+  btn.addEventListener('click', function(){ update(!isActive()); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && isActive()) { update(false); }
+  });
+
+  update(isActive());
 })();
 </script>
 <script>
