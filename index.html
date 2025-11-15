@@ -1788,7 +1788,7 @@ body.rs-fullscreen-mode .rs-logo-corner .rs-logo {
   position:fixed;
   top:120px;
   right:0;
-  z-index:10010;
+  z-index:4000;
   display:flex;
   flex-direction:column;
   align-items:flex-end;
@@ -7861,22 +7861,34 @@ function rsRestoreLayers(state){
     }
   }).addTo(map);
 
-  // Reset button -> fit to bounds
-  document.getElementById('rs-reset'); /* null-guarded */ if (window.rsFindHelpButton()) window.rsFindHelpButton(); /* null-guarded */ if (window.rsFindInfoButton()) window.rsFindInfoButton().addEventListener('click', function(){ map.fitBounds(BOUNDS, {padding:[20,20]});
+  // Ensure default toolbar buttons resolve and Info button returns to the shared home view
+  if (typeof window.rsFindHelpButton === 'function') {
+    window.rsFindHelpButton();
+  }
+  var infoButton = (typeof window.rsFindInfoButton === 'function') ? window.rsFindInfoButton() : null;
+  if (infoButton && !infoButton.__rsHomeBound) {
+    infoButton.__rsHomeBound = true;
+    infoButton.addEventListener('click', function(){
+      try {
+        if (typeof window.rsGoHome === 'function') {
+          window.rsGoHome({ animate: true });
+        } else if (map && typeof map.fitBounds === 'function') {
+          map.fitBounds(BOUNDS, { padding:[20,20] });
+        }
+      } catch (_) {}
+    });
+  }
 
   // Expose globally for kiosk scripts
   try { window.map = map; } catch(_) {}
 
-  // Adjust center lower and left over dense cluster
-  map.setView([41.507, -81.638129], 13);
+  // Make unloaded / missing tiles appear black
+  document.getElementById('map').style.backgroundColor = '#000';
 
-// Make unloaded / missing tiles appear black
-document.getElementById('map').style.backgroundColor = '#000';
-
-// Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
-if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
-  if (e.tile) e.tile.style.display = 'none';
-}); });
+  // Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
+  if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
+    if (e.tile) e.tile.style.display = 'none';
+  });
 
   // Sidebar toggle/collapse/close
   var floatEl = document.getElementById('rs-float');
@@ -7967,7 +7979,16 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
 
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
-  var features = (window.THEATRES && window.THEATRES.features) || [];
+  function resolveTheatreCollection(){
+    if (typeof THEATRES !== 'undefined' && THEATRES && Array.isArray(THEATRES.features)) {
+      return THEATRES.features;
+    }
+    if (typeof window !== 'undefined' && window.THEATRES && Array.isArray(window.THEATRES.features)) {
+      return window.THEATRES.features;
+    }
+    return [];
+  }
+  var features = resolveTheatreCollection();
   function liHTML(p, idx){
     var badge = '<span class="rs-chip-status" style="margin-left:6px;">'+statusLabel(Number(p.map_status))+'</span>';
     var movie = p.Movie ? ('<p class="rs-movie"><strong>Now Showing:</strong> '+String(p.Movie)+'</p>') : '';
@@ -7979,8 +8000,7 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
   }
 
   function getFeatures(){
-    var data = (window.THEATRES && window.THEATRES.features) || [];
-    return Array.isArray(data) ? data : [];
+    return resolveTheatreCollection();
   }
 
   function populateList(){
@@ -7988,6 +8008,9 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     var list = listRoot;
     if (!list) return features;
     features = getFeatures();
+    if (typeof window !== 'undefined' && !window.THEATRES && typeof THEATRES !== 'undefined') {
+      try { window.THEATRES = THEATRES; } catch(_) {}
+    }
     list.innerHTML = features.map(function(f,i){ return liHTML((f && f.properties) || {}, i); }).join('');
     Array.prototype.forEach.call(list.querySelectorAll('.rs-li'), function(node, idx){
       var feature = features[idx];
@@ -12847,6 +12870,10 @@ document.addEventListener("DOMContentLoaded", function() {
         if (typeof window.fitToGeoJSON === 'function'){ window.fitToGeoJSON(); return; }
         if (typeof window.fitToMarkers === 'function'){ window.fitToMarkers(); return; }
         if (RS.fitMarkerLayerBounds()) return;
+        if (typeof window.rsGoHome === 'function') {
+          window.rsGoHome({ animate: true });
+          return;
+        }
         console.warn('RS.recenter: no fitting function/layer found.');
       }catch(e){ console.warn('RS.recenter error', e); }
     };
