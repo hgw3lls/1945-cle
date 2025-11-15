@@ -517,6 +517,11 @@ body:not(.rs-sidebar-open) #map {
     transition: right 0.3s ease;
 }
 
+body.rs-fullscreen-mode #map {
+
+  right: 0 !important;
+}
+
 
 
 /* Toolbar */
@@ -7803,6 +7808,13 @@ if (window.map && typeof window.map.on === "function") map.on('tileerror', funct
     }
   }
 
+  if (typeof window !== 'undefined') {
+    window.rsSetSidebarHidden = setSidebarHidden;
+    window.rsIsSidebarHidden = function(){
+      return !floatEl || floatEl.classList.contains('is-hidden');
+    };
+  }
+
   function toggleSidebar(){
     if (!floatEl) return;
     var isHidden = floatEl.classList.contains('is-hidden');
@@ -9552,6 +9564,7 @@ try {
   const sidebar = document.getElementById('rs-float');
   const toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
   const CLASS = 'rs-fullscreen-mode';
+  let sidebarWasHidden = null;
   if (!body || !btn) return;
 
   function applyInert(el, state){
@@ -9583,7 +9596,51 @@ try {
   }
 
   function isActive(){ return body.classList.contains(CLASS); }
+  function isSidebarHidden(){
+    try {
+      if (typeof window.rsIsSidebarHidden === 'function') {
+        return !!window.rsIsSidebarHidden();
+      }
+    } catch(_) {}
+    if (!sidebar) return true;
+    return sidebar.classList.contains('is-hidden');
+  }
+  function hideSidebar(){
+    if (typeof window.rsSetSidebarHidden === 'function') {
+      try { window.rsSetSidebarHidden(true); return; } catch(_) {}
+    }
+    if (sidebar) {
+      sidebar.classList.add('is-hidden');
+      sidebar.setAttribute('aria-hidden', 'true');
+    }
+    body.classList.remove('rs-sidebar-open');
+  }
+  function restoreSidebar(){
+    if (typeof window.rsSetSidebarHidden === 'function') {
+      try { window.rsSetSidebarHidden(false); return; } catch(_) {}
+    }
+    if (sidebar) {
+      sidebar.classList.remove('is-hidden');
+      sidebar.removeAttribute('aria-hidden');
+    }
+    body.classList.add('rs-sidebar-open');
+  }
   function update(active){
+    if (active) {
+      if (sidebarWasHidden === null) {
+        sidebarWasHidden = isSidebarHidden();
+      }
+      if (!sidebarWasHidden) {
+        hideSidebar();
+      } else {
+        body.classList.remove('rs-sidebar-open');
+      }
+    } else {
+      if (sidebarWasHidden === false) {
+        restoreSidebar();
+      }
+      sidebarWasHidden = null;
+    }
     body.classList.toggle(CLASS, active);
     btn.setAttribute('aria-pressed', active ? 'true' : 'false');
     const label = active ? 'Exit fullscreen mode' : 'Enter fullscreen mode';
