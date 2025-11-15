@@ -8035,6 +8035,7 @@ function rsRestoreLayers(state){
 
   if (typeof window !== 'undefined') {
     try { window.rsGetExactLatLng = getExactLatLng; } catch (_) {}
+    try { window.rsRevealMarker = revealMarker; } catch (_) {}
   }
 
   // Layer of theatre points
@@ -8318,14 +8319,32 @@ function rsRestoreLayers(state){
     var item = e.target.closest('.rs-li'); if (!item) return;
     var idx = Number(item.getAttribute('data-idx'));
     var layer = idxToLayer[idx]; if (!layer) return;
-    var latlng = (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') ? window.rsGetExactLatLng(layer) : (layer.getLatLng ? layer.getLatLng() : null);
-    if (!latlng) return;
-    var z = Math.max(map.getZoom(), 16);
-    var px = map.project(latlng, z);
-    var offsetY = Math.round(map.getSize().y * -0.20);
-    var target = L.point(px.x, px.y + offsetY);
-    map.flyTo(map.unproject(target, z), z, { duration: 0.6 });
-    setTimeout(function(){ layer.openPopup(); }, 650);
+
+    var focus = (typeof window !== 'undefined' && typeof window.rsFlyFocus === 'function') ? window.rsFlyFocus : null;
+    var reveal = (typeof window !== 'undefined' && typeof window.rsRevealMarker === 'function') ? window.rsRevealMarker : null;
+
+    if (focus) {
+      focus(layer);
+    } else {
+      var latlng = (typeof window !== 'undefined' && typeof window.rsGetExactLatLng === 'function') ? window.rsGetExactLatLng(layer) : (layer.getLatLng ? layer.getLatLng() : null);
+      if (!latlng) return;
+      var z = Math.max(map.getZoom(), 16);
+      var px = map.project(latlng, z);
+      var offsetY = Math.round(map.getSize().y * -0.20);
+      var target = L.point(px.x, px.y + offsetY);
+      map.flyTo(map.unproject(target, z), z, { duration: 0.6 });
+    }
+
+    var open = function(){
+      try { if (reveal) reveal(layer); } catch(_) {}
+      try { layer.openPopup(); } catch(_) {}
+    };
+    if (window.map && typeof map.once === 'function') {
+      map.once('moveend', function(){ setTimeout(open, 60); });
+    } else {
+      setTimeout(open, 650);
+    }
+
     Array.prototype.forEach.call(listRoot.querySelectorAll('.rs-li'), function(n){ n.classList.remove('active'); });
     item.classList.add('active');
   });
@@ -10955,10 +10974,18 @@ document.addEventListener('DOMContentLoaded', function() {
         var yOffset = Math.round(map.getSize().y * -0.18); // move view up 18% so point sits lower
         map.panBy([0, yOffset], { animate: false });
       } catch(_) {}
-      setTimeout(function(){ revealMarker(layer); }, 60);
+      setTimeout(function(){
+        if (typeof window !== 'undefined' && typeof window.rsRevealMarker === 'function') {
+          window.rsRevealMarker(layer);
+        }
+      }, 60);
     };
     if (window.map && typeof window.map.on === "function") map.on('moveend', once);
     setTimeout(once, 1200);
+  }
+
+  if (typeof window !== 'undefined') {
+    try { window.rsFlyFocus = flyFocus; } catch(_) {}
   }
 
   function zoomToExact(e) {
