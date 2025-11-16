@@ -1903,16 +1903,17 @@ body.rs-sidebar-open .rs-filter-toggle-shell {
 .rs-filter-panel {
 
   position:fixed;
-  top:0;
+  top:12px;
   right:0;
-  height:100vh;
+  bottom:12px;
+  height:auto;
   width:min(var(--rs-float-max-width, 420px), 92vw);
-  max-height:100vh;
+  max-height:calc(100vh - 24px);
   background:rgba(8, 8, 8, 0.97);
   border:3px solid #f3efe4;
   border-radius:0;
   box-shadow:-8px 0 24px rgba(0,0,0,0.65);
-  padding:22px 24px 18px;
+  padding:22px 24px 26px;
   color:#f3efe4;
   display:flex;
   flex-direction:column;
@@ -1977,7 +1978,7 @@ body.rs-neighborhoods-open #rs-filter-panel {
 .rs-neighborhood-shape {
 
   width:100%;
-    max-width:520px;
+    max-width:100%;
   margin:6px auto 12px;
     padding:10px 10px 12px;
     border:3px solid #f3efe4;
@@ -1989,7 +1990,7 @@ body.rs-neighborhoods-open #rs-filter-panel {
 .rs-neighborhood-buttons {
 
   display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(118px, 1fr));
+    grid-template-columns:repeat(auto-fit, minmax(104px, 1fr));
     gap:8px;
     width:100%;
 }
@@ -2008,8 +2009,8 @@ body.rs-neighborhoods-open #rs-filter-panel {
   position:relative;
     width:100%;
     text-align:center;
-    padding:10px 8px;
-    min-height:48px;
+    padding:9px 7px;
+    min-height:46px;
     min-width:0;
     background:#f3efe4;
     color:#080808;
@@ -2047,6 +2048,34 @@ body.rs-neighborhoods-open #rs-filter-panel {
     letter-spacing:0.08em;
     box-shadow:0 3px 0 #000;
     align-self:flex-start;
+}
+
+@media (max-width: 560px) {
+
+  .rs-filter-panel {
+
+    top:10px;
+      bottom:10px;
+      max-height:calc(100vh - 20px);
+  }
+
+  .rs-neighborhood-shape {
+
+    padding:8px 8px 10px;
+  }
+
+  .rs-neighborhood-buttons {
+
+    grid-template-columns:repeat(auto-fit, minmax(92px, 1fr));
+    gap:7px;
+  }
+
+  .rs-neighborhood-pin {
+
+    padding:8px 6px;
+      min-height:44px;
+      font-size:10px;
+  }
 }
 
 .leaflet-popup.rs-pop-below {
