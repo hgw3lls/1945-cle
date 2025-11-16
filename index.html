@@ -1966,9 +1966,10 @@ body.rs-neighborhoods-open #rs-filter-panel {
   background:rgba(8, 8, 8, 0.97);
     border-color:#f3efe4;
     width:min(340px, 86vw);
-    top:clamp(10px, 2vh, 18px);
-    bottom:clamp(12px, 4vh, 26px);
-    max-height:calc(100vh - 22px);
+    top:clamp(8px, 1.5vh, 14px);
+    bottom:clamp(8px, 2vh, 16px);
+    min-height:min(700px, 92vh);
+    max-height:calc(100vh - 16px);
 }
 
 .rs-filter-panel__hint {
@@ -2081,19 +2082,23 @@ body.rs-neighborhoods-open #rs-filter-panel {
 .rs-neighborhood-footer {
 
   position:sticky;
-    bottom:-26px;
-    margin:6px -24px -28px;
-    padding:12px 24px 18px;
+    bottom:-18px;
+    margin:8px -16px -18px;
+    padding:10px 16px 14px;
     background:linear-gradient(180deg, rgba(8,8,8,0), rgba(8,8,8,0.96));
     box-shadow:0 -8px 16px rgba(0,0,0,0.35);
     border-top:1px solid rgba(243,239,228,0.28);
+    display:flex;
+    justify-content:flex-end;
 }
 
 .rs-neighborhood-footer .rs-neighborhood-showall {
 
-  width:100%;
+  width:auto;
+    min-width:0;
+    padding:7px 12px;
     justify-content:center;
-    min-height:38px;
+    min-height:34px;
 }
 
 .rs-neighborhood-insight {
