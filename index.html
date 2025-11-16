@@ -1840,6 +1840,13 @@ body.rs-sidebar-open .rs-sidebar-toggle-wrap {
   white-space:normal;
 }
 
+.rs-sidebar-toggle.rs-sidebar-toggle--accent {
+
+  background:#0c89c2;
+    color:#f3efe4;
+    box-shadow:6px 6px 0 rgba(0,0,0,0.9);
+}
+
 .rs-sidebar-toggle:hover {
 
   transform:translate(-2px,-2px);
@@ -1888,12 +1895,6 @@ body.rs-sidebar-open .rs-filter-toggle-shell {
 }
 
 .rs-filter-toggle--neighborhoods {
-
-  background:#0c89c2;
-    color:#f3efe4;
-}
-
-.rs-filter-toggle--neighborhoods[aria-expanded="true"] {
 
   background:#f3efe4;
     color:#080808;
@@ -1960,7 +1961,7 @@ body.rs-neighborhoods-open #rs-filter-panel {
 
 .rs-filter-panel--neighborhoods {
 
-  background:rgba(12, 137, 194, 0.92);
+  background:rgba(8, 8, 8, 0.97);
     border-color:#f3efe4;
 }
 
@@ -1977,20 +1978,29 @@ body.rs-neighborhoods-open #rs-filter-panel {
 
   width:100%;
     max-width:520px;
-    margin:6px auto 12px;
-    padding:10px;
+  margin:6px auto 12px;
+    padding:10px 10px 12px;
     border:3px solid #f3efe4;
-    border-radius:14px;
-    background:linear-gradient(180deg, rgba(8,8,8,0.25), rgba(8,8,8,0.55));
-    box-shadow:inset 0 0 0 1px rgba(243,239,228,0.18), 0 12px 26px rgba(0,0,0,0.35);
+    border-radius:12px;
+    background:linear-gradient(180deg, rgba(8,8,8,0.18), rgba(8,8,8,0.45));
+    box-shadow:inset 0 0 0 1px rgba(243,239,228,0.16), 0 12px 26px rgba(0,0,0,0.32);
 }
 
 .rs-neighborhood-buttons {
 
   display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
-    gap:10px;
+    grid-template-columns:repeat(auto-fit, minmax(118px, 1fr));
+    gap:8px;
     width:100%;
+}
+
+.rs-neighborhood-toolbar {
+
+  display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:6px;
 }
 
 .rs-neighborhood-pin {
@@ -1998,13 +2008,16 @@ body.rs-neighborhoods-open #rs-filter-panel {
   position:relative;
     width:100%;
     text-align:center;
-    padding:12px 10px;
+    padding:10px 8px;
+    min-height:48px;
     min-width:0;
     background:#f3efe4;
     color:#080808;
     border-color:#080808;
-    box-shadow:3px 3px 0 rgba(0,0,0,0.75);
-    transition:transform 0.12s ease, box-shadow 0.12s ease, background-color 0.2s ease;
+    box-shadow:3px 3px 0 rgba(0,0,0,0.7);
+    transition:transform 0.12s ease, box-shadow 0.12s ease, background-color 0.2s ease, color 0.2s ease;
+    font-size:11px;
+    line-height:1.2;
 }
 
 .rs-neighborhood-pin:hover {
@@ -2024,6 +2037,32 @@ body.rs-neighborhoods-open #rs-filter-panel {
   background:#0c89c2;
     color:#f3efe4;
     border-color:#f3efe4;
+}
+
+.rs-neighborhood-showall {
+
+  min-height:38px;
+    padding:9px 10px;
+    font-size:10px;
+    letter-spacing:0.08em;
+    box-shadow:0 3px 0 #000;
+    align-self:flex-start;
+}
+
+.leaflet-popup.rs-pop-below {
+
+  margin-top:16px;
+}
+
+.leaflet-popup.rs-pop-below .leaflet-popup-tip-container {
+
+  top:-14px;
+    bottom:auto;
+}
+
+.leaflet-popup.rs-pop-below .leaflet-popup-tip {
+
+  transform: rotate(225deg);
 }
 
 .rs-filter-panel__header {
@@ -7734,10 +7773,10 @@ html.tv .rs-status-filter-btn--showall {
 </div>
 </div>
 <div class="rs-sidebar-toggle-wrap">
-  <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
+<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle rs-sidebar-toggle--accent" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
   <div class="rs-filter-toggle-shell">
     <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Status" data-label-open="Status" id="rs-filter-toggle" type="button">Status</button>
-    <button aria-controls="rs-neighborhood-panel" aria-expanded="false" class="rs-btn rs-filter-toggle rs-filter-toggle--neighborhoods" data-label-close="Close Neighborhoods" data-label-open="Neighborhoods" id="rs-neighborhood-toggle" type="button">Neighborhoods</button>
+    <button aria-controls="rs-neighborhood-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Neighborhoods" data-label-open="Neighborhoods" id="rs-neighborhood-toggle" type="button">Neighborhoods</button>
     <aside aria-hidden="true" aria-label="Map filters" class="rs-filter-panel" id="rs-filter-panel">
       <div class="rs-filter-panel__header">
         <p class="rs-filter-panel__title">Theatre Status</p>
@@ -7773,11 +7812,13 @@ html.tv .rs-status-filter-btn--showall {
       <div class="rs-filter-panel__body">
         <p class="rs-filter-panel__description">Pick a neighborhood from the grid to isolate theatres on the map and in the list.</p>
         <div class="rs-filter-panel__section" id="rs-neighborhood-filter">
+          <div class="rs-neighborhood-toolbar">
+            <p class="rs-filter-panel__hint">Tap one neighborhood to isolate it. Use Show All to reset.</p>
+            <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall rs-neighborhood-showall is-active" data-neighborhood="all" aria-pressed="true">Show All</button>
+          </div>
           <div aria-label="Filter by neighborhood" class="rs-neighborhood-shape" id="rs-neighborhood-grid" role="group">
             <div class="rs-neighborhood-buttons" id="rs-neighborhood-buttons"></div>
           </div>
-          <p class="rs-filter-panel__hint">Tap a neighborhood to toggle it. Use Show All to reset.</p>
-          <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-neighborhood="all" aria-pressed="true">Show All</button>
         </div>
       </div>
     </aside>
@@ -12453,10 +12494,17 @@ function rsRestoreLayers(state){
     },
     onEachFeature: function(f, layer){
       var p = f.properties||{};
-      layer.bindPopup(buildPopupHTML(p), { maxWidth: 360 });
+      var isLake = String(p.Theatre || '').trim().toUpperCase() === 'LAKE';
+      var popupOptions = { maxWidth: 360 };
+      if (isLake) {
+        popupOptions.offset = L.point(0, 34);
+        popupOptions.className = (popupOptions.className || '') + ' rs-pop-below';
+      }
+      layer.bindPopup(buildPopupHTML(p), popupOptions);
       layer.on('popupopen', function(ev){
         var node = ev.popup.getElement();
         if (!node) return;
+        if (isLake) { node.classList.add('rs-pop-below'); }
         var btn = node.querySelector('[data-more]');
         if (btn){ btn.addEventListener('click', function(){ openDetails(p); }); }
       });
@@ -13054,9 +13102,11 @@ function rsRestoreLayers(state){
     if (!next || next === 'all') {
       nextSet = new Set(ALL_NEIGHBORHOODS);
     } else if (Array.isArray(next)) {
-      nextSet = new Set(next.map(normalizedNeighborhood).filter(Boolean));
+      var first = next.map(normalizedNeighborhood).filter(Boolean)[0];
+      nextSet = first ? new Set([first]) : new Set();
     } else if (typeof next === 'string') {
-      nextSet = new Set(next.split(/[\s,]+/).map(normalizedNeighborhood).filter(Boolean));
+      var solo = normalizedNeighborhood(next);
+      nextSet = solo ? new Set([solo]) : new Set();
     } else {
       nextSet = new Set(ALL_NEIGHBORHOODS);
     }
@@ -13088,17 +13138,7 @@ function rsRestoreLayers(state){
   function toggleNeighborhood(code){
     var norm = normalizedNeighborhood(code);
     if (!norm) return;
-    var nextSet = new Set(activeNeighborhoods);
-    if (isDefaultNeighborhood()) {
-      nextSet = new Set([norm]);
-    } else if (nextSet.has(norm)) {
-      if (nextSet.size === 1) { return; }
-      nextSet.delete(norm);
-    } else {
-      nextSet.add(norm);
-    }
-    activeNeighborhoods = nextSet;
-    refreshUI();
+    setActiveNeighborhoods(norm);
   }
 
     if (statusButtons.length){
