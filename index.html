@@ -18396,47 +18396,50 @@ document.addEventListener("DOMContentLoaded", function() {
     // ---------- legend delegation (SHOW ALL + per-status) ----------
     RS.applyStatusFilter = function(status){
       try{
-        // list items
-        const root = RS.qs('#rs-float') || document;
-        const items = RS.qsa('.rs-li', root);
+        // Drive the consolidated status UI so map markers and the list stay in sync
+        // with neighborhood filtering.
+        const ui = (typeof window !== 'undefined') ? window.rsStatusFilterUI : null;
+        if (ui && typeof ui.set === 'function') {
+          ui.set(status === null ? 'all' : [status], { broadcast: true });
+        } else {
+          // Fallback to legacy visibility toggling
+          const root = RS.qs('#rs-float') || document;
+          const items = RS.qsa('.rs-li', root);
+          const showAll = (status===null);
 
-        // markers
-        const hideShowMarker = (l, show) => {
-          try{
-            if (l && typeof l.setStyle === 'function'){ 
-              l.setStyle({ opacity: show ? 1 : 0, fillOpacity: show ? 0.8 : 0 });
-            }
-            if (l && l._icon){ l._icon.style.display = show ? '' : 'none'; }
-            if (l && l._path){ l._path.style.display = show ? '' : 'none'; }
-          }catch(_){}
-        };
-
-        const showAll = (status===null);
-
-        // Update list visibility
-        items.forEach(li => {
-          const s = Number(li.getAttribute('data-status'));
-          const ok = showAll || (s === Number(status));
-          li.style.display = ok ? '' : 'none';
-        });
-
-        // Update map markers if available
-        if (typeof markerLayer !== 'undefined' && markerLayer && typeof markerLayer.eachLayer === 'function'){
-          markerLayer.eachLayer(function(l){
+          const hideShowMarker = (l, show) => {
             try{
-              const p = l && l.feature ? l.feature.properties : null;
-              const ms = p ? Number(p.map_status) : NaN;
-              const ok = showAll || (ms === Number(status));
-              hideShowMarker(l, ok);
+              if (l && typeof l.setStyle === 'function'){
+                l.setStyle({ opacity: show ? 1 : 0, fillOpacity: show ? 0.8 : 0 });
+              }
+              if (l && l._icon){ l._icon.style.display = show ? '' : 'none'; }
+              if (l && l._path){ l._path.style.display = show ? '' : 'none'; }
             }catch(_){}
+          };
+
+          items.forEach(li => {
+            const s = Number(li.getAttribute('data-status'));
+            const ok = showAll || (s === Number(status));
+            li.style.display = ok ? '' : 'none';
           });
+
+          if (typeof markerLayer !== 'undefined' && markerLayer && typeof markerLayer.eachLayer === 'function'){
+            markerLayer.eachLayer(function(l){
+              try{
+                const p = l && l.feature ? l.feature.properties : null;
+                const ms = p ? Number(p.map_status) : NaN;
+                const ok = showAll || (ms === Number(status));
+                hideShowMarker(l, ok);
+              }catch(_){}
+            });
+          }
         }
 
-        // UI state
+        // UI state (legend buttons)
         const lg = RS.qs('#rs-legend');
         if (lg){
           RS.qsa('.swrow', lg).forEach(b=>b.classList.remove('active'));
-          const btn = showAll ? RS.qs('.swrow.swrow--all', lg) : RS.qs(`.swrow[data-status="${status}"]`, lg);
+          const btn = (status===null) ? RS.qs('.swrow.swrow--all', lg) : RS.qs(`.swrow[data-status="${status}"]`, lg);
           if (btn) btn.classList.add('active');
         }
       }catch(e){ console.warn('RS.applyStatusFilter error', e); }
