@@ -1966,10 +1966,9 @@ body.rs-neighborhoods-open #rs-filter-panel {
   background:rgba(8, 8, 8, 0.97);
     border-color:#f3efe4;
     width:min(340px, 86vw);
-    top:clamp(12px, 3vh, 24px);
-    bottom:clamp(16px, 5vh, 32px);
-    max-height:calc(100vh - 40px);
-    overflow:hidden;
+    top:clamp(10px, 2vh, 18px);
+    bottom:clamp(12px, 4vh, 26px);
+    max-height:calc(100vh - 22px);
 }
 
 .rs-filter-panel__hint {
@@ -2077,6 +2076,24 @@ body.rs-neighborhoods-open #rs-filter-panel {
     letter-spacing:0.08em;
     box-shadow:0 3px 0 #000;
     align-self:flex-start;
+}
+
+.rs-neighborhood-footer {
+
+  position:sticky;
+    bottom:-26px;
+    margin:6px -24px -28px;
+    padding:12px 24px 18px;
+    background:linear-gradient(180deg, rgba(8,8,8,0), rgba(8,8,8,0.96));
+    box-shadow:0 -8px 16px rgba(0,0,0,0.35);
+    border-top:1px solid rgba(243,239,228,0.28);
+}
+
+.rs-neighborhood-footer .rs-neighborhood-showall {
+
+  width:100%;
+    justify-content:center;
+    min-height:38px;
 }
 
 .rs-neighborhood-insight {
@@ -7899,12 +7916,11 @@ html.tv .rs-status-filter-btn--showall {
       <div class="rs-filter-panel__body">
         <p class="rs-filter-panel__description">Pick a neighborhood to isolate theatres on the map and in the list.</p>
         <div class="rs-filter-panel__section" id="rs-neighborhood-filter">
-          <div class="rs-neighborhood-toolbar">
-            <p class="rs-filter-panel__hint">Tap one neighborhood to isolate it. Use Show All to reset.</p>
-            <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall rs-neighborhood-showall is-active" data-neighborhood="all" aria-pressed="true">Show All</button>
-          </div>
           <div aria-label="Filter by neighborhood" class="rs-neighborhood-shape" id="rs-neighborhood-grid" role="group">
             <div class="rs-neighborhood-list" id="rs-neighborhood-buttons"></div>
+          </div>
+          <div class="rs-neighborhood-footer">
+            <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall rs-neighborhood-showall is-active" data-neighborhood="all" aria-pressed="true">Show All</button>
           </div>
         </div>
       </div>
