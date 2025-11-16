@@ -2072,6 +2072,46 @@ body.rs-neighborhoods-open #rs-filter-panel {
     align-self:flex-start;
 }
 
+.rs-neighborhood-insight {
+
+  margin:12px 0 10px;
+    padding:12px 14px 14px;
+    border:1px solid rgba(0,0,0,0.35);
+    border-radius:10px;
+    background:rgba(255,255,255,0.86);
+    color:#0c0c0c;
+    box-shadow:0 6px 18px rgba(0,0,0,0.25);
+}
+
+.rs-neighborhood-insight__eyebrow {
+
+  margin:0 0 6px;
+    font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:#0c89c2;
+}
+
+.rs-neighborhood-insight__title {
+
+  margin:0 0 6px;
+    font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
+    font-size:20px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    line-height:1.05;
+}
+
+.rs-neighborhood-insight__body {
+
+  margin:0;
+    font-family:var(--font-body, Georgia, serif);
+    font-size:14px;
+    line-height:1.5;
+    color:#161616;
+}
+
 @media (max-width: 560px) {
 
   .rs-filter-panel {
@@ -7884,6 +7924,11 @@ html.tv .rs-status-filter-btn--showall {
   <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
   <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
 </div>
+<div class="rs-neighborhood-insight" id="rs-neighborhood-insight" aria-live="polite" hidden>
+  <p class="rs-neighborhood-insight__eyebrow">Neighborhood Focus</p>
+  <p class="rs-neighborhood-insight__title" id="rs-neighborhood-insight-title"></p>
+  <p class="rs-neighborhood-insight__body" id="rs-neighborhood-insight-body"></p>
+</div>
 <div class="rs-float__list" id="rs-list" role="list"></div>
 <div class="rs-footer-bar" id="rs-footer-bar">
 <div class="rs-footer-inner">
@@ -12957,9 +13002,46 @@ function rsRestoreLayers(state){
     return p.cluster_neighborhood;
   }).filter(Boolean).map(function(n){ return String(n).trim().toLowerCase(); }))).sort();
   var activeNeighborhoods = new Set(ALL_NEIGHBORHOODS);
+  var NEIGHBORHOOD_META_COPY = {
+    "downtown_core": {
+      "tagline": "Prestige pictures under the brightest lights.",
+      "historical_insight": "Downtown Cleveland’s big houses drew dense wartime crowds—office workers, sailors, and streetcar traffic filling the aisles for first-run dramas."
+    },
+    "east_side_neighborhood": {
+      "tagline": "Double-features for the after-shift crowd.",
+      "historical_insight": "East-side blocks, shaped by industrial labor and dense housing, relied on neighborhood theatres for steady crime reels and home-front stories."
+    },
+    "near_west": {
+      "tagline": "Hard-hit reels for hard-working nights.",
+      "historical_insight": "The Near West’s factories and rooming houses produced strong evening audiences for danger pictures, noirish thrillers, and action-heavy B-films."
+    },
+    "outlying_lake": {
+      "tagline": "Light dramas along the quiet lake route.",
+      "historical_insight": "Sparse lakefront districts used their theatres as calm escapes, often favoring musicals, skating romances, and scenic features."
+    },
+    "streetcar_suburbs_east": {
+      "tagline": "Musicals at the end of the line.",
+      "historical_insight": "East-side streetcar suburbs—Cleveland Heights, Noble–Caledonia, Oxford—packed weekend matinees with families riding directly from the stops."
+    },
+    "streetcar_suburbs_west": {
+      "tagline": "Evening reels timed to the car.",
+      "historical_insight": "West-side streetcar corridors supported busy corner theatres showing comedies, romances, and newsreels synced to commuter schedules."
+    },
+    "the_heights": {
+      "tagline": "Upland screens with a refined touch.",
+      "historical_insight": "The Heights’ more affluent districts gravitated toward polished dramas, orchestral features, and well-reviewed films that matched their cultural reputation."
+    },
+    "west_side_residential": {
+      "tagline": "Neighborhood fun, one screen at a time.",
+      "historical_insight": "West-side residential streets built their entertainment around small, friendly theatres running comedies, B-mysteries, and serial chapters for loyal regulars."
+    }
+  };
   var neighborhoodMeta = {};
   var neighborhoodButtons = [];
   var neighborhoodRows = [];
+  var neighborhoodInsight = document.getElementById('rs-neighborhood-insight');
+  var neighborhoodInsightTitle = document.getElementById('rs-neighborhood-insight-title');
+  var neighborhoodInsightBody = document.getElementById('rs-neighborhood-insight-body');
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, function(ch){
@@ -12992,12 +13074,23 @@ function rsRestoreLayers(state){
       var code = normalizedNeighborhood(p.cluster_neighborhood);
       if (!code) return;
       if (!neighborhoodMeta[code]) {
-        neighborhoodMeta[code] = { count: 0, notes: new Set() };
+        neighborhoodMeta[code] = { count: 0, notes: new Set(), tagline: '', historical: '' };
       }
       neighborhoodMeta[code].count += 1;
       if (p.Notes) {
         neighborhoodMeta[code].notes.add(String(p.Notes).trim());
       }
+      var copy = NEIGHBORHOOD_META_COPY[code] || {};
+      if (copy.tagline) neighborhoodMeta[code].tagline = copy.tagline;
+      if (copy.historical_insight) neighborhoodMeta[code].historical = copy.historical_insight;
+    });
+    Object.keys(NEIGHBORHOOD_META_COPY).forEach(function(code){
+      if (!neighborhoodMeta[code]) {
+        neighborhoodMeta[code] = { count: 0, notes: new Set(), tagline: '', historical: '' };
+      }
+      var copy = NEIGHBORHOOD_META_COPY[code] || {};
+      if (copy.tagline) neighborhoodMeta[code].tagline = copy.tagline;
+      if (copy.historical_insight) neighborhoodMeta[code].historical = copy.historical_insight;
     });
     Object.keys(neighborhoodMeta).forEach(function(code){
       var meta = neighborhoodMeta[code];
@@ -13008,6 +13101,34 @@ function rsRestoreLayers(state){
   function formatCountLabel(count){
     if (!isFinite(count) || count <= 0) return 'No theatres';
     return count + ' theatre' + (count === 1 ? '' : 's');
+  }
+
+  function activeNeighborhoodCode(){
+    if (!ALL_NEIGHBORHOODS.length) return null;
+    if (isDefaultNeighborhood()) return null;
+    var arr = Array.from(activeNeighborhoods);
+    if (arr.length === 1) return arr[0];
+    return null;
+  }
+
+  function getNeighborhoodInsight(code){
+    var meta = neighborhoodMeta[code] || {};
+    var copy = NEIGHBORHOOD_META_COPY[code] || {};
+    return meta.historical || copy.historical_insight || '';
+  }
+
+  function updateNeighborhoodInsight(){
+    if (!neighborhoodInsight) return;
+    var code = activeNeighborhoodCode();
+    if (!code) {
+      neighborhoodInsight.hidden = true;
+      return;
+    }
+    var label = formatNeighborhoodLabel(code);
+    var insight = getNeighborhoodInsight(code);
+    if (neighborhoodInsightTitle) neighborhoodInsightTitle.textContent = label || '';
+    if (neighborhoodInsightBody) neighborhoodInsightBody.textContent = insight || '';
+    neighborhoodInsight.hidden = !(label || insight);
   }
 
   function normalizedStatus(code){
@@ -13062,12 +13183,12 @@ function rsRestoreLayers(state){
       var label = escapeHtml(formatNeighborhoodLabel(code));
       var meta = neighborhoodMeta[code] || {};
       var countLabel = escapeHtml(formatCountLabel(meta.count));
-      var notesText = (meta.notes && meta.notes.length) ? escapeHtml(meta.notes.join(' • ')) : '—';
+      var taglineText = meta.tagline ? escapeHtml(meta.tagline) : ((meta.notes && meta.notes.length) ? escapeHtml(meta.notes.join(' • ')) : '—');
       return '<div class="rs-neighborhood-row" data-neighborhood="'+code+'">'
         + '<div class="rs-neighborhood-copy">'
         + '<p class="rs-neighborhood-name">'+label+'</p>'
         + '<p class="rs-neighborhood-count">'+countLabel+'</p>'
-        + '<p class="rs-neighborhood-notes">'+notesText+'</p>'
+        + '<p class="rs-neighborhood-notes">'+taglineText+'</p>'
         + '</div>'
         + '<button type="button" class="rs-status-filter-btn rs-neighborhood-pin" data-neighborhood="'+code+'" aria-pressed="true">Show</button>'
         + '</div>';
@@ -13141,6 +13262,28 @@ function rsRestoreLayers(state){
     return statusAllows(code) && neighborhoodAllows(neighborhood);
   }
 
+  function focusVisibleMarkers(){
+    if (typeof map === 'undefined' || !map || typeof map.fitBounds !== 'function') return;
+    if (typeof L === 'undefined' || !markerLayer || typeof markerLayer.eachLayer !== 'function') return;
+    var bounds = null;
+    var count = 0;
+    markerLayer.eachLayer(function(l){
+      var p = (l && l.feature && l.feature.properties) || {};
+      var raw = p.map_status;
+      var code = (raw === 0) ? '0' : (raw == null ? null : String(raw));
+      var neighborhood = normalizedNeighborhood(p.cluster_neighborhood);
+      if (!shouldShow(code, neighborhood)) return;
+      var latlng = (l && typeof l.getLatLng === 'function') ? l.getLatLng() : null;
+      if (!latlng) return;
+      bounds = bounds ? bounds.extend(latlng) : L.latLngBounds(latlng, latlng);
+      count += 1;
+    });
+    if (!bounds || !count) return;
+    try {
+      map.fitBounds(bounds, { padding:[38, 46], animate:true, duration:0.65, easeLinearity:0.15 });
+    } catch(_) {}
+  }
+
   function applyFilters(){
     if (typeof markerLayer === 'undefined' || !markerLayer || typeof markerLayer.eachLayer !== 'function') return;
     markerLayer.eachLayer(function(l){
@@ -13175,6 +13318,10 @@ function rsRestoreLayers(state){
     if (!opts || !opts.skipFilter) {
       applyFilters();
       syncList();
+    }
+    updateNeighborhoodInsight();
+    if (opts && opts.focus) {
+      focusVisibleMarkers();
     }
     if (!opts || opts.broadcast !== false) {
       emitStatusChange();
@@ -13221,7 +13368,7 @@ function rsRestoreLayers(state){
     }
 
     activeNeighborhoods = nextSet;
-    refreshUI({ skipFilter: opts && opts.skipFilter, broadcast: opts && opts.broadcast });
+    refreshUI({ skipFilter: opts && opts.skipFilter, broadcast: opts && opts.broadcast, focus: opts && opts.focus });
   }
 
   function toggleStatus(code){
@@ -13243,7 +13390,7 @@ function rsRestoreLayers(state){
   function toggleNeighborhood(code){
     var norm = normalizedNeighborhood(code);
     if (!norm) return;
-    setActiveNeighborhoods(norm);
+    setActiveNeighborhoods(norm, { focus: true });
   }
 
     if (statusButtons.length){
@@ -13275,7 +13422,7 @@ function rsRestoreLayers(state){
   }
 
   if (neighborhoodShowAll){
-    neighborhoodShowAll.addEventListener('click', function(){ setActiveNeighborhoods('all'); });
+    neighborhoodShowAll.addEventListener('click', function(){ setActiveNeighborhoods('all', { focus: true }); });
   }
 
   if (typeof window !== 'undefined') {
@@ -13287,7 +13434,7 @@ function rsRestoreLayers(state){
       sync: function(){ refreshUI({ skipFilter: true, broadcast: false }); },
       neighborhoods: {
         set: function(value, opts){ setActiveNeighborhoods(value, opts); },
-        reset: function(){ setActiveNeighborhoods('all'); },
+        reset: function(opts){ setActiveNeighborhoods('all', opts); },
         get: function(){ return Array.from(activeNeighborhoods); },
         isDefault: isDefaultNeighborhood
       }
@@ -13354,6 +13501,18 @@ function zoomHere(lat, lon) {
     }
   }
 
+  function resetNeighborhoodButtons(){
+    var ui = (typeof window !== 'undefined') ? window.rsNeighborhoodFilterUI : null;
+    if (ui && typeof ui.reset === 'function') {
+      ui.reset({ focus: true, broadcast: true });
+      return;
+    }
+    var statusUi = (typeof window !== 'undefined') ? window.rsStatusFilterUI : null;
+    if (statusUi && statusUi.neighborhoods && typeof statusUi.neighborhoods.reset === 'function') {
+      statusUi.neighborhoods.reset({ focus: true, broadcast: true });
+    }
+  }
+
   function resetSearchField(){
     var input = document.getElementById('rs-search');
     if (!input) return;
@@ -13379,6 +13538,7 @@ function zoomHere(lat, lon) {
 
   function resetFilters(opts){
     try { resetStatusButtons(); } catch(_) {}
+    try { resetNeighborhoodButtons(); } catch(_) {}
     try { resetSearchField(); } catch(_) {}
     try { closeFiltersPanel(); } catch(_) {}
     applyListSync();
