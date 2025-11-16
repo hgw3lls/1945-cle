@@ -746,36 +746,84 @@ body.rs-fullscreen-mode #map {
 
 
 
-/* === Status + neighborhood filter panel === */
-.rs-filter-controls { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-.rs-filter-toggle {
-  background:#3fc4ff;
-  color:#081018;
-  border:2px solid #111;
-  font-weight:900;
-  padding:8px 12px;
-  border-radius:8px;
-  letter-spacing:0.04em;
-  text-transform:uppercase;
-}
-#rs-footer-bar { position: relative; }
-#rs-filter-panel {
-  position:absolute;
-  right:12px;
-  bottom:calc(100% + 12px);
-  width:min(360px, 92vw);
-  background:#0b0b0b;
-  color:#f3efe4;
-  border:2px solid #3fc4ff;
-  border-radius:12px;
-  box-shadow:0 12px 32px rgba(0,0,0,.55);
-  padding:14px 14px 12px;
+/* === Status + neighborhood filter panel (vertical toggle stack) === */
+.rs-filter-toggle-shell {
+  position:relative;
   display:none;
-  z-index: 10;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+  width:100%;
+  overflow:visible;
 }
-#rs-filter-panel.is-open { display:block; }
-.rs-filter-panel__header { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+
+body.rs-sidebar-open .rs-filter-toggle-shell { display:flex; }
+
+.rs-filter-toggle {
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  padding:18px 14px;
+  letter-spacing:0.18em;
+  min-height:140px;
+  min-width:0;
+  width:auto;
+  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
+  white-space:normal;
+}
+
+.rs-filter-toggle[aria-expanded="true"] {
+  background:#080808;
+  color:#f3efe4;
+}
+
+.rs-filter-panel {
+  position:fixed;
+  top:0;
+  right:0;
+  height:100vh;
+  width:min(var(--rs-float-max-width, 420px), 92vw);
+  max-height:100vh;
+  background:rgba(8, 8, 8, 0.97);
+  border:3px solid #f3efe4;
+  border-radius:0;
+  box-shadow:-8px 0 24px rgba(0,0,0,0.65);
+  padding:22px 24px 18px;
+  color:#f3efe4;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  transform:translateX(12px);
+  opacity:0;
+  pointer-events:none;
+  transition:transform 0.24s ease, opacity 0.24s ease;
+  z-index:10040;
+  overflow-y:auto;
+}
+
+.rs-filter-panel::after {
+  content:"";
+  position:absolute;
+  top:60px;
+  left:-10px;
+  width:20px;
+  height:20px;
+  background:rgba(8, 8, 8, 0.97);
+  border-top:3px solid #f3efe4;
+  border-left:3px solid #f3efe4;
+  transform:rotate(-45deg);
+}
+
+.rs-filter-panel[aria-hidden="true"] { visibility:hidden; }
+
+body.rs-filters-open .rs-filter-panel {
+  opacity:1;
+  transform:translateX(0);
+  pointer-events:auto;
+}
+
+.rs-filter-panel__header { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
 .rs-filter-panel__title { margin:0; font-size:18px; letter-spacing:0.5px; text-transform:uppercase; }
+.rs-filter-panel__body { display:flex; flex-direction:column; gap:16px; }
 .rs-filter-close {
   background:#111;
   color:#f3efe4;
@@ -785,7 +833,7 @@ body.rs-fullscreen-mode #map {
   padding:6px 10px;
   cursor:pointer;
 }
-.rs-filter-section { display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+.rs-filter-section { display:flex; flex-direction:column; gap:10px; }
 .rs-status-list { display:grid; grid-template-columns:1fr; gap:8px; }
 .rs-status-btn {
   display:flex;
@@ -6965,6 +7013,12 @@ html.booting #rs-float {
   box-shadow: 0 1px 2px rgba(0,0,0,0.35);
 }
 
+/* Status-colored title bands */
+#rs-list .rs-li[data-status="1"] .rs-titleband { background:#1c7c50; color:#fdfdfd; }
+#rs-list .rs-li[data-status="0"] .rs-titleband { background:#8c1f1f; color:#fdfdfd; }
+#rs-list .rs-li[data-status="2"] .rs-titleband { background:#c89a1e; color:#111; }
+#rs-list .rs-li[data-status="3"] .rs-titleband { background:#48505a; color:#fdfdfd; }
+
 /* Slight color normalization (optional—keeps your tones) */
 .rs-statuschip-open { background:#47a775; color:#fff; }
 .rs-statuschip-closed { background:#d65252; color:#fff; }
@@ -7451,6 +7505,34 @@ html.booting #rs-float {
 </div>
 <div class="rs-sidebar-toggle-wrap">
   <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
+  <div class="rs-filter-toggle-shell">
+    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Status" data-label-open="Status" id="rs-filter-toggle" type="button">Status</button>
+    <aside aria-hidden="true" aria-label="Theatre Status" class="rs-filter-panel" id="rs-filter-panel">
+      <div class="rs-filter-panel__header">
+        <p class="rs-filter-panel__title">Theatre Status</p>
+        <button aria-label="Close" class="rs-filter-close" id="rs-filter-close" type="button">Close</button>
+      </div>
+      <div class="rs-filter-panel__body">
+        <div class="rs-filter-section">
+          <div class="rs-status-list">
+            <button aria-pressed="true" class="rs-footer-sq rs-status-btn rs-footer-sq--1" data-status-code="1" type="button"><span class="rs-status-swatch rs-footer-sq--1"></span><span class="rs-status-label">Open</span></button>
+            <button aria-pressed="true" class="rs-footer-sq rs-status-btn rs-footer-sq--0" data-status-code="0" type="button"><span class="rs-status-swatch rs-footer-sq--0"></span><span class="rs-status-label">Closed</span></button>
+            <button aria-pressed="true" class="rs-footer-sq rs-status-btn rs-footer-sq--2" data-status-code="2" type="button"><span class="rs-status-swatch rs-footer-sq--2"></span><span class="rs-status-label">Repurposed</span></button>
+            <button aria-pressed="true" class="rs-footer-sq rs-status-btn rs-footer-sq--3" data-status-code="3" type="button"><span class="rs-status-swatch rs-footer-sq--3"></span><span class="rs-status-label">Demolished</span></button>
+          </div>
+          <button class="rs-footer-all" id="rs-status-show-all" type="button">Show All</button>
+          <small>Toggle statuses to show on the map and theatre list.</small>
+        </div>
+        <div class="rs-filter-section">
+          <label for="rs-neighborhood-filter">Neighborhood</label>
+          <select id="rs-neighborhood-filter" name="neighborhood">
+            <option value="all">All neighborhoods</option>
+          </select>
+          <small>Choose an area to filter results and recenter the map.</small>
+        </div>
+      </div>
+    </aside>
+  </div>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
 <header class="rs-float__header" id="rs-sidebar-header">
@@ -7466,10 +7548,7 @@ html.booting #rs-float {
 <div class="rs-float__list" id="rs-list" role="list"></div>
 <div class="rs-footer-bar" id="rs-footer-bar">
 <div class="rs-footer-inner">
-<div class="rs-filter-controls">
-<button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" id="rs-filter-toggle" type="button">Status</button>
-</div>
-<!-- Historic opacity slider (Stage 1) -->
+  <!-- Historic opacity slider (Stage 1) -->
 <div class="rs-footer-inner">
 <div class="rs-maplayers-header">MAP LAYERS</div>
 <!-- Historic opacity segmented bar -->
@@ -7515,29 +7594,6 @@ html.booting #rs-float {
 <button aria-label="100%" class="rs-hist-step" data-v="100"></button>
 </div>
 </div>
-</div>
-</div>
-<div aria-hidden="true" class="rs-filter-panel" id="rs-filter-panel" role="dialog">
-<div class="rs-filter-panel__header">
-<h3 class="rs-filter-panel__title">Theatre Status</h3>
-<button aria-label="Close" class="rs-filter-close" id="rs-filter-close" type="button">Close</button>
-</div>
-<div class="rs-filter-section">
-<div class="rs-status-list">
-<button aria-pressed="true" class="rs-footer-sq rs-status-btn rs-footer-sq--1" data-status-code="1" type="button"><span class="rs-status-swatch rs-footer-sq--1"></span><span class="rs-status-label">Open</span></button>
-<button aria-pressed="true" class="rs-footer-sq rs-status-btn rs-footer-sq--0" data-status-code="0" type="button"><span class="rs-status-swatch rs-footer-sq--0"></span><span class="rs-status-label">Closed</span></button>
-<button aria-pressed="true" class="rs-footer-sq rs-status-btn rs-footer-sq--2" data-status-code="2" type="button"><span class="rs-status-swatch rs-footer-sq--2"></span><span class="rs-status-label">Repurposed</span></button>
-<button aria-pressed="true" class="rs-footer-sq rs-status-btn rs-footer-sq--3" data-status-code="3" type="button"><span class="rs-status-swatch rs-footer-sq--3"></span><span class="rs-status-label">Demolished</span></button>
-</div>
-<button class="rs-footer-all" id="rs-status-show-all" type="button">Show All</button>
-<small>Toggle statuses to show on the map and theatre list.</small>
-</div>
-<div class="rs-filter-section">
-<label for="rs-neighborhood-filter">Neighborhood</label>
-<select id="rs-neighborhood-filter" name="neighborhood">
-<option value="all">All neighborhoods</option>
-</select>
-<small>Choose an area to filter results and recenter the map.</small>
 </div>
 </div>
 </div>
@@ -7999,45 +8055,98 @@ function rsRestoreLayers(state){
     if (e.tile) e.tile.style.display = 'none';
   });
 
-  // Sidebar toggle/collapse/close
-  var floatEl = document.getElementById('rs-float');
-  var toggleBtn = document.getElementById('rs-sidebar-toggle');
-  var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
-  var closeBtn = document.getElementById('rs-close');
-  var listEl = document.getElementById('rs-list');
+    // Sidebar toggle/collapse/close
+    var floatEl = document.getElementById('rs-float');
+    var toggleBtn = document.getElementById('rs-sidebar-toggle');
+    var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
+    var filterToggle = document.getElementById('rs-filter-toggle');
+    var filterPanel = document.getElementById('rs-filter-panel');
+    var filterShell = document.querySelector('.rs-filter-toggle-shell');
+    var filterClose = document.getElementById('rs-filter-close');
+    var closeBtn = document.getElementById('rs-close');
+    var listEl = document.getElementById('rs-list');
 
-  function positionSidebarToggle(){
-    if (!toggleWrap) toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
-    if (!toggleWrap) return;
-    var zoom = document.querySelector('.leaflet-control-zoom');
-    if (!zoom){
-      toggleWrap.style.top = '120px';
-      return;
+    function setFiltersOpen(open){
+      var body = document.body;
+      if (body){ body.classList.toggle('rs-filters-open', !!open); }
+      if (filterPanel){
+        filterPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+        if (typeof filterPanel.toggleAttribute === 'function'){
+          filterPanel.toggleAttribute('inert', !open);
+        } else if (!open) {
+          filterPanel.setAttribute('inert', '');
+        } else {
+          filterPanel.removeAttribute('inert');
+        }
+      }
+      if (filterToggle){
+        filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        var openLabel = filterToggle.getAttribute('data-label-open') || 'Status';
+        var closeLabel = filterToggle.getAttribute('data-label-close') || 'Close Status';
+        filterToggle.textContent = open ? closeLabel : openLabel;
+      }
     }
-    var rect = zoom.getBoundingClientRect();
-    if (!rect || typeof rect.bottom !== 'number'){ return; }
-    var offset = Math.max(12, rect.bottom + 12);
-    toggleWrap.style.top = offset + 'px';
-  }
 
-  function setSidebarHidden(hidden){
-    if (!floatEl) return;
-    floatEl.classList.toggle('is-hidden', hidden);
-    if (hidden){
-      floatEl.setAttribute('aria-hidden', 'true');
-    } else {
-      floatEl.removeAttribute('aria-hidden');
+    if (typeof window !== 'undefined'){
+      window.rsSetFiltersOpen = setFiltersOpen;
     }
-    if (toggleBtn){
-      toggleBtn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
-      var openLabel = toggleBtn.getAttribute('data-label-open') || 'Hide Theatres';
-      var closedLabel = toggleBtn.getAttribute('data-label-closed') || 'Show Theatres';
-      toggleBtn.textContent = hidden ? closedLabel : openLabel;
+
+    if (filterToggle){
+      setFiltersOpen(false);
+      filterToggle.addEventListener('click', function(){
+        var body = document.body;
+        var isOpen = body ? body.classList.contains('rs-filters-open') : false;
+        setFiltersOpen(!isOpen);
+      });
     }
-    if (document.body){
-      document.body.classList.toggle('rs-sidebar-open', !hidden);
+
+    if (filterClose){
+      filterClose.addEventListener('click', function(){ setFiltersOpen(false); });
     }
-  }
+
+    document.addEventListener('click', function(evt){
+      var body = document.body;
+      if (!body || !body.classList.contains('rs-filters-open')) return;
+      var target = evt.target;
+      if (filterShell && filterShell.contains(target)) return;
+      setFiltersOpen(false);
+    });
+
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') setFiltersOpen(false); }, true);
+
+    function positionSidebarToggle(){
+      if (!toggleWrap) toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
+      if (!toggleWrap) return;
+      var zoom = document.querySelector('.leaflet-control-zoom');
+      if (!zoom){
+        toggleWrap.style.top = '120px';
+        return;
+      }
+      var rect = zoom.getBoundingClientRect();
+      if (!rect || typeof rect.bottom !== 'number'){ return; }
+      var offset = Math.max(12, rect.bottom + 12);
+      toggleWrap.style.top = offset + 'px';
+    }
+
+    function setSidebarHidden(hidden){
+      if (!floatEl) return;
+      floatEl.classList.toggle('is-hidden', hidden);
+      if (hidden){
+        floatEl.setAttribute('aria-hidden', 'true');
+        setFiltersOpen(false);
+      } else {
+        floatEl.removeAttribute('aria-hidden');
+      }
+      if (toggleBtn){
+        toggleBtn.setAttribute('aria-expanded', hidden ? 'false' : 'true');
+        var openLabel = toggleBtn.getAttribute('data-label-open') || 'Hide Theatres';
+        var closedLabel = toggleBtn.getAttribute('data-label-closed') || 'Show Theatres';
+        toggleBtn.textContent = hidden ? closedLabel : openLabel;
+      }
+      if (document.body){
+        document.body.classList.toggle('rs-sidebar-open', !hidden);
+      }
+    }
 
   if (typeof window !== 'undefined') {
     window.rsSetSidebarHidden = setSidebarHidden;
@@ -8331,17 +8440,17 @@ function rsRestoreLayers(state){
     });
   });
   var showAllBtn = document.getElementById('rs-status-show-all');
-  if (showAllBtn){
-    showAllBtn.addEventListener('click', function(){
-      activeStatuses = new Set(STATUS_CODES);
-      activeNeighborhood = 'all';
-      syncStatusButtons();
-      var sel = document.getElementById('rs-neighborhood-filter');
-      if (sel) sel.value = 'all';
-      applyFilters();
-      try { setFilterPanel(false); } catch(_){}
-    });
-  }
+    if (showAllBtn){
+      showAllBtn.addEventListener('click', function(){
+        activeStatuses = new Set(STATUS_CODES);
+        activeNeighborhood = 'all';
+        syncStatusButtons();
+        var sel = document.getElementById('rs-neighborhood-filter');
+        if (sel) sel.value = 'all';
+        applyFilters();
+        try { setFiltersOpen(false); } catch(_){}
+      });
+    }
   var neighborhoodSelect = document.getElementById('rs-neighborhood-filter');
   if (neighborhoodSelect){
     neighborhoodSelect.addEventListener('change', function(){
@@ -8350,29 +8459,9 @@ function rsRestoreLayers(state){
       recenterOnNeighborhood(activeNeighborhood);
     });
   }
-  var filterPanel = document.getElementById('rs-filter-panel');
-  var filterToggle = document.getElementById('rs-filter-toggle');
-  var filterClose = document.getElementById('rs-filter-close');
-  function setFilterPanel(open){
-    if (!filterPanel || !filterToggle) return;
-    var isOpen = !!open;
-    filterPanel.classList.toggle('is-open', isOpen);
-    filterPanel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-    filterToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  }
-  if (filterToggle){
-    filterToggle.addEventListener('click', function(){
-      var isOpen = filterPanel && filterPanel.classList.contains('is-open');
-      setFilterPanel(!isOpen);
-    });
-  }
-  if (filterClose){
-    filterClose.addEventListener('click', function(){ setFilterPanel(false); });
-  }
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') setFilterPanel(false); }, true);
-  populateNeighborhoodFilter();
-  syncStatusButtons();
-  applyFilters();
+    populateNeighborhoodFilter();
+    syncStatusButtons();
+    applyFilters();
 
 })();
 
