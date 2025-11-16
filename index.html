@@ -1903,12 +1903,12 @@ body.rs-sidebar-open .rs-filter-toggle-shell {
 .rs-filter-panel {
 
   position:fixed;
-  top:12px;
+  top:14px;
   right:0;
-  bottom:12px;
+  bottom:18px;
   height:auto;
   width:min(var(--rs-float-max-width, 420px), 92vw);
-  max-height:calc(100vh - 24px);
+  max-height:calc(100vh - 32px);
   background:rgba(8, 8, 8, 0.97);
   border:3px solid #f3efe4;
   border-radius:0;
@@ -1964,6 +1964,11 @@ body.rs-neighborhoods-open #rs-filter-panel {
 
   background:rgba(8, 8, 8, 0.97);
     border-color:#f3efe4;
+    width:min(360px, 88vw);
+    top:clamp(12px, 3vh, 24px);
+    bottom:clamp(16px, 5vh, 32px);
+    max-height:calc(100vh - 40px);
+    overflow:visible;
 }
 
 .rs-filter-panel__hint {
@@ -1980,7 +1985,7 @@ body.rs-neighborhoods-open #rs-filter-panel {
   width:100%;
     max-width:100%;
   margin:6px auto 12px;
-    padding:12px 12px 16px;
+    padding:12px 12px 18px;
     border:3px solid #f3efe4;
     border-radius:12px;
     background:linear-gradient(180deg, rgba(8,8,8,0.18), rgba(8,8,8,0.45));
@@ -2000,15 +2005,15 @@ body.rs-neighborhoods-open #rs-filter-panel {
 
   display:flex;
     flex-direction:column;
-    gap:10px;
+    gap:8px;
 }
 
 .rs-neighborhood-row {
 
   display:flex;
     align-items:flex-start;
-    gap:12px;
-    padding:10px 12px;
+    gap:10px;
+    padding:8px 10px;
     background:rgba(243,239,228,0.06);
     border:1px solid rgba(243,239,228,0.25);
     border-radius:10px;
@@ -2031,7 +2036,7 @@ body.rs-neighborhoods-open #rs-filter-panel {
 
   margin:0;
     font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
-    font-size:14px;
+    font-size:15px;
     letter-spacing:0.12em;
     text-transform:uppercase;
     color:#f3efe4;
@@ -2039,25 +2044,25 @@ body.rs-neighborhoods-open #rs-filter-panel {
 
 .rs-neighborhood-count {
 
-  margin:4px 0 6px;
-    color:rgba(243,239,228,0.88);
-    font-size:12px;
+  margin:3px 0 6px;
+    color:rgba(243,239,228,0.86);
+    font-size:11px;
 }
 
 .rs-neighborhood-notes {
 
   margin:0;
-    color:rgba(243,239,228,0.78);
-    font-size:12px;
-    line-height:1.4;
+    color:rgba(243,239,228,0.9);
+    font-size:13px;
+    line-height:1.45;
 }
 
 .rs-neighborhood-pin {
 
-  min-width:76px;
+  min-width:64px;
     align-self:center;
-    padding:8px 10px;
-    font-size:11px;
+    padding:6px 8px;
+    font-size:10px;
     letter-spacing:0.08em;
     box-shadow:0 3px 0 #000;
 }
@@ -2117,8 +2122,8 @@ body.rs-neighborhoods-open #rs-filter-panel {
   .rs-filter-panel {
 
     top:10px;
-      bottom:10px;
-      max-height:calc(100vh - 20px);
+      bottom:14px;
+      max-height:calc(100vh - 24px);
   }
 
   .rs-neighborhood-shape {
@@ -2176,6 +2181,13 @@ body.rs-neighborhoods-open #rs-filter-panel {
   overflow-y:auto;
   padding-right:2px;
   max-height:none;
+}
+
+.rs-filter-panel--neighborhoods .rs-filter-panel__body {
+
+  overflow:visible;
+    padding-right:0;
+    max-height:none;
 }
 
 .rs-filter-panel__section {
@@ -13501,15 +13513,19 @@ function zoomHere(lat, lon) {
     }
   }
 
-  function resetNeighborhoodButtons(){
+  function resetNeighborhoodButtons(opts){
     var ui = (typeof window !== 'undefined') ? window.rsNeighborhoodFilterUI : null;
+    var resetOpts = {
+      focus: opts && opts.focus,
+      broadcast: (opts && opts.broadcast !== undefined) ? opts.broadcast : true
+    };
     if (ui && typeof ui.reset === 'function') {
-      ui.reset({ focus: true, broadcast: true });
+      ui.reset(resetOpts);
       return;
     }
     var statusUi = (typeof window !== 'undefined') ? window.rsStatusFilterUI : null;
     if (statusUi && statusUi.neighborhoods && typeof statusUi.neighborhoods.reset === 'function') {
-      statusUi.neighborhoods.reset({ focus: true, broadcast: true });
+      statusUi.neighborhoods.reset(resetOpts);
     }
   }
 
@@ -13537,8 +13553,9 @@ function zoomHere(lat, lon) {
   }
 
   function resetFilters(opts){
+    var options = opts || {};
     try { resetStatusButtons(); } catch(_) {}
-    try { resetNeighborhoodButtons(); } catch(_) {}
+    try { resetNeighborhoodButtons({ focus: false, broadcast: options.broadcast }); } catch(_) {}
     try { resetSearchField(); } catch(_) {}
     try { closeFiltersPanel(); } catch(_) {}
     applyListSync();
