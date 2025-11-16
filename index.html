@@ -8005,7 +8005,7 @@ function rsRestoreLayers(state){
       return null;
     }
     function setPressed(btn, on){ if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
-    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return False; } }
+    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return false; } }
 
     function syncButtons(){
       var g = gm(); if (!g) return;
