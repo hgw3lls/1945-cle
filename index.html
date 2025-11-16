@@ -1887,6 +1887,18 @@ body.rs-sidebar-open .rs-filter-toggle-shell {
   color:#f3efe4;
 }
 
+.rs-filter-toggle--neighborhoods {
+
+  background:#0c89c2;
+    color:#f3efe4;
+}
+
+.rs-filter-toggle--neighborhoods[aria-expanded="true"] {
+
+  background:#f3efe4;
+    color:#080808;
+}
+
 .rs-filter-panel {
 
   position:fixed;
@@ -1931,12 +1943,103 @@ body.rs-sidebar-open .rs-filter-toggle-shell {
   visibility:hidden;
 }
 
-body.rs-filters-open .rs-filter-panel {
+body.rs-filters-open #rs-filter-panel,
+body.rs-neighborhoods-open #rs-neighborhood-panel {
 
   opacity:1;
   pointer-events:auto;
   transform:translateX(0);
   visibility:visible;
+}
+
+body.rs-neighborhoods-open #rs-filter-panel {
+
+  opacity:0;
+    pointer-events:none;
+}
+
+.rs-filter-panel--neighborhoods {
+
+  background:rgba(12, 137, 194, 0.92);
+    border-color:#f3efe4;
+}
+
+.rs-filter-panel__hint {
+
+  font-family:var(--font-body, Georgia, serif);
+    font-size:13px;
+    line-height:1.35;
+    color:rgba(243,239,228,0.9);
+    margin:8px 0 10px;
+}
+
+.rs-neighborhood-shape {
+
+  position:relative;
+    width:100%;
+    max-width:360px;
+    aspect-ratio:4 / 3;
+    margin:6px auto 12px;
+    background:radial-gradient(circle at 32% 18%, rgba(243,239,228,0.12), rgba(243,239,228,0) 38%),
+      radial-gradient(circle at 78% 22%, rgba(243,239,228,0.18), rgba(243,239,228,0) 44%),
+      linear-gradient(145deg, rgba(8,8,8,0.45), rgba(8,8,8,0.72));
+    border:3px solid #f3efe4;
+    box-shadow:inset 0 0 0 1px rgba(243,239,228,0.26), 0 12px 26px rgba(0,0,0,0.35);
+    clip-path:polygon(14% 12%, 56% 4%, 80% 10%, 92% 30%, 90% 60%, 70% 88%, 44% 94%, 18% 78%, 10% 52%);
+    overflow:hidden;
+}
+
+.rs-neighborhood-buttons {
+
+  position:absolute;
+    inset:0;
+}
+
+.rs-neighborhood-pin {
+
+  position:absolute;
+    left:var(--nx, 50%);
+    top:var(--ny, 50%);
+    transform:translate(-50%, -50%);
+    padding:10px 12px;
+    min-width:0;
+    width:max-content;
+    background:#f3efe4;
+    color:#080808;
+    border-color:#080808;
+    box-shadow:3px 3px 0 rgba(0,0,0,0.75);
+    transition:transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+}
+
+.rs-neighborhood-pin:hover {
+
+  transform:translate(-50%, -50%) scale(1.04);
+    box-shadow:5px 5px 0 rgba(0,0,0,0.85);
+}
+
+.rs-neighborhood-pin:active {
+
+  transform:translate(-50%, -50%) scale(0.99);
+    box-shadow:2px 2px 0 rgba(0,0,0,0.7);
+}
+
+.rs-neighborhood-pin.is-active {
+
+  background:#0c89c2;
+    color:#f3efe4;
+    border-color:#f3efe4;
+}
+
+.rs-lake-label {
+
+  position:absolute;
+    top:8%;
+    right:10%;
+    font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
+    font-size:13px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:rgba(243,239,228,0.75);
 }
 
 .rs-filter-panel__header {
@@ -7650,12 +7753,13 @@ html.tv .rs-status-filter-btn--showall {
   <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
   <div class="rs-filter-toggle-shell">
     <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Status" data-label-open="Status" id="rs-filter-toggle" type="button">Status</button>
+    <button aria-controls="rs-neighborhood-panel" aria-expanded="false" class="rs-btn rs-filter-toggle rs-filter-toggle--neighborhoods" data-label-close="Close Neighborhoods" data-label-open="Neighborhoods" id="rs-neighborhood-toggle" type="button">Neighborhoods</button>
     <aside aria-hidden="true" aria-label="Map filters" class="rs-filter-panel" id="rs-filter-panel">
       <div class="rs-filter-panel__header">
         <p class="rs-filter-panel__title">Theatre Status</p>
       </div>
       <div class="rs-filter-panel__body">
-        <p class="rs-filter-panel__description">Sort theatres by their status or narrow the map to a specific neighborhood.</p>
+        <p class="rs-filter-panel__description">Sort theatres by their status. Use the Neighborhoods panel to focus on part of Greater Cleveland.</p>
         <div class="rs-filter-panel__section">
           <div class="rs-status-filter-select" id="rs-status-filter-wrap">
             <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
@@ -7676,12 +7780,21 @@ html.tv .rs-status-filter-btn--showall {
             </select>
           </div>
         </div>
+      </div>
+    </aside>
+    <aside aria-hidden="true" aria-label="Neighborhood filters" class="rs-filter-panel rs-filter-panel--neighborhoods" id="rs-neighborhood-panel">
+      <div class="rs-filter-panel__header">
+        <p class="rs-filter-panel__title">Neighborhoods</p>
+      </div>
+      <div class="rs-filter-panel__body">
+        <p class="rs-filter-panel__description">Pick a neighborhood by tapping its place on the stylized Greater Cleveland map.</p>
         <div class="rs-filter-panel__section" id="rs-neighborhood-filter">
-          <button type="button" class="rs-status-filter-btn rs-neighborhood-filter-toggle" aria-controls="rs-neighborhood-grid" aria-expanded="false">Neighborhoods</button>
-          <div aria-label="Filter by neighborhood" class="rs-status-filter-touchbar rs-neighborhood-filter" id="rs-neighborhood-grid" role="group" hidden>
-            <div class="rs-status-filter-grid" id="rs-neighborhood-buttons"></div>
-            <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-neighborhood="all" aria-pressed="true">Show All</button>
+          <div aria-label="Filter by neighborhood" class="rs-neighborhood-shape" id="rs-neighborhood-grid" role="group">
+            <div class="rs-neighborhood-buttons" id="rs-neighborhood-buttons"></div>
+            <div aria-hidden="true" class="rs-lake-label">Lake Erie</div>
           </div>
+          <p class="rs-filter-panel__hint">Tap a location pin to focus on that cluster. Tap again to toggle it off, or use Show All to reset.</p>
+          <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-neighborhood="all" aria-pressed="true">Show All</button>
         </div>
       </div>
     </aside>
@@ -12394,11 +12507,14 @@ function rsRestoreLayers(state){
   var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
   var filterToggle = document.getElementById('rs-filter-toggle');
   var filterPanel = document.getElementById('rs-filter-panel');
+  var neighborhoodToggleBtn = document.getElementById('rs-neighborhood-toggle');
+  var neighborhoodPanel = document.getElementById('rs-neighborhood-panel');
   var filterShell = document.querySelector('.rs-filter-toggle-shell');
   var closeBtn = document.getElementById('rs-close');
   var listEl = document.getElementById('rs-list');
 
   function setFiltersOpen(open){
+    if (open) { setNeighborhoodPanelOpen(false); }
     var body = document.body;
     if (body){
       body.classList.toggle('rs-filters-open', !!open);
@@ -12421,6 +12537,30 @@ function rsRestoreLayers(state){
     }
   }
 
+  function setNeighborhoodPanelOpen(open){
+    var body = document.body;
+    if (body){
+      if (open) body.classList.remove('rs-filters-open');
+      body.classList.toggle('rs-neighborhoods-open', !!open);
+    }
+    if (neighborhoodPanel){
+      neighborhoodPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      if (typeof neighborhoodPanel.toggleAttribute === 'function'){
+        neighborhoodPanel.toggleAttribute('inert', !open);
+      } else if (!open) {
+        neighborhoodPanel.setAttribute('inert', '');
+      } else {
+        neighborhoodPanel.removeAttribute('inert');
+      }
+    }
+    if (neighborhoodToggleBtn){
+      neighborhoodToggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      var openLabelN = neighborhoodToggleBtn.getAttribute('data-label-open') || 'Neighborhoods';
+      var closeLabelN = neighborhoodToggleBtn.getAttribute('data-label-close') || 'Close Neighborhoods';
+      neighborhoodToggleBtn.textContent = open ? closeLabelN : openLabelN;
+    }
+  }
+
   if (typeof window !== 'undefined'){
     window.rsSetFiltersOpen = setFiltersOpen;
     window.rsFiltersPanel = {
@@ -12430,6 +12570,16 @@ function rsRestoreLayers(state){
         var body = document.body;
         var isOpen = body ? body.classList.contains('rs-filters-open') : false;
         setFiltersOpen(!isOpen);
+      }
+    };
+    window.rsSetNeighborhoodOpen = setNeighborhoodPanelOpen;
+    window.rsNeighborhoodPanel = {
+      open: function(){ setNeighborhoodPanelOpen(true); },
+      close: function(){ setNeighborhoodPanelOpen(false); },
+      toggle: function(){
+        var body = document.body;
+        var isOpen = body ? body.classList.contains('rs-neighborhoods-open') : false;
+        setNeighborhoodPanelOpen(!isOpen);
       }
     };
   }
@@ -12443,12 +12593,24 @@ function rsRestoreLayers(state){
     });
   }
 
+  if (neighborhoodToggleBtn){
+    setNeighborhoodPanelOpen(false);
+    neighborhoodToggleBtn.addEventListener('click', function(){
+      var body = document.body;
+      var isOpen = body ? body.classList.contains('rs-neighborhoods-open') : false;
+      setFiltersOpen(false);
+      setNeighborhoodPanelOpen(!isOpen);
+    });
+  }
+
   document.addEventListener('click', function(evt){
     var body = document.body;
-    if (!body || !body.classList.contains('rs-filters-open')) return;
+    var hasAnyOpen = body && (body.classList.contains('rs-filters-open') || body.classList.contains('rs-neighborhoods-open'));
+    if (!hasAnyOpen) return;
     var target = evt.target;
     if (filterShell && filterShell.contains(target)) return;
     setFiltersOpen(false);
+    setNeighborhoodPanelOpen(false);
   });
 
   function positionSidebarToggle(){
@@ -12471,6 +12633,7 @@ function rsRestoreLayers(state){
     if (hidden){
       floatEl.setAttribute('aria-hidden', 'true');
       setFiltersOpen(false);
+      setNeighborhoodPanelOpen(false);
     } else {
       floatEl.removeAttribute('aria-hidden');
     }
@@ -12528,10 +12691,17 @@ function rsRestoreLayers(state){
       var handled = false;
       var body = document.body;
       var filtersOpen = body && body.classList.contains('rs-filters-open');
+      var neighborhoodsOpen = body && body.classList.contains('rs-neighborhoods-open');
       if (filtersOpen){
         setFiltersOpen(false);
         if (filterToggle){
           filterToggle.focus();
+        }
+        handled = true;
+      } else if (neighborhoodsOpen){
+        setNeighborhoodPanelOpen(false);
+        if (neighborhoodToggleBtn){
+          neighborhoodToggleBtn.focus();
         }
         handled = true;
       }
@@ -12700,9 +12870,8 @@ function rsRestoreLayers(state){
   var STATUS_CODES = ['1', '0', '2', '3'];
   var activeStatuses = new Set(STATUS_CODES);
   var neighborhoodSection = document.getElementById('rs-neighborhood-filter');
-  var neighborhoodToggle = neighborhoodSection ? neighborhoodSection.querySelector('.rs-neighborhood-filter-toggle') : null;
   var neighborhoodGrid = document.getElementById('rs-neighborhood-grid');
-  var neighborhoodButtonsRoot = document.getElementById('rs-neighborhood-buttons');
+  var neighborhoodButtonsRoot = document.getElementById('rs-neighborhood-buttons') || document.getElementById('rs-neighborhood-grid');
   var neighborhoodShowAll = neighborhoodSection ? neighborhoodSection.querySelector('[data-neighborhood="all"]') : null;
   var ALL_NEIGHBORHOODS = Array.from(new Set(((typeof THEATRES === 'object' && THEATRES.features) || []).map(function(f){
     var p = (f && f.properties) || {};
@@ -12710,6 +12879,16 @@ function rsRestoreLayers(state){
   }).filter(Boolean).map(function(n){ return String(n).trim().toLowerCase(); }))).sort();
   var activeNeighborhoods = new Set(ALL_NEIGHBORHOODS);
   var neighborhoodButtons = [];
+  var NEIGHBORHOOD_POSITIONS = {
+    'downtown_core': { x: 53, y: 40 },
+    'near_west': { x: 38, y: 46 },
+    'west_side_residential': { x: 30, y: 62 },
+    'streetcar_suburbs_west': { x: 32, y: 30 },
+    'streetcar_suburbs_east': { x: 64, y: 44 },
+    'east_side_neighborhood': { x: 70, y: 58 },
+    'the_heights': { x: 62, y: 70 },
+    'outlying_lake': { x: 78, y: 26 }
+  };
 
   function formatNeighborhoodLabel(code){
     if (!code) return '';
@@ -12772,7 +12951,8 @@ function rsRestoreLayers(state){
     neighborhoodButtonsRoot.__rsBuilt = true;
     neighborhoodButtonsRoot.innerHTML = ALL_NEIGHBORHOODS.map(function(code){
       var label = formatNeighborhoodLabel(code);
-      return '<button type="button" class="rs-status-filter-btn" data-neighborhood="'+code+'" aria-pressed="true">'+label+'</button>';
+      var pos = NEIGHBORHOOD_POSITIONS[code] || { x: 50, y: 50 };
+      return '<button type="button" class="rs-status-filter-btn rs-neighborhood-pin" data-neighborhood="'+code+'" aria-pressed="true" style="--nx:'+pos.x+'%; --ny:'+pos.y+'%;">'+label+'</button>';
     }).join('');
     neighborhoodButtons = Array.prototype.slice.call(neighborhoodButtonsRoot.querySelectorAll('[data-neighborhood]'));
   }
@@ -12957,19 +13137,6 @@ function rsRestoreLayers(state){
 
   if (showAllButton){
     showAllButton.addEventListener('click', function(){ setActiveStatuses('all'); });
-  }
-
-  if (neighborhoodToggle && neighborhoodGrid){
-    neighborhoodToggle.addEventListener('click', function(){
-      ensureNeighborhoodButtons();
-      var hidden = neighborhoodGrid.hasAttribute('hidden');
-      if (hidden) {
-        neighborhoodGrid.removeAttribute('hidden');
-      } else {
-        neighborhoodGrid.setAttribute('hidden', '');
-      }
-      neighborhoodToggle.setAttribute('aria-expanded', hidden ? 'true' : 'false');
-    });
   }
 
   function bindNeighborhoodButtons(){
