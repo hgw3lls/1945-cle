@@ -13223,6 +13223,14 @@ function rsRestoreLayers(state){
       filterToggle.textContent = open ? closeLabel : openLabel;
     }
 
+    if (open){
+      try {
+        if (typeof window.applyListFilter === 'function') {
+          setTimeout(window.applyListFilter, 0);
+        }
+      } catch(_){}
+    }
+
     if (!open){
       try {
         if (window.rsStatusFilterUI && typeof window.rsStatusFilterUI.reset === 'function') {
@@ -14160,6 +14168,58 @@ function zoomHere(lat, lon) {
     return cleanCodes(String(val).split(','));
   }
 
+  var STATUS_ORDER = null;
+
+  function orderedStatusCodes(){
+    if (STATUS_ORDER) return STATUS_ORDER;
+    var buttons = Array.prototype.slice.call(document.querySelectorAll('#rs-status-filter-wrap .rs-status-filter-btn[data-status]:not([data-status="all"])'));
+    var codes = buttons.map(function(btn){ return btn.getAttribute('data-status'); }).filter(Boolean);
+    STATUS_ORDER = codes.length ? codes : ['1','0','2','3'];
+    return STATUS_ORDER;
+  }
+
+  function ensureOriginalListOrder(items){
+    items.forEach(function(li, idx){
+      if (!li.hasAttribute('data-rs-order')) {
+        var existing = li.getAttribute('data-idx');
+        li.setAttribute('data-rs-order', existing != null ? existing : String(idx));
+      }
+    });
+  }
+
+  function sortListByStatus(items, enabled){
+    var list = document.getElementById('rs-list');
+    if (!list || !items || !items.length) return;
+
+    var body = document.body;
+    var inlineOpen = body && body.classList.contains('rs-status-inline-open');
+    ensureOriginalListOrder(items);
+
+    var defaultOrder = orderedStatusCodes();
+    var activeOrder = defaultOrder.filter(function(code){ return !enabled || enabled.has(code); });
+
+    var originalRank = function(li){
+      var raw = li.getAttribute('data-rs-order');
+      var n = Number(raw);
+      return isFinite(n) ? n : 0;
+    };
+
+    var priority = function(li){
+      if (!inlineOpen) return originalRank(li);
+      var code = liStatusCode(li);
+      var idx = activeOrder.indexOf(code);
+      if (idx === -1) idx = defaultOrder.indexOf(code);
+      if (idx === -1) idx = activeOrder.length + defaultOrder.length;
+      return (idx * 10000) + originalRank(li);
+    };
+
+    items.sort(function(a, b){ return priority(a) - priority(b); });
+
+    var frag = document.createDocumentFragment();
+    items.forEach(function(li){ frag.appendChild(li); });
+    list.appendChild(frag);
+  }
+
   function getEnabledNeighborhoods(){
     if (typeof window !== 'undefined' && window.rsStatusFilterUI && window.rsStatusFilterUI.neighborhoods && typeof window.rsStatusFilterUI.neighborhoods.get === 'function') {
       var current = window.rsStatusFilterUI.neighborhoods.get();
@@ -14201,7 +14261,8 @@ function zoomHere(lat, lon) {
       var neighborhoods = getEnabledNeighborhoods();
       var items = document.querySelectorAll('#rs-list .rs-li');
       var neighborhoodFiltering = neighborhoods && neighborhoods.size && neighborhoods.size < ALL_NEIGHBORHOODS.length;
-      items.forEach(function(li){
+      var arr = Array.prototype.slice.call(items);
+      arr.forEach(function(li){
         var code = liStatusCode(li);
         var hood = liNeighborhoodCode(li);
         // Only filter when we have a known code; unknowns remain visible
@@ -14210,6 +14271,7 @@ function zoomHere(lat, lon) {
         var show = statusOK && hoodOK;
         li.style.display = show ? '' : 'none';
       });
+      sortListByStatus(arr, enabled);
       // Update visible count badge if #rs-count exists
       var countEl = document.getElementById('rs-count');
       if (countEl) {
