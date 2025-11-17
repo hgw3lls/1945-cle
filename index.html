@@ -7676,7 +7676,7 @@ html.booting #rs-float {
   flex: 1 1 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
 }
 
 .rs-status-filter-btn {
@@ -7684,7 +7684,7 @@ html.booting #rs-float {
   -webkit-appearance: none;
   border-radius: 0;
   border: 2px solid #000;
-  box-shadow: 0 3px 0 #000;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.75);
   background: #f3efe4;
   color: #000;
   padding: 8px 4px;
@@ -7724,13 +7724,13 @@ html.booting #rs-float {
 
 .rs-status-filter-btn:not(.is-active) {
   filter: saturate(80%) brightness(0.92);
-  box-shadow: 0 2px 0 #000;
-  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.7);
+  transform: translateY(0);
 }
 
 .rs-status-filter-btn.is-active {
   transform: translateY(-1px);
-  box-shadow: 0 3px 0 #000;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.85);
   filter: none;
 }
 
@@ -7839,501 +7839,10 @@ html.tv .rs-status-filter-btn--showall {
 </style>
 </head>
 <body>
-<!-- Boot overlay -->
-<div aria-hidden="false" id="rs-boot">
-<div class="rs-boot-inner">
-<div class="rs-boot-title">PICTURE HOUSES</div>
-<div class="rs-boot-sub">Preparing map &amp; UI…</div>
-</div>
-</div>
-<!-- Full Image Viewer -->
-<div aria-hidden="true" id="rs-image-viewer">
-<button class="rs-iv-close" title="Close" type="button">Close</button>
-<img alt="Full-size view" id="rs-image-viewer-img"/>
-</div>
-<div id="map"></div>
-<!-- Attract / Intro overlay (Stage 1) -->
-<div id="rs-attract" style="
-  position:fixed; inset:0; z-index:10020;
-  display:flex; align-items:center; justify-content:center;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,.72), rgba(0,0,0,.92));
-  color:#f3efe4; text-align:center; cursor:pointer;">
-<div style="max-width:min(70ch, 80vw); padding:24px;">
-<img alt="Reel Screens" src="images/reel_screens_logo.png" style="width:min(520px,60vw); filter:drop-shadow(0 8px 24px rgba(0,0,0,.6)); margin-bottom:18px;"/>
-<h1 style="font-family: var(--font-display, system-ui, sans-serif); font-size:56px; font-weight:900; line-height:1; letter-spacing:.5px; text-transform:uppercase; margin:0 0 10px;">
-      Cleveland • 1945
-    </h1>
-<p style="font-family: var(--font-body, Georgia, serif); font-size:20px; font-weight:600; line-height:1.35; opacity:.95; margin:0 0 18px;">
-      Tap anywhere to begin. Explore neighbourhood theatres, “Today at Your Theatre,” and layered historic maps.
-    </p>
-<button class="rs-btn" style="font-size:20px; padding:14px 18px;">Start Exploring</button>
-</div>
-</div>
-<div class="rs-logo-corner">
-  <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
-</div>
-<div class="rs-toolbar">
-<div aria-label="Map controls" class="rs-toolbar__actions" role="group">
-<button class="rs-btn rs-toolbar__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
-<button class="rs-btn rs-toolbar__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
-<button aria-label="Tips" class="rs-btn rs-toolbar__btn rs-tips-btn-toolbar" type="button">Tips</button>
-<button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Recenter the map" type="button">Recenter</button>
-<button class="rs-btn rs-toolbar__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
-<button aria-pressed="false" aria-label="Enter fullscreen mode" class="rs-btn rs-toolbar__btn rs-toolbar__btn--fullscreen" id="rs-fullscreen-btn" title="Enter fullscreen mode" type="button">Fullscreen</button>
-</div>
-</div>
-<div class="rs-sidebar-toggle-wrap">
-<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle rs-sidebar-toggle--accent" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
-  <div class="rs-filter-toggle-shell">
-    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Status" data-label-open="Status" id="rs-filter-toggle" type="button">Status</button>
-    <button aria-controls="rs-neighborhood-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Neighborhoods" data-label-open="Neighborhoods" id="rs-neighborhood-toggle" type="button">Neighborhoods</button>
-    <aside aria-hidden="true" aria-label="Map filters" class="rs-filter-panel" id="rs-filter-panel">
-      <div class="rs-filter-panel__header">
-        <p class="rs-filter-panel__title">Theatre Status</p>
-      </div>
-      <div class="rs-filter-panel__body">
-        <p class="rs-filter-panel__description">Sort theatres by their status. Use the Neighborhoods panel to focus on part of Greater Cleveland.</p>
-        <div class="rs-filter-panel__section">
-          <div class="rs-status-filter-select" id="rs-status-filter-wrap">
-            <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
-              <div class="rs-status-filter-grid">
-                <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
-              </div>
-              <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
-            </div>
-            <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
-              <option value="all">All Statuses</option>
-              <option value="1">Open</option>
-              <option value="0">Closed</option>
-              <option value="2">Repurposed</option>
-              <option value="3">Demolished</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </aside>
-    <aside aria-hidden="true" aria-label="Neighborhood filters" class="rs-filter-panel rs-filter-panel--neighborhoods" id="rs-neighborhood-panel">
-      <div class="rs-filter-panel__header">
-        <p class="rs-filter-panel__title">Neighborhoods</p>
-      </div>
-      <div class="rs-filter-panel__body">
-        <p class="rs-filter-panel__description">Pick a neighborhood to isolate theatres on the map and in the list.</p>
-        <div class="rs-filter-panel__section" id="rs-neighborhood-filter">
-          <div aria-label="Filter by neighborhood" class="rs-neighborhood-shape" id="rs-neighborhood-grid" role="group">
-            <div class="rs-neighborhood-list" id="rs-neighborhood-buttons"></div>
-          </div>
-          <div class="rs-neighborhood-footer">
-            <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall rs-neighborhood-showall is-active" data-neighborhood="all" aria-pressed="true">Show All</button>
-          </div>
-        </div>
-      </div>
-    </aside>
-  </div>
-</div>
-<aside class="rs-float rs-float--sidebar" id="rs-float">
-<header class="rs-float__header" id="rs-sidebar-header">
-<div><span class="rs-float__title">Theatres</span></div>
-<div class="rs-float__actions">
-<span aria-live="polite" class="rs-chip rs-count-badge" id="rs-count">0</span>
-<button class="rs-btn rs-float__reset-btn" id="rs-list-reset-btn" title="Reset search and filters" type="button">Reset</button>
-</div>
-</header>
-<div class="rs-search-wrap" role="search">
-  <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
-  <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
-</div>
-<div class="rs-neighborhood-insight" id="rs-neighborhood-insight" aria-live="polite" hidden>
-  <p class="rs-neighborhood-insight__eyebrow">Neighborhood Focus</p>
-  <p class="rs-neighborhood-insight__title" id="rs-neighborhood-insight-title"></p>
-  <p class="rs-neighborhood-insight__body" id="rs-neighborhood-insight-body"></p>
-</div>
-<div class="rs-float__list" id="rs-list" role="list"></div>
-<div class="rs-footer-bar" id="rs-footer-bar">
-<div class="rs-footer-inner">
-<!-- Historic opacity slider (Stage 1) -->
-<div class="rs-footer-inner">
-<div class="rs-maplayers-header">MAP LAYERS</div>
-<!-- Historic opacity segmented bar -->
-<div class="rs-historic-slider">
-<div class="rs-hist-label">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
-<span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
-</div>
-<div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:100%"></div>
-<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-</div>
-</div>
-<div class="rs-layer-sliders">
-<!-- Street segmented bar -->
-<div class="rs-layer-slider">
-<div class="rs-hist-label">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
-</div>
-<div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:100%"></div>
-<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-</div>
-</div>
-<div class="rs-layer-slider">
-<div class="rs-hist-label">
-<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
-</div>
-<div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
-<div class="rs-hist-bar-fill" style="width:0%"></div>
-<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
-<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
-<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
-<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
-<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
-</div>
-</div>
-</div>
-</div>
-</div>
-</aside>
-<!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
-<div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
-<div class="backdrop"></div>
-<div aria-labelledby="rs-today-title" aria-modal="true" class="panel" role="dialog">
-<button class="close rs-btn" type="button">Close</button>
-<h3 class="rs-title" id="rs-today-title" style="color:#000;margin:0 0 8px;">Movie Houses // Today at Your Theatre</h3>
-<div class="rs-image-pair">
-<img alt="Movie Houses page 1" src="images/Movie_houses1.png"/>
-<img alt="Movie Houses page 2" src="images/Movie_houses2.png"/>
-</div>
-</div>
-</div>
-<script src="vendor/leaflet/leaflet.js"></script>
-<script>
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
-
-// Popup zoom-in animation hooks
-if (window.map && typeof window.map.on === "function") map.on('popupopen', function(e){
-  try {
-    var el = e && e.popup ? e.popup.getElement() : null;
-    if (!el) return;
-    // restart animation by toggling class
-    el.classList.remove('rs-pop-anim');
-    void el.offsetWidth; // reflow to reset animation
-    el.classList.add('rs-pop-anim');
-  } catch(_){}
-});
-if (window.map && typeof window.map.on === "function") map.on('popupclose', function(e){
-  try {
-    var el = e && e.popup ? e.popup.getElement() : null;
-    if (el) el.classList.remove('rs-pop-anim');
-  } catch(_){}
-});
-</script>
-<script>
-(function(){
-  // Bounds & limits
-  var WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
-  var BOUNDS = L.latLngBounds([[SOUTH, WEST],[NORTH, EAST]]);
-
-  var map = L.map('map', {
-    minZoom: 12, maxZoom: 19,
-    zoomControl: false,
-    maxBounds: BOUNDS,
-    maxBoundsViscosity: 1.0,
-    worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
-  });
-  var HOME_CENTER = L.latLng(41.463182, -81.589138);
-  var HOME_ZOOM = Math.max(map.getMinZoom(), Math.min(12, map.getMaxZoom()));
-
-  function goHome(options){
-    var animate = options && options.animate === true;
-    try {
-      if (map && typeof map.closePopup === 'function') { map.closePopup(); }
-      map.setView(HOME_CENTER, HOME_ZOOM, { animate: animate });
-      if (typeof map.panInsideBounds === 'function') {
-        map.panInsideBounds(BOUNDS, { animate: animate });
-      }
-    } catch(_) {}
-  }
-  goHome({ animate: false });
-
-  // Expose globally for kiosk scripts
-  try {
-    window.map = map;
-    window.rsGoHome = goHome;
-  } catch(_) {}
-
-
-  var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
-  var isLocalOnlineMode = tileMode === 'local_online';
-  var onlineTiles = window.RS_ONLINE_TILES || {};
-
-  if (isLocalOnlineMode && document && document.body && document.body.dataset) {
-    document.body.dataset.rsMode = 'local-online';
-  }
-
-  function createOnlineLayer(key, extraOpts) {
-    try {
-      var info = onlineTiles[key] || {};
-      if (!info.url) return null;
-      var opts = Object.assign({}, info.opts || {}, extraOpts || {});
-      return L.tileLayer(info.url, opts);
-    } catch (_) {
-      return null;
-    }
-  }
-
-// Make unloaded / missing tiles appear black
-document.getElementById('map').style.backgroundColor = '#000';
-
-// Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
-if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
-  if (e.tile) e.tile.style.display = 'none';
-});
-  L.control.zoom({ position: 'topright' }).addTo(map);
-
-  // Offline tiles
-  var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:200}).addTo(map);
-  var fallbackOSM = null;
-  if (isLocalOnlineMode) {
-    var baseZ = (baseOSM && baseOSM.options && typeof baseOSM.options.zIndex === 'number') ? baseOSM.options.zIndex : 200;
-    fallbackOSM = createOnlineLayer('street', { zIndex: baseZ - 10, opacity: 1.0 });
-    if (fallbackOSM) {
-      try { fallbackOSM.addTo(map); } catch (_) {}
-      try { window.baseOSMOnline = fallbackOSM; } catch (_) {}
-    }
-  }
-  var sat = null;
-  if (isLocalOnlineMode) {
-    sat = createOnlineLayer('satellite', { minZoom:12, maxZoom:19, zIndex:210, opacity:1.0, updateWhenZooming:false });
-  }
-  if (!sat) {
-    sat = L.tileLayer('tiles/sat/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:210, opacity:1.0, updateWhenZooming:false});
-  }
-  try { window.sat = sat; } catch(_) {}
-
-  var street = L.tileLayer('tiles/street/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:220, opacity:1.0, updateWhenZooming:false});
-  try { window.street = street; } catch(_) {};
-  var historic = L.tileLayer('tiles/historic/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:400, opacity:1.0, updateWhenZooming:false}).addTo(map);
-  try { window.historic = historic; } catch(_) {}
-  function refreshZ(){
-    try{
-      if (sat && map.hasLayer(sat) && sat.bringToFront) sat.bringToFront();
-      if (street && map.hasLayer(street) && street.bringToFront) street.bringToFront();
-      if (historic && map.hasLayer(historic) && historic.bringToFront) historic.bringToFront();
-    }catch(e){}
-  }
-  if (window.map && typeof window.map.on === "function") map.on('overlayadd', refreshZ);
-  if (window.map && typeof window.map.on === "function") map.on('overlayremove', refreshZ);
-
-// --- Smooth flyTo patch: hide non-top tile layers during animation to prevent cross-fade glitches ---
-function rsGetActiveTileLayers(){
-  var arr = [];
-  try{ if (typeof sat !== 'undefined' && map.hasLayer(sat)) arr.push(sat); }catch(_){}
-  try{ if (typeof street !== 'undefined' && map.hasLayer(street)) arr.push(street); }catch(_){}
-  try{ if (typeof historic !== 'undefined' && map.hasLayer(historic)) arr.push(historic); }catch(_){}
-  return arr;
-}
-function rsDimNonTopLayers(){
-  var active = rsGetActiveTileLayers();
-  if (!active.length) return { hidden: [] };
-  var top = active[active.length - 1];
-  var hidden = [];
-  for (var i=0;i<active.length;i++){
-    var l = active[i];
-    if (l !== top){
-      try{
-        l._rs_prevOpacity = (typeof l.options.opacity === 'number') ? l.options.opacity : 1;
-        l.setOpacity(0);
-        hidden.push(l);
-      }catch(_){}
-    }
-  }
-  return { hidden: hidden, top: top };
-}
-function rsRestoreLayers(state){
-  try{
-    (state.hidden || []).forEach(function(l){
-      try{ l.setOpacity(l._rs_prevOpacity || 1); }catch(_){}
-    });
-    if (typeof refreshZ === 'function') refreshZ();
-  }catch(_){}
-}
-
-// Override flyTo to two-phase: zoom-out -> fly -> zoom-in (target zoom=17) with smoothing
-(function(){
-  if (!map || typeof map.flyTo !== 'function') return;
-  var originalFlyTo = map.flyTo.bind(map);
-
-  function rsTopActiveLayer(){
-    var arr = rsGetActiveTileLayers();
-    return arr.length ? arr[arr.length - 1] : null;
-  }
-  function rsCloneTileLayer(src, extra){
-    try{
-      var url = src && src._url ? src._url : null;
-      if (!url) return null;
-      var opts = Object.assign({}, (src.options||{}), (extra||{}));
-      return L.tileLayer(url, opts);
-    }catch(_){ return null; }
-  }
-
-  map.flyTo = function(latlng, zoom, options){
-    var targetZoom = 19;
-    var opts = Object.assign({}, options||{});
-    if (typeof opts.animate === 'undefined') opts.animate = true;
-    if (typeof opts.duration === 'undefined') opts.duration = 1.6;   // main leg
-    if (typeof opts.easeLinearity === 'undefined') opts.easeLinearity = 0.14;
-
-    // Phase A: light zoom-out to reveal motion
-    var currentZoom = map.getZoom();
-    var midZoom = Math.max(currentZoom - 2, 13);
-    var phaseAOpts = { animate:true, duration:0.7, easeLinearity:0.16 };
-    // Only do the zoom-out if we're already fairly close
-    if (currentZoom >= 15) {
-      try { originalFlyTo(map.getCenter(), midZoom, phaseAOpts); } catch(_){}
-    }
-
-    // Phase B: smooth fly with layer dim + prewarm
-    setTimeout(function(){
-      var st = rsDimNonTopLayers();
-      var top = rsTopActiveLayer();
-      var prewarm = null;
-
-      if (top){
-        try{
-          prewarm = rsCloneTileLayer(top, {
-            opacity: 0,
-            zIndex: (top.options && typeof top.options.zIndex==='number' ? top.options.zIndex : 300) + 100,
-            updateWhenZooming: false
-          });
-          if (prewarm){ prewarm.addTo(map); prewarm.once('load', function(){ try{ prewarm.setOpacity(1); }catch(_){} }); }
-        }catch(_){}
-      }
-
-      map.once('moveend', function(){
-        try{
-          if (prewarm){ map.removeLayer(prewarm); }
-          rsRestoreLayers(st);
-          if (typeof refreshZ === 'function') refreshZ();
-        }catch(_){}
-      });
-
-      return originalFlyTo(latlng, targetZoom, opts);
-    }, currentZoom >= 15 ? 550 : 50);
-  };
-})();
-
-  // Toolbar toggle wiring (replaced with independent toggles)
-
-  // === Independent Layer Toggles (patched to use window.*) ===
-  (function(){
-    function gm(){ return (window.map || (typeof map!=='undefined' ? map : null)); }
-    function layerFor(key){
-      if (key==='sat') return (window.sat || null);
-      if (key==='street') return (window.street || null);
-      if (key==='historic') return (window.historic || null);
-      return null;
-    }
-    function setPressed(btn, on){ if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
-    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return false; } }
-
-    function syncButtons(){
-      var g = gm(); if (!g) return;
-      document.querySelectorAll('.rs-layer-btn[data-layer]').forEach(function(btn){
-        var key = btn.getAttribute('data-layer');
-        var layer = layerFor(key);
-        setPressed(btn, has(layer));
-      });
-    }
-
-    function onToggleClick(e){
-      var btn = e.target.closest('.rs-layer-btn');
-      if(!btn) return;
-      var key = btn.getAttribute('data-layer');
-      var layer = layerFor(key);
-      var g = gm();
-      if(!layer || !g) return;
-
-      if (has(layer)){
-        try{ g.removeLayer(layer); }catch(_){}
-      } else {
-        try{ layer.addTo(g); }catch(_){}
-      }
-      syncButtons();
-      try{ refreshZ(); }catch(_){}
-    }
-
-    document.addEventListener('click', function(e){
-      if (e.target && e.target.classList && e.target.classList.contains('rs-layer-btn')){
-        onToggleClick(e);
-      }
-    });
-
-    try{
-      var g = gm();
-      if (g){ g.on('layeradd', syncButtons); g.on('layerremove', syncButtons); }
-    }catch(_){}
-
-    if (document.readyState === 'complete'){ syncButtons(); }
-    else { window.addEventListener('load', syncButtons, { once: true }); }
-  })();
-// (replaced) L.control.layers removed in favor of toolbar toggles.
-// Image viewer
-  function ensureImageViewer(){
-    var v = document.getElementById('rs-image-viewer');
-    if (v) return v;
-    v = document.createElement('div'); v.id='rs-image-viewer'; v.setAttribute('aria-hidden','true'); v.style.display='none';
-    var b = document.createElement('button'); b.className='rs-iv-close'; b.textContent='Close';
-    var i = document.createElement('img'); i.id='rs-image-viewer-img';
-    v.appendChild(b); v.appendChild(i); document.body.appendChild(v); return v;
-  }
-  function openImageViewer(src){
-    var viewer = ensureImageViewer();
-    var img = viewer.querySelector('#rs-image-viewer-img');
-    img.src = src; viewer.style.display='flex'; viewer.setAttribute('aria-hidden','false');
-  }
-  function closeImageViewer(){
-    var viewer = document.getElementById('rs-image-viewer');
-    if (!viewer) return; viewer.setAttribute('aria-hidden','true'); viewer.style.display='none';
-    var img = viewer.querySelector('#rs-image-viewer-img'); if (img) img.src='';
-  }
-  document.addEventListener('click', function(e){
-    if (e.target && e.target.id === 'rs-image-viewer') closeImageViewer();
-    if (e.target && e.target.classList && e.target.classList.contains('rs-iv-close')) closeImageViewer();
-  });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeImageViewer(); });
-
-  // Inline nowshowing catalog
-  var NOW_SHOWING = [
+<!-- === Data payloads: theatre geojson + now showing catalog === -->
+<!-- Offline “Now Showing” catalog (inlined JSON) -->
+<script type="application/json" id="rs-data-nowshowing">
+[
   {
     "Title": "A Night to Remember",
     "Year": 1943.0,
@@ -8919,11 +8428,12 @@ function rsRestoreLayers(state){
     "Awards": null,
     "PosterPath": "images/posters/youthontrial.jpg"
   }
-  ];
-  window.RS_NOW_SHOWING = NOW_SHOWING;
+  ]
+</script>
 
-  // Data & helpers
-  var THEATRES = {
+<!-- Theatre markers GeoJSON (inlined for offline use) -->
+<script type="application/json" id="rs-data-theatres">
+{
   "type": "FeatureCollection",
   "features": [
     {
@@ -13101,7 +12611,519 @@ function rsRestoreLayers(state){
       }
     }
   ]
+  }
+</script>
+
+<!-- === UI chrome and overlays === -->
+
+<!-- Boot overlay -->
+<div aria-hidden="false" id="rs-boot">
+<div class="rs-boot-inner">
+<div class="rs-boot-title">PICTURE HOUSES</div>
+<div class="rs-boot-sub">Preparing map &amp; UI…</div>
+</div>
+</div>
+<!-- Full Image Viewer -->
+<div aria-hidden="true" id="rs-image-viewer">
+<button class="rs-iv-close" title="Close" type="button">Close</button>
+<img alt="Full-size view" id="rs-image-viewer-img"/>
+</div>
+<div id="map"></div>
+<!-- Attract / Intro overlay (Stage 1) -->
+<div id="rs-attract" style="
+  position:fixed; inset:0; z-index:10020;
+  display:flex; align-items:center; justify-content:center;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,.72), rgba(0,0,0,.92));
+  color:#f3efe4; text-align:center; cursor:pointer;">
+<div style="max-width:min(70ch, 80vw); padding:24px;">
+<img alt="Reel Screens" src="images/reel_screens_logo.png" style="width:min(520px,60vw); filter:drop-shadow(0 8px 24px rgba(0,0,0,.6)); margin-bottom:18px;"/>
+<h1 style="font-family: var(--font-display, system-ui, sans-serif); font-size:56px; font-weight:900; line-height:1; letter-spacing:.5px; text-transform:uppercase; margin:0 0 10px;">
+      Cleveland • 1945
+    </h1>
+<p style="font-family: var(--font-body, Georgia, serif); font-size:20px; font-weight:600; line-height:1.35; opacity:.95; margin:0 0 18px;">
+      Tap anywhere to begin. Explore neighbourhood theatres, “Today at Your Theatre,” and layered historic maps.
+    </p>
+<button class="rs-btn" style="font-size:20px; padding:14px 18px;">Start Exploring</button>
+</div>
+</div>
+<div class="rs-logo-corner">
+  <img alt="Reel Screens" class="rs-logo" src="images/reel_screens_logo.png"/>
+</div>
+<div class="rs-toolbar">
+<div aria-label="Map controls" class="rs-toolbar__actions" role="group">
+<button class="rs-btn rs-toolbar__btn" id="rs-info-btn" title="About this map" type="button">Info</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-help-btn" title="How to explore" type="button">Help</button>
+<button aria-label="Tips" class="rs-btn rs-toolbar__btn rs-tips-btn-toolbar" type="button">Tips</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-reset" title="Recenter the map" type="button">Recenter</button>
+<button class="rs-btn rs-toolbar__btn" id="rs-restart-btn" title="Restart the map" type="button">Restart Map</button>
+<button aria-pressed="false" aria-label="Enter fullscreen mode" class="rs-btn rs-toolbar__btn rs-toolbar__btn--fullscreen" id="rs-fullscreen-btn" title="Enter fullscreen mode" type="button">Fullscreen</button>
+</div>
+</div>
+<div class="rs-sidebar-toggle-wrap">
+<button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle rs-sidebar-toggle--accent" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
+  <div class="rs-filter-toggle-shell">
+    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Status" data-label-open="Status" id="rs-filter-toggle" type="button">Status</button>
+    <button aria-controls="rs-neighborhood-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Neighborhoods" data-label-open="Neighborhoods" id="rs-neighborhood-toggle" type="button">Neighborhoods</button>
+    <aside aria-hidden="true" aria-label="Map filters" class="rs-filter-panel" id="rs-filter-panel">
+      <div class="rs-filter-panel__header">
+        <p class="rs-filter-panel__title">Theatre Status</p>
+      </div>
+      <div class="rs-filter-panel__body">
+        <p class="rs-filter-panel__description">Sort theatres by their status. Use the Neighborhoods panel to focus on part of Greater Cleveland.</p>
+        <div class="rs-filter-panel__section">
+          <div class="rs-status-filter-select" id="rs-status-filter-wrap">
+            <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
+              <div class="rs-status-filter-grid">
+                <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
+                <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
+                <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
+                <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
+              </div>
+              <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
+            </div>
+            <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
+              <option value="all">All Statuses</option>
+              <option value="1">Open</option>
+              <option value="0">Closed</option>
+              <option value="2">Repurposed</option>
+              <option value="3">Demolished</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <aside aria-hidden="true" aria-label="Neighborhood filters" class="rs-filter-panel rs-filter-panel--neighborhoods" id="rs-neighborhood-panel">
+      <div class="rs-filter-panel__header">
+        <p class="rs-filter-panel__title">Neighborhoods</p>
+      </div>
+      <div class="rs-filter-panel__body">
+        <p class="rs-filter-panel__description">Pick a neighborhood to isolate theatres on the map and in the list.</p>
+        <div class="rs-filter-panel__section" id="rs-neighborhood-filter">
+          <div aria-label="Filter by neighborhood" class="rs-neighborhood-shape" id="rs-neighborhood-grid" role="group">
+            <div class="rs-neighborhood-list" id="rs-neighborhood-buttons"></div>
+          </div>
+          <div class="rs-neighborhood-footer">
+            <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall rs-neighborhood-showall is-active" data-neighborhood="all" aria-pressed="true">Show All</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+<aside class="rs-float rs-float--sidebar" id="rs-float">
+<header class="rs-float__header" id="rs-sidebar-header">
+<div><span class="rs-float__title">Theatres</span></div>
+<div class="rs-float__actions">
+<span aria-live="polite" class="rs-chip rs-count-badge" id="rs-count">0</span>
+<button class="rs-btn rs-float__reset-btn" id="rs-list-reset-btn" title="Reset search and filters" type="button">Reset</button>
+</div>
+</header>
+<div class="rs-search-wrap" role="search">
+  <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
+  <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+</div>
+<div class="rs-neighborhood-insight" id="rs-neighborhood-insight" aria-live="polite" hidden>
+  <p class="rs-neighborhood-insight__eyebrow">Neighborhood Focus</p>
+  <p class="rs-neighborhood-insight__title" id="rs-neighborhood-insight-title"></p>
+  <p class="rs-neighborhood-insight__body" id="rs-neighborhood-insight-body"></p>
+</div>
+<div class="rs-float__list" id="rs-list" role="list"></div>
+<div class="rs-footer-bar" id="rs-footer-bar">
+<div class="rs-footer-inner">
+<!-- Historic opacity slider (Stage 1) -->
+<div class="rs-footer-inner">
+<div class="rs-maplayers-header">MAP LAYERS</div>
+<!-- Historic opacity segmented bar -->
+<div class="rs-historic-slider">
+<div class="rs-hist-label">
+<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Cleveland</span>
+<span class="rs-label" style="color:#f3efe4; opacity:.9; font-size:12px;">1927–1937</span>
+</div>
+<div aria-label="Cleveland 1927–1937 opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-layer="historic" id="rs-hist-bar" role="slider" tabindex="0">
+<div class="rs-hist-bar-fill" style="width:100%"></div>
+<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
+</div>
+</div>
+<div class="rs-layer-sliders">
+<!-- Street segmented bar -->
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
+<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Satellite</span>
+</div>
+<div aria-label="Satellite opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="100" class="rs-hist-bar" data-val="100" data-layer="sat" id="rs-sat-bar" role="slider" tabindex="0">
+<div class="rs-hist-bar-fill" style="width:100%"></div>
+<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
+</div>
+</div>
+<div class="rs-layer-slider">
+<div class="rs-hist-label">
+<span class="rs-label" style="color:#f3efe4; font-size:14px; text-transform:uppercase;">Street</span>
+</div>
+<div aria-label="Street opacity" aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="rs-hist-bar" data-val="0" data-layer="street" id="rs-street-bar" role="slider" tabindex="0">
+<div class="rs-hist-bar-fill" style="width:0%"></div>
+<button aria-label="0%" class="rs-hist-step" data-v="0"></button>
+<button aria-label="25%" class="rs-hist-step" data-v="25"></button>
+<button aria-label="50%" class="rs-hist-step" data-v="50"></button>
+<button aria-label="75%" class="rs-hist-step" data-v="75"></button>
+<button aria-label="100%" class="rs-hist-step" data-v="100"></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Two-page Image Modal: "Movie Houses // Today at Your Theatre" -->
+<div aria-hidden="true" class="rs-image-modal" id="rs-modal-todayAtTheatre">
+<div class="backdrop"></div>
+<div aria-labelledby="rs-today-title" aria-modal="true" class="panel" role="dialog">
+<button class="close rs-btn" type="button">Close</button>
+<h3 class="rs-title" id="rs-today-title" style="color:#000;margin:0 0 8px;">Movie Houses // Today at Your Theatre</h3>
+<div class="rs-image-pair">
+<img alt="Movie Houses page 1" src="images/Movie_houses1.png"/>
+<img alt="Movie Houses page 2" src="images/Movie_houses2.png"/>
+</div>
+</div>
+</div>
+<script src="vendor/leaflet/leaflet.js"></script>
+<script>
+// Zoom Here helper (ensures visible zoom-in even if already at target)
+function zoomHere(lat, lon) {
+  try {
+    var target = 19;
+    var current = map.getZoom();
+    var center = [lat, lon];
+    try { map.closePopup(); } catch(_){}
+
+    if (current >= target) {
+      var mid = Math.max(target - 2, 13);
+      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
+      setTimeout(function(){
+        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
+      }, 500);
+    } else {
+      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
+    }
+  } catch (e) {
+    console.error('ZoomHere error', e);
+  }
+}
+
+// Popup zoom-in animation hooks
+if (window.map && typeof window.map.on === "function") map.on('popupopen', function(e){
+  try {
+    var el = e && e.popup ? e.popup.getElement() : null;
+    if (!el) return;
+    // restart animation by toggling class
+    el.classList.remove('rs-pop-anim');
+    void el.offsetWidth; // reflow to reset animation
+    el.classList.add('rs-pop-anim');
+  } catch(_){}
+});
+if (window.map && typeof window.map.on === "function") map.on('popupclose', function(e){
+  try {
+    var el = e && e.popup ? e.popup.getElement() : null;
+    if (el) el.classList.remove('rs-pop-anim');
+  } catch(_){}
+});
+</script>
+<script>
+(function(){
+  // Bounds & limits
+  var WEST = -81.8967547, SOUTH = 41.3346721, EAST = -81.1215329, NORTH = 41.7897234;
+  var BOUNDS = L.latLngBounds([[SOUTH, WEST],[NORTH, EAST]]);
+
+  var map = L.map('map', {
+    minZoom: 12, maxZoom: 19,
+    zoomControl: false,
+    maxBounds: BOUNDS,
+    maxBoundsViscosity: 1.0,
+    worldCopyJump: false, inertia: true, inertiaDeceleration: 1500, inertiaMaxSpeed: 1000, preferCanvas: true, fadeAnimation: true, zoomAnimation: true, updateWhenIdle: true
+  });
+  var HOME_CENTER = L.latLng(41.463182, -81.589138);
+  var HOME_ZOOM = Math.max(map.getMinZoom(), Math.min(12, map.getMaxZoom()));
+
+  function goHome(options){
+    var animate = options && options.animate === true;
+    try {
+      if (map && typeof map.closePopup === 'function') { map.closePopup(); }
+      map.setView(HOME_CENTER, HOME_ZOOM, { animate: animate });
+      if (typeof map.panInsideBounds === 'function') {
+        map.panInsideBounds(BOUNDS, { animate: animate });
+      }
+    } catch(_) {}
+  }
+  goHome({ animate: false });
+
+  // Expose globally for kiosk scripts
+  try {
+    window.map = map;
+    window.rsGoHome = goHome;
+  } catch(_) {}
+
+
+  var tileMode = String(window.RS_TILE_MODE || 'local').toLowerCase();
+  var isLocalOnlineMode = tileMode === 'local_online';
+  var onlineTiles = window.RS_ONLINE_TILES || {};
+
+  if (isLocalOnlineMode && document && document.body && document.body.dataset) {
+    document.body.dataset.rsMode = 'local-online';
+  }
+
+  function createOnlineLayer(key, extraOpts) {
+    try {
+      var info = onlineTiles[key] || {};
+      if (!info.url) return null;
+      var opts = Object.assign({}, info.opts || {}, extraOpts || {});
+      return L.tileLayer(info.url, opts);
+    } catch (_) {
+      return null;
+    }
+  }
+
+// Make unloaded / missing tiles appear black
+document.getElementById('map').style.backgroundColor = '#000';
+
+// Optional: hide broken tiles explicitly (makes blank black squares instead of “missing tile” icons)
+if (window.map && typeof window.map.on === "function") map.on('tileerror', function(e){
+  if (e.tile) e.tile.style.display = 'none';
+});
+  L.control.zoom({ position: 'topright' }).addTo(map);
+
+  // Offline tiles
+  var baseOSM = L.tileLayer('tiles/osm/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:200}).addTo(map);
+  var fallbackOSM = null;
+  if (isLocalOnlineMode) {
+    var baseZ = (baseOSM && baseOSM.options && typeof baseOSM.options.zIndex === 'number') ? baseOSM.options.zIndex : 200;
+    fallbackOSM = createOnlineLayer('street', { zIndex: baseZ - 10, opacity: 1.0 });
+    if (fallbackOSM) {
+      try { fallbackOSM.addTo(map); } catch (_) {}
+      try { window.baseOSMOnline = fallbackOSM; } catch (_) {}
+    }
+  }
+  var sat = null;
+  if (isLocalOnlineMode) {
+    sat = createOnlineLayer('satellite', { minZoom:12, maxZoom:19, zIndex:210, opacity:1.0, updateWhenZooming:false });
+  }
+  if (!sat) {
+    sat = L.tileLayer('tiles/sat/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:210, opacity:1.0, updateWhenZooming:false});
+  }
+  try { window.sat = sat; } catch(_) {}
+
+  var street = L.tileLayer('tiles/street/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:220, opacity:1.0, updateWhenZooming:false});
+  try { window.street = street; } catch(_) {};
+  var historic = L.tileLayer('tiles/historic/{z}/{x}/{y}.png', {minZoom:12, maxZoom:19, tms:false, zIndex:400, opacity:1.0, updateWhenZooming:false}).addTo(map);
+  try { window.historic = historic; } catch(_) {}
+  function refreshZ(){
+    try{
+      if (sat && map.hasLayer(sat) && sat.bringToFront) sat.bringToFront();
+      if (street && map.hasLayer(street) && street.bringToFront) street.bringToFront();
+      if (historic && map.hasLayer(historic) && historic.bringToFront) historic.bringToFront();
+    }catch(e){}
+  }
+  if (window.map && typeof window.map.on === "function") map.on('overlayadd', refreshZ);
+  if (window.map && typeof window.map.on === "function") map.on('overlayremove', refreshZ);
+
+// --- Smooth flyTo patch: hide non-top tile layers during animation to prevent cross-fade glitches ---
+function rsGetActiveTileLayers(){
+  var arr = [];
+  try{ if (typeof sat !== 'undefined' && map.hasLayer(sat)) arr.push(sat); }catch(_){}
+  try{ if (typeof street !== 'undefined' && map.hasLayer(street)) arr.push(street); }catch(_){}
+  try{ if (typeof historic !== 'undefined' && map.hasLayer(historic)) arr.push(historic); }catch(_){}
+  return arr;
+}
+function rsDimNonTopLayers(){
+  var active = rsGetActiveTileLayers();
+  if (!active.length) return { hidden: [] };
+  var top = active[active.length - 1];
+  var hidden = [];
+  for (var i=0;i<active.length;i++){
+    var l = active[i];
+    if (l !== top){
+      try{
+        l._rs_prevOpacity = (typeof l.options.opacity === 'number') ? l.options.opacity : 1;
+        l.setOpacity(0);
+        hidden.push(l);
+      }catch(_){}
+    }
+  }
+  return { hidden: hidden, top: top };
+}
+function rsRestoreLayers(state){
+  try{
+    (state.hidden || []).forEach(function(l){
+      try{ l.setOpacity(l._rs_prevOpacity || 1); }catch(_){}
+    });
+    if (typeof refreshZ === 'function') refreshZ();
+  }catch(_){}
+}
+
+// Override flyTo to two-phase: zoom-out -> fly -> zoom-in (target zoom=17) with smoothing
+(function(){
+  if (!map || typeof map.flyTo !== 'function') return;
+  var originalFlyTo = map.flyTo.bind(map);
+
+  function rsTopActiveLayer(){
+    var arr = rsGetActiveTileLayers();
+    return arr.length ? arr[arr.length - 1] : null;
+  }
+  function rsCloneTileLayer(src, extra){
+    try{
+      var url = src && src._url ? src._url : null;
+      if (!url) return null;
+      var opts = Object.assign({}, (src.options||{}), (extra||{}));
+      return L.tileLayer(url, opts);
+    }catch(_){ return null; }
+  }
+
+  map.flyTo = function(latlng, zoom, options){
+    var targetZoom = 19;
+    var opts = Object.assign({}, options||{});
+    if (typeof opts.animate === 'undefined') opts.animate = true;
+    if (typeof opts.duration === 'undefined') opts.duration = 1.6;   // main leg
+    if (typeof opts.easeLinearity === 'undefined') opts.easeLinearity = 0.14;
+
+    // Phase A: light zoom-out to reveal motion
+    var currentZoom = map.getZoom();
+    var midZoom = Math.max(currentZoom - 2, 13);
+    var phaseAOpts = { animate:true, duration:0.7, easeLinearity:0.16 };
+    // Only do the zoom-out if we're already fairly close
+    if (currentZoom >= 15) {
+      try { originalFlyTo(map.getCenter(), midZoom, phaseAOpts); } catch(_){}
+    }
+
+    // Phase B: smooth fly with layer dim + prewarm
+    setTimeout(function(){
+      var st = rsDimNonTopLayers();
+      var top = rsTopActiveLayer();
+      var prewarm = null;
+
+      if (top){
+        try{
+          prewarm = rsCloneTileLayer(top, {
+            opacity: 0,
+            zIndex: (top.options && typeof top.options.zIndex==='number' ? top.options.zIndex : 300) + 100,
+            updateWhenZooming: false
+          });
+          if (prewarm){ prewarm.addTo(map); prewarm.once('load', function(){ try{ prewarm.setOpacity(1); }catch(_){} }); }
+        }catch(_){}
+      }
+
+      map.once('moveend', function(){
+        try{
+          if (prewarm){ map.removeLayer(prewarm); }
+          rsRestoreLayers(st);
+          if (typeof refreshZ === 'function') refreshZ();
+        }catch(_){}
+      });
+
+      return originalFlyTo(latlng, targetZoom, opts);
+    }, currentZoom >= 15 ? 550 : 50);
   };
+})();
+
+  // Toolbar toggle wiring (replaced with independent toggles)
+
+  // === Independent Layer Toggles (patched to use window.*) ===
+  (function(){
+    function gm(){ return (window.map || (typeof map!=='undefined' ? map : null)); }
+    function layerFor(key){
+      if (key==='sat') return (window.sat || null);
+      if (key==='street') return (window.street || null);
+      if (key==='historic') return (window.historic || null);
+      return null;
+    }
+    function setPressed(btn, on){ if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
+    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return false; } }
+
+    function syncButtons(){
+      var g = gm(); if (!g) return;
+      document.querySelectorAll('.rs-layer-btn[data-layer]').forEach(function(btn){
+        var key = btn.getAttribute('data-layer');
+        var layer = layerFor(key);
+        setPressed(btn, has(layer));
+      });
+    }
+
+    function onToggleClick(e){
+      var btn = e.target.closest('.rs-layer-btn');
+      if(!btn) return;
+      var key = btn.getAttribute('data-layer');
+      var layer = layerFor(key);
+      var g = gm();
+      if(!layer || !g) return;
+
+      if (has(layer)){
+        try{ g.removeLayer(layer); }catch(_){}
+      } else {
+        try{ layer.addTo(g); }catch(_){}
+      }
+      syncButtons();
+      try{ refreshZ(); }catch(_){}
+    }
+
+    document.addEventListener('click', function(e){
+      if (e.target && e.target.classList && e.target.classList.contains('rs-layer-btn')){
+        onToggleClick(e);
+      }
+    });
+
+    try{
+      var g = gm();
+      if (g){ g.on('layeradd', syncButtons); g.on('layerremove', syncButtons); }
+    }catch(_){}
+
+    if (document.readyState === 'complete'){ syncButtons(); }
+    else { window.addEventListener('load', syncButtons, { once: true }); }
+  })();
+// (replaced) L.control.layers removed in favor of toolbar toggles.
+// Image viewer
+  function ensureImageViewer(){
+    var v = document.getElementById('rs-image-viewer');
+    if (v) return v;
+    v = document.createElement('div'); v.id='rs-image-viewer'; v.setAttribute('aria-hidden','true'); v.style.display='none';
+    var b = document.createElement('button'); b.className='rs-iv-close'; b.textContent='Close';
+    var i = document.createElement('img'); i.id='rs-image-viewer-img';
+    v.appendChild(b); v.appendChild(i); document.body.appendChild(v); return v;
+  }
+  function openImageViewer(src){
+    var viewer = ensureImageViewer();
+    var img = viewer.querySelector('#rs-image-viewer-img');
+    img.src = src; viewer.style.display='flex'; viewer.setAttribute('aria-hidden','false');
+  }
+  function closeImageViewer(){
+    var viewer = document.getElementById('rs-image-viewer');
+    if (!viewer) return; viewer.setAttribute('aria-hidden','true'); viewer.style.display='none';
+    var img = viewer.querySelector('#rs-image-viewer-img'); if (img) img.src='';
+  }
+  document.addEventListener('click', function(e){
+    if (e.target && e.target.id === 'rs-image-viewer') closeImageViewer();
+    if (e.target && e.target.classList && e.target.classList.contains('rs-iv-close')) closeImageViewer();
+  });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeImageViewer(); });
+
+  // Inline data payloads (loaded from <script type="application/json">)
+  function rsReadJson(id, fallback){
+    var el = document.getElementById(id);
+    if (!el) return fallback;
+    try { return JSON.parse(el.textContent); }
+    catch(e){ console.warn('Failed to parse', id, e); return fallback; }
+  }
+
+  var NOW_SHOWING = rsReadJson('rs-data-nowshowing', []);
+  window.RS_NOW_SHOWING = NOW_SHOWING;
+
+  var THEATRES = rsReadJson('rs-data-theatres', { type: 'FeatureCollection', features: [] });
+  window.THEATRES = THEATRES;
+
+  // Data & helpers
   function colorForStatus(code){
     switch(Number(code)){
       case 1: return '#19a974'; // Open
