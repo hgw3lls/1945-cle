@@ -14147,273 +14147,310 @@ function zoomHere(lat, lon) {
 <script>
 /* === BEGIN: Status dropdown also filters the list === */
 (function(){
-  var ALL_CODES = ['0','1','2','3'];
+  var LIST_ID = 'rs-list';
+  var STATUS_ORDER_FALLBACK = ['1','0','2','3'];
+  var textCache = new WeakMap();
+  var state = { items: [] };
 
-  function cleanCodes(list){
-    var set = new Set();
-    list.forEach(function(code){
-      var c = (code === 0) ? '0' : (code == null ? null : String(code).trim());
-      if (!c) return;
-      if (ALL_CODES.indexOf(c) === -1) return;
-      set.add(c);
-    });
-    return set;
+  function getList(){
+    return document.getElementById(LIST_ID);
   }
 
-  function getEnabledStatuses(){
-    if (typeof window !== 'undefined' && window.rsStatusFilterUI && typeof window.rsStatusFilterUI.get === 'function') {
-      var fromUi = window.rsStatusFilterUI.get();
-      if (Array.isArray(fromUi) && fromUi.length) {
-        return cleanCodes(fromUi);
+  function normalizeNeighborhood(name){
+    return name ? String(name).trim().toLowerCase() : '';
+  }
+
+  function ensureOrder(el, idx){
+    var existing = el.getAttribute('data-rs-order');
+    if (existing == null){
+      existing = el.getAttribute('data-idx');
+    }
+    if (existing == null){
+      existing = idx;
+    }
+    el.setAttribute('data-rs-order', existing);
+    var n = Number(existing);
+    return isFinite(n) ? n : idx;
+  }
+
+  function readStatusFromLi(el){
+    try {
+      if (typeof window.liStatusCode === 'function') {
+        var code = window.liStatusCode(el);
+        if (code != null) return String(code);
+      }
+    } catch(_){ }
+    var chip = el.querySelector('.rs-chip-status[data-map-status]');
+    if (chip){
+      var c = chip.getAttribute('data-map-status');
+      if (c != null) return String(c);
+    }
+    var attr = el.getAttribute('data-map-status') || (el.dataset && el.dataset.mapStatus);
+    return attr != null ? String(attr) : 'default';
+  }
+
+  function readNeighborhoodFromLi(el){
+    var attr = el.getAttribute('data-neighborhood') || (el.dataset && el.dataset.neighborhood);
+    return attr ? normalizeNeighborhood(attr) : '';
+  }
+
+  function snapshotItems(){
+    var list = getList();
+    if (!list) return;
+    state.items = Array.prototype.slice.call(list.children || []).map(function(el, idx){
+      return {
+        el: el,
+        order: ensureOrder(el, idx),
+        status: readStatusFromLi(el),
+        neighborhood: readNeighborhoodFromLi(el)
+      };
+    });
+  }
+
+  function detectStatusOrder(){
+    var buttons = document.querySelectorAll('#rs-status-filter-wrap .rs-status-filter-btn[data-status]:not([data-status="all"])');
+    var codes = Array.prototype.map.call(buttons, function(btn){ return btn.getAttribute('data-status'); }).filter(Boolean);
+    return codes.length ? codes : STATUS_ORDER_FALLBACK.slice();
+  }
+
+  function readInlineOpen(){
+    return document.body && document.body.classList.contains('rs-status-inline-open');
+  }
+
+  function readStatusFilters(){
+    var ui = (typeof window !== 'undefined') ? window.rsStatusFilterUI : null;
+    if (ui && typeof ui.get === 'function'){
+      var codes = ui.get();
+      if (Array.isArray(codes) && codes.length){
+        return new Set(codes.map(function(c){ return String(c); }));
       }
     }
     var wrap = document.getElementById('rs-status-filter-wrap');
     if (wrap){
-      var attr = wrap.getAttribute('data-active-codes') || '';
-      var parts = attr.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-      if (!parts.length || parts.length >= ALL_CODES.length) {
-        return new Set(ALL_CODES);
+      var actives = wrap.querySelectorAll('.rs-status-filter-btn.is-active[data-status]');
+      var vals = Array.prototype.map.call(actives, function(btn){ return btn.getAttribute('data-status'); }).filter(Boolean);
+      if (vals.length && vals.length < STATUS_ORDER_FALLBACK.length + 1){
+        return new Set(vals);
       }
-      return cleanCodes(parts);
+      var attr = wrap.getAttribute('data-active-codes');
+      if (attr){
+        var parts = attr.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+        if (parts.length){
+          return new Set(parts);
+        }
+      }
     }
-
     var select = document.getElementById('rs-status-select');
-    if (!select) {
-      return new Set(ALL_CODES);
+    if (select && select.value && select.value !== 'all'){
+      return new Set(String(select.value).split(',').map(function(s){ return s.trim(); }).filter(Boolean));
     }
-    var val = select.value;
-    if (!val || val === 'all') {
-      return new Set(ALL_CODES);
-    }
-    return cleanCodes(String(val).split(','));
+    return new Set(STATUS_ORDER_FALLBACK);
   }
 
-  var STATUS_ORDER = null;
-
-  function orderedStatusCodes(){
-    if (STATUS_ORDER) return STATUS_ORDER;
-    var buttons = Array.prototype.slice.call(document.querySelectorAll('#rs-status-filter-wrap .rs-status-filter-btn[data-status]:not([data-status="all"])'));
-    var codes = buttons.map(function(btn){ return btn.getAttribute('data-status'); }).filter(Boolean);
-    STATUS_ORDER = codes.length ? codes : ['1','0','2','3'];
-    return STATUS_ORDER;
-  }
-
-  function ensureOriginalListOrder(items){
-    items.forEach(function(li, idx){
-      if (!li.hasAttribute('data-rs-order')) {
-        var existing = li.getAttribute('data-idx');
-        li.setAttribute('data-rs-order', existing != null ? existing : String(idx));
+  function readNeighborhoodFilters(){
+    var ui = (typeof window !== 'undefined' && window.rsStatusFilterUI) ? window.rsStatusFilterUI : null;
+    if (ui && ui.neighborhoods && typeof ui.neighborhoods.get === 'function'){
+      var selected = ui.neighborhoods.get();
+      if (Array.isArray(selected) && selected.length){
+        return new Set(selected.map(normalizeNeighborhood).filter(Boolean));
       }
-    });
+    }
+    var grid = document.getElementById('rs-neighborhood-filter');
+    if (grid){
+      var actives = grid.querySelectorAll('.is-active[data-neighborhood]');
+      var vals = Array.prototype.map.call(actives, function(btn){ return btn.getAttribute('data-neighborhood'); }).filter(Boolean);
+      if (vals.length){
+        return new Set(vals.map(normalizeNeighborhood));
+      }
+      var attr = grid.getAttribute('data-active-neighborhoods');
+      if (attr){
+        var parts = attr.split(',').map(normalizeNeighborhood).filter(Boolean);
+        if (parts.length){
+          return new Set(parts);
+        }
+      }
+    }
+    return new Set();
   }
 
-  function sortListByStatus(items, enabled){
-    var list = document.getElementById('rs-list');
-    if (!list || !items || !items.length) return;
+  function readSearchQuery(){
+    var el = document.getElementById('rs-search');
+    return el ? String(el.value || '').trim().toLowerCase() : '';
+  }
 
-    var body = document.body;
-    var inlineOpen = body && body.classList.contains('rs-status-inline-open');
-    ensureOriginalListOrder(items);
+  function normalizedText(el){
+    var cached = textCache.get(el);
+    if (cached != null) return cached;
+    var txt = String(el.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    textCache.set(el, txt);
+    return txt;
+  }
 
-    var defaultOrder = orderedStatusCodes();
-    var activeOrder = defaultOrder.filter(function(code){ return !enabled || enabled.has(code); });
+  function buildSortOrder(activeStatuses){
+    var base = detectStatusOrder();
+    if (!activeStatuses || !activeStatuses.size){
+      return base;
+    }
+    var front = base.filter(function(code){ return activeStatuses.has(code); });
+    base.forEach(function(code){ if (front.indexOf(code) === -1) front.push(code); });
+    return front;
+  }
 
-    var originalRank = function(li){
-      var raw = li.getAttribute('data-rs-order');
-      var n = Number(raw);
-      return isFinite(n) ? n : 0;
+  function computeFilters(){
+    var statuses = readStatusFilters();
+    var neighborhoods = readNeighborhoodFilters();
+    var query = readSearchQuery();
+    return {
+      statuses: statuses,
+      neighborhoods: neighborhoods,
+      query: query,
+      inlineOpen: readInlineOpen(),
+      sortOrder: buildSortOrder(statuses)
     };
-
-    var priority = function(li){
-      if (!inlineOpen) return originalRank(li);
-      var code = liStatusCode(li);
-      var idx = activeOrder.indexOf(code);
-      if (idx === -1) idx = defaultOrder.indexOf(code);
-      if (idx === -1) idx = activeOrder.length + defaultOrder.length;
-      return (idx * 10000) + originalRank(li);
-    };
-
-    items.sort(function(a, b){ return priority(a) - priority(b); });
-
-    var frag = document.createDocumentFragment();
-    items.forEach(function(li){ frag.appendChild(li); });
-    list.appendChild(frag);
   }
 
-  function getEnabledNeighborhoods(){
-    if (typeof window !== 'undefined' && window.rsStatusFilterUI && window.rsStatusFilterUI.neighborhoods && typeof window.rsStatusFilterUI.neighborhoods.get === 'function') {
-      var current = window.rsStatusFilterUI.neighborhoods.get();
-      var fromUi = Array.isArray(current) ? current.map(normalizedNeighborhood).filter(Boolean) : [];
-      if (fromUi.length) return new Set(fromUi);
+  function matches(item, filters){
+    if (filters.statuses && filters.statuses.size && !filters.statuses.has(item.status)){
+      return false;
     }
-    if (!neighborhoodSection || !ALL_NEIGHBORHOODS.length) {
-      return new Set(ALL_NEIGHBORHOODS);
+    if (filters.neighborhoods && filters.neighborhoods.size){
+      var nb = item.neighborhood || '';
+      if (!nb || !filters.neighborhoods.has(nb)) return false;
     }
-    var attr = neighborhoodSection.getAttribute('data-active-neighborhoods') || '';
-    var parts = attr.split(',').map(function(s){ return normalizedNeighborhood(s); }).filter(Boolean);
-    if (!parts.length || parts.length >= ALL_NEIGHBORHOODS.length) {
-      return new Set(ALL_NEIGHBORHOODS);
-    }
-    return new Set(parts);
-  }
-
-  function liStatusCode(li){
-    // Prefer explicit badge attribute inside the list item
-    var chip = li.querySelector('.rs-chip-status[data-map-status]');
-    if (chip) {
-      var code = chip.getAttribute('data-map-status');
-      if (code != null) return String(code);
-    }
-    // Fallbacks: data attributes on li if present
-    var d = li.getAttribute('data-map-status') || li.dataset && li.dataset.mapStatus;
-    if (d != null) return String(d);
-    return 'default';
-  }
-
-  function liNeighborhoodCode(li){
-    var d = li.getAttribute('data-neighborhood') || (li.dataset && li.dataset.neighborhood);
-    return d ? normalizedNeighborhood(d) : null;
-  }
-
-  // --- Shared list filtering helpers (search + status/neighborhood) ---
-  var _textCache = new WeakMap();
-
-  function normalize(text){
-    return String(text || '').toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-      .replace(/[^a-z0-9\s]/g,' ')
-      .replace(/\s+/g,' ').trim();
-  }
-
-  function textOf(li){
-    try {
-      var title = li.querySelector('h4') ? li.querySelector('h4').textContent : '';
-      var addr  = li.querySelector('.rs-addr') ? li.querySelector('.rs-addr').textContent : '';
-      var film  = li.querySelector('.rs-movie') ? li.querySelector('.rs-movie').textContent : '';
-      return normalize([title, addr, film].join(' '));
-    } catch (e) {
-      return '';
-    }
-  }
-
-  function getText(li){
-    if (_textCache.has(li)) return _textCache.get(li);
-    var t = textOf(li);
-    _textCache.set(li, t);
-    return t;
-  }
-
-  function tokenMatch(hay, q){
-    var tokens = normalize(q).split(/\s+/).filter(Boolean);
-    var idx = 0;
-    for (var i = 0; i < tokens.length; i++){
-      var pos = hay.indexOf(tokens[i], idx);
-      if (pos === -1) return false;
-      idx = pos + tokens[i].length;
+    if (filters.query){
+      var txt = normalizedText(item.el);
+      if (txt.indexOf(filters.query) === -1) return false;
     }
     return true;
   }
 
-  function readSearchQuery(){
-    var qEl = document.getElementById('rs-search');
-    var raw = qEl ? qEl.value : '';
-    var trimmed = String(raw || '').trim();
-    return trimmed.length >= 2 ? trimmed : '';
+  function sortVisible(visible, filters){
+    if (!filters.inlineOpen || !visible.length) return visible.sort(function(a,b){ return a.order - b.order; });
+    var order = filters.sortOrder || STATUS_ORDER_FALLBACK;
+    var rank = function(item){
+      var idx = order.indexOf(item.status);
+      if (idx === -1) idx = order.length;
+      return (idx * 10000) + item.order;
+    };
+    return visible.sort(function(a,b){ return rank(a) - rank(b); });
   }
 
-  function updateListCount(count){
-    var countEl = document.getElementById('rs-count');
-    if (countEl) countEl.textContent = String(count);
+  function updateCount(count){
+    var badge = document.getElementById('rs-count');
+    if (badge){
+      badge.textContent = String(count);
+    }
   }
 
   function applyListFilter(){
-    try{
-      var enabled = getEnabledStatuses();
-      var neighborhoods = getEnabledNeighborhoods();
-      var search = readSearchQuery();
-      var items = document.querySelectorAll('#rs-list .rs-li');
-      var neighborhoodFiltering = neighborhoods && neighborhoods.size && neighborhoods.size < ALL_NEIGHBORHOODS.length;
-      var arr = Array.prototype.slice.call(items);
-      var shown = 0;
-      arr.forEach(function(li){
-        var code = liStatusCode(li);
-        var hood = liNeighborhoodCode(li);
-        // Only filter when we have a known code; unknowns remain visible
-        var statusOK = (code === 'default') ? true : enabled.has(code);
-        var hoodOK = neighborhoodFiltering ? (hood ? neighborhoods.has(hood) : false) : true;
-        var searchOK = true;
-        if (search && statusOK && hoodOK) {
-          searchOK = tokenMatch(getText(li), search);
-        }
-        var show = statusOK && hoodOK && searchOK;
-        li.toggleAttribute('data-rs-status-filtered', !(statusOK && hoodOK));
-        li.style.display = show ? '' : 'none';
-        if (show) shown++;
-      });
-      sortListByStatus(arr, enabled);
-      updateListCount(shown);
-    }catch(e){ /* swallow */ }
+    var list = getList();
+    if (!list) return;
+    if (!state.items.length || list.children.length !== state.items.length){
+      snapshotItems();
+    }
+    var filters = computeFilters();
+    var visible = [];
+    var hidden = [];
+    state.items.forEach(function(item){
+      var ok = matches(item, filters);
+      item.el.style.display = ok ? '' : 'none';
+      item.el.setAttribute('aria-hidden', ok ? 'false' : 'true');
+      (ok ? visible : hidden).push(item);
+    });
+    sortVisible(visible, filters);
+    var frag = document.createDocumentFragment();
+    visible.concat(hidden).forEach(function(item){ frag.appendChild(item.el); });
+    list.appendChild(frag);
+    updateCount(visible.length);
   }
 
-  function hookStatusDropdown(){
-    var wrap = document.getElementById('rs-status-filter-wrap');
-    var select = document.getElementById('rs-status-select');
-    var rerun = function(){ setTimeout(applyListFilter, 0); };
-    if (wrap && typeof wrap.addEventListener === 'function') {
-      wrap.addEventListener('rs-status-change', rerun);
-    }
-    if (select) {
-      select.addEventListener('change', rerun);
-    }
-
-    var searchInput = document.getElementById('rs-search');
+  function wireSearch(){
+    var input = document.getElementById('rs-search');
     var clearBtn = document.getElementById('rs-search-clear');
-    var handleSearch = function(){ applyListFilter(); };
-    if (searchInput) {
-      searchInput.addEventListener('input', handleSearch, { passive: true });
-      searchInput.addEventListener('keydown', function(e){ if (e.key === 'Escape'){ searchInput.value=''; applyListFilter(); } });
+    if (input){
+      input.addEventListener('input', applyListFilter, { passive: true });
+      input.addEventListener('keydown', function(e){ if (e.key === 'Escape'){ input.value=''; applyListFilter(); } });
     }
-    if (clearBtn) {
+    if (clearBtn){
       clearBtn.addEventListener('click', function(){
-        var qEl2 = document.getElementById('rs-search');
-        if (qEl2) { qEl2.value = ''; }
+        var q = document.getElementById('rs-search');
+        if (q){ q.value = ''; }
         applyListFilter();
       });
     }
   }
 
-  if (typeof window !== 'undefined') {
+  function wireStatus(){
+    var wrap = document.getElementById('rs-status-filter-wrap');
+    if (wrap){
+      wrap.addEventListener('click', function(e){
+        if (e.target.closest('[data-status]')){
+          setTimeout(applyListFilter, 0);
+        }
+      });
+      if (window.MutationObserver){
+        new MutationObserver(function(){ setTimeout(applyListFilter, 0); }).observe(wrap, { attributes:true, childList:true, subtree:true });
+      }
+    }
+    document.addEventListener('rs-status-change', function(){ setTimeout(applyListFilter, 0); });
+    var toggle = document.getElementById('rs-filter-toggle');
+    if (toggle){
+      toggle.addEventListener('click', function(){ setTimeout(applyListFilter, 0); });
+    }
+  }
+
+  function wireNeighborhoods(){
+    var grid = document.getElementById('rs-neighborhood-filter');
+    if (grid){
+      grid.addEventListener('click', function(e){
+        if (e.target.closest('[data-neighborhood]')){
+          setTimeout(applyListFilter, 0);
+        }
+      });
+      if (window.MutationObserver){
+        new MutationObserver(function(){ setTimeout(applyListFilter, 0); }).observe(grid, { attributes:true, childList:true, subtree:true });
+      }
+    }
+    document.addEventListener('rs-neighborhood-change', function(){ setTimeout(applyListFilter, 0); });
+  }
+
+  function wireListObserver(){
+    var list = getList();
+    if (list && window.MutationObserver){
+      new MutationObserver(function(){
+        textCache = new WeakMap();
+        snapshotItems();
+        applyListFilter();
+      }).observe(list, { childList:true, subtree:true });
+    }
+  }
+
+  function init(){
+    snapshotItems();
+    wireSearch();
+    wireStatus();
+    wireNeighborhoods();
+    wireListObserver();
+    applyListFilter();
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  if (typeof window !== 'undefined'){
     window.applyListFilter = applyListFilter;
-    window.rsListManager = {
+    window.rsListManager = window.rsListController = {
       refresh: applyListFilter,
-      state: function(){
-        return {
-          statuses: Array.from(getEnabledStatuses()),
-          neighborhoods: Array.from(getEnabledNeighborhoods()),
-          search: readSearchQuery()
-        };
-      },
-      resetCache: function(){ _textCache = new WeakMap(); }
+      reindex: snapshotItems,
+      state: computeFilters
     };
   }
-
-  // Run once DOM is ready; also re-run when list content changes
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ hookStatusDropdown(); applyListFilter(); });
-  } else {
-    hookStatusDropdown(); applyListFilter();
-  }
-
-  // If your app re-renders the list dynamically, keep it in sync:
-  try{
-    var list = document.getElementById('rs-list');
-    if (list && 'MutationObserver' in window){
-      var obs = new MutationObserver(function(){ _textCache = new WeakMap(); applyListFilter(); });
-      obs.observe(list, { childList: true, subtree: true });
-    }
-  }catch(_){}
 })();
 /* === END: Status dropdown also filters the list === */
+
 
 // Zoom Here helper (ensures visible zoom-in even if already at target)
 function zoomHere(lat, lon) {
