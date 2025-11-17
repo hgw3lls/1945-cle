@@ -9326,30 +9326,10 @@ function rsRestoreLayers(state){
     infoBtn.addEventListener('click', function(){ setActiveStatuses('all'); });
   }
 
-  refreshUI({ broadcast: false });
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
+    refreshUI({ broadcast: false });
+  })();
 
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
-
-</script>
+  </script>
 <script>
 (function(){
   function trigger(el, type){
@@ -11231,10 +11211,8 @@ try {
     if (!btn) return;
     setTimeout(function(){ apply(100); }, 0);
   }, true);
-})();
-</script>
-})();
-</script>
+  })();
+  </script>
 <script>
 // === Segmented sliders for Historic, Street, Satellite with overlaid labels ===
 (function(){
