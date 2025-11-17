@@ -7649,6 +7649,7 @@ html.booting #rs-float {
 #rs-float.rs-collapsed .rs-float__search,
 #rs-float.rs-collapsed .rs-search,
 #rs-float.rs-collapsed .rs-search-wrap,
+#rs-float.rs-collapsed #rs-status-filter-wrap,
 #rs-float.rs-collapsed .rs-searchbar,
 #rs-float.rs-collapsed .rs-search-container,
 #rs-float.rs-collapsed .rs-float__footer,
@@ -7659,126 +7660,55 @@ html.booting #rs-float {
 }
 
 <style>
-/* === Touch-friendly status filter buttons under search === */
+/* === Compact status dots under search === */
 #rs-status-filter-wrap {
   width: 100%;
-  padding: 0;
+  padding: 6px 14px 12px 14px;
   margin: 0;
-}
-
-.rs-status-filter-touchbar {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
-  align-items: stretch;
-  background: #f3efe4;
-  padding: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  border-radius: 12px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
-.rs-status-filter-grid {
-  flex: 1 1 220px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+.rs-status-inline__dots {
+  display: flex;
   gap: 10px;
-  padding: 2px;
-  background: transparent;
+  align-items: center;
+  flex: 1;
 }
 
 .rs-status-filter-btn {
   appearance: none;
   -webkit-appearance: none;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.38);
+  background: var(--rs-status-color, #f3efe4);
   color: #000;
-  padding: 10px 12px;
-  min-height: 86px;
-  font-family: var(--font-ui, 'StandingRoomOnly NF', system-ui);
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.12px;
-  display: grid;
-  grid-template-columns: 42px 1fr;
-  grid-template-rows: auto auto;
-  align-items: center;
-  gap: 6px 12px;
-  text-align: left;
-  line-height: 1.2;
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.18s ease;
-  word-break: keep-all;
-  white-space: normal;
-  hyphens: manual;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.18s ease;
 }
 
-.rs-status-filter-btn:not([data-status="all"])::before {
-  content: "";
-  display: block;
-  width: 40px;
-  height: 40px;
+.rs-status-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.rs-status-filter-btn.is-active { opacity: 1; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 2px 0 rgba(0,0,0,0.32); transform: translateY(-1px); }
+.rs-status-filter-btn:not(.is-active) { opacity: 0.45; transform: translateY(0); }
+.rs-status-filter-btn:focus-visible { outline: 2px solid rgba(0, 0, 0, 0.7); outline-offset: 2px; }
+
+.rs-status-reset {
+  padding: 8px 10px;
   border-radius: 8px;
-  background: var(--rs-status-color, #f3efe4);
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
-  grid-row: 1 / span 2;
-}
-
-.rs-status-filter-label {
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.24px;
-  line-height: 1.1;
-}
-
-.rs-status-filter-note {
-  font-size: 11.5px;
-  color: #1f1f1f;
-  opacity: 0.8;
-  line-height: 1.2;
-}
-
-.rs-status-filter-btn--showall {
-  min-height: 86px;
-  flex: 0 0 150px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  letter-spacing: 0.6px;
-  font-size: 12px;
-  line-height: 1.15;
-  padding: 12px 10px;
   background: #fdfaf2;
-  border: 1px solid rgba(0, 0, 0, 0.26);
-  border-radius: 10px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-.rs-status-filter-btn:not(.is-active) {
-  filter: saturate(85%) brightness(0.95);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  transform: translateY(0);
-}
-
-.rs-status-filter-btn.is-active {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
-  filter: none;
-}
-
-.rs-status-filter-btn:focus-visible {
-  outline: 2px solid rgba(0, 0, 0, 0.6);
-  outline-offset: 3px;
-}
-
-.rs-status-filter-btn[data-status="all"] {
-  color: #000;
+  font-family: var(--font-ui, 'StandingRoomOnly NF', system-ui);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.18);
+  white-space: nowrap;
 }
 
 .rs-status-filter-btn[data-status="1"] { --rs-status-color: #b7f1d1; }
@@ -7786,43 +7716,10 @@ html.booting #rs-float {
 .rs-status-filter-btn[data-status="2"] { --rs-status-color: #ffe7a3; }
 .rs-status-filter-btn[data-status="3"] { --rs-status-color: #cfd3d9; }
 
-.rs-status-filter-dropdown {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  border: 0;
-  white-space: nowrap;
-}
-
-html.tv #rs-status-filter-wrap { margin-bottom: 0; }
-
-html.tv .rs-status-filter-touchbar {
-  gap: clamp(8px, 1vw, 14px);
-  padding: clamp(8px, 1vw, 14px);
-}
-
-html.tv .rs-status-filter-grid {
-  gap: clamp(8px, 1vw, 14px);
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-}
-
-html.tv .rs-status-filter-btn {
-  min-height: clamp(90px, 9vw, 120px);
-  font-size: clamp(13px, 1.8vw, 18px);
-  padding: clamp(12px, 1.4vw, 18px);
-}
-
-html.tv .rs-status-filter-note { font-size: clamp(12px, 1.5vw, 15px); }
-
-html.tv .rs-status-filter-btn--showall {
-  flex-basis: clamp(160px, 12vw, 200px);
-  font-size: clamp(13px, 1.6vw, 16px);
-}
+html.tv #rs-status-filter-wrap { padding: clamp(4px, 1vw, 10px) clamp(10px, 2vw, 16px); gap: clamp(8px, 2vw, 14px); }
+html.tv .rs-status-inline__dots { gap: clamp(8px, 2vw, 16px); }
+html.tv .rs-status-dot { width: clamp(28px, 3vw, 36px); height: clamp(28px, 3vw, 36px); }
+html.tv .rs-status-reset { font-size: clamp(12px, 1.6vw, 16px); padding: clamp(8px, 1.2vw, 12px) clamp(10px, 1.8vw, 14px); }
 </style>
 <style>
 /* === Map layer slider label alignment === */
@@ -12677,39 +12574,7 @@ html.tv .rs-status-filter-btn--showall {
         <p class="rs-filter-panel__title">Theatre Status</p>
       </div>
       <div class="rs-filter-panel__body">
-        <p class="rs-filter-panel__description">Sort theatres by their status. Use the Neighborhoods panel to focus on part of Greater Cleveland.</p>
-        <div class="rs-filter-panel__section">
-          <div class="rs-status-filter-select" id="rs-status-filter-wrap">
-            <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
-            <div class="rs-status-filter-grid">
-              <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">
-                <span class="rs-status-filter-label">Open</span>
-                <span class="rs-status-filter-note">Currently operating</span>
-              </button>
-              <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">
-                <span class="rs-status-filter-label">Closed</span>
-                <span class="rs-status-filter-note">Shuttered venues</span>
-              </button>
-              <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">
-                <span class="rs-status-filter-label">Repurposed</span>
-                <span class="rs-status-filter-note">Adapted for new uses</span>
-              </button>
-              <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">
-                <span class="rs-status-filter-label">Demolished</span>
-                <span class="rs-status-filter-note">Sites no longer standing</span>
-              </button>
-            </div>
-          <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
-            </div>
-            <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
-              <option value="all">All Statuses</option>
-              <option value="1">Open</option>
-              <option value="0">Closed</option>
-              <option value="2">Repurposed</option>
-              <option value="3">Demolished</option>
-            </select>
-          </div>
-        </div>
+        <p class="rs-filter-panel__description">Use the status dots above the theatre list to quickly focus on open, closed, repurposed, or demolished locations.</p>
       </div>
     </aside>
     <aside aria-hidden="true" aria-label="Neighborhood filters" class="rs-filter-panel rs-filter-panel--neighborhoods" id="rs-neighborhood-panel">
@@ -12735,12 +12600,20 @@ html.tv .rs-status-filter-btn--showall {
 <div><span class="rs-float__title">Theatres</span></div>
 <div class="rs-float__actions">
 <span aria-live="polite" class="rs-chip rs-count-badge" id="rs-count">0</span>
-<button class="rs-btn rs-float__reset-btn" id="rs-list-reset-btn" title="Reset search and filters" type="button">Reset</button>
 </div>
 </header>
 <div class="rs-search-wrap" role="search">
   <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
   <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+</div>
+<div class="rs-status-inline" id="rs-status-filter-wrap">
+  <div aria-label="Filter theatres by status" class="rs-status-inline__dots" role="group">
+    <button aria-label="Open" aria-pressed="true" class="rs-status-filter-btn rs-status-dot is-active" data-status="1" title="Open" type="button"></button>
+    <button aria-label="Closed" aria-pressed="true" class="rs-status-filter-btn rs-status-dot is-active" data-status="0" title="Closed" type="button"></button>
+    <button aria-label="Repurposed" aria-pressed="true" class="rs-status-filter-btn rs-status-dot is-active" data-status="2" title="Repurposed" type="button"></button>
+    <button aria-label="Demolished" aria-pressed="true" class="rs-status-filter-btn rs-status-dot is-active" data-status="3" title="Demolished" type="button"></button>
+  </div>
+  <button aria-pressed="true" class="rs-status-filter-btn rs-status-reset rs-status-filter-btn--showall is-active" data-status="all" type="button">Show all</button>
 </div>
 <div class="rs-neighborhood-insight" id="rs-neighborhood-insight" aria-live="polite" hidden>
   <p class="rs-neighborhood-insight__eyebrow">Neighborhood Focus</p>
@@ -13658,7 +13531,7 @@ function rsRestoreLayers(state){
   // Footer legend filters
   var statusWrap = document.getElementById('rs-status-filter-wrap');
   var statusSelect = document.getElementById('rs-status-select');
-  var statusButtons = statusWrap ? Array.prototype.slice.call(statusWrap.querySelectorAll('.rs-status-filter-grid .rs-status-filter-btn[data-status]')) : [];
+  var statusButtons = statusWrap ? Array.prototype.slice.call(statusWrap.querySelectorAll('.rs-status-filter-btn[data-status]:not([data-status="all"])')) : [];
   var showAllButton = statusWrap ? statusWrap.querySelector('.rs-status-filter-btn[data-status="all"]') : null;
   var STATUS_CODES = ['1', '0', '2', '3'];
   var activeStatuses = new Set(STATUS_CODES);
@@ -14222,22 +14095,6 @@ function zoomHere(lat, lon) {
     resetFilters(opts || {});
   };
 
-  function bindSidebarReset(){
-    var btn = document.getElementById('rs-list-reset-btn');
-    if (!btn || btn.__rsResetBound) return;
-    btn.__rsResetBound = true;
-    btn.addEventListener('click', function(){
-      if (typeof window.rsResetFilters === 'function') {
-        window.rsResetFilters({ source: 'sidebar-button' });
-      }
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindSidebarReset);
-  } else {
-    bindSidebarReset();
-  }
 })();
 </script>
 <script>
