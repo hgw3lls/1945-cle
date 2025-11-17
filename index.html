@@ -7431,6 +7431,25 @@ html.booting #rs-float {
   margin: 0;
 }
 
+.rs-status-filter-note {
+  margin: 0 0 6px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #f3efe4;
+}
+
+.rs-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .rs-status-inline {
   padding: 8px 14px 2px 14px;
 }
@@ -7676,12 +7695,21 @@ html.tv .rs-status-filter-btn--showall {
 </div>
 <div class="rs-status-inline" id="rs-status-inline" aria-hidden="true" hidden>
   <div class="rs-status-filter-select" id="rs-status-filter-wrap">
+    <p class="rs-status-filter-note">Status colors: green = open, red = closed, yellow = repurposed, gray = demolished.</p>
     <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
       <div class="rs-status-filter-grid">
-        <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
-        <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
-        <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
-        <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
+        <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true" aria-label="Open">
+          <span class="rs-visually-hidden">Open</span>
+        </button>
+        <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true" aria-label="Closed">
+          <span class="rs-visually-hidden">Closed</span>
+        </button>
+        <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true" aria-label="Repurposed">
+          <span class="rs-visually-hidden">Repurposed</span>
+        </button>
+        <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true" aria-label="Demolished">
+          <span class="rs-visually-hidden">Demolished</span>
+        </button>
       </div>
       <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
     </div>
