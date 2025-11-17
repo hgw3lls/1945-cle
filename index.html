@@ -13117,11 +13117,38 @@ function rsRestoreLayers(state){
     catch(e){ console.warn('Failed to parse', id, e); return fallback; }
   }
 
-  var NOW_SHOWING = rsReadJson('rs-data-nowshowing', []);
-  window.RS_NOW_SHOWING = NOW_SHOWING;
+  // Centralized data bootstrap so editors only touch one helper for inline JSON
+  function rsBootstrapData(){
+    var data = {
+      nowShowing: rsReadJson('rs-data-nowshowing', []),
+      theatres: rsReadJson('rs-data-theatres', { type: 'FeatureCollection', features: [] })
+    };
 
-  var THEATRES = rsReadJson('rs-data-theatres', { type: 'FeatureCollection', features: [] });
-  window.THEATRES = THEATRES;
+    data.features = Array.isArray((data.theatres && data.theatres.features) || []) ? data.theatres.features : [];
+    data.byTheatre = data.features.reduce(function(map, feature){
+      var name = feature && feature.properties && feature.properties.Theatre;
+      if (!name) return map;
+      var key = String(name).trim().toLowerCase();
+      if (!map[key]) map[key] = feature;
+      return map;
+    }, {});
+
+    if (typeof window !== 'undefined'){
+      try { window.NOW_SHOWING = data.nowShowing; } catch(_) {}
+      try { window.RS_NOW_SHOWING = data.nowShowing; } catch(_) {}
+      try { window.THEATRES = data.theatres; } catch(_) {}
+    }
+
+    return data;
+  }
+
+  var RS_DATA = window.RS_DATA = rsBootstrapData();
+  var NOW_SHOWING = RS_DATA.nowShowing;
+  var THEATRES = RS_DATA.theatres;
+
+  function rsGetTheatreFeatures(){
+    return (RS_DATA && Array.isArray(RS_DATA.features)) ? RS_DATA.features : [];
+  }
 
   // Data & helpers
   function colorForStatus(code){
@@ -13472,13 +13499,7 @@ function rsRestoreLayers(state){
   // Populate list + click behavior
   var listRoot = document.getElementById('rs-list');
   function resolveTheatreCollection(){
-    if (typeof THEATRES !== 'undefined' && THEATRES && Array.isArray(THEATRES.features)) {
-      return THEATRES.features;
-    }
-    if (typeof window !== 'undefined' && window.THEATRES && Array.isArray(window.THEATRES.features)) {
-      return window.THEATRES.features;
-    }
-    return [];
+    return rsGetTheatreFeatures();
   }
   var features = resolveTheatreCollection();
   function liHTML(p, idx){
@@ -13497,7 +13518,7 @@ function rsRestoreLayers(state){
   }
 
   function getFeatures(){
-    return resolveTheatreCollection();
+    return rsGetTheatreFeatures();
   }
 
   function populateList(){
@@ -13505,9 +13526,6 @@ function rsRestoreLayers(state){
     var list = listRoot;
     if (!list) return features;
     features = getFeatures();
-    if (typeof window !== 'undefined' && !window.THEATRES && typeof THEATRES !== 'undefined') {
-      try { window.THEATRES = THEATRES; } catch(_) {}
-    }
     list.innerHTML = features.map(function(f,i){ return liHTML((f && f.properties) || {}, i); }).join('');
     Array.prototype.forEach.call(list.querySelectorAll('.rs-li'), function(node, idx){
       var feature = features[idx];
@@ -13628,7 +13646,7 @@ function rsRestoreLayers(state){
   var neighborhoodGrid = document.getElementById('rs-neighborhood-grid');
   var neighborhoodButtonsRoot = document.getElementById('rs-neighborhood-buttons') || document.getElementById('rs-neighborhood-grid');
   var neighborhoodShowAll = neighborhoodSection ? neighborhoodSection.querySelector('[data-neighborhood="all"]') : null;
-  var ALL_NEIGHBORHOODS = Array.from(new Set(((typeof THEATRES === 'object' && THEATRES.features) || []).map(function(f){
+  var ALL_NEIGHBORHOODS = Array.from(new Set(rsGetTheatreFeatures().map(function(f){
     var p = (f && f.properties) || {};
     return p.cluster_neighborhood;
   }).filter(Boolean).map(function(n){ return String(n).trim().toLowerCase(); }))).sort();
@@ -13699,7 +13717,7 @@ function rsRestoreLayers(state){
   }
 
   (function buildNeighborhoodMeta(){
-    var features = (typeof THEATRES === 'object' && THEATRES.features) || [];
+    var features = rsGetTheatreFeatures();
     features.forEach(function(f){
       var p = (f && f.properties) || {};
       var code = normalizedNeighborhood(p.cluster_neighborhood);
