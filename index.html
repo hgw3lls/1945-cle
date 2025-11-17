@@ -7993,59 +7993,96 @@ function rsRestoreLayers(state){
   };
 })();
 
-  // Toolbar toggle wiring (replaced with independent toggles)
-
-  // === Independent Layer Toggles (patched to use window.*) ===
+  // Toolbar toggle wiring with explicit base-layer exclusivity
   (function(){
-    function gm(){ return (window.map || (typeof map!=='undefined' ? map : null)); }
+    var BASE_KEYS = ['street', 'sat'];
+
+    function normalize(key){ return (key || '').toLowerCase(); }
+    function getActiveMap(){
+      try {
+        return (window.map && typeof window.map.hasLayer === 'function') ? window.map : null;
+      } catch(_) { return null; }
+    }
     function layerFor(key){
-      if (key==='sat') return (window.sat || null);
-      if (key==='street') return (window.street || null);
-      if (key==='historic') return (window.historic || null);
+      var k = normalize(key);
+      if (k === 'sat' || k === 'satellite') return (window.sat || window.satellite || null);
+      if (k === 'street') return (window.street || null);
+      if (k === 'historic') return (window.historic || null);
       return null;
     }
-    function setPressed(btn, on){ if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
-    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return False; } }
+    function isOn(key, mapInstance){
+      var mapRef = mapInstance || getActiveMap();
+      var layer = layerFor(key);
+      return !!(layer && mapRef && typeof mapRef.hasLayer === 'function' && mapRef.hasLayer(layer));
+    }
+    function setPressed(btn, on){ if (btn) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
 
     function syncButtons(){
-      var g = gm(); if (!g) return;
+      var mapInstance = getActiveMap();
+      if (!mapInstance) return;
       document.querySelectorAll('.rs-layer-btn[data-layer]').forEach(function(btn){
-        var key = btn.getAttribute('data-layer');
-        var layer = layerFor(key);
-        setPressed(btn, has(layer));
+        var key = normalize(btn.getAttribute('data-layer'));
+        setPressed(btn, isOn(key, mapInstance));
       });
     }
 
-    function onToggleClick(e){
-      var btn = e.target.closest('.rs-layer-btn');
-      if(!btn) return;
-      var key = btn.getAttribute('data-layer');
-      var layer = layerFor(key);
-      var g = gm();
-      if(!layer || !g) return;
+    function enforceExclusivity(key){
+      var k = normalize(key);
+      if (k === 'street') { setLayerState('sat', false, { skipExclusivity: true }); }
+      if (k === 'sat') { setLayerState('street', false, { skipExclusivity: true }); }
+    }
 
-      if (has(layer)){
-        try{ g.removeLayer(layer); }catch(_){}
-      } else {
-        try{ layer.addTo(g); }catch(_){}
+    function setLayerState(key, desired, opts){
+      var mapInstance = getActiveMap();
+      var layer = layerFor(key);
+      if (!mapInstance || !layer) return;
+
+      var shouldSync = !(opts && opts.skipSync);
+      var allowExclusive = !(opts && opts.skipExclusivity);
+      var active = isOn(key, mapInstance);
+      var turnOn = (typeof desired === 'boolean') ? desired : !active;
+
+      if (turnOn === active) return;
+
+      if (turnOn && allowExclusive && BASE_KEYS.indexOf(normalize(key)) !== -1) {
+        enforceExclusivity(key);
       }
-      syncButtons();
+
+      try {
+        if (turnOn) { layer.addTo(mapInstance); }
+        else { mapInstance.removeLayer(layer); }
+      } catch(_) {}
+
+      if (shouldSync) syncButtons();
+    }
+
+    function onToggleClick(target){
+      var key = normalize(target.getAttribute('data-layer'));
+      setLayerState(key);
       try{ refreshZ(); }catch(_){}
     }
 
     document.addEventListener('click', function(e){
-      if (e.target && e.target.classList && e.target.classList.contains('rs-layer-btn')){
-        onToggleClick(e);
-      }
+      var btn = e.target && typeof e.target.closest === 'function' ? e.target.closest('.rs-layer-btn[data-layer]') : null;
+      if (btn) { onToggleClick(btn); }
     });
 
-    try{
-      var g = gm();
-      if (g){ g.on('layeradd', syncButtons); g.on('layerremove', syncButtons); }
-    }catch(_){}
+    (function bindMapEvents(){
+      var mapInstance = getActiveMap();
+      if (mapInstance && typeof mapInstance.on === 'function'){
+        mapInstance.on('layeradd', syncButtons);
+        mapInstance.on('layerremove', syncButtons);
+      }
+    })();
 
-    if (document.readyState === 'complete'){ syncButtons(); }
-    else { window.addEventListener('load', syncButtons, { once: true }); }
+    function applyDefaults(){
+      setLayerState('sat', false, { skipSync:true });
+      setLayerState('street', true, { skipSync:true });
+      syncButtons();
+    }
+
+    if (document.readyState === 'complete'){ applyDefaults(); }
+    else { window.addEventListener('load', applyDefaults, { once: true }); }
   })();
 // (replaced) L.control.layers removed in favor of toolbar toggles.
 // Image viewer
@@ -10460,38 +10497,6 @@ try {
 })();
 </script>
 <script>
-// === Stage 1.1: Base-layer exclusivity (Street vs Satellite); Historic independent ===
-(function baseExclusivity(){
-  function btnFor(name){ return document.querySelector('.rs-layer-btn[data-layer="'+name+'"]'); }
-  function isOn(btn){ return btn && btn.getAttribute('aria-pressed') === 'true'; }
-  function turnOn(btn){ if (btn && !isOn(btn)) btn.click(); }
-  function turnOff(btn){ if (btn && isOn(btn)) btn.click(); }
-
-  const streetBtn = btnFor('street');
-  const satBtn = btnFor('sat');
-
-  // Ensure defaults: Street ON, Satellite OFF, Historic OFF
-  // First, turn everything OFF, then turn Street ON
-  [streetBtn, satBtn].forEach(b => turnOff(b));
-  turnOn(streetBtn);
-
-  // Enforce exclusivity between Street and Satellite
-  document.addEventListener('click', (e) => {
-    const b = e.target.closest('.rs-layer-btn');
-    if (!b) return;
-    const layer = b.getAttribute('data-layer');
-    if (layer === 'street' && b.getAttribute('aria-pressed') === 'false'){
-      // Request to turn ON Street: turn Satellite OFF
-      turnOff(satBtn);
-    }
-    if (layer === 'sat' && b.getAttribute('aria-pressed') === 'false'){
-      // Request to turn ON Satellite: turn Street OFF
-      turnOff(streetBtn);
-    }
-  }, true);
-})();
-</script>
-<script>
 // Stage 1B: Historic opacity slider (always-on Historic layer)
 (function(){
   var slider = document.getElementById('rs-hist-op');
@@ -10674,6 +10679,17 @@ try {
     bar.setAttribute('aria-valuenow', String(v));
   }
 
+  function enforceBaseExclusivity(activeKey, mapRef, streetLayer, satLayer){
+    if (!mapRef) return;
+    var k = (activeKey || '').toLowerCase();
+    if (k === 'street' && satLayer){
+      try { if (mapRef.hasLayer(satLayer)) mapRef.removeLayer(satLayer); } catch(_){}
+    }
+    if (k === 'sat' && streetLayer){
+      try { if (mapRef.hasLayer(streetLayer)) mapRef.removeLayer(streetLayer); } catch(_){}
+    }
+  }
+
   function initSegBar(opts){
     var bar = document.getElementById(opts.id);
     if (!bar) return;
@@ -10697,6 +10713,7 @@ try {
             try { if (m.hasLayer(streetLayer)) m.removeLayer(streetLayer); } catch(_){}
           } else {
             if (!m.hasLayer(streetLayer)) streetLayer.addTo(m);
+            enforceBaseExclusivity('street', m, streetLayer, getLayerRef('sat'));
             try { streetLayer.setOpacity(frac); } catch(_){}
           }
         }
@@ -10707,6 +10724,7 @@ try {
             try { if (m.hasLayer(satLayer)) m.removeLayer(satLayer); } catch(_){}
           } else {
             if (!m.hasLayer(satLayer)) satLayer.addTo(m);
+            enforceBaseExclusivity('sat', m, getLayerRef('street'), satLayer);
             try { satLayer.setOpacity(frac); } catch(_){}
           }
         }
@@ -10737,8 +10755,17 @@ try {
       }
     });
 
-    // Init value
-    var initial = (typeof opts.init === 'number') ? opts.init : Number(bar.getAttribute('data-val') || bar.getAttribute('aria-valuenow') || '0');
+    // Init value based on current map state to avoid fighting other defaults
+    var mapRef = gm();
+    var liveDefault = null;
+    if (mapRef){
+      var ref = getLayerRef(opts.key);
+      if (ref){
+        try { liveDefault = mapRef.hasLayer(ref) ? 100 : 0; } catch(_){}
+      }
+    }
+    var initial = (typeof liveDefault === 'number') ? liveDefault :
+                  (typeof opts.init === 'number' ? opts.init : Number(bar.getAttribute('data-val') || bar.getAttribute('aria-valuenow') || '0'));
     apply(initial);
   }
 
