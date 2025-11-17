@@ -119,6 +119,12 @@
 <!-- -->
 <style id="rs-consolidated">
 /* --- Consolidated CSS (last occurrence wins) --- */
+*,
+*::before,
+*::after {
+
+  border-radius: 0 !important;
+}
 @font-face {
 
         font-family: 'LeagueGothic Condensed';
@@ -7690,6 +7696,12 @@ body.rs-status-inline-open #rs-status-filter-wrap {
   border: 1px solid rgba(0, 0, 0, 0.38);
   background: var(--rs-status-color, #f3efe4);
   color: #000;
+  font-family: var(--font-ui, system-ui, sans-serif);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 12px;
+  line-height: 1;
   cursor: pointer;
   touch-action: manipulation;
   transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.18s ease;
@@ -7698,8 +7710,8 @@ body.rs-status-inline-open #rs-status-filter-wrap {
 .rs-status-dot {
   width: 26px;
   height: 26px;
-  border-radius: 6px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 1px 2px rgba(0, 0, 0, 0.18);
+  border: 2px solid #111;
+  box-shadow: none;
 }
 
 .rs-status-filter-btn.is-active { opacity: 1; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 2px 0 rgba(0,0,0,0.32); transform: translateY(-1px); }
@@ -7708,13 +7720,15 @@ body.rs-status-inline-open #rs-status-filter-wrap {
 
 .rs-status-reset {
   padding: 8px 10px;
-  border-radius: 8px;
-  background: #fdfaf2;
-  font-family: var(--font-ui, 'StandingRoomOnly NF', system-ui);
+  background: var(--nicotine-white, #f3efe4);
+  color: #111;
+  border: 2px solid #111;
+  font-family: var(--font-ui, system-ui, sans-serif);
   font-weight: 800;
   font-size: 12px;
-  letter-spacing: 0.4px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.18);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: none;
   white-space: nowrap;
   flex: 0 0 auto;
 }
