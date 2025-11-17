@@ -7666,131 +7666,125 @@ html.booting #rs-float {
   margin: 0;
 }
 
-
 .rs-status-filter-touchbar {
   display: flex;
-  gap: 3px;
+  flex-wrap: wrap;
+  gap: 10px;
   align-items: stretch;
-  background: rgba(0, 0, 0, 0.12);
-  padding: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: #f3efe4;
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .rs-status-filter-grid {
-  flex: 1 1 auto;
+  flex: 1 1 220px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2px;
-  padding: 4px;
-  background: #f7f3e9;
-  border: 1px solid rgba(0, 0, 0, 0.16);
-  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.06);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  padding: 2px;
+  background: transparent;
 }
 
 .rs-status-filter-btn {
   appearance: none;
   -webkit-appearance: none;
-  border-radius: 0;
-  border: 0;
-  box-shadow: none;
-  background: transparent;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: #fff;
   color: #000;
-  padding: 6px 4px 8px;
-  min-height: 96px;
-  text-transform: uppercase;
+  padding: 10px 12px;
+  min-height: 86px;
   font-family: var(--font-ui, 'StandingRoomOnly NF', system-ui);
-  font-weight: 900;
-  font-size: clamp(9px, 1.7vw, 11px);
-  letter-spacing: 0.24px;
-  display: flex;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.12px;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  grid-template-rows: auto auto;
   align-items: center;
-  justify-content: flex-start;
-  flex-direction: column;
-  gap: 6px;
-  text-align: center;
-  line-height: 1.15;
+  gap: 6px 12px;
+  text-align: left;
+  line-height: 1.2;
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.18s ease;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.18s ease;
   word-break: keep-all;
   white-space: normal;
   hyphens: manual;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .rs-status-filter-btn:not([data-status="all"])::before {
   content: "";
   display: block;
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   background: var(--rs-status-color, #f3efe4);
-  border: 1px solid rgba(0, 0, 0, 0.26);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  grid-row: 1 / span 2;
+}
+
+.rs-status-filter-label {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.24px;
+  line-height: 1.1;
+}
+
+.rs-status-filter-note {
+  font-size: 11.5px;
+  color: #1f1f1f;
+  opacity: 0.8;
+  line-height: 1.2;
 }
 
 .rs-status-filter-btn--showall {
-  aspect-ratio: auto;
-  min-height: 100%;
-  flex: 0 0 68px;
+  min-height: 86px;
+  flex: 0 0 150px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  letter-spacing: 0.8px;
-  font-size: 9.5px;
-  line-height: 1.05;
-  padding: 10px 6px;
+  letter-spacing: 0.6px;
+  font-size: 12px;
+  line-height: 1.15;
+  padding: 12px 10px;
+  background: #fdfaf2;
+  border: 1px solid rgba(0, 0, 0, 0.26);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 .rs-status-filter-btn:not(.is-active) {
-  filter: saturate(80%) brightness(0.92);
-  box-shadow: none;
+  filter: saturate(85%) brightness(0.95);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transform: translateY(0);
 }
 
 .rs-status-filter-btn.is-active {
   transform: translateY(-1px);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
   filter: none;
 }
 
 .rs-status-filter-btn:focus-visible {
-  outline: 2px solid rgba(0, 0, 0, 0.55);
-  outline-offset: 2px;
+  outline: 2px solid rgba(0, 0, 0, 0.6);
+  outline-offset: 3px;
 }
-
 
 .rs-status-filter-btn[data-status="all"] {
-  background: #f3efe4;
-  color: #000;
-  border: 1px solid rgba(0, 0, 0, 0.24);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.24);
-}
-
-.rs-status-filter-btn[data-status="1"] {
-  --rs-status-color: #b7f1d1;
   color: #000;
 }
 
-.rs-status-filter-btn[data-status="0"] {
-  --rs-status-color: #f5baba;
-  color: #000;
-}
-
-.rs-status-filter-btn[data-status="2"] {
-  --rs-status-color: #ffe7a3;
-  color: #000;
-}
-
-.rs-status-filter-btn[data-status="3"] {
-  --rs-status-color: #cfd3d9;
-  color: #000;
-}
-
-.rs-status-filter-btn[data-status="2"],
-.rs-status-filter-btn[data-status="3"] {
-  font-size: clamp(8.5px, 1.6vw, 10px);
-  letter-spacing: 0.08px;
-}
+.rs-status-filter-btn[data-status="1"] { --rs-status-color: #b7f1d1; }
+.rs-status-filter-btn[data-status="0"] { --rs-status-color: #f5baba; }
+.rs-status-filter-btn[data-status="2"] { --rs-status-color: #ffe7a3; }
+.rs-status-filter-btn[data-status="3"] { --rs-status-color: #cfd3d9; }
 
 .rs-status-filter-dropdown {
   position: absolute;
@@ -7805,37 +7799,29 @@ html.booting #rs-float {
   white-space: nowrap;
 }
 
-html.tv #rs-status-filter-wrap {
-  margin-bottom: 0;
-}
+html.tv #rs-status-filter-wrap { margin-bottom: 0; }
 
 html.tv .rs-status-filter-touchbar {
-  gap: clamp(4px, 1vw, 10px);
-  padding: clamp(3px, 0.8vw, 6px);
+  gap: clamp(8px, 1vw, 14px);
+  padding: clamp(8px, 1vw, 14px);
 }
 
 html.tv .rs-status-filter-grid {
-  gap: clamp(2px, 0.9vw, 6px);
-  padding: clamp(1px, 0.5vw, 3px);
+  gap: clamp(8px, 1vw, 14px);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
 html.tv .rs-status-filter-btn {
-  min-height: clamp(70px, 8vw, 110px);
-  font-size: clamp(12px, 1.8vw, 18px);
-  letter-spacing: 0.4px;
-  padding: clamp(10px, 1.2vw, 16px);
-  line-height: 1.15;
+  min-height: clamp(90px, 9vw, 120px);
+  font-size: clamp(13px, 1.8vw, 18px);
+  padding: clamp(12px, 1.4vw, 18px);
 }
 
-html.tv .rs-status-filter-btn[data-status="2"],
-html.tv .rs-status-filter-btn[data-status="3"] {
-  font-size: clamp(11px, 1.6vw, 16px);
-  letter-spacing: 0.2px;
-}
+html.tv .rs-status-filter-note { font-size: clamp(12px, 1.5vw, 15px); }
 
 html.tv .rs-status-filter-btn--showall {
-  flex-basis: clamp(76px, 7.5vw, 104px);
-  font-size: clamp(12px, 1.4vw, 15px);
+  flex-basis: clamp(160px, 12vw, 200px);
+  font-size: clamp(13px, 1.6vw, 16px);
 }
 </style>
 <style>
@@ -12695,13 +12681,25 @@ html.tv .rs-status-filter-btn--showall {
         <div class="rs-filter-panel__section">
           <div class="rs-status-filter-select" id="rs-status-filter-wrap">
             <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
-              <div class="rs-status-filter-grid">
-                <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
-              </div>
-              <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
+            <div class="rs-status-filter-grid">
+              <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">
+                <span class="rs-status-filter-label">Open</span>
+                <span class="rs-status-filter-note">Currently operating</span>
+              </button>
+              <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">
+                <span class="rs-status-filter-label">Closed</span>
+                <span class="rs-status-filter-note">Shuttered venues</span>
+              </button>
+              <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">
+                <span class="rs-status-filter-label">Repurposed</span>
+                <span class="rs-status-filter-note">Adapted for new uses</span>
+              </button>
+              <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">
+                <span class="rs-status-filter-label">Demolished</span>
+                <span class="rs-status-filter-note">Sites no longer standing</span>
+              </button>
+            </div>
+          <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
             </div>
             <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
               <option value="all">All Statuses</option>
