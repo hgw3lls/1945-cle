@@ -7415,6 +7415,7 @@ html.booting #rs-float {
 #rs-float.rs-collapsed .rs-search-wrap,
 #rs-float.rs-collapsed .rs-searchbar,
 #rs-float.rs-collapsed .rs-search-container,
+#rs-float.rs-collapsed .rs-status-inline,
 #rs-float.rs-collapsed .rs-float__footer,
 #rs-float.rs-collapsed .rs-footer,
 #rs-float.rs-collapsed footer,
@@ -7430,16 +7431,25 @@ html.booting #rs-float {
   margin: 0;
 }
 
+.rs-status-inline {
+  padding: 8px 14px 2px 14px;
+}
+
+.rs-status-inline[hidden] {
+  display: none !important;
+}
+
 .rs-status-filter-touchbar {
   display: flex;
   gap: 8px;
   align-items: stretch;
+  flex-wrap: nowrap;
 }
 
 .rs-status-filter-grid {
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -7649,34 +7659,7 @@ html.tv .rs-status-filter-btn--showall {
 <div class="rs-sidebar-toggle-wrap">
   <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
   <div class="rs-filter-toggle-shell">
-    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Filters" data-label-open="Filters" id="rs-filter-toggle" type="button">Filters</button>
-    <aside aria-hidden="true" aria-label="Map filters" class="rs-filter-panel" id="rs-filter-panel">
-      <div class="rs-filter-panel__header">
-        <p class="rs-filter-panel__title">Filters</p>
-      </div>
-      <div class="rs-filter-panel__body">
-        <div class="rs-filter-panel__section">
-          <div class="rs-status-filter-select" id="rs-status-filter-wrap">
-            <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
-              <div class="rs-status-filter-grid">
-                <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
-              </div>
-              <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
-            </div>
-            <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
-              <option value="all">All Statuses</option>
-              <option value="1">Open</option>
-              <option value="0">Closed</option>
-              <option value="2">Repurposed</option>
-              <option value="3">Demolished</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </aside>
+    <button aria-controls="rs-status-inline" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Hide Status" data-label-open="Status" id="rs-filter-toggle" type="button">Status</button>
   </div>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
@@ -7690,6 +7673,26 @@ html.tv .rs-status-filter-btn--showall {
 <div class="rs-search-wrap" role="search">
   <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
   <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+</div>
+<div class="rs-status-inline" id="rs-status-inline" aria-hidden="true" hidden>
+  <div class="rs-status-filter-select" id="rs-status-filter-wrap">
+    <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
+      <div class="rs-status-filter-grid">
+        <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
+        <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
+        <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
+        <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
+      </div>
+      <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
+    </div>
+    <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
+      <option value="all">All Statuses</option>
+      <option value="1">Open</option>
+      <option value="0">Closed</option>
+      <option value="2">Repurposed</option>
+      <option value="3">Demolished</option>
+    </select>
+  </div>
 </div>
 <div class="rs-float__list" id="rs-list" role="list"></div>
 <div class="rs-footer-bar" id="rs-footer-bar">
@@ -8244,31 +8247,27 @@ function rsRestoreLayers(state){
   var toggleBtn = document.getElementById('rs-sidebar-toggle');
   var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
   var filterToggle = document.getElementById('rs-filter-toggle');
-  var filterPanel = document.getElementById('rs-filter-panel');
+  var statusInline = document.getElementById('rs-status-inline');
   var filterShell = document.querySelector('.rs-filter-toggle-shell');
   var closeBtn = document.getElementById('rs-close');
   var listEl = document.getElementById('rs-list');
 
   function setFiltersOpen(open){
-    var body = document.body;
-    if (body){
-      body.classList.toggle('rs-filters-open', !!open);
-    }
-    if (filterPanel){
-      filterPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
-      if (typeof filterPanel.toggleAttribute === 'function'){
-        filterPanel.toggleAttribute('inert', !open);
-      } else if (!open) {
-        filterPanel.setAttribute('inert', '');
+    var isOpen = !!open;
+    if (statusInline){
+      if (isOpen){
+        statusInline.removeAttribute('hidden');
+        statusInline.setAttribute('aria-hidden', 'false');
       } else {
-        filterPanel.removeAttribute('inert');
+        statusInline.setAttribute('hidden', '');
+        statusInline.setAttribute('aria-hidden', 'true');
       }
     }
     if (filterToggle){
-      filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      var openLabel = filterToggle.getAttribute('data-label-open') || 'Filters';
-      var closeLabel = filterToggle.getAttribute('data-label-close') || 'Close Filters';
-      filterToggle.textContent = open ? closeLabel : openLabel;
+      filterToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      var openLabel = filterToggle.getAttribute('data-label-open') || 'Status';
+      var closeLabel = filterToggle.getAttribute('data-label-close') || 'Hide Status';
+      filterToggle.textContent = isOpen ? closeLabel : openLabel;
     }
   }
 
@@ -8278,8 +8277,7 @@ function rsRestoreLayers(state){
       open: function(){ setFiltersOpen(true); },
       close: function(){ setFiltersOpen(false); },
       toggle: function(){
-        var body = document.body;
-        var isOpen = body ? body.classList.contains('rs-filters-open') : false;
+        var isOpen = statusInline && !statusInline.hasAttribute('hidden');
         setFiltersOpen(!isOpen);
       }
     };
@@ -8288,17 +8286,26 @@ function rsRestoreLayers(state){
   if (filterToggle){
     setFiltersOpen(false);
     filterToggle.addEventListener('click', function(){
-      var body = document.body;
-      var isOpen = body ? body.classList.contains('rs-filters-open') : false;
-      setFiltersOpen(!isOpen);
+      var isOpen = statusInline && !statusInline.hasAttribute('hidden');
+      if (isOpen){
+        if (window.rsStatusFilterUI && typeof window.rsStatusFilterUI.reset === 'function') {
+          window.rsStatusFilterUI.reset();
+        }
+        setFiltersOpen(false);
+      } else {
+        setFiltersOpen(true);
+      }
     });
   }
 
   document.addEventListener('click', function(evt){
-    var body = document.body;
-    if (!body || !body.classList.contains('rs-filters-open')) return;
+    var isOpen = statusInline && !statusInline.hasAttribute('hidden');
+    if (!isOpen) return;
     var target = evt.target;
-    if (filterShell && filterShell.contains(target)) return;
+    if ((statusInline && statusInline.contains(target)) || (filterShell && filterShell.contains(target))) return;
+    if (window.rsStatusFilterUI && typeof window.rsStatusFilterUI.reset === 'function') {
+      window.rsStatusFilterUI.reset();
+    }
     setFiltersOpen(false);
   });
 
@@ -8377,8 +8384,7 @@ function rsRestoreLayers(state){
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape'){
       var handled = false;
-      var body = document.body;
-      var filtersOpen = body && body.classList.contains('rs-filters-open');
+      var filtersOpen = statusInline && !statusInline.hasAttribute('hidden');
       if (filtersOpen){
         setFiltersOpen(false);
         if (filterToggle){
@@ -8786,8 +8792,11 @@ function zoomHere(lat, lon) {
   }
 
   function resetFilters(opts){
+    var options = opts || {};
     try { resetStatusButtons(); } catch(_) {}
-    try { resetSearchField(); } catch(_) {}
+    if (!options.preserveSearch) {
+      try { resetSearchField(); } catch(_) {}
+    }
     try { closeFiltersPanel(); } catch(_) {}
     applyListSync();
   }
