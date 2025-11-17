@@ -7648,36 +7648,6 @@ html.tv .rs-status-filter-btn--showall {
 </div>
 <div class="rs-sidebar-toggle-wrap">
   <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
-  <div class="rs-filter-toggle-shell">
-    <button aria-controls="rs-filter-panel" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Close Filters" data-label-open="Filters" id="rs-filter-toggle" type="button">Filters</button>
-    <aside aria-hidden="true" aria-label="Map filters" class="rs-filter-panel" id="rs-filter-panel">
-      <div class="rs-filter-panel__header">
-        <p class="rs-filter-panel__title">Filters</p>
-      </div>
-      <div class="rs-filter-panel__body">
-        <div class="rs-filter-panel__section">
-          <div class="rs-status-filter-select" id="rs-status-filter-wrap">
-            <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
-              <div class="rs-status-filter-grid">
-                <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
-                <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
-              </div>
-              <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
-            </div>
-            <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
-              <option value="all">All Statuses</option>
-              <option value="1">Open</option>
-              <option value="0">Closed</option>
-              <option value="2">Repurposed</option>
-              <option value="3">Demolished</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </aside>
-  </div>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
 <header class="rs-float__header" id="rs-sidebar-header">
@@ -7690,6 +7660,24 @@ html.tv .rs-status-filter-btn--showall {
 <div class="rs-search-wrap" role="search">
   <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
   <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
+</div>
+<div class="rs-status-filter-select" id="rs-status-filter-wrap">
+  <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
+    <div class="rs-status-filter-grid">
+      <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true">Open</button>
+      <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true">Closed</button>
+      <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true">Repurposed</button>
+      <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true">Demolished</button>
+    </div>
+    <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
+  </div>
+  <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
+    <option value="all">All Statuses</option>
+    <option value="1">Open</option>
+    <option value="0">Closed</option>
+    <option value="2">Repurposed</option>
+    <option value="3">Demolished</option>
+  </select>
 </div>
 <div class="rs-float__list" id="rs-list" role="list"></div>
 <div class="rs-footer-bar" id="rs-footer-bar">
