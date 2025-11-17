@@ -7665,16 +7665,23 @@ html.booting #rs-float {
   width: 100%;
   padding: 6px 14px 12px 14px;
   margin: 0;
-  display: flex;
+  display: none;
   align-items: center;
   gap: 10px;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+body.rs-status-inline-open #rs-status-filter-wrap {
+  display: flex;
 }
 
 .rs-status-inline__dots {
   display: flex;
   gap: 10px;
   align-items: center;
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .rs-status-filter-btn {
@@ -7709,12 +7716,13 @@ html.booting #rs-float {
   letter-spacing: 0.4px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.18);
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 
-.rs-status-filter-btn[data-status="1"] { --rs-status-color: #b7f1d1; }
-.rs-status-filter-btn[data-status="0"] { --rs-status-color: #f5baba; }
-.rs-status-filter-btn[data-status="2"] { --rs-status-color: #ffe7a3; }
-.rs-status-filter-btn[data-status="3"] { --rs-status-color: #cfd3d9; }
+.rs-status-filter-btn[data-status="1"] { --rs-status-color: #19a974; }
+.rs-status-filter-btn[data-status="0"] { --rs-status-color: #e03131; }
+.rs-status-filter-btn[data-status="2"] { --rs-status-color: #fcc419; }
+.rs-status-filter-btn[data-status="3"] { --rs-status-color: #495057; }
 
 html.tv #rs-status-filter-wrap { padding: clamp(4px, 1vw, 10px) clamp(10px, 2vw, 16px); gap: clamp(8px, 2vw, 14px); }
 html.tv .rs-status-inline__dots { gap: clamp(8px, 2vw, 16px); }
@@ -12606,7 +12614,7 @@ html.tv .rs-status-reset { font-size: clamp(12px, 1.6vw, 16px); padding: clamp(8
   <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
   <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
 </div>
-<div class="rs-status-inline" id="rs-status-filter-wrap">
+<div class="rs-status-inline" id="rs-status-filter-wrap" hidden aria-hidden="true">
   <div aria-label="Filter theatres by status" class="rs-status-inline__dots" role="group">
     <button aria-label="Open" aria-pressed="true" class="rs-status-filter-btn rs-status-dot is-active" data-status="1" title="Open" type="button"></button>
     <button aria-label="Closed" aria-pressed="true" class="rs-status-filter-btn rs-status-dot is-active" data-status="0" title="Closed" type="button"></button>
@@ -13182,6 +13190,7 @@ function rsRestoreLayers(state){
   var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
   var filterToggle = document.getElementById('rs-filter-toggle');
   var filterPanel = document.getElementById('rs-filter-panel');
+  var statusWrapInline = document.getElementById('rs-status-filter-wrap');
   var neighborhoodToggleBtn = document.getElementById('rs-neighborhood-toggle');
   var neighborhoodPanel = document.getElementById('rs-neighborhood-panel');
   var filterShell = document.querySelector('.rs-filter-toggle-shell');
@@ -13192,23 +13201,39 @@ function rsRestoreLayers(state){
     if (open) { setNeighborhoodPanelOpen(false); }
     var body = document.body;
     if (body){
-      body.classList.toggle('rs-filters-open', !!open);
+      body.classList.remove('rs-filters-open');
+      body.classList.toggle('rs-status-inline-open', !!open);
     }
     if (filterPanel){
-      filterPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+      filterPanel.setAttribute('aria-hidden', 'true');
       if (typeof filterPanel.toggleAttribute === 'function'){
-        filterPanel.toggleAttribute('inert', !open);
-      } else if (!open) {
-        filterPanel.setAttribute('inert', '');
+        filterPanel.toggleAttribute('inert', true);
       } else {
-        filterPanel.removeAttribute('inert');
+        filterPanel.setAttribute('inert', '');
       }
+    }
+    if (statusWrapInline){
+      statusWrapInline.hidden = !open;
+      statusWrapInline.setAttribute('aria-hidden', open ? 'false' : 'true');
     }
     if (filterToggle){
       filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
       var openLabel = filterToggle.getAttribute('data-label-open') || 'Filters';
       var closeLabel = filterToggle.getAttribute('data-label-close') || 'Close Filters';
       filterToggle.textContent = open ? closeLabel : openLabel;
+    }
+
+    if (!open){
+      try {
+        if (window.rsStatusFilterUI && typeof window.rsStatusFilterUI.reset === 'function') {
+          window.rsStatusFilterUI.reset();
+        }
+      } catch(_){}
+      try {
+        if (typeof window.applyListFilter === 'function') {
+          setTimeout(window.applyListFilter, 0);
+        }
+      } catch(_){}
     }
   }
 
@@ -13263,7 +13288,7 @@ function rsRestoreLayers(state){
     setFiltersOpen(false);
     filterToggle.addEventListener('click', function(){
       var body = document.body;
-      var isOpen = body ? body.classList.contains('rs-filters-open') : false;
+      var isOpen = body ? body.classList.contains('rs-status-inline-open') : false;
       setFiltersOpen(!isOpen);
     });
   }
