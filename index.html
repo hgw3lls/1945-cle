@@ -14275,34 +14275,84 @@ function zoomHere(lat, lon) {
     return d ? normalizedNeighborhood(d) : null;
   }
 
+  // --- Shared list filtering helpers (search + status/neighborhood) ---
+  var _textCache = new WeakMap();
+
+  function normalize(text){
+    return String(text || '').toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9\s]/g,' ')
+      .replace(/\s+/g,' ').trim();
+  }
+
+  function textOf(li){
+    try {
+      var title = li.querySelector('h4') ? li.querySelector('h4').textContent : '';
+      var addr  = li.querySelector('.rs-addr') ? li.querySelector('.rs-addr').textContent : '';
+      var film  = li.querySelector('.rs-movie') ? li.querySelector('.rs-movie').textContent : '';
+      return normalize([title, addr, film].join(' '));
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function getText(li){
+    if (_textCache.has(li)) return _textCache.get(li);
+    var t = textOf(li);
+    _textCache.set(li, t);
+    return t;
+  }
+
+  function tokenMatch(hay, q){
+    var tokens = normalize(q).split(/\s+/).filter(Boolean);
+    var idx = 0;
+    for (var i = 0; i < tokens.length; i++){
+      var pos = hay.indexOf(tokens[i], idx);
+      if (pos === -1) return false;
+      idx = pos + tokens[i].length;
+    }
+    return true;
+  }
+
+  function readSearchQuery(){
+    var qEl = document.getElementById('rs-search');
+    var raw = qEl ? qEl.value : '';
+    var trimmed = String(raw || '').trim();
+    return trimmed.length >= 2 ? trimmed : '';
+  }
+
+  function updateListCount(count){
+    var countEl = document.getElementById('rs-count');
+    if (countEl) countEl.textContent = String(count);
+  }
+
   function applyListFilter(){
     try{
       var enabled = getEnabledStatuses();
       var neighborhoods = getEnabledNeighborhoods();
+      var search = readSearchQuery();
       var items = document.querySelectorAll('#rs-list .rs-li');
       var neighborhoodFiltering = neighborhoods && neighborhoods.size && neighborhoods.size < ALL_NEIGHBORHOODS.length;
       var arr = Array.prototype.slice.call(items);
+      var shown = 0;
       arr.forEach(function(li){
         var code = liStatusCode(li);
         var hood = liNeighborhoodCode(li);
         // Only filter when we have a known code; unknowns remain visible
         var statusOK = (code === 'default') ? true : enabled.has(code);
         var hoodOK = neighborhoodFiltering ? (hood ? neighborhoods.has(hood) : false) : true;
-        var show = statusOK && hoodOK;
+        var searchOK = true;
+        if (search && statusOK && hoodOK) {
+          searchOK = tokenMatch(getText(li), search);
+        }
+        var show = statusOK && hoodOK && searchOK;
+        li.toggleAttribute('data-rs-status-filtered', !(statusOK && hoodOK));
         li.style.display = show ? '' : 'none';
+        if (show) shown++;
       });
       sortListByStatus(arr, enabled);
-      // Update visible count badge if #rs-count exists
-      var countEl = document.getElementById('rs-count');
-      if (countEl) {
-        var vis = Array.from(document.querySelectorAll('#rs-list .rs-li')).filter(function(li){ return li.style.display !== 'none'; }).length;
-        countEl.textContent = String(vis);
-      }
+      updateListCount(shown);
     }catch(e){ /* swallow */ }
-  }
-
-  if (typeof window !== 'undefined') {
-    window.applyListFilter = applyListFilter;
   }
 
   function hookStatusDropdown(){
@@ -14315,6 +14365,36 @@ function zoomHere(lat, lon) {
     if (select) {
       select.addEventListener('change', rerun);
     }
+
+    var searchInput = document.getElementById('rs-search');
+    var clearBtn = document.getElementById('rs-search-clear');
+    var handleSearch = function(){ applyListFilter(); };
+    if (searchInput) {
+      searchInput.addEventListener('input', handleSearch, { passive: true });
+      searchInput.addEventListener('keydown', function(e){ if (e.key === 'Escape'){ searchInput.value=''; applyListFilter(); } });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function(){
+        var qEl2 = document.getElementById('rs-search');
+        if (qEl2) { qEl2.value = ''; }
+        applyListFilter();
+      });
+    }
+  }
+
+  if (typeof window !== 'undefined') {
+    window.applyListFilter = applyListFilter;
+    window.rsListManager = {
+      refresh: applyListFilter,
+      state: function(){
+        return {
+          statuses: Array.from(getEnabledStatuses()),
+          neighborhoods: Array.from(getEnabledNeighborhoods()),
+          search: readSearchQuery()
+        };
+      },
+      resetCache: function(){ _textCache = new WeakMap(); }
+    };
   }
 
   // Run once DOM is ready; also re-run when list content changes
@@ -14328,7 +14408,7 @@ function zoomHere(lat, lon) {
   try{
     var list = document.getElementById('rs-list');
     if (list && 'MutationObserver' in window){
-      var obs = new MutationObserver(function(){ applyListFilter(); });
+      var obs = new MutationObserver(function(){ _textCache = new WeakMap(); applyListFilter(); });
       obs.observe(list, { childList: true, subtree: true });
     }
   }catch(_){}
@@ -14541,104 +14621,32 @@ function zoomHere(lat, lon) {
 <script>
 /* === BEGIN: Float Fuzzy Search Logic === */
 (function(){
-  function normalize(s){
-    return (s||"").toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  }
-  function textOf(li){
-    try{
-      var title = li.querySelector('h4') ? li.querySelector('h4').textContent : '';
-      var addr  = li.querySelector('.rs-addr') ? li.querySelector('.rs-addr').textContent : '';
-      var film  = li.querySelector('.rs-movie') ? li.querySelector('.rs-movie').textContent : '';
-      return normalize([title, addr, film].join(' '));
-    }catch(e){ return ''; }
-  }
-  var _cache = new WeakMap();
-  function getText(li){
-    if (_cache.has(li)) return _cache.get(li);
-    var t = textOf(li);
-    _cache.set(li, t);
-    return t;
-  }
-  function tokenMatch(hay, q){
-    // All tokens must appear in order (not necessarily adjacent). Very fast 'fuzzy enough' match.
-    var tokens = normalize(q).split(/\s+/).filter(Boolean);
-    var idx = 0;
-    for (var i=0;i<tokens.length;i++){
-      var pos = hay.indexOf(tokens[i], idx);
-      if (pos === -1) return false;
-      idx = pos + tokens[i].length;
+  function refreshList(){
+    if (typeof window.applyListFilter === 'function') {
+      window.applyListFilter();
     }
-    return true;
-  }
-  function visibleByStatus(li){
-    // If list filtering by status already hid items (display:none), respect it.
-    // Otherwise treat as eligible.
-    return li.style.display !== 'none' || !li.hasAttribute('data-rs-status-filtered');
-  }
-  // Wrap the existing applyListFilter (if present) to mark items we hid by status
-  var prevApply = (typeof window !== 'undefined' && typeof window.applyListFilter === 'function') ? window.applyListFilter : null;
-  window.applyListFilter = function(){
-    if (prevApply) prevApply();
-    // Mark items hidden by status so search composes on top
-    var items = document.querySelectorAll('#rs-list .rs-li');
-    items.forEach(function(li){
-      li.toggleAttribute('data-rs-status-filtered', li.style.display === 'none');
-    });
-    // After status filter, also re-apply search filter
-    applySearchFilter();
-  };
-
-  function applySearchFilter(){
-    var qEl = document.getElementById('rs-search');
-    var q = qEl ? qEl.value : '';
-    var items = document.querySelectorAll('#rs-list .rs-li');
-    var shown = 0;
-    items.forEach(function(li){
-      var byStatus = !li.hasAttribute('data-rs-status-filtered') || li.style.display !== 'none';
-      var show = byStatus;
-      if (show && q && q.trim().length >= 2){
-        var hay = getText(li);
-        show = tokenMatch(hay, q);
-      }
-      li.style.display = show ? '' : 'none';
-      if (show) shown++;
-    });
-    var countEl = document.getElementById('rs-count');
-    if (countEl) countEl.textContent = String(shown);
   }
 
-  function hookSearch(){
-    var qEl = document.getElementById('rs-search');
-    var clr = document.getElementById('rs-search-clear');
-    if (qEl){
-      qEl.addEventListener('input', function(){
-        applySearchFilter();
-      }, {passive:true});
-      qEl.addEventListener('keydown', function(e){
-        if (e.key === 'Escape'){ qEl.value=''; applySearchFilter(); }
-      });
-    }
-    if (clr){
-      clr.addEventListener('click', function(){
-        var qEl2 = document.getElementById('rs-search');
-        if (qEl2){ qEl2.value=''; }
-        applySearchFilter();
-      });
-    }
+  // Preserve a callable entry point so other behaviors can refresh the list
+  window.applySearchFilter = refreshList;
+
+  function wireSearchTriggers(){
     var statusWrap = document.getElementById('rs-status-filter-wrap');
     var statusSelect = document.getElementById('rs-status-select');
-    var triggerSearch = function(){ setTimeout(applySearchFilter, 0); };
-    if (statusWrap && typeof statusWrap.addEventListener === 'function'){
-      statusWrap.addEventListener('rs-status-change', triggerSearch);
-    } else if (statusSelect){
-      statusSelect.addEventListener('change', triggerSearch);
+    var trigger = function(){ setTimeout(refreshList, 0); };
+    if (statusWrap && typeof statusWrap.addEventListener === 'function' && !statusWrap.__rsSearchWired){
+      statusWrap.__rsSearchWired = true;
+      statusWrap.addEventListener('rs-status-change', trigger);
+    } else if (statusSelect && !statusSelect.__rsSearchWired){
+      statusSelect.__rsSearchWired = true;
+      statusSelect.addEventListener('change', trigger);
     }
   }
 
   if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', function(){ hookSearch(); applySearchFilter(); });
+    document.addEventListener('DOMContentLoaded', function(){ wireSearchTriggers(); refreshList(); });
   } else {
-    hookSearch(); applySearchFilter();
+    wireSearchTriggers(); refreshList();
   }
 })();
 /* === END: Float Fuzzy Search Logic === */
