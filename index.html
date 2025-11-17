@@ -7672,19 +7672,19 @@ html.booting #rs-float {
   gap: 3px;
   align-items: stretch;
   background: rgba(0, 0, 0, 0.12);
-  padding: 3px;
-  border: 1px solid rgba(0, 0, 0, 0.25);
+  padding: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
 }
 
 .rs-status-filter-grid {
   flex: 1 1 auto;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  padding: 1px;
-  background: #f3efe4;
-  border: 1px solid rgba(0, 0, 0, 0.22);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+  gap: 2px;
+  padding: 4px;
+  background: #f7f3e9;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.06);
 }
 
 .rs-status-filter-btn {
@@ -7692,20 +7692,21 @@ html.booting #rs-float {
   -webkit-appearance: none;
   border-radius: 0;
   border: 0;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(0, 0, 0, 0.35);
-  background: #f3efe4;
+  box-shadow: none;
+  background: transparent;
   color: #000;
-  padding: 8px 4px;
-  min-height: 56px;
-  aspect-ratio: 1 / 1;
+  padding: 6px 4px 8px;
+  min-height: 96px;
   text-transform: uppercase;
   font-family: var(--font-ui, 'StandingRoomOnly NF', system-ui);
   font-weight: 900;
-  font-size: clamp(9px, 1.8vw, 11px);
-  letter-spacing: 0.2px;
+  font-size: clamp(9px, 1.7vw, 11px);
+  letter-spacing: 0.24px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 6px;
   text-align: center;
   line-height: 1.15;
   cursor: pointer;
@@ -7714,6 +7715,16 @@ html.booting #rs-float {
   word-break: keep-all;
   white-space: normal;
   hyphens: manual;
+}
+
+.rs-status-filter-btn:not([data-status="all"])::before {
+  content: "";
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--rs-status-color, #f3efe4);
+  border: 1px solid rgba(0, 0, 0, 0.26);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
 .rs-status-filter-btn--showall {
@@ -7732,53 +7743,53 @@ html.booting #rs-float {
 
 .rs-status-filter-btn:not(.is-active) {
   filter: saturate(80%) brightness(0.92);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.32), 0 1px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: none;
   transform: translateY(0);
 }
 
 .rs-status-filter-btn.is-active {
   transform: translateY(-1px);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.42), 0 2px 0 rgba(0, 0, 0, 0.6);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
   filter: none;
 }
 
 .rs-status-filter-btn:focus-visible {
-  outline: 2px solid #f3efe4;
-  outline-offset: 3px;
+  outline: 2px solid rgba(0, 0, 0, 0.55);
+  outline-offset: 2px;
 }
 
 
 .rs-status-filter-btn[data-status="all"] {
   background: #f3efe4;
   color: #000;
-  border: 1px dashed rgba(0, 0, 0, 0.4);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18), 0 1px 0 rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(0, 0, 0, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 1px 0 rgba(0, 0, 0, 0.24);
 }
 
 .rs-status-filter-btn[data-status="1"] {
-  background: #19a974;
-  color: #fff;
+  --rs-status-color: #b7f1d1;
+  color: #000;
 }
 
 .rs-status-filter-btn[data-status="0"] {
-  background: #e03131;
-  color: #fff;
+  --rs-status-color: #f5baba;
+  color: #000;
 }
 
 .rs-status-filter-btn[data-status="2"] {
-  background: #fcc419;
-  color: #111;
+  --rs-status-color: #ffe7a3;
+  color: #000;
 }
 
 .rs-status-filter-btn[data-status="3"] {
-  background: #495057;
-  color: #fff;
+  --rs-status-color: #cfd3d9;
+  color: #000;
 }
 
 .rs-status-filter-btn[data-status="2"],
 .rs-status-filter-btn[data-status="3"] {
-  font-size: clamp(8.5px, 1.6vw, 10.5px);
-  letter-spacing: 0.12px;
+  font-size: clamp(8.5px, 1.6vw, 10px);
+  letter-spacing: 0.08px;
 }
 
 .rs-status-filter-dropdown {
