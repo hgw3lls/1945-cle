@@ -14147,6 +14147,12 @@ function zoomHere(lat, lon) {
   }
 
   function getEnabledStatuses(){
+    if (typeof window !== 'undefined' && window.rsStatusFilterUI && typeof window.rsStatusFilterUI.get === 'function') {
+      var fromUi = window.rsStatusFilterUI.get();
+      if (Array.isArray(fromUi) && fromUi.length) {
+        return cleanCodes(fromUi);
+      }
+    }
     var wrap = document.getElementById('rs-status-filter-wrap');
     if (wrap){
       var attr = wrap.getAttribute('data-active-codes') || '';
@@ -18995,6 +19001,9 @@ document.addEventListener("DOMContentLoaded", function() {
         const ui = (typeof window !== 'undefined') ? window.rsStatusFilterUI : null;
         if (ui && typeof ui.set === 'function') {
           ui.set(status === null ? 'all' : [status], { broadcast: true });
+          if (typeof window.applyListFilter === 'function') {
+            try { window.applyListFilter(); } catch(_) {}
+          }
         } else {
           // Fallback to legacy visibility toggling
           const root = RS.qs('#rs-float') || document;
