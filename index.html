@@ -469,30 +469,13 @@ h1, h2, h3, h4,
     letter-spacing: 0.5px;
 }
 
-.rs-float__title-row {
 
-  display: inline-flex;
-    align-items: center;
-    gap: 10px;
-}
 
 #rs-count {
 
-  display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    padding: 6px 10px;
-    line-height: 1;
-    min-width: 40px;
-    background: #fdfbf5;
-    color: #111;
-    border: 2px solid #000;
-    border-radius: 0;
-    box-shadow: none;
-    text-transform: uppercase;
+  font-size: 12px;
+    padding: 1px 5px;
+    vertical-align: middle;
 }
 
 
@@ -1655,8 +1638,7 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn,
-.rs-sidebar-toggle,
-.rs-filter-toggle {
+.rs-sidebar-toggle {
 
   display:inline-flex;
   align-items:center;
@@ -1684,8 +1666,7 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn:hover,
-.rs-sidebar-toggle:hover,
-.rs-filter-toggle:hover {
+.rs-sidebar-toggle:hover {
 
   background:#ffffff;
   transform:translate(-2px,-2px);
@@ -1693,16 +1674,14 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn:active,
-.rs-sidebar-toggle:active,
-.rs-filter-toggle:active {
+.rs-sidebar-toggle:active {
 
   transform:translate(0,0);
   box-shadow:3px 3px 0 rgba(0,0,0,0.75);
 }
 
 .rs-toolbar__btn:focus-visible,
-.rs-sidebar-toggle:focus-visible,
-.rs-filter-toggle:focus-visible {
+.rs-sidebar-toggle:focus-visible {
 
   outline:2px solid var(--fever-cyan);
   outline-offset:4px;
@@ -1868,139 +1847,6 @@ body.rs-sidebar-open .rs-sidebar-toggle-wrap {
   box-shadow:8px 8px 0 rgba(0,0,0,0.9);
 }
 
-
-.rs-filter-toggle-shell {
-
-  position:relative;
-  display:none;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:10px;
-  width:100%;
-  overflow:visible;
-}
-
-body.rs-sidebar-open .rs-filter-toggle-shell {
-
-  display:flex;
-}
-
-.rs-filter-toggle {
-
-  writing-mode:vertical-rl;
-  text-orientation:mixed;
-  padding:18px 14px;
-  letter-spacing:0.18em;
-  min-height:140px;
-  min-width:0;
-  width:auto;
-  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
-  white-space:normal;
-}
-
-.rs-filter-toggle[aria-expanded="true"] {
-
-  background:#080808;
-  color:#f3efe4;
-}
-
-.rs-filter-panel {
-
-  position:fixed;
-  top:0;
-  right:0;
-  height:100vh;
-  width:min(var(--rs-float-max-width, 420px), 92vw);
-  max-height:100vh;
-  background:rgba(8, 8, 8, 0.97);
-  border:3px solid #f3efe4;
-  border-radius:0;
-  box-shadow:-8px 0 24px rgba(0,0,0,0.65);
-  padding:22px 24px 18px;
-  color:#f3efe4;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-  transform:translateX(12px);
-  opacity:0;
-  pointer-events:none;
-  transition:transform 0.24s ease, opacity 0.24s ease;
-  z-index:10040;
-  overflow-y:auto;
-}
-
-.rs-filter-panel::after {
-
-  content:"";
-  position:absolute;
-  top:60px;
-  left:-10px;
-  width:20px;
-  height:20px;
-  background:rgba(8, 8, 8, 0.97);
-  border-top:3px solid #f3efe4;
-  border-left:3px solid #f3efe4;
-  transform:rotate(-45deg);
-}
-
-.rs-filter-panel[aria-hidden="true"] {
-
-  visibility:hidden;
-}
-
-body.rs-filters-open .rs-filter-panel {
-
-  opacity:1;
-  pointer-events:auto;
-  transform:translateX(0);
-  visibility:visible;
-}
-
-.rs-filter-panel__header {
-
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.rs-filter-panel__title {
-
-  font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
-  font-size:18px;
-  font-weight:900;
-  letter-spacing:0.18em;
-  text-transform:uppercase;
-  margin:0;
-}
-
-.rs-filter-panel__body {
-
-  overflow-y:auto;
-  padding-right:2px;
-  max-height:calc(70vh - 80px);
-}
-
-.rs-filter-panel__section {
-
-  margin-bottom:20px;
-}
-
-.rs-filter-panel__section:last-child {
-
-  margin-bottom:0;
-}
-
-html.tv .rs-filter-panel {
-
-  width:min(360px, 50vw);
-  max-height:40vh;
-}
-
-html.tv .rs-filter-panel__title {
-
-  font-size:24px;
-}
 
 #rs-infohelp-modal {
 
@@ -7432,7 +7278,6 @@ html.booting #rs-float {
 #rs-float.rs-collapsed .rs-search-wrap,
 #rs-float.rs-collapsed .rs-searchbar,
 #rs-float.rs-collapsed .rs-search-container,
-#rs-float.rs-collapsed .rs-status-inline,
 #rs-float.rs-collapsed .rs-float__footer,
 #rs-float.rs-collapsed .rs-footer,
 #rs-float.rs-collapsed footer,
@@ -7447,53 +7292,18 @@ html.booting #rs-float {
   padding: 0;
   margin: 0;
 }
-@font-face {
-  font-family: "TheaterBold";
-  src: url("fonts/Theater_Bold.woff2") format("woff2");
-  font-weight: bold;
-  font-style: normal;
-}
-.rs-status-filter-note {
-  font-family: "TheaterBold", sans-serif;
-  margin: 0 0 6px;
-  font-size: clamp(14px, 1.2vw, 40px); /* scales with screen/frame */
-  line-height: 1.35;
-  white-space: nowrap; /* forces single line */
-/*  color: #f3efe4;*/
-}
-
-.rs-visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.rs-status-inline {
-  padding: 8px 14px 2px 14px;
-}
-
-.rs-status-inline[hidden] {
-  display: none !important;
-}
 
 .rs-status-filter-touchbar {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: stretch;
-  flex-wrap: nowrap;
 }
 
 .rs-status-filter-grid {
   flex: 1 1 auto;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
 }
 
 .rs-status-filter-btn {
@@ -7504,15 +7314,13 @@ html.booting #rs-float {
   box-shadow: 0 5px 0 #000;
   background: #f3efe4;
   color: #000;
-  height: 12px;
-  min-height: 12px;
-  max-height: 12px;
-  padding: 0 3px;
-  aspect-ratio: 4.2 / 1;
+  padding: 6px 4px;
+  min-height: 44px;
+  aspect-ratio: 1 / 1;
   text-transform: uppercase;
   font-family: var(--font-ui, 'StandingRoomOnly NF', system-ui);
   font-weight: 900;
-  font-size: clamp(9px, 1.8vw, 11px);
+  font-size: clamp(8px, 1.7vw, 10px);
   letter-spacing: 0.2px;
   display: flex;
   align-items: center;
@@ -7529,18 +7337,16 @@ html.booting #rs-float {
 
 .rs-status-filter-btn--showall {
   aspect-ratio: auto;
-  height: 14px;
-  min-height: 14px;
-  max-height: 14px;
-  flex: 0 0 88px;
+  min-height: 100%;
+  flex: 0 0 72px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   letter-spacing: 0.8px;
-  font-size: 11px;
-  line-height: 1.1;
-  padding: 1px 6px;
+  font-size: 10px;
+  line-height: 1.05;
+  padding: 10px 6px;
 }
 
 .rs-status-filter-btn:not(.is-active) {
@@ -7705,52 +7511,36 @@ html.tv .rs-status-filter-btn--showall {
 </div>
 <div class="rs-sidebar-toggle-wrap">
   <button aria-controls="rs-float" aria-expanded="true" class="rs-btn rs-sidebar-toggle" data-label-closed="Show Theatres" data-label-open="Hide Theatres" id="rs-sidebar-toggle" type="button">Hide Theatres</button>
-  <div class="rs-filter-toggle-shell">
-    <button aria-controls="rs-status-inline" aria-expanded="false" class="rs-btn rs-filter-toggle" data-label-close="Hide Status" data-label-open="Status" id="rs-filter-toggle" type="button">Status</button>
-  </div>
 </div>
 <aside class="rs-float rs-float--sidebar" id="rs-float">
 <header class="rs-float__header" id="rs-sidebar-header">
-  <div class="rs-float__title-row">
-    <span class="rs-float__title">Theatres</span>
-    <span aria-live="polite" class="rs-count-badge" id="rs-count">0</span>
-  </div>
-  <div class="rs-float__actions">
-    <button class="rs-btn rs-float__reset-btn" id="rs-list-reset-btn" title="Reset search and filters" type="button">Reset</button>
-  </div>
+<div><span class="rs-float__title">Theatres</span></div>
+<div class="rs-float__actions">
+<span aria-live="polite" class="rs-chip rs-count-badge" id="rs-count">0</span>
+<button class="rs-btn rs-float__reset-btn" id="rs-list-reset-btn" title="Reset search and filters" type="button">Reset</button>
+</div>
 </header>
 <div class="rs-search-wrap" role="search">
   <input aria-label="Search theatres, addresses, films" id="rs-search" placeholder="Search theatres, addresses, films…" type="text"/>
   <button class="rs-btn" id="rs-search-clear" title="Clear search" type="button">×</button>
 </div>
-<div class="rs-status-inline" id="rs-status-inline" aria-hidden="true" hidden>
-  <div class="rs-status-filter-select" id="rs-status-filter-wrap">
-    <p class="rs-status-filter-note"><span style="color:#2ecc71;">OPEN</span> | <span style="color:#e74c3c;">CLOSED</span> | <span style="color:#f1c40f;">REPURPOSED</span> | <span style="color:#7f8c8d;">DEMOLISHED</span></p>
-    <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
-      <div class="rs-status-filter-grid">
-        <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true" aria-label="Open">
-          <span class="rs-visually-hidden">Open</span>
-        </button>
-        <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true" aria-label="Closed">
-          <span class="rs-visually-hidden">Closed</span>
-        </button>
-        <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true" aria-label="Repurposed">
-          <span class="rs-visually-hidden">Repurposed</span>
-        </button>
-        <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true" aria-label="Demolished">
-          <span class="rs-visually-hidden">Demolished</span>
-        </button>
-      </div>
-      <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
+<div class="rs-status-filter-select" id="rs-status-filter-wrap">
+  <div aria-label="Filter by theatre status" class="rs-status-filter-touchbar" role="group">
+    <div class="rs-status-filter-grid">
+      <button type="button" class="rs-status-filter-btn is-active" data-status="1" aria-pressed="true" aria-label="Open"></button>
+      <button type="button" class="rs-status-filter-btn is-active" data-status="0" aria-pressed="true" aria-label="Closed"></button>
+      <button type="button" class="rs-status-filter-btn is-active" data-status="2" aria-pressed="true" aria-label="Repurposed"></button>
+      <button type="button" class="rs-status-filter-btn is-active" data-status="3" aria-pressed="true" aria-label="Demolished"></button>
     </div>
-    <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
-      <option value="all">All Statuses</option>
-      <option value="1">Open</option>
-      <option value="0">Closed</option>
-      <option value="2">Repurposed</option>
-      <option value="3">Demolished</option>
-    </select>
+    <button type="button" class="rs-status-filter-btn rs-status-filter-btn--showall is-active" data-status="all" aria-pressed="true">Show All</button>
   </div>
+  <select aria-hidden="true" class="rs-status-filter-dropdown" id="rs-status-select" tabindex="-1">
+    <option value="all">All Statuses</option>
+    <option value="1">Open</option>
+    <option value="0">Closed</option>
+    <option value="2">Repurposed</option>
+    <option value="3">Demolished</option>
+  </select>
 </div>
 <div class="rs-float__list" id="rs-list" role="list"></div>
 <div class="rs-footer-bar" id="rs-footer-bar">
@@ -8054,96 +7844,59 @@ function rsRestoreLayers(state){
   };
 })();
 
-  // Toolbar toggle wiring with explicit base-layer exclusivity
-  (function(){
-    var BASE_KEYS = ['street', 'sat'];
+  // Toolbar toggle wiring (replaced with independent toggles)
 
-    function normalize(key){ return (key || '').toLowerCase(); }
-    function getActiveMap(){
-      try {
-        return (window.map && typeof window.map.hasLayer === 'function') ? window.map : null;
-      } catch(_) { return null; }
-    }
+  // === Independent Layer Toggles (patched to use window.*) ===
+  (function(){
+    function gm(){ return (window.map || (typeof map!=='undefined' ? map : null)); }
     function layerFor(key){
-      var k = normalize(key);
-      if (k === 'sat' || k === 'satellite') return (window.sat || window.satellite || null);
-      if (k === 'street') return (window.street || null);
-      if (k === 'historic') return (window.historic || null);
+      if (key==='sat') return (window.sat || null);
+      if (key==='street') return (window.street || null);
+      if (key==='historic') return (window.historic || null);
       return null;
     }
-    function isOn(key, mapInstance){
-      var mapRef = mapInstance || getActiveMap();
-      var layer = layerFor(key);
-      return !!(layer && mapRef && typeof mapRef.hasLayer === 'function' && mapRef.hasLayer(layer));
-    }
-    function setPressed(btn, on){ if (btn) { btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
+    function setPressed(btn, on){ if(btn){ btn.setAttribute('aria-pressed', on ? 'true' : 'false'); } }
+    function has(layer){ try{ return layer && gm() && gm().hasLayer(layer); } catch(_){ return False; } }
 
     function syncButtons(){
-      var mapInstance = getActiveMap();
-      if (!mapInstance) return;
+      var g = gm(); if (!g) return;
       document.querySelectorAll('.rs-layer-btn[data-layer]').forEach(function(btn){
-        var key = normalize(btn.getAttribute('data-layer'));
-        setPressed(btn, isOn(key, mapInstance));
+        var key = btn.getAttribute('data-layer');
+        var layer = layerFor(key);
+        setPressed(btn, has(layer));
       });
     }
 
-    function enforceExclusivity(key){
-      var k = normalize(key);
-      if (k === 'street') { setLayerState('sat', false, { skipExclusivity: true }); }
-      if (k === 'sat') { setLayerState('street', false, { skipExclusivity: true }); }
-    }
-
-    function setLayerState(key, desired, opts){
-      var mapInstance = getActiveMap();
+    function onToggleClick(e){
+      var btn = e.target.closest('.rs-layer-btn');
+      if(!btn) return;
+      var key = btn.getAttribute('data-layer');
       var layer = layerFor(key);
-      if (!mapInstance || !layer) return;
+      var g = gm();
+      if(!layer || !g) return;
 
-      var shouldSync = !(opts && opts.skipSync);
-      var allowExclusive = !(opts && opts.skipExclusivity);
-      var active = isOn(key, mapInstance);
-      var turnOn = (typeof desired === 'boolean') ? desired : !active;
-
-      if (turnOn === active) return;
-
-      if (turnOn && allowExclusive && BASE_KEYS.indexOf(normalize(key)) !== -1) {
-        enforceExclusivity(key);
+      if (has(layer)){
+        try{ g.removeLayer(layer); }catch(_){}
+      } else {
+        try{ layer.addTo(g); }catch(_){}
       }
-
-      try {
-        if (turnOn) { layer.addTo(mapInstance); }
-        else { mapInstance.removeLayer(layer); }
-      } catch(_) {}
-
-      if (shouldSync) syncButtons();
-    }
-
-    function onToggleClick(target){
-      var key = normalize(target.getAttribute('data-layer'));
-      setLayerState(key);
+      syncButtons();
       try{ refreshZ(); }catch(_){}
     }
 
     document.addEventListener('click', function(e){
-      var btn = e.target && typeof e.target.closest === 'function' ? e.target.closest('.rs-layer-btn[data-layer]') : null;
-      if (btn) { onToggleClick(btn); }
+      if (e.target && e.target.classList && e.target.classList.contains('rs-layer-btn')){
+        onToggleClick(e);
+      }
     });
 
-    (function bindMapEvents(){
-      var mapInstance = getActiveMap();
-      if (mapInstance && typeof mapInstance.on === 'function'){
-        mapInstance.on('layeradd', syncButtons);
-        mapInstance.on('layerremove', syncButtons);
-      }
-    })();
+    try{
+      var g = gm();
+      if (g){ g.on('layeradd', syncButtons); g.on('layerremove', syncButtons); }
+    }catch(_){}
 
-    function applyDefaults(){
-      setLayerState('sat', false, { skipSync:true });
-      setLayerState('street', true, { skipSync:true });
-      syncButtons();
-    }
-
-    if (document.readyState === 'complete'){ applyDefaults(); }
-    else { window.addEventListener('load', applyDefaults, { once: true }); }
+    if (document.readyState === 'complete'){ syncButtons(); }
+    else { window.addEventListener('load', syncButtons, { once: true }); }
   })();
 // (replaced) L.control.layers removed in favor of toolbar toggles.
 // Image viewer
@@ -8304,68 +8057,8 @@ function rsRestoreLayers(state){
   var floatEl = document.getElementById('rs-float');
   var toggleBtn = document.getElementById('rs-sidebar-toggle');
   var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
-  var filterToggle = document.getElementById('rs-filter-toggle');
-  var statusInline = document.getElementById('rs-status-inline');
-  var filterShell = document.querySelector('.rs-filter-toggle-shell');
   var closeBtn = document.getElementById('rs-close');
   var listEl = document.getElementById('rs-list');
-
-  function setFiltersOpen(open){
-    var isOpen = !!open;
-    if (statusInline){
-      if (isOpen){
-        statusInline.removeAttribute('hidden');
-        statusInline.setAttribute('aria-hidden', 'false');
-      } else {
-        statusInline.setAttribute('hidden', '');
-        statusInline.setAttribute('aria-hidden', 'true');
-      }
-    }
-    if (filterToggle){
-      filterToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      var openLabel = filterToggle.getAttribute('data-label-open') || 'Status';
-      var closeLabel = filterToggle.getAttribute('data-label-close') || 'Hide Status';
-      filterToggle.textContent = isOpen ? closeLabel : openLabel;
-    }
-  }
-
-  if (typeof window !== 'undefined'){
-    window.rsSetFiltersOpen = setFiltersOpen;
-    window.rsFiltersPanel = {
-      open: function(){ setFiltersOpen(true); },
-      close: function(){ setFiltersOpen(false); },
-      toggle: function(){
-        var isOpen = statusInline && !statusInline.hasAttribute('hidden');
-        setFiltersOpen(!isOpen);
-      }
-    };
-  }
-
-  if (filterToggle){
-    setFiltersOpen(false);
-    filterToggle.addEventListener('click', function(){
-      var isOpen = statusInline && !statusInline.hasAttribute('hidden');
-      if (isOpen){
-        if (window.rsStatusFilterUI && typeof window.rsStatusFilterUI.reset === 'function') {
-          window.rsStatusFilterUI.reset();
-        }
-        setFiltersOpen(false);
-      } else {
-        setFiltersOpen(true);
-      }
-    });
-  }
-
-  document.addEventListener('click', function(evt){
-    var isOpen = statusInline && !statusInline.hasAttribute('hidden');
-    if (!isOpen) return;
-    var target = evt.target;
-    if ((statusInline && statusInline.contains(target)) || (filterShell && filterShell.contains(target))) return;
-    if (window.rsStatusFilterUI && typeof window.rsStatusFilterUI.reset === 'function') {
-      window.rsStatusFilterUI.reset();
-    }
-    setFiltersOpen(false);
-  });
 
   function positionSidebarToggle(){
     if (!toggleWrap) toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
@@ -8386,7 +8079,6 @@ function rsRestoreLayers(state){
     floatEl.classList.toggle('is-hidden', hidden);
     if (hidden){
       floatEl.setAttribute('aria-hidden', 'true');
-      setFiltersOpen(false);
     } else {
       floatEl.removeAttribute('aria-hidden');
     }
@@ -8441,16 +8133,7 @@ function rsRestoreLayers(state){
 
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape'){
-      var handled = false;
-      var filtersOpen = statusInline && !statusInline.hasAttribute('hidden');
-      if (filtersOpen){
-        setFiltersOpen(false);
-        if (filterToggle){
-          filterToggle.focus();
-        }
-        handled = true;
-      }
-      if (!handled && floatEl && !floatEl.classList.contains('is-hidden')){
+      if (floatEl && !floatEl.classList.contains('is-hidden')){
         setSidebarHidden(true);
         if (toggleBtn) toggleBtn.focus();
       }
@@ -8776,28 +8459,6 @@ function rsRestoreLayers(state){
 
 })();
 
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
-
 </script>
 <script>
 (function(){
@@ -8850,11 +8511,8 @@ function zoomHere(lat, lon) {
   }
 
   function resetFilters(opts){
-    var options = opts || {};
     try { resetStatusButtons(); } catch(_) {}
-    if (!options.preserveSearch) {
-      try { resetSearchField(); } catch(_) {}
-    }
+    try { resetSearchField(); } catch(_) {}
     try { closeFiltersPanel(); } catch(_) {}
     applyListSync();
   }
@@ -8985,28 +8643,6 @@ function zoomHere(lat, lon) {
 })();
 /* === END: Status dropdown also filters the list === */
 
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
-
 </script>
 <script>
 /* === BEGIN: Robust list-filter status detection === */
@@ -9051,28 +8687,6 @@ function zoomHere(lat, lon) {
   })();
 })();
 /* === END: Robust list-filter status detection === */
-
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
 
 </script>
 <!-- Info/Help Modal -->
@@ -9164,28 +8778,6 @@ Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call 
     if (e.key === 'Escape') closeModal();
   });
 })();
-
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
 
 </script>
 <script>
@@ -9292,28 +8884,6 @@ function zoomHere(lat, lon) {
   }
 })();
 /* === END: Float Fuzzy Search Logic === */
-
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
 
 </script>
 <script>
@@ -9445,28 +9015,6 @@ function zoomHere(lat, lon) {
     initFocus();
   }
 })();
-
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
 
 </script>
 <script>
@@ -10564,6 +10112,38 @@ try {
 })();
 </script>
 <script>
+// === Stage 1.1: Base-layer exclusivity (Street vs Satellite); Historic independent ===
+(function baseExclusivity(){
+  function btnFor(name){ return document.querySelector('.rs-layer-btn[data-layer="'+name+'"]'); }
+  function isOn(btn){ return btn && btn.getAttribute('aria-pressed') === 'true'; }
+  function turnOn(btn){ if (btn && !isOn(btn)) btn.click(); }
+  function turnOff(btn){ if (btn && isOn(btn)) btn.click(); }
+
+  const streetBtn = btnFor('street');
+  const satBtn = btnFor('sat');
+
+  // Ensure defaults: Street ON, Satellite OFF, Historic OFF
+  // First, turn everything OFF, then turn Street ON
+  [streetBtn, satBtn].forEach(b => turnOff(b));
+  turnOn(streetBtn);
+
+  // Enforce exclusivity between Street and Satellite
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('.rs-layer-btn');
+    if (!b) return;
+    const layer = b.getAttribute('data-layer');
+    if (layer === 'street' && b.getAttribute('aria-pressed') === 'false'){
+      // Request to turn ON Street: turn Satellite OFF
+      turnOff(satBtn);
+    }
+    if (layer === 'sat' && b.getAttribute('aria-pressed') === 'false'){
+      // Request to turn ON Satellite: turn Street OFF
+      turnOff(streetBtn);
+    }
+  }, true);
+})();
+</script>
+<script>
 // Stage 1B: Historic opacity slider (always-on Historic layer)
 (function(){
   var slider = document.getElementById('rs-hist-op');
@@ -10746,17 +10326,6 @@ try {
     bar.setAttribute('aria-valuenow', String(v));
   }
 
-  function enforceBaseExclusivity(activeKey, mapRef, streetLayer, satLayer){
-    if (!mapRef) return;
-    var k = (activeKey || '').toLowerCase();
-    if (k === 'street' && satLayer){
-      try { if (mapRef.hasLayer(satLayer)) mapRef.removeLayer(satLayer); } catch(_){}
-    }
-    if (k === 'sat' && streetLayer){
-      try { if (mapRef.hasLayer(streetLayer)) mapRef.removeLayer(streetLayer); } catch(_){}
-    }
-  }
-
   function initSegBar(opts){
     var bar = document.getElementById(opts.id);
     if (!bar) return;
@@ -10780,7 +10349,6 @@ try {
             try { if (m.hasLayer(streetLayer)) m.removeLayer(streetLayer); } catch(_){}
           } else {
             if (!m.hasLayer(streetLayer)) streetLayer.addTo(m);
-            enforceBaseExclusivity('street', m, streetLayer, getLayerRef('sat'));
             try { streetLayer.setOpacity(frac); } catch(_){}
           }
         }
@@ -10791,7 +10359,6 @@ try {
             try { if (m.hasLayer(satLayer)) m.removeLayer(satLayer); } catch(_){}
           } else {
             if (!m.hasLayer(satLayer)) satLayer.addTo(m);
-            enforceBaseExclusivity('sat', m, getLayerRef('street'), satLayer);
             try { satLayer.setOpacity(frac); } catch(_){}
           }
         }
@@ -10822,17 +10389,8 @@ try {
       }
     });
 
-    // Init value based on current map state to avoid fighting other defaults
-    var mapRef = gm();
-    var liveDefault = null;
-    if (mapRef){
-      var ref = getLayerRef(opts.key);
-      if (ref){
-        try { liveDefault = mapRef.hasLayer(ref) ? 100 : 0; } catch(_){}
-      }
-    }
-    var initial = (typeof liveDefault === 'number') ? liveDefault :
-                  (typeof opts.init === 'number' ? opts.init : Number(bar.getAttribute('data-val') || bar.getAttribute('aria-valuenow') || '0'));
+    // Init value
+    var initial = (typeof opts.init === 'number') ? opts.init : Number(bar.getAttribute('data-val') || bar.getAttribute('aria-valuenow') || '0');
     apply(initial);
   }
 

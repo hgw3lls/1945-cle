@@ -45,15 +45,6 @@
     "PosterPath": "images/posters/alaska.jpg"
   },
   {
-    "Title": "Attack",
-    "Year": 1956.0,
-    "Director": "Robert Aldrich",
-    "Stars": "Jack Palance, Eddie Albert, Lee Marvin",
-    "Synopsis": "WWII drama on command cowardice and moral conflict. *(Note: post-1945)*",
-    "Awards": null,
-    "PosterPath": "images/posters/attack.jpg"
-  },
-  {
     "Title": "Bahama Passage",
     "Year": 1941.0,
     "Director": "Edward H. Griffith",
@@ -91,12 +82,21 @@
   },
   {
     "Title": "Bombalera",
-    "Year": NaN,
+    "Year": null,
     "Director": null,
     "Stars": null,
     "Synopsis": "Unverified title. Could not identify a pre-1946 film with this exact name; likely a misspelling or alternate title (e.g., 'Bombardier' 1943). Needs manual check.",
     "Awards": null,
     "PosterPath": "images/posters/bombalera.jpg"
+  },
+  {
+    "Title": "Counter-Attack",
+    "Year": 1945.0,
+    "Director": "Zoltan Korda",
+    "Stars": "Paul Muni; Marguerite Chapman",
+    "Synopsis": "Soviet partisans interrogate a captured Nazi officer inside a booby-trapped cellar as tensions and trust unravel.",
+    "Awards": null,
+    "PosterPath": "images/posters/attack.jpg"
   },
   {
     "Title": "Buckskin Frontier",
@@ -298,7 +298,7 @@
   },
   {
     "Title": "Jail-talking (Polish picture)",
-    "Year": NaN,
+    "Year": null,
     "Director": null,
     "Stars": null,
     "Synopsis": null,
