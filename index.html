@@ -1638,8 +1638,7 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn,
-.rs-sidebar-toggle,
-.rs-filter-toggle {
+.rs-sidebar-toggle {
 
   display:inline-flex;
   align-items:center;
@@ -1667,8 +1666,7 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn:hover,
-.rs-sidebar-toggle:hover,
-.rs-filter-toggle:hover {
+.rs-sidebar-toggle:hover {
 
   background:#ffffff;
   transform:translate(-2px,-2px);
@@ -1676,16 +1674,14 @@ body.rs-fullscreen-mode #map {
 }
 
 .rs-toolbar__btn:active,
-.rs-sidebar-toggle:active,
-.rs-filter-toggle:active {
+.rs-sidebar-toggle:active {
 
   transform:translate(0,0);
   box-shadow:3px 3px 0 rgba(0,0,0,0.75);
 }
 
 .rs-toolbar__btn:focus-visible,
-.rs-sidebar-toggle:focus-visible,
-.rs-filter-toggle:focus-visible {
+.rs-sidebar-toggle:focus-visible {
 
   outline:2px solid var(--fever-cyan);
   outline-offset:4px;
@@ -1851,139 +1847,6 @@ body.rs-sidebar-open .rs-sidebar-toggle-wrap {
   box-shadow:8px 8px 0 rgba(0,0,0,0.9);
 }
 
-
-.rs-filter-toggle-shell {
-
-  position:relative;
-  display:none;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:10px;
-  width:100%;
-  overflow:visible;
-}
-
-body.rs-sidebar-open .rs-filter-toggle-shell {
-
-  display:flex;
-}
-
-.rs-filter-toggle {
-
-  writing-mode:vertical-rl;
-  text-orientation:mixed;
-  padding:18px 14px;
-  letter-spacing:0.18em;
-  min-height:140px;
-  min-width:0;
-  width:auto;
-  box-shadow:6px 6px 0 rgba(0,0,0,0.85);
-  white-space:normal;
-}
-
-.rs-filter-toggle[aria-expanded="true"] {
-
-  background:#080808;
-  color:#f3efe4;
-}
-
-.rs-filter-panel {
-
-  position:fixed;
-  top:0;
-  right:0;
-  height:100vh;
-  width:min(var(--rs-float-max-width, 420px), 92vw);
-  max-height:100vh;
-  background:rgba(8, 8, 8, 0.97);
-  border:3px solid #f3efe4;
-  border-radius:0;
-  box-shadow:-8px 0 24px rgba(0,0,0,0.65);
-  padding:22px 24px 18px;
-  color:#f3efe4;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-  transform:translateX(12px);
-  opacity:0;
-  pointer-events:none;
-  transition:transform 0.24s ease, opacity 0.24s ease;
-  z-index:10040;
-  overflow-y:auto;
-}
-
-.rs-filter-panel::after {
-
-  content:"";
-  position:absolute;
-  top:60px;
-  left:-10px;
-  width:20px;
-  height:20px;
-  background:rgba(8, 8, 8, 0.97);
-  border-top:3px solid #f3efe4;
-  border-left:3px solid #f3efe4;
-  transform:rotate(-45deg);
-}
-
-.rs-filter-panel[aria-hidden="true"] {
-
-  visibility:hidden;
-}
-
-body.rs-filters-open .rs-filter-panel {
-
-  opacity:1;
-  pointer-events:auto;
-  transform:translateX(0);
-  visibility:visible;
-}
-
-.rs-filter-panel__header {
-
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-}
-
-.rs-filter-panel__title {
-
-  font-family:var(--font-display, 'StandingRoomOnly NF', system-ui);
-  font-size:18px;
-  font-weight:900;
-  letter-spacing:0.18em;
-  text-transform:uppercase;
-  margin:0;
-}
-
-.rs-filter-panel__body {
-
-  overflow-y:auto;
-  padding-right:2px;
-  max-height:calc(70vh - 80px);
-}
-
-.rs-filter-panel__section {
-
-  margin-bottom:20px;
-}
-
-.rs-filter-panel__section:last-child {
-
-  margin-bottom:0;
-}
-
-html.tv .rs-filter-panel {
-
-  width:min(360px, 50vw);
-  max-height:40vh;
-}
-
-html.tv .rs-filter-panel__title {
-
-  font-size:24px;
-}
 
 #rs-infohelp-modal {
 
@@ -8194,64 +8057,8 @@ function rsRestoreLayers(state){
   var floatEl = document.getElementById('rs-float');
   var toggleBtn = document.getElementById('rs-sidebar-toggle');
   var toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
-  var filterToggle = document.getElementById('rs-filter-toggle');
-  var filterPanel = document.getElementById('rs-filter-panel');
-  var filterShell = document.querySelector('.rs-filter-toggle-shell');
   var closeBtn = document.getElementById('rs-close');
   var listEl = document.getElementById('rs-list');
-
-  function setFiltersOpen(open){
-    var body = document.body;
-    if (body){
-      body.classList.toggle('rs-filters-open', !!open);
-    }
-    if (filterPanel){
-      filterPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
-      if (typeof filterPanel.toggleAttribute === 'function'){
-        filterPanel.toggleAttribute('inert', !open);
-      } else if (!open) {
-        filterPanel.setAttribute('inert', '');
-      } else {
-        filterPanel.removeAttribute('inert');
-      }
-    }
-    if (filterToggle){
-      filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      var openLabel = filterToggle.getAttribute('data-label-open') || 'Filters';
-      var closeLabel = filterToggle.getAttribute('data-label-close') || 'Close Filters';
-      filterToggle.textContent = open ? closeLabel : openLabel;
-    }
-  }
-
-  if (typeof window !== 'undefined'){
-    window.rsSetFiltersOpen = setFiltersOpen;
-    window.rsFiltersPanel = {
-      open: function(){ setFiltersOpen(true); },
-      close: function(){ setFiltersOpen(false); },
-      toggle: function(){
-        var body = document.body;
-        var isOpen = body ? body.classList.contains('rs-filters-open') : false;
-        setFiltersOpen(!isOpen);
-      }
-    };
-  }
-
-  if (filterToggle){
-    setFiltersOpen(false);
-    filterToggle.addEventListener('click', function(){
-      var body = document.body;
-      var isOpen = body ? body.classList.contains('rs-filters-open') : false;
-      setFiltersOpen(!isOpen);
-    });
-  }
-
-  document.addEventListener('click', function(evt){
-    var body = document.body;
-    if (!body || !body.classList.contains('rs-filters-open')) return;
-    var target = evt.target;
-    if (filterShell && filterShell.contains(target)) return;
-    setFiltersOpen(false);
-  });
 
   function positionSidebarToggle(){
     if (!toggleWrap) toggleWrap = document.querySelector('.rs-sidebar-toggle-wrap');
@@ -8272,7 +8079,6 @@ function rsRestoreLayers(state){
     floatEl.classList.toggle('is-hidden', hidden);
     if (hidden){
       floatEl.setAttribute('aria-hidden', 'true');
-      setFiltersOpen(false);
     } else {
       floatEl.removeAttribute('aria-hidden');
     }
@@ -8327,17 +8133,7 @@ function rsRestoreLayers(state){
 
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape'){
-      var handled = false;
-      var body = document.body;
-      var filtersOpen = body && body.classList.contains('rs-filters-open');
-      if (filtersOpen){
-        setFiltersOpen(false);
-        if (filterToggle){
-          filterToggle.focus();
-        }
-        handled = true;
-      }
-      if (!handled && floatEl && !floatEl.classList.contains('is-hidden')){
+      if (floatEl && !floatEl.classList.contains('is-hidden')){
         setSidebarHidden(true);
         if (toggleBtn) toggleBtn.focus();
       }
@@ -8663,28 +8459,6 @@ function rsRestoreLayers(state){
 
 })();
 
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
-
 </script>
 <script>
 (function(){
@@ -8869,28 +8643,6 @@ function zoomHere(lat, lon) {
 })();
 /* === END: Status dropdown also filters the list === */
 
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
-
 </script>
 <script>
 /* === BEGIN: Robust list-filter status detection === */
@@ -8935,28 +8687,6 @@ function zoomHere(lat, lon) {
   })();
 })();
 /* === END: Robust list-filter status detection === */
-
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
 
 </script>
 <!-- Info/Help Modal -->
@@ -9048,28 +8778,6 @@ Here on the Cuyahoga, Cleveland’s deeper cinema story comes into focus—call 
     if (e.key === 'Escape') closeModal();
   });
 })();
-
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
 
 </script>
 <script>
@@ -9176,28 +8884,6 @@ function zoomHere(lat, lon) {
   }
 })();
 /* === END: Float Fuzzy Search Logic === */
-
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
 
 </script>
 <script>
@@ -9329,28 +9015,6 @@ function zoomHere(lat, lon) {
     initFocus();
   }
 })();
-
-// Zoom Here helper (ensures visible zoom-in even if already at target)
-function zoomHere(lat, lon) {
-  try {
-    var target = 19;
-    var current = map.getZoom();
-    var center = [lat, lon];
-    try { map.closePopup(); } catch(_){}
-
-    if (current >= target) {
-      var mid = Math.max(target - 2, 13);
-      map.flyTo(center, mid, { animate: true, duration: 0.6, easeLinearity: 0.16 });
-      setTimeout(function(){
-        map.flyTo(center, target, { animate: true, duration: 1.2, easeLinearity: 0.14 });
-      }, 500);
-    } else {
-      map.flyTo(center, target, { animate: true, duration: 1.4, easeLinearity: 0.14 });
-    }
-  } catch (e) {
-    console.error('ZoomHere error', e);
-  }
-}
 
 </script>
 <script>
