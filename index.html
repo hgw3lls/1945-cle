@@ -9047,6 +9047,7 @@ function rsRestoreLayers(state){
     if (!statusWrap || !statusWrap.dataset) return;
     statusWrap.dataset.rsDefaultState = isDefaultStatus() ? '1' : '0';
     statusWrap.dataset.rsActiveStatuses = Array.from(activeStatuses).join(',');
+    statusWrap.setAttribute('data-active-codes', Array.from(activeStatuses).join(','));
     if (neighborhoodSection){
       neighborhoodSection.setAttribute('data-default-state', isDefaultNeighborhood() ? '1' : '0');
       neighborhoodSection.setAttribute('data-active-neighborhoods', Array.from(activeNeighborhoods).join(','));
@@ -9429,14 +9430,28 @@ function rsRestoreLayers(state){
   }
 
   function getEnabledStatuses(){
-    var wrap = document.getElementById('rs-status-filter-wrap');
-    if (wrap){
-      var attr = wrap.getAttribute('data-active-codes') || '';
-      var parts = attr.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    var fromAttr = function(attr){
+      var parts = (attr || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
       if (!parts.length || parts.length >= ALL_CODES.length) {
         return new Set(ALL_CODES);
       }
       return cleanCodes(parts);
+    };
+
+    var ui = (typeof window !== 'undefined') ? window.rsStatusFilterUI : null;
+    if (ui && typeof ui.get === 'function'){
+      try {
+        var codes = ui.get();
+        var defaultOn = (typeof ui.isDefault === 'function') ? ui.isDefault() : (!codes || !codes.length);
+        if (defaultOn) return new Set(ALL_CODES);
+        return cleanCodes(codes || []);
+      } catch (_) {}
+    }
+
+    var wrap = document.getElementById('rs-status-filter-wrap');
+    if (wrap){
+      var attr = wrap.getAttribute('data-rs-active-statuses') || wrap.getAttribute('data-active-codes') || '';
+      return fromAttr(attr);
     }
 
     var select = document.getElementById('rs-status-select');
@@ -9447,7 +9462,7 @@ function rsRestoreLayers(state){
     if (!val || val === 'all') {
       return new Set(ALL_CODES);
     }
-    return cleanCodes(String(val).split(','));
+    return fromAttr(val);
   }
 
   function liStatusCode(li){
